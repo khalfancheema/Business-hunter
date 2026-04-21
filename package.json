@@ -1,0 +1,34 @@
+{
+  "name": "daycare-agent-system",
+  "version": "4.0.0",
+  "description": "13-agent AI pipeline for daycare business planning — demographics, gap analysis, site selection, real estate, compliance, financials, SBA business plan, project plan, market map, grants, and competitor deep-dive.",
+  "main": "public/index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8080 --directory public",
+    "serve": "npx serve public -l 8080",
+    "dev": "npx serve public -l 8080 --no-clipboard",
+    "build": "node scripts/build.js",
+    "lint": "node --input-type=module --eval \"import { readFileSync } from 'fs'; const h = readFileSync('public/index.html','utf8'); const s = h.match(/<script>([\\s\\S]*?)<\\/script>/g); console.log('Script blocks:', s?.length); console.log('OK');\""
+  },
+  "keywords": [
+    "anthropic",
+    "claude",
+    "multi-agent",
+    "daycare",
+    "childcare",
+    "business-planning",
+    "sba-loan",
+    "real-estate",
+    "demographics",
+    "gwinnett-county",
+    "barrow-county",
+    "georgia"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
