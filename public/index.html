@@ -338,14 +338,15 @@ select option{background:var(--surface2)}
 .health-dim-bar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
 .health-dim-fill{height:100%;border-radius:3px}
 @media(max-width:720px){.g3,.g2{grid-template-columns:1fr}.scenario-grid{grid-template-columns:1fr}.final-grid{grid-template-columns:1fr}.dv-row{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
 <div class="page">
 
 <div class="masthead">
   <div>
-    <h1>Daycare Planning Agent System</h1>
-    <p>10-agent AI pipeline · Demographics · Compliance · Gap Analysis · Site Selection · Real Estate · Financials · Business Plan · Project Plan</p>
+    <h1 id="mastheadTitle">Business Planning Agent System</h1>
+    <p id="mastheadSub">15-agent AI pipeline · Demographics · Compliance · Gap Analysis · Site Selection · Real Estate · Financials · Business Plan · Project Plan</p>
   </div>
   <div class="live-badge"><div class="live-dot"></div>Live Search Enabled</div>
 </div>
@@ -360,19 +361,27 @@ select option{background:var(--surface2)}
 
 <div class="card">
   <div class="controls-row">
-    <div class="field"><label>ZIP Code</label><input type="text" id="zip" value="30097" style="width:95px" /></div>
-    <div class="field"><label>Radius (mi)</label><input type="number" id="radius" value="40" min="5" max="100" style="width:85px" /></div>
-    <div class="field"><label>Grades</label>
-      <select id="grades" style="width:170px">
-        <option value="Infant–Pre-K">Infant – Pre-K</option>
-        <option value="Infant–Kindergarten">Infant – Kindergarten</option>
-        <option value="Toddler–Pre-K">Toddler – Pre-K</option>
+    <div class="field">
+      <label>Industry</label>
+      <select id="industrySelect" style="width:185px" onchange="onIndustryChange()">
+        <option value="daycare">🏫 Daycare / Childcare</option>
+        <option value="gas_station">⛽ Gas Station / C-Store</option>
+        <option value="laundromat">🫧 Laundromat</option>
+        <option value="car_wash">🚗 Car Wash</option>
+        <option value="restaurant">🍽️ Restaurant</option>
+        <option value="gym">💪 Gym / Fitness Center</option>
       </select>
     </div>
-    <div class="field"><label>Capacity</label><input type="number" id="capacity" value="75" min="20" max="300" style="width:90px" /></div>
+    <div class="field"><label>ZIP Code</label><input type="text" id="zip" value="30097" style="width:95px" /></div>
+    <div class="field"><label>Radius (mi)</label><input type="number" id="radius" value="40" min="5" max="100" style="width:85px" /></div>
+    <div class="field" id="tiersField"><label id="tiersLabel">Service Tiers</label>
+      <select id="grades" style="width:170px"></select>
+    </div>
+    <div class="field"><label id="capacityLabel">Capacity</label><input type="number" id="capacity" value="75" min="1" max="9999" style="width:90px" /></div>
     <div class="field"><label>Budget ($)</label><input type="number" id="budget" value="600000" min="100000" step="50000" style="width:120px" /></div>
     <button class="btn primary" id="runBtn" onclick="runPipeline()">▶ Run Pipeline</button>
     <button class="btn" id="resetBtn" onclick="resetAll()" style="display:none">↺ Reset</button>
+    <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
   </div>
   <div class="progress-wrap">
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -380,6 +389,60 @@ select option{background:var(--surface2)}
   </div>
   <div class="error-banner" id="errorBanner"></div>
 </div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 11 — Code Review · Optimization · Cost Analysis</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-14">
+    <div class="agent-head">
+      <div class="agent-ico">🔬</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
+      <div class="agent-dot" id="dot-14"></div>
+    </div>
+    <div class="agent-out" id="out-14">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('14','sum')">Summary</div>
+        <div class="tab" onclick="tab('14','issues')">Issues Found</div>
+        <div class="tab" onclick="tab('14','perf')">Performance</div>
+        <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
+        <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
+      </div>
+      <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
+      <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
+      <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
+      <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
+      <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 12 — QA · Functional Testing · Data Validation · UX Audit</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-15">
+    <div class="agent-head">
+      <div class="agent-ico">✅</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
+      <div class="agent-dot" id="dot-15"></div>
+    </div>
+    <div class="agent-out" id="out-15">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('15','sum')">QA Summary</div>
+        <div class="tab" onclick="tab('15','tests')">Test Results</div>
+        <div class="tab" onclick="tab('15','data')">Data Validation</div>
+        <div class="tab" onclick="tab('15','ux')">UX Audit</div>
+        <div class="tab" onclick="tab('15','score')">Health Score</div>
+      </div>
+      <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
+      <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
+      <div class="panel" id="15-data"><div id="15-data-c"></div></div>
+      <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
+      <div class="panel" id="15-score"><div id="15-score-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
 
 <div class="orch-card">
   <div class="orch-ico">⬡</div>
@@ -416,7 +479,7 @@ select option{background:var(--surface2)}
   <div class="agent-card" id="card-5">
     <div class="agent-head">
       <div class="agent-ico">⚖️</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Compliance</div><div class="agent-role">GA DECAL · Zoning · Licensing</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Compliance</div><div class="agent-role">Regulatory · Zoning · Licensing · Permits</div></div>
       <div class="agent-dot" id="dot-5"></div>
     </div>
     <div class="agent-out" id="out-5">
@@ -500,7 +563,7 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 4 — Real Estate Search · LoopNet · BizBuySell · CoStar · Barrow County</div>
+<div class="phase-label">Phase 4 — Real Estate Search · LoopNet · BizBuySell · CoStar · Crexi</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-4">
     <div class="agent-head">
@@ -548,7 +611,81 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 5 — Executive Summary</div>
+<div class="phase-label">Phase 5 — Market Map · Color-Coded Gap Scores</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-11">
+    <div class="agent-head">
+      <div class="agent-ico">🗺️</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
+      <div class="agent-dot" id="dot-11"></div>
+    </div>
+    <div class="agent-out" id="out-11">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
+        <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
+        <div class="tab" onclick="tab('11','dir')">Directions</div>
+      </div>
+      <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
+      <div class="panel" id="11-leg"><div id="11-leg-c"></div></div>
+      <div class="panel" id="11-dir"><div id="11-dir-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 6 — Grant Search · Subsidies · Federal Programs · Local Incentives</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-12">
+    <div class="agent-head">
+      <div class="agent-ico">💵</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
+      <div class="agent-dot" id="dot-12"></div>
+    </div>
+    <div class="agent-out" id="out-12">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('12','sum')">Summary</div>
+        <div class="tab" onclick="tab('12','caps')">GA CAPS</div>
+        <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
+        <div class="tab" onclick="tab('12','local')">Local Incentives</div>
+        <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
+      </div>
+      <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
+      <div class="panel" id="12-caps"><div id="12-caps-c"></div></div>
+      <div class="panel" id="12-usda"><div id="12-usda-c"></div></div>
+      <div class="panel" id="12-local"><div id="12-local-c"></div></div>
+      <div class="panel" id="12-tbl"><div class="tbl-wrap" id="12-tbl-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 7 — Competitor Deep-Dive · Reviews · Complaints · Differentiation</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-13">
+    <div class="agent-head">
+      <div class="agent-ico">🎯</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
+      <div class="agent-dot" id="dot-13"></div>
+    </div>
+    <div class="agent-out" id="out-13">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('13','sum')">Summary</div>
+        <div class="tab" onclick="tab('13','comp')">Competitor Profiles</div>
+        <div class="tab" onclick="tab('13','pain')">Pain Points</div>
+        <div class="tab" onclick="tab('13','diff')">Differentiation Plan</div>
+        <div class="tab" onclick="tab('13','msg')">Messaging Guide</div>
+      </div>
+      <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
+      <div class="panel" id="13-comp"><div id="13-comp-c"></div></div>
+      <div class="panel" id="13-pain"><div id="13-pain-c"></div></div>
+      <div class="panel" id="13-diff"><div id="13-diff-c"></div></div>
+      <div class="panel" id="13-msg"><div id="13-msg-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 8 — Executive Summary</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-8">
     <div class="agent-head">
@@ -563,7 +700,7 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 6 — SBA Business Plan</div>
+<div class="phase-label">Phase 9 — SBA Business Plan · Investor Deck · Financial Projections</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-9">
     <div class="agent-head">
@@ -591,7 +728,7 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 7 — Project Execution Plan</div>
+<div class="phase-label">Phase 10 — Project Execution Plan · Gantt · Risk Register</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-10">
     <div class="agent-head">
@@ -618,133 +755,6 @@ select option{background:var(--surface2)}
   </div>
 </div>
 
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 8 — Market Map · Color-Coded Gap Scores</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-11">
-    <div class="agent-head">
-      <div class="agent-ico">🗺️</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
-      <div class="agent-dot" id="dot-11"></div>
-    </div>
-    <div class="agent-out" id="out-11">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
-        <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
-        <div class="tab" onclick="tab('11','dir')">Directions</div>
-      </div>
-      <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
-      <div class="panel" id="11-leg"><div id="11-leg-c"></div></div>
-      <div class="panel" id="11-dir"><div id="11-dir-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 9 — Grant Search · CAPS · USDA · Barrow County Incentives</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-12">
-    <div class="agent-head">
-      <div class="agent-ico">💵</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Georgia CAPS · USDA Rural Dev · Barrow Incentives · Federal Grants</div></div>
-      <div class="agent-dot" id="dot-12"></div>
-    </div>
-    <div class="agent-out" id="out-12">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('12','sum')">Summary</div>
-        <div class="tab" onclick="tab('12','caps')">GA CAPS</div>
-        <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
-        <div class="tab" onclick="tab('12','local')">Local Incentives</div>
-        <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
-      </div>
-      <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
-      <div class="panel" id="12-caps"><div id="12-caps-c"></div></div>
-      <div class="panel" id="12-usda"><div id="12-usda-c"></div></div>
-      <div class="panel" id="12-local"><div id="12-local-c"></div></div>
-      <div class="panel" id="12-tbl"><div class="tbl-wrap" id="12-tbl-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 10 — Competitor Deep-Dive · Reviews · Complaints · Differentiation</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-13">
-    <div class="agent-head">
-      <div class="agent-ico">🎯</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
-      <div class="agent-dot" id="dot-13"></div>
-    </div>
-    <div class="agent-out" id="out-13">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('13','sum')">Summary</div>
-        <div class="tab" onclick="tab('13','comp')">Competitor Profiles</div>
-        <div class="tab" onclick="tab('13','pain')">Pain Points</div>
-        <div class="tab" onclick="tab('13','diff')">Differentiation Plan</div>
-        <div class="tab" onclick="tab('13','msg')">Messaging Guide</div>
-      </div>
-      <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
-      <div class="panel" id="13-comp"><div id="13-comp-c"></div></div>
-      <div class="panel" id="13-pain"><div id="13-pain-c"></div></div>
-      <div class="panel" id="13-diff"><div id="13-diff-c"></div></div>
-      <div class="panel" id="13-msg"><div id="13-msg-c"></div></div>
-    </div>
-  </div>
-</div>
-
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 11 — Code Review · Optimization · Cost Analysis</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-14">
-    <div class="agent-head">
-      <div class="agent-ico">🔬</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
-      <div class="agent-dot" id="dot-14"></div>
-    </div>
-    <div class="agent-out" id="out-14">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('14','sum')">Summary</div>
-        <div class="tab" onclick="tab('14','issues')">Issues Found</div>
-        <div class="tab" onclick="tab('14','perf')">Performance</div>
-        <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
-        <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
-      </div>
-      <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
-      <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
-      <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
-      <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
-      <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 12 — QA · Functional Testing · Data Validation · UX Audit</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-15">
-    <div class="agent-head">
-      <div class="agent-ico">✅</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
-      <div class="agent-dot" id="dot-15"></div>
-    </div>
-    <div class="agent-out" id="out-15">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('15','sum')">QA Summary</div>
-        <div class="tab" onclick="tab('15','tests')">Test Results</div>
-        <div class="tab" onclick="tab('15','data')">Data Validation</div>
-        <div class="tab" onclick="tab('15','ux')">UX Audit</div>
-        <div class="tab" onclick="tab('15','score')">Health Score</div>
-      </div>
-      <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
-      <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
-      <div class="panel" id="15-data"><div id="15-data-c"></div></div>
-      <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
-      <div class="panel" id="15-score"><div id="15-score-c"></div></div>
-    </div>
-  </div>
-</div>
-
 <div class="final-box" id="finalBox">
   <h2>Executive Report</h2>
   <div id="verdictEl"></div>
@@ -759,15 +769,141 @@ select option{background:var(--surface2)}
 </div>
 <script>
 const API='https://api.anthropic.com/v1/messages', MODEL='claude-sonnet-4-6';
-let running=false, R={}, charts={};
+let running=false, R={}, charts={}, demoMode=false;
+
+const INDUSTRIES = {
+  daycare: {
+    label:'Daycare / Childcare', emoji:'🏫',
+    unit:'childcare center', units:'childcare centers',
+    capacity_label:'Capacity (children)', capacity_default:75, budget_default:600000,
+    regulatory:'DECAL (GA Dept of Early Care & Learning)', regulatory_url:'decal.ga.gov',
+    tiers_label:'Age Groups',
+    tiers:['Infant–Pre-K','Infant–Kindergarten','Toddler–Pre-K'],
+    compliance:'DECAL licensing, staff-to-child ratios, 35 sqft/child indoor, 75 sqft/child outdoor, food safety, background checks, CDA credentials',
+    grants:'Georgia CAPS subsidy, USDA CACFP reimbursement, DECAL Quality Rated incentives, USDA Rural Development grants, local childcare coalitions',
+    competitors:'Primrose Schools, KinderCare, Bright Horizons, local independent centers',
+    financials:'tuition by age group (infant/toddler/preschool/pre-K), staff ratios, CACFP reimbursement, CAPS subsidy income, director salary',
+    staffing:'licensed lead teachers (CDA credential), assistant teachers, director, cook',
+    real_estate:'2,500–6,000 sqft, playground space (75 sqft/child outdoor), commercial kitchen, multiple classrooms, ADA-compliant restrooms',
+    revenue_unit:'monthly tuition per child',
+  },
+  gas_station: {
+    label:'Gas Station / C-Store', emoji:'⛽',
+    unit:'gas station', units:'gas stations',
+    capacity_label:'Fuel Pumps', capacity_default:8, budget_default:1500000,
+    regulatory:'Georgia EPD, EPA Underground Storage Tank program, Fire Marshal, State Fuel Tax license',
+    regulatory_url:'epd.georgia.gov',
+    tiers_label:'Fuel Types',
+    tiers:['Regular + Diesel','Regular + Premium + Diesel','Full Multi-Grade'],
+    compliance:'EPA UST registration, fire code, state fuel tax license, ATF tobacco permit, EBT/SNAP approval, ADA, spill containment',
+    grants:'EPA Brownfields grants, USDA Rural Business Development grants, USDA Rural Energy programs, SBA 7(a) loans',
+    competitors:'Shell, BP, Circle K, Chevron, QuikTrip, RaceTrac, local independents',
+    financials:'fuel margin per gallon (regular/premium/diesel), convenience store gross margin (~30%), car wash add-on, ATM fee income, lottery commission',
+    staffing:'cashiers, shift supervisors, maintenance technician',
+    real_estate:'1–2 acres, highway or arterial visibility, underground storage tank clearance, canopy space for pumps, truck access for fuel delivery',
+    revenue_unit:'daily fuel gallons sold + c-store revenue',
+  },
+  laundromat: {
+    label:'Laundromat', emoji:'🫧',
+    unit:'laundromat', units:'laundromats',
+    capacity_label:'Washers (machines)', capacity_default:30, budget_default:350000,
+    regulatory:'Local zoning, water/sewer utility agreements, fire code, ADA accessibility',
+    regulatory_url:'local municipality',
+    tiers_label:'Equipment Mix',
+    tiers:['Standard (top-load focus)','Mixed (top & front-load)','Premium (large-capacity focus)'],
+    compliance:'water/sewer capacity permit, drain permits, fire suppression, ADA accessibility, ventilation requirements, electrical capacity (400A+)',
+    grants:'USDA Rural Business Development grants, SBA 7(a) loans, local economic development incentives, energy-efficiency utility rebates',
+    competitors:'Speed Queen laundromats, Wash & Dry chains, local coin-ops, WaveMax franchise',
+    financials:'revenue per machine per day, vend price by machine size, utility cost (water/gas/electric ~40% of revenue), wash-dry-fold service, attendant labor',
+    staffing:'part-time attendants, maintenance technician',
+    real_estate:'2,000–4,000 sqft, high-traffic strip mall, heavy water/gas lines, strong electrical service (200–400A), parking',
+    revenue_unit:'revenue per machine per day',
+  },
+  car_wash: {
+    label:'Car Wash', emoji:'🚗',
+    unit:'car wash', units:'car washes',
+    capacity_label:'Wash Bays', capacity_default:4, budget_default:1200000,
+    regulatory:'Local zoning, water reclamation system, stormwater permit, EPA wastewater discharge, Fire Marshal',
+    regulatory_url:'local municipality / EPA',
+    tiers_label:'Service Tiers',
+    tiers:['Express (tunnel only)','Full-Service','Express + Detail'],
+    compliance:'water reclamation system (mandatory in most states), stormwater permit, EPA wastewater discharge, signage permits, fire code, ADA',
+    grants:'EPA WaterSense rebates, SBA 7(a) loans, local economic development, USDA Rural Business grants, water utility conservation incentives',
+    competitors:"Mister Car Wash, Zips Car Wash, Tommy's Express, Crew Carwash, local self-serve washes",
+    financials:'cars per hour per bay, pricing by tier (basic/deluxe/premium), monthly membership/subscription revenue, detailing add-ons, fleet accounts',
+    staffing:'wash attendants, cashiers, detailers, maintenance technician, manager',
+    real_estate:'0.5–1.5 acres, high-traffic arterial, drive-through lane space, utility connections (water/sewer/electric), setback for stacking',
+    revenue_unit:'cars washed per day × average ticket',
+  },
+  restaurant: {
+    label:'Restaurant / Food Service', emoji:'🍽️',
+    unit:'restaurant', units:'restaurants',
+    capacity_label:'Seating Capacity', capacity_default:60, budget_default:450000,
+    regulatory:'Georgia Dept of Public Health, local health dept, Fire Marshal, liquor license (if applicable), ADA',
+    regulatory_url:'dph.georgia.gov',
+    tiers_label:'Service Format',
+    tiers:['Fast Casual','Full Service / Dine-In','Counter Service + Delivery'],
+    compliance:'food handler permits, commercial kitchen health inspection, fire suppression (Ansul) system, hood ventilation, ADA, grease trap, liquor license',
+    grants:'SBA Restaurant Revitalization Fund, USDA Rural Business grants, local economic development, Georgia SBDC programs',
+    competitors:'Local independent restaurants, regional fast-casual chains, national QSR franchises',
+    financials:'revenue per seat, table turns per day, average check, food cost % (~28–35%), labor cost % (~30–35%), rent-to-revenue ratio (<10%)',
+    staffing:'chef/kitchen manager, line cooks, servers, host, dishwasher, manager',
+    real_estate:'1,500–4,000 sqft, commercial kitchen, parking (1 space/3 seats), grease trap, hood ventilation, health-dept-compliant layout',
+    revenue_unit:'revenue per seat per day',
+  },
+  gym: {
+    label:'Gym / Fitness Center', emoji:'💪',
+    unit:'gym', units:'gyms',
+    capacity_label:'Member Capacity', capacity_default:500, budget_default:500000,
+    regulatory:'Local zoning, building occupancy certificate, ADA, fire code, personal trainer certification (NASM/ACE)',
+    regulatory_url:'local municipality',
+    tiers_label:'Membership Tiers',
+    tiers:['Basic + Standard','Standard + Premium','Full-Service (all tiers + PT)'],
+    compliance:'occupancy limits, ADA accessibility, equipment safety anchoring, emergency exits, ventilation/HVAC for exercise load, liability insurance',
+    grants:'SBA 7(a) loans, local economic development incentives, USDA Rural Business grants, New Markets Tax Credits',
+    competitors:'Planet Fitness, LA Fitness, Anytime Fitness, YMCA, CrossFit affiliates, local boutique studios',
+    financials:'monthly memberships by tier, personal training packages, class/program fees, retail supplements, annual fee, churn rate (~3–5%/mo)',
+    staffing:'personal trainers (NASM/ACE certified), front desk staff, group class instructors, maintenance, general manager',
+    real_estate:'4,000–15,000 sqft, high-ceiling open floor, parking, locker rooms with showers, HVAC for heat load, ADA restrooms',
+    revenue_unit:'monthly recurring membership revenue',
+  },
+};
 
 const $ = id => document.getElementById(id);
 const key = () => $('apiKey').value.trim();
 const zip = () => $('zip').value||'30097';
 const radius = () => $('radius').value||'40';
-const grades = () => $('grades').value||'Infant–Pre-K';
+const grades = () => $('grades').value||INDUSTRIES[($('industrySelect')||{value:'daycare'}).value||'daycare'].tiers[0];
 const capacity = () => $('capacity').value||'75';
 const budget = () => $('budget').value||'600000';
+const industry = () => INDUSTRIES[$('industrySelect')?.value||'daycare'];
+
+function onIndustryChange() {
+  const ind = industry();
+  // Update masthead
+  $('mastheadTitle').textContent = ind.emoji+' '+ind.label+' Planning Agent System';
+  // Update capacity label
+  $('capacityLabel').textContent = ind.capacity_label;
+  $('capacity').value = ind.capacity_default;
+  $('budget').value = ind.budget_default;
+  // Update tiers dropdown
+  $('tiersLabel').textContent = ind.tiers_label;
+  const sel = $('grades');
+  sel.innerHTML = ind.tiers.map(t=>`<option value="${t}">${t}</option>`).join('');
+  // Update page title
+  document.title = ind.emoji+' '+ind.label+' Planning Agent System';
+}
+// Init on load
+window.addEventListener('DOMContentLoaded', onIndustryChange);
+
+function toggleDemo(){
+  demoMode=!demoMode;
+  const btn=$('demoBtn');
+  btn.textContent=demoMode?'⚡ Demo ON':'⚡ Demo Mode';
+  btn.style.background=demoMode?'var(--amber-dim)':'';
+  btn.style.borderColor='var(--amber)';
+  btn.style.color='var(--amber)';
+}
 
 function setDot(id,st){$('dot-'+id).className='agent-dot '+st;$('card-'+id).className='agent-card '+st}
 function showOut(id){$('out-'+id).className='agent-out show'}
@@ -812,6 +948,12 @@ function killChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete 
 
 // Retry an agent call up to 2 times if JSON parse fails
 async function claudeJSON(system, user) {
+  if (demoMode) {
+    await new Promise(r => setTimeout(r, 400));
+    const d = parseJSON(user);
+    if (d) return d;
+    return {};
+  }
   const strictSystem = system + '\n\nCRITICAL: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.';
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -822,6 +964,7 @@ async function claudeJSON(system, user) {
     } catch(e) {
       if (attempt === 3) throw e;
       console.warn(`Attempt ${attempt} API error:`, e.message);
+      await new Promise(r => setTimeout(r, attempt * 1500));
     }
   }
   return null;
@@ -847,6 +990,7 @@ async function claude(system, user, useSearch=false) {
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'HTTP '+res.status)}
   const d=await res.json();
   if(d.error) throw new Error(d.error.message);
+  if(d.stop_reason==='max_tokens') throw new Error('Response truncated at max_tokens — reduce prompt size or increase max_tokens');
   // Extract all text blocks
   return (d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
 }
@@ -877,64 +1021,29 @@ function renderHmap(containerId, cities, dims) {
 // ══════════════════════════════════════════════════════════
 async function runAgent1() {
   setDot(1,'running');
-  const sys=`You are a demographics analyst with expertise in US Census ACS data and GIS mapping. 
-You will use web search to find real Census/ACS data for Georgia cities. 
-Always respond with a JSON object only — no prose outside the JSON block.`;
+  const ind=industry();
+  const sys=`You are a demographics and market analyst with expertise in US Census ACS data and GIS mapping. You are researching demand signals for a ${ind.unit} business. Always respond with a JSON object only.`;
 
-  const usr=`Search for US Census Bureau ACS 2022 5-year estimates and Georgia GIS data for cities within ${radius()} miles of ZIP ${zip()} (Duluth GA / Gwinnett County area and Barrow County).
+  const usr=`Search US Census Bureau ACS 2022 5-year estimates for cities within ${radius()} miles of ZIP ${zip()}.
 
-Cities to analyze: Johns Creek, Duluth, Suwanee, Lawrenceville, Buford, Sugar Hill, Norcross, Alpharetta, Cumming, Peachtree Corners, Winder (Barrow County), Auburn (Barrow County), Bethlehem (Barrow County).
+Industry: ${ind.label}. Revenue unit: ${ind.revenue_unit}.
 
-Search for: population under 5 years, median household income, labor force participation, population growth 2019-2023, household counts. Use Census.gov, data.census.gov, Georgia GIS clearinghouse.
+Identify the top cities by population, income, traffic, and growth. For a ${ind.unit}, the most relevant demand signals are: total population, median household income, labor force participation, population growth 2019–2023, household counts, and daily traffic volume.
 
-Return ONLY this JSON (use real data where found, clearly note "est." if estimated):
-{
-  "data_sources": ["US Census ACS 2022 5-year estimates","Georgia GIS Clearinghouse","ACS Table B09001","ACS Table B19013"],
-  "summary": "4-5 sentence narrative citing actual census findings for this area",
-  "cities": [
-    {
-      "name":"Johns Creek","county":"Fulton","distance_miles":12,
-      "pop_total":82788,"pop_under5":4820,"pop_under5_pct":5.8,
-      "median_hh_income":112000,"labor_force_pct":68.4,
-      "pop_growth_pct_5yr":4.2,"households":28900,
-      "working_parents_est_pct":71,"demand_score":88,
-      "data_note":"ACS 2022 est."
-    },
-    {
-      "name":"Winder","county":"Barrow","distance_miles":32,
-      "pop_total":18200,"pop_under5":1420,"pop_under5_pct":7.8,
-      "median_hh_income":52000,"labor_force_pct":65.2,
-      "pop_growth_pct_5yr":14.1,"households":6800,
-      "working_parents_est_pct":74,"demand_score":72,
-      "data_note":"ACS 2022 est."
-    },
-    {
-      "name":"Auburn","county":"Barrow","distance_miles":28,
-      "pop_total":8900,"pop_under5":820,"pop_under5_pct":9.2,
-      "median_hh_income":68000,"labor_force_pct":70.1,
-      "pop_growth_pct_5yr":22.4,"households":3100,
-      "working_parents_est_pct":76,"demand_score":74,
-      "data_note":"ACS 2022 est."
-    }
-  ],
-  "age_breakdown_county": [
-    {"age_group":"Under 1 yr","gwinnett_pop":7200,"fulton_pop":5100,"gap_capacity":380},
-    {"age_group":"1-2 yrs","gwinnett_pop":14800,"fulton_pop":10400,"gap_capacity":620},
-    {"age_group":"3-4 yrs","gwinnett_pop":15200,"fulton_pop":10900,"gap_capacity":490},
-    {"age_group":"5 yrs","gwinnett_pop":7800,"fulton_pop":5600,"gap_capacity":310}
-  ]
-}`;
+Return ONLY this JSON (use real data, note "est." if estimated):
+{"data_sources":["US Census ACS 2022 5-year estimates","ACS Table B19013","local GIS data"],"summary":"4-5 sentence narrative on demographic opportunity for a ${ind.unit} in this area","cities":[{"name":"City A","county":"County","distance_miles":10,"pop_total":82000,"pop_under5":4800,"pop_under5_pct":5.8,"median_hh_income":112000,"labor_force_pct":68,"pop_growth_pct_5yr":4.2,"households":28000,"working_parents_est_pct":71,"demand_score":88,"data_note":"ACS 2022 est."},{"name":"City B","county":"County","distance_miles":28,"pop_total":18000,"pop_under5":1400,"pop_under5_pct":7.8,"median_hh_income":52000,"labor_force_pct":65,"pop_growth_pct_5yr":14,"households":6800,"working_parents_est_pct":74,"demand_score":72,"data_note":"ACS 2022 est."}],"age_breakdown_county":[{"age_group":"Segment 1","gwinnett_pop":7200,"fulton_pop":5100,"gap_capacity":380},{"age_group":"Segment 2","gwinnett_pop":14800,"fulton_pop":10400,"gap_capacity":620}]}`;
 
   try {
     const d=await claudeJSON(sys,usr);
-    if(!d) throw new Error('Could not parse demographics JSON — raw: '+raw.substring(0,100));
+    if(!d) throw new Error('Could not parse demographics JSON — check console for details.');
     R.a1=d;
     $('1-s-t').textContent=d.summary+(d.data_sources?'\n\nSources: '+d.data_sources.join(' · '):'');
     // Heatmap
+    const ind=industry();
     renderHmap('1-h-c',d.cities,[
-      {key:'pop_under5',label:'Children <5',fmt:v=>v.toLocaleString()},
+      {key:'pop_under5',label:ind.capacity_label.split(' ')[0]+' Pop',fmt:v=>v.toLocaleString()},
       {key:'median_hh_income',label:'Median Income',fmt:v=>'$'+(v/1000).toFixed(0)+'k'},
-      {key:'working_parents_est_pct',label:'Working Parents',fmt:v=>v+'%'},
+      {key:'working_parents_est_pct',label:'Labor Force %',fmt:v=>v+'%'},
       {key:'pop_growth_pct_5yr',label:'Pop Growth 5yr',fmt:v=>v+'%'},
       {key:'demand_score',label:'Demand Score',fmt:v=>v+'/100'}
     ]);
@@ -966,43 +1075,20 @@ Return ONLY this JSON (use real data where found, clearly note "est." if estimat
 // ══════════════════════════════════════════════════════════
 async function runAgent5() {
   setDot(5,'running');
-  const sys=`You are a Georgia childcare licensing expert. Search for current DECAL requirements. Respond JSON only.`;
-  const usr=`Search Georgia DECAL website (decal.ga.gov) and Georgia law for current requirements to open a ${grades()} daycare/childcare center near ZIP ${zip()}.
+  const ind=industry();
+  const sys=`You are a regulatory compliance expert for small businesses in the US. Research current licensing, zoning, and permit requirements for opening a ${ind.unit}. Respond JSON only.`;
+  const usr=`Search for all federal, state, and local requirements to open a ${ind.unit} near ZIP ${zip()}.
 
-Also search for local Gwinnett County, Forsyth County, and Barrow County zoning requirements for childcare facilities.
+Regulatory authority: ${ind.regulatory}
+Key compliance areas: ${ind.compliance}
 
 Return ONLY:
-{
-  "summary": "4-sentence overview citing decal.ga.gov requirements",
-  "decal_url": "https://decal.ga.gov/BftS/Home.aspx",
-  "requirements": [
-    {"category":"Licensing","item":"DECAL Child Care License","detail":"Required before opening. Apply via decal.ga.gov","timeline_weeks":8,"cost_usd":50,"source":"decal.ga.gov","priority":"Critical"},
-    {"category":"Ratios","item":"Infant ratio 1:6","detail":"Maximum 6 infants per teacher per OCGA 20-1A","timeline_weeks":0,"cost_usd":0,"source":"OCGA 20-1A-11","priority":"Critical"},
-    {"category":"Facility","item":"35 sq ft per child indoors","detail":"Georgia minimum indoor space requirement","timeline_weeks":0,"cost_usd":0,"source":"Rules Chapter 591-1","priority":"Critical"},
-    {"category":"Facility","item":"75 sq ft per child outdoors","detail":"Outdoor play area requirement","timeline_weeks":0,"cost_usd":0,"source":"Rules Chapter 591-1","priority":"Critical"},
-    {"category":"Zoning","item":"Gwinnett County C-1/O-I","detail":"Child care centers permitted in C-1, C-2, O-I zones","timeline_weeks":4,"cost_usd":500,"source":"Gwinnett County UDO","priority":"High"},
-    {"category":"Zoning","item":"Barrow County C-1/R-C","detail":"Child care centers permitted in C-1 and Residential-Commercial zones; verify with Barrow County Planning at 770-307-3021","timeline_weeks":4,"cost_usd":350,"source":"Barrow County Planning Dept","priority":"High"},
-    {"category":"Fire","item":"Fire Marshal Inspection","detail":"Required before occupancy","timeline_weeks":4,"cost_usd":0,"source":"Local AHJ","priority":"Critical"},
-    {"category":"Health","item":"County Health Inspection","detail":"Gwinnett/Forsyth/Barrow health dept inspection required","timeline_weeks":3,"cost_usd":0,"source":"County Health Dept","priority":"Critical"},
-    {"category":"Staff","item":"Director – CDA or ECE Degree","detail":"Director must hold CDA credential or ECE/Child Dev degree","timeline_weeks":0,"cost_usd":500,"source":"DECAL Rules","priority":"Critical"},
-    {"category":"Insurance","item":"$1M Liability Insurance","detail":"Required before DECAL license issued","timeline_weeks":1,"cost_usd":5200,"source":"DECAL","priority":"Critical"},
-    {"category":"Training","item":"CPR/First Aid – All Staff","detail":"Certification required before working with children","timeline_weeks":2,"cost_usd":900,"source":"DECAL","priority":"High"}
-  ],
-  "timeline_phases":[
-    {"phase":"Business Setup","weeks":4,"tasks":"LLC, EIN, business bank account"},
-    {"phase":"Site & Lease","weeks":8,"tasks":"Find zoning-compliant space, negotiate lease"},
-    {"phase":"Plans & Permits","weeks":12,"tasks":"Architect drawings, building permit, DECAL pre-application"},
-    {"phase":"Construction","weeks":16,"tasks":"Build-out, playground, signage"},
-    {"phase":"Licensing","weeks":8,"tasks":"DECAL application, background checks, inspections"},
-    {"phase":"Staffing","weeks":8,"tasks":"Hire director, teachers, complete training"},
-    {"phase":"Enrollment","weeks":4,"tasks":"Marketing, waitlist, soft open"}
-  ]
-}`;
+{"summary":"4-sentence overview of the main regulatory requirements","decal_url":"https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits","requirements":[{"category":"Licensing","item":"Business License","detail":"Required from city/county before opening","timeline_weeks":4,"cost_usd":200,"source":"Local municipality","priority":"Critical"},{"category":"Zoning","item":"Zoning/Use Permit","detail":"Confirm ${ind.unit} is permitted use in target zone","timeline_weeks":4,"cost_usd":400,"source":"Local planning dept","priority":"Critical"},{"category":"Regulatory","item":"Industry-Specific License","detail":"${ind.regulatory} — obtain required permits","timeline_weeks":8,"cost_usd":500,"source":"${ind.regulatory}","priority":"Critical"},{"category":"Fire","item":"Fire Marshal Inspection","detail":"Required before occupancy certificate","timeline_weeks":4,"cost_usd":0,"source":"Local Fire Marshal","priority":"Critical"},{"category":"Insurance","item":"General Liability Insurance","detail":"$1M–$2M policy required before opening","timeline_weeks":1,"cost_usd":3000,"source":"Insurance broker","priority":"Critical"},{"category":"Building","item":"Certificate of Occupancy","detail":"Building dept CO required before opening","timeline_weeks":6,"cost_usd":300,"source":"Local building dept","priority":"Critical"}],"timeline_phases":[{"phase":"Business Formation","weeks":2,"tasks":"LLC, EIN, business bank account"},{"phase":"Site & Zoning","weeks":6,"tasks":"Confirm zoning, negotiate lease or purchase"},{"phase":"Permits & Plans","weeks":10,"tasks":"Building permit, architect drawings if needed, industry license application"},{"phase":"Build-Out","weeks":14,"tasks":"Construction, equipment installation, signage"},{"phase":"Final Inspections","weeks":4,"tasks":"Fire marshal, health/safety, CO, industry regulator"},{"phase":"Staffing & Training","weeks":4,"tasks":"Hire, train, certify staff per ${ind.compliance}"},{"phase":"Soft Open","weeks":2,"tasks":"Marketing, grand opening"}]}`;
   try {
     const d=await claudeJSON(sys,usr);
-    if(!d) throw new Error('JSON parse error agent 5 — raw: '+raw.substring(0,100));
+    if(!d) throw new Error('JSON parse error agent 5 — check console for details.');
     R.a5=d;
-    $('5-s-t').textContent=d.summary+(d.decal_url?'\n\nDECAL portal: '+d.decal_url:'');
+    $('5-s-t').textContent=d.summary+(d.decal_url?'\n\nRegulatory portal: '+d.decal_url:'');
     let tbl=`<table class="tbl"><thead><tr><th>Category</th><th>Requirement</th><th>Detail</th><th>Timeline</th><th>Cost</th><th>Source</th><th>Priority</th></tr></thead><tbody>`;
     d.requirements.forEach(r=>{
       const pb=r.priority==='Critical'?'b-red':r.priority==='High'?'b-amber':'b-blue';
@@ -1026,38 +1112,33 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 async function runAgent6() {
   setDot(6,'running');
-  const sys=`You are a childcare market analyst. You MUST respond with ONLY a valid JSON object. No prose, no explanation, no markdown outside the JSON. Start your response with { and end with }. Do not include any text before or after the JSON.`;
-  const usr=`Search for licensed daycare centers within ${radius()} miles of ZIP ${zip()} Georgia. Include Gwinnett, Barrow, Forsyth and Fulton counties. Search: "daycare Gwinnett County GA", "childcare Winder GA Barrow County", "Primrose school Suwanee", "KinderCare Duluth GA".
+  const ind=industry();
+  const sys=`You are a market analyst specializing in competitive intelligence for ${ind.units}. Respond with ONLY a valid JSON object — no prose before or after.`;
+  const usr=`Search for existing ${ind.units} within ${radius()} miles of ZIP ${zip()}. Key competitors to research: ${ind.competitors}.
 
-Respond with ONLY this JSON (no other text):
-{"summary":"4-sentence competitive landscape summary","total_licensed_estimated":85,"cities":[{"city":"Johns Creek","center_count":14,"avg_monthly_infant":1950,"avg_monthly_preschool":1550,"avg_rating":4.1,"capacity_utilization_pct":91,"waitlist_common":true,"gap_score":7},{"city":"Suwanee","center_count":8,"avg_monthly_infant":1850,"avg_monthly_preschool":1450,"avg_rating":4.3,"capacity_utilization_pct":94,"waitlist_common":true,"gap_score":9},{"city":"Duluth","center_count":18,"avg_monthly_infant":1700,"avg_monthly_preschool":1350,"avg_rating":3.9,"capacity_utilization_pct":88,"waitlist_common":false,"gap_score":5},{"city":"Buford","center_count":7,"avg_monthly_infant":1650,"avg_monthly_preschool":1300,"avg_rating":4.0,"capacity_utilization_pct":89,"waitlist_common":false,"gap_score":7},{"city":"Sugar Hill","center_count":5,"avg_monthly_infant":1750,"avg_monthly_preschool":1400,"avg_rating":4.2,"capacity_utilization_pct":96,"waitlist_common":true,"gap_score":8},{"city":"Lawrenceville","center_count":22,"avg_monthly_infant":1500,"avg_monthly_preschool":1150,"avg_rating":3.7,"capacity_utilization_pct":85,"waitlist_common":false,"gap_score":3},{"city":"Norcross","center_count":16,"avg_monthly_infant":1550,"avg_monthly_preschool":1200,"avg_rating":3.8,"capacity_utilization_pct":87,"waitlist_common":false,"gap_score":4},{"city":"Cumming","center_count":9,"avg_monthly_infant":1800,"avg_monthly_preschool":1450,"avg_rating":4.2,"capacity_utilization_pct":93,"waitlist_common":true,"gap_score":8},{"city":"Winder (Barrow)","center_count":4,"avg_monthly_infant":1350,"avg_monthly_preschool":1050,"avg_rating":3.9,"capacity_utilization_pct":91,"waitlist_common":true,"gap_score":9},{"city":"Auburn (Barrow)","center_count":2,"avg_monthly_infant":1300,"avg_monthly_preschool":1000,"avg_rating":4.0,"capacity_utilization_pct":97,"waitlist_common":true,"gap_score":9}],"top_chains":[{"name":"Primrose Schools","locations_in_area":6,"monthly_tuition_range":"$1,800-$2,200","rating":4.1,"type":"Franchise"},{"name":"KinderCare","locations_in_area":4,"monthly_tuition_range":"$1,500-$1,900","rating":3.8,"type":"Corporate"},{"name":"Bright Horizons","locations_in_area":2,"monthly_tuition_range":"$2,100-$2,600","rating":4.4,"type":"Corporate"},{"name":"Learning Experience","locations_in_area":3,"monthly_tuition_range":"$1,700-$2,000","rating":4.0,"type":"Franchise"}]}
+Search queries to use: "${ind.unit} near ZIP ${zip()}", "${ind.units} [city name] reviews", Google Maps / Yelp listings.
 
-Replace the example values with real data you find from search results. Keep the exact same JSON structure.`;
+Respond with ONLY this JSON:
+{"summary":"4-sentence competitive landscape for ${ind.units} in this area","total_licensed_estimated":40,"cities":[{"city":"City A","center_count":8,"avg_monthly_infant":0,"avg_monthly_preschool":0,"avg_rating":4.1,"capacity_utilization_pct":88,"waitlist_common":false,"gap_score":7},{"city":"City B","center_count":3,"avg_monthly_infant":0,"avg_monthly_preschool":0,"avg_rating":4.3,"capacity_utilization_pct":94,"waitlist_common":true,"gap_score":9}],"top_chains":[{"name":"Competitor A","locations_in_area":4,"monthly_tuition_range":"varies","rating":4.1,"type":"Chain"},{"name":"Competitor B","locations_in_area":2,"monthly_tuition_range":"varies","rating":3.8,"type":"Independent"}]}
+
+Use avg_monthly_infant and avg_monthly_preschool as the primary and secondary revenue price points for a ${ind.unit} (e.g. base service price and premium tier price). Replace example values with real search data.`;
   try {
     let d=await claudeJSON(sys,usr);
     // Fallback: if claudeJSON returns null after 3 retries, use baseline data
     if(!d) {
+      const ind=industry();
       console.warn('Agent 6: using baseline fallback data');
       d={
-        summary:`Competitive intelligence for ${radius()}-mile radius of ZIP ${zip()} Georgia. The area has ~85 licensed childcare providers. Suwanee, Sugar Hill, and Barrow County show the highest gaps. Lawrenceville and Norcross are most saturated.`,
-        total_licensed_estimated:85,
+        summary:`Competitive intelligence for ${radius()}-mile radius of ZIP ${zip()}. Baseline data used — run with a valid API key for live market research on ${ind.units} in this area.`,
+        total_licensed_estimated:20,
         cities:[
-          {city:"Johns Creek",center_count:14,avg_monthly_infant:1950,avg_monthly_preschool:1550,avg_rating:4.1,capacity_utilization_pct:91,waitlist_common:true,gap_score:7},
-          {city:"Suwanee",center_count:8,avg_monthly_infant:1850,avg_monthly_preschool:1450,avg_rating:4.3,capacity_utilization_pct:94,waitlist_common:true,gap_score:9},
-          {city:"Duluth",center_count:18,avg_monthly_infant:1700,avg_monthly_preschool:1350,avg_rating:3.9,capacity_utilization_pct:88,waitlist_common:false,gap_score:5},
-          {city:"Buford",center_count:7,avg_monthly_infant:1650,avg_monthly_preschool:1300,avg_rating:4.0,capacity_utilization_pct:89,waitlist_common:false,gap_score:7},
-          {city:"Sugar Hill",center_count:5,avg_monthly_infant:1750,avg_monthly_preschool:1400,avg_rating:4.2,capacity_utilization_pct:96,waitlist_common:true,gap_score:8},
-          {city:"Lawrenceville",center_count:22,avg_monthly_infant:1500,avg_monthly_preschool:1150,avg_rating:3.7,capacity_utilization_pct:85,waitlist_common:false,gap_score:3},
-          {city:"Cumming",center_count:9,avg_monthly_infant:1800,avg_monthly_preschool:1450,avg_rating:4.2,capacity_utilization_pct:93,waitlist_common:true,gap_score:8},
-          {city:"Winder (Barrow)",center_count:4,avg_monthly_infant:1350,avg_monthly_preschool:1050,avg_rating:3.9,capacity_utilization_pct:91,waitlist_common:true,gap_score:9},
-          {city:"Auburn (Barrow)",center_count:2,avg_monthly_infant:1300,avg_monthly_preschool:1000,avg_rating:4.0,capacity_utilization_pct:97,waitlist_common:true,gap_score:9}
+          {city:"Area A",center_count:8,avg_monthly_infant:1800,avg_monthly_preschool:1400,avg_rating:4.1,capacity_utilization_pct:88,waitlist_common:true,gap_score:8},
+          {city:"Area B",center_count:5,avg_monthly_infant:1600,avg_monthly_preschool:1200,avg_rating:4.0,capacity_utilization_pct:85,waitlist_common:false,gap_score:7},
+          {city:"Area C",center_count:12,avg_monthly_infant:1500,avg_monthly_preschool:1100,avg_rating:3.8,capacity_utilization_pct:82,waitlist_common:false,gap_score:4}
         ],
-        top_chains:[
-          {name:"Primrose Schools",locations_in_area:6,monthly_tuition_range:"$1,800-$2,200",rating:4.1,type:"Franchise"},
-          {name:"KinderCare",locations_in_area:4,monthly_tuition_range:"$1,500-$1,900",rating:3.8,type:"Corporate"},
-          {name:"Bright Horizons",locations_in_area:2,monthly_tuition_range:"$2,100-$2,600",rating:4.4,type:"Corporate"},
-          {name:"Learning Experience",locations_in_area:3,monthly_tuition_range:"$1,700-$2,000",rating:4.0,type:"Franchise"}
-        ]
+        top_chains:ind.competitors.split(',').slice(0,4).map((name,i)=>({
+          name:name.trim(),locations_in_area:Math.max(1,4-i),monthly_tuition_range:'varies',rating:4.0-i*0.1,type:i===0?'Franchise':'Independent'
+        }))
       };
     }
     R.a6=d;
@@ -1088,55 +1169,18 @@ Replace the example values with real data you find from search results. Keep the
 // ══════════════════════════════════════════════════════════
 async function runAgent2(a1,a5,a6) {
   setDot(2,'running');
-  const sys=`You are a market gap analyst. Respond JSON only.`;
-  const usr=`Synthesize a gap analysis for a ${grades()} daycare (${capacity()} children) within ${radius()} miles of ZIP ${zip()} Georgia.
+  const ind=industry();
+  const sys=`You are a market gap analyst for small businesses. Respond JSON only.`;
+  const usr=`Synthesize a market gap analysis for a ${ind.unit} (capacity: ${capacity()}, budget: $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
 DEMOGRAPHICS: ${a1.substring(0,600)}
 REGULATORY: ${a5.substring(0,400)}
 COMPETITORS: ${a6.substring(0,600)}
 
 Return ONLY:
-{
-  "summary": "5-sentence gap analysis narrative",
-  "overall_opportunity_score": 81,
-  "cities": [
-    {
-      "city":"Suwanee","rank":1,"demand_score":9,"supply_score":3,"gap_score":9,"unserved_children":580,"income_tier":"Premium","recommended_tuition_infant":2050,"recommended_tuition_preschool":1650,"priority":"Critical Opportunity","rationale":"Fastest growing, highest gap, low competition"
-    },
-    {
-      "city":"Sugar Hill","rank":2,"demand_score":8,"supply_score":3,"gap_score":8,"unserved_children":420,"income_tier":"Upper-Mid","recommended_tuition_infant":1900,"recommended_tuition_preschool":1500,"priority":"High Opportunity","rationale":"Rapid growth, few competitors"
-    },
-    {
-      "city":"Johns Creek","rank":3,"demand_score":9,"supply_score":5,"gap_score":7,"unserved_children":390,"income_tier":"Premium","recommended_tuition_infant":2200,"recommended_tuition_preschool":1800,"priority":"High Opportunity","rationale":"Highest income, premium pricing possible"
-    },
-    {
-      "city":"Buford","rank":4,"demand_score":7,"supply_score":4,"gap_score":7,"unserved_children":310,"income_tier":"Mid","recommended_tuition_infant":1750,"recommended_tuition_preschool":1380,"priority":"High Opportunity","rationale":"Low competition, growing"
-    },
-    {
-      "city":"Cumming","rank":5,"demand_score":8,"supply_score":4,"gap_score":7,"unserved_children":350,"income_tier":"Upper-Mid","recommended_tuition_infant":1850,"recommended_tuition_preschool":1480,"priority":"Good Opportunity","rationale":"Forsyth County boom"
-    },
-    {
-      "city":"Winder","rank":6,"demand_score":8,"supply_score":2,"gap_score":9,"unserved_children":480,"income_tier":"Lower-Mid","recommended_tuition_infant":1400,"recommended_tuition_preschool":1100,"priority":"Critical Opportunity – Underserved","rationale":"Barrow County extremely underserved, fastest growth in metro"
-    },
-    {
-      "city":"Auburn","rank":7,"demand_score":7,"supply_score":2,"gap_score":8,"unserved_children":310,"income_tier":"Mid","recommended_tuition_infant":1350,"recommended_tuition_preschool":1050,"priority":"High Opportunity – Underserved","rationale":"Barrow County boom, nearly zero competition"
-    },
-    {
-      "city":"Duluth","rank":6,"demand_score":7,"supply_score":7,"gap_score":4,"unserved_children":160,"income_tier":"Mid","recommended_tuition_infant":1650,"recommended_tuition_preschool":1300,"priority":"Moderate","rationale":"Saturating, more competition"
-    },
-    {
-      "city":"Lawrenceville","rank":7,"demand_score":7,"supply_score":9,"gap_score":2,"unserved_children":80,"income_tier":"Lower-Mid","recommended_tuition_infant":1400,"recommended_tuition_preschool":1100,"priority":"Low","rationale":"Oversupplied market"
-    },
-    {
-      "city":"Norcross","rank":8,"demand_score":6,"supply_score":8,"gap_score":2,"unserved_children":70,"income_tier":"Lower-Mid","recommended_tuition_infant":1450,"recommended_tuition_preschool":1150,"priority":"Avoid","rationale":"High competition, lower income"}
-  ],
-  "age_gaps":[
-    {"age":"Infant (0-12mo)","demand_idx":95,"supply_idx":42,"gap":53},
-    {"age":"Toddler (1-2yr)","demand_idx":90,"supply_idx":58,"gap":32},
-    {"age":"Preschool (3yr)","demand_idx":82,"supply_idx":71,"gap":11},
-    {"age":"Pre-K (4yr)","demand_idx":74,"supply_idx":78,"gap":-4}
-  ]
-}`;
+{"summary":"5-sentence gap analysis for a ${ind.unit} in this area","overall_opportunity_score":81,"cities":[{"city":"City A","rank":1,"demand_score":9,"supply_score":3,"gap_score":9,"unserved_children":580,"income_tier":"Premium","recommended_tuition_infant":2050,"recommended_tuition_preschool":1650,"priority":"Critical Opportunity","rationale":"High demand, low competition"},{"city":"City B","rank":2,"demand_score":8,"supply_score":4,"gap_score":7,"unserved_children":310,"income_tier":"Mid","recommended_tuition_infant":1750,"recommended_tuition_preschool":1380,"priority":"High Opportunity","rationale":"Growing area, few competitors"}],"age_gaps":[{"age":"${ind.tiers[0]||'Tier 1'}","demand_idx":95,"supply_idx":42,"gap":53},{"age":"${ind.tiers[1]||'Tier 2'}","demand_idx":82,"supply_idx":71,"gap":11}]}
+
+Use recommended_tuition_infant as the primary price point and recommended_tuition_preschool as the secondary price point for a ${ind.unit}. Revenue model: ${ind.revenue_unit}.`;
   try {
     const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 2');
@@ -1187,8 +1231,9 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 async function runAgent3(a1,a2,a5) {
   setDot(3,'running');
-  const sys=`You are a childcare site selection consultant. Respond JSON only.`;
-  const usr=`Recommend the top 5 specific locations for a ${grades()} daycare (${capacity()} children, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()} Georgia.
+  const ind=industry();
+  const sys=`You are a ${ind.unit} site selection consultant. Respond JSON only.`;
+  const usr=`Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
 DEMOGRAPHICS: ${a1.substring(0,500)}
 GAP ANALYSIS: ${a2.substring(0,600)}
@@ -1338,8 +1383,9 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 async function runAgent4(a3,a5) {
   setDot(4,'running');
+  const ind=industry();
   const sys=`You are a commercial real estate analyst. Search LoopNet, BizBuySell, CoStar, and Crexi for real available listings. Respond JSON only.`;
-  const usr=`Search for commercial real estate listings suitable for a ${capacity()}-child daycare near ZIP ${zip()} Georgia.
+  const usr=`Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}) near ZIP ${zip()}.
 
 Search these sites:
 1. loopnet.com — search "retail for lease Suwanee GA", "commercial space Duluth GA daycare", "flex space Johns Creek GA"  
@@ -1510,8 +1556,9 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 async function runAgent7(a3,a4,a5) {
   setDot(7,'running');
-  const sys=`You are a childcare financial analyst. Respond JSON only with realistic numbers.`;
-  const usr=`Build a financial model for a ${grades()} daycare (${capacity()} children, budget $${parseInt(budget()).toLocaleString()}) near ZIP ${zip()} Georgia.
+  const ind=industry();
+  const sys=`You are a ${ind.unit} financial analyst. Respond JSON only with realistic numbers.`;
+  const usr=`Build a financial model for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) near ZIP ${zip()}.
 
 SITE RECOMMENDATIONS: ${a3.substring(0,500)}
 REAL ESTATE: ${a4.substring(0,400)}
@@ -1650,8 +1697,9 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 async function runAgent8(a1,a2,a3,a4,a5,a6,a7) {
   setDot(8,'running');
+  const ind=industry();
   const sys=`You are an executive consultant. Respond JSON only.`;
-  const usr=`Write a final executive report for opening a ${grades()} daycare (${capacity()} children, $${parseInt(budget()).toLocaleString()} budget) near ZIP ${zip()} Georgia.
+  const usr=`Write a final executive report for opening a ${ind.unit} (${ind.capacity_label}: ${capacity()}, $${parseInt(budget()).toLocaleString()} budget) near ZIP ${zip()}.
 
 KEY FINDINGS:
 - Demographics: ${a1.substring(0,250)}
@@ -1714,8 +1762,9 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 async function runAgent9(a1,a2,a3,a4,a5,a6,a7,a8) {
   setDot(9,'running');
-  const sys=`You are a senior business plan writer and SBA loan consultant with 20 years of experience helping childcare businesses secure funding. You write detailed, bank-ready business plans. Respond JSON only.`;
-  const usr=`Write a comprehensive SBA 7(a) loan-ready business plan for a ${grades()} daycare (${capacity()} children, budget $${parseInt(budget()).toLocaleString()}) near ZIP ${zip()} Georgia.
+  const ind=industry();
+  const sys=`You are a senior business plan writer and SBA loan consultant with 20 years of experience helping ${ind.unit} businesses secure funding. You write detailed, bank-ready business plans. Respond JSON only.`;
+  const usr=`Write a comprehensive SBA 7(a) loan-ready business plan for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) near ZIP ${zip()}.
 
 Use all research below:
 DEMOGRAPHICS: ${a1.substring(0,400)}
@@ -2041,8 +2090,9 @@ function renderBusinessPlan(d) {
 // ══════════════════════════════════════════════════════════
 async function runAgent10(a3,a4,a5,a7,a9) {
   setDot(10,'running');
-  const sys=`You are a senior project manager specializing in childcare center launches. You create detailed, actionable project plans. Respond JSON only.`;
-  const usr=`Create a comprehensive 18-month project execution plan to open a ${grades()} daycare (${capacity()} children) in ${zip()} Georgia area, budget $${parseInt(budget()).toLocaleString()}.
+  const ind=industry();
+  const sys=`You are a senior project manager specializing in ${ind.unit} launches. You create detailed, actionable project plans. Respond JSON only.`;
+  const usr=`Create a comprehensive 18-month project execution plan to open a ${ind.unit} (${ind.capacity_label}: ${capacity()}) near ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
 
 SITE SELECTION: ${a3.substring(0,300)}
 REAL ESTATE: ${a4.substring(0,300)}
@@ -2414,20 +2464,15 @@ function toggleCheck(id) {
   if(isChecked){el.classList.remove('checked');el.textContent='';}
   else{el.classList.add('checked');el.textContent='✓';}
 }
-function toggleCheck(id) {
-  const el=$(id);
-  const isChecked=el.classList.contains('checked');
-  if(isChecked){el.classList.remove('checked');el.textContent='';}
-  else{el.classList.add('checked');el.textContent='✓';}
-}
 
 // ══════════════════════════════════════════════════════════
 // MARKET MAP AGENT (Agent 11)
 // ══════════════════════════════════════════════════════════
 async function runAgent11(a1,a2,a4) {
   setDot(11,'running');
+  const ind=industry();
   const sys=`You are a geographic data analyst. Respond with JSON only.`;
-  const usr=`Build geographic mapping data for cities within 40 miles of ZIP 30097 (Duluth, GA) for a daycare planning analysis.
+  const usr=`Build geographic mapping data for cities within ${radius()} miles of ZIP ${zip()} for a ${ind.unit} site analysis.
 DEMOGRAPHICS: ${a1.substring(0,400)}
 GAP ANALYSIS: ${a2.substring(0,400)}
 REAL ESTATE: ${a4.substring(0,300)}
@@ -2512,11 +2557,10 @@ function buildMap(d) {
     <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:#f0f0ee;border:2px solid #4a9eff;display:inline-block"></span>★ Home ZIP</span>
   </div>
   <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-    <a href="https://maps.google.com/maps?q=Gwinnett+County+GA+daycare" target="_blank" class="link-btn primary-btn">↗ Google Maps</a>
-    <a href="https://www.loopnet.com/search/commercial-real-estate/gwinnett-county-ga/for-lease/" target="_blank" class="link-btn">↗ LoopNet Gwinnett</a>
-    <a href="https://www.loopnet.com/search/commercial-real-estate/barrow-county-ga/for-lease/" target="_blank" class="link-btn">↗ LoopNet Barrow</a>
-    <a href="https://decal.ga.gov/bfts/facilitysearch.aspx" target="_blank" class="link-btn">↗ DECAL Facility Map</a>
-    <a href="https://www.crexi.com/lease/properties?address=Gwinnett+County%2C+GA" target="_blank" class="link-btn">↗ Crexi Gwinnett</a>
+    <a href="https://maps.google.com/maps?q=${encodeURIComponent(industry().unit)}+near+${zip()}" target="_blank" class="link-btn primary-btn">↗ Google Maps</a>
+    <a href="https://www.loopnet.com/search/commercial-real-estate/${zip()}/for-lease/" target="_blank" class="link-btn">↗ LoopNet Listings</a>
+    <a href="https://www.crexi.com/lease/properties?address=${zip()}" target="_blank" class="link-btn">↗ Crexi Listings</a>
+    <a href="https://www.bizbuysell.com/search/" target="_blank" class="link-btn">↗ BizBuySell</a>
   </div>`;
   $('11-map-c').innerHTML=svg;
 }
@@ -2565,7 +2609,7 @@ function buildMapLegend(d) {
 }
 
 function buildDirections(d) {
-  let html=`<div style="margin-bottom:10px;font-size:13px;color:var(--muted)">Drive times from ZIP 30097 (Duluth, GA) to each key market:</div><div style="display:grid;gap:8px">`;
+  let html=`<div style="margin-bottom:10px;font-size:13px;color:var(--muted)">Drive times from ZIP ${zip()} to each key market:</div><div style="display:grid;gap:8px">`;
   d.directions.forEach(dir=>{
     html+=`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
       <div style="font-size:22px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);width:58px;text-align:center;flex-shrink:0">${dir.drive_mins}<span style="font-size:11px;font-weight:400">min</span></div>
@@ -2585,8 +2629,9 @@ function buildDirections(d) {
 // ══════════════════════════════════════════════════════════
 async function runAgent12(a3,a5) {
   setDot(12,'running');
-  const sys=`You are a grant research specialist for childcare businesses in Georgia. Search for real, current grant and subsidy programs. Respond JSON only.`;
-  const usr=`Search for all available grants, subsidies, and funding incentives for opening a ${grades()} daycare near ZIP ${zip()} Georgia (Gwinnett and Barrow County). Search: Georgia CAPS rates decal.ga.gov, USDA Rural Development Georgia childcare grant, Barrow County business incentives 2025, Georgia Pre-K provider funding, CACFP reimbursement rates 2025, childcare stabilization grant Georgia 2026.
+  const ind=industry();
+  const sys=`You are a grant research specialist for ${ind.unit} businesses. Search for real, current grant and subsidy programs. Respond JSON only.`;
+  const usr=`Search for all available grants, subsidies, and funding incentives for opening a ${ind.unit} near ZIP ${zip()}. Regulatory body: ${ind.regulatory}. Search for SBA programs, USDA Rural Development grants, local county business incentives, industry-specific subsidies (${ind.grants}), and federal small business grants applicable to ${ind.unit} businesses.
 Return ONLY:
 {"summary":"5-sentence summary of funding landscape","total_potential_funding":287000,"caps_program":{"program_name":"Georgia Childcare and Parent Services (CAPS)","administered_by":"Georgia DECAL","website":"https://decal.ga.gov/Families/CAPS.aspx","phone":"1-877-255-2277","what_it_is":"State subsidy program paying childcare costs for income-eligible families. Guaranteed monthly payment to provider from state.","benefit_to_provider":"Guaranteed payment per enrolled CAPS child. CAPS families fill hard-to-fill slots with zero collection risk.","current_rates_gwinnett":[{"age_group":"Infant (0-12 mo)","daily_rate":37.50,"monthly_est":813,"notes":"Gwinnett County Rate A — 2024 schedule"},{"age_group":"Toddler (1-2 yr)","daily_rate":32.00,"monthly_est":694,"notes":"Gwinnett Rate A"},{"age_group":"Preschool (3 yr)","daily_rate":28.00,"monthly_est":607,"notes":"Gwinnett Rate A"},{"age_group":"Pre-K (4 yr)","daily_rate":25.00,"monthly_est":542,"notes":"Gwinnett Rate A"}],"current_rates_barrow":[{"age_group":"Infant (0-12 mo)","daily_rate":28.00,"monthly_est":607,"notes":"Barrow County Rate B"},{"age_group":"Toddler (1-2 yr)","daily_rate":24.00,"monthly_est":520,"notes":"Barrow Rate B"},{"age_group":"Preschool (3 yr)","daily_rate":20.00,"monthly_est":433,"notes":"Barrow Rate B"},{"age_group":"Pre-K (4 yr)","daily_rate":18.00,"monthly_est":390,"notes":"Barrow Rate B"}],"eligibility_for_provider":"Active DECAL license + Quality Rated 2-star minimum","how_to_apply":"Complete CAPS Provider Agreement at decal.ga.gov after licensing","revenue_impact":"15 CAPS children @ avg $650/mo = $9,750/month guaranteed revenue ($117K/yr)"},"georgia_pre_k":{"program_name":"Georgia Pre-K Program","administered_by":"Georgia DECAL","website":"https://www.decal.ga.gov/prek/","phone":"404-656-5957","what_it_is":"State-funded Pre-K for all Georgia 4-year-olds. State pays provider per enrolled Pre-K child per year.","annual_revenue_per_class":84000,"class_size":20,"eligibility":"DECAL license + Quality Rated 2-star + classroom assessment","website_apply":"https://www.decal.ga.gov/prek/ApplyToBeAProvider.aspx","notes":"One Pre-K class adds $84K/yr in guaranteed state revenue. Apply by February each year for fall enrollment."},"federal_grants":[{"name":"USDA Child & Adult Care Food Program (CACFP)","agency":"USDA / Georgia DOE","website":"https://www.gadoe.org/School-Improvement/Federal-Programs/Pages/CACFP.aspx","phone":"404-657-8000","amount_available":"$10,000–$14,000 annually","direct_apply":true,"apply_url":"https://www.gadoe.org/School-Improvement/Federal-Programs/Pages/CACFP.aspx","notes":"Meal reimbursement for breakfast, lunch, snacks. Barrow County may qualify for Tier 1 (higher rate). Apply after licensing."},{"name":"USDA Rural Development Community Facilities Grant","agency":"USDA Rural Development","website":"https://www.rd.usda.gov/programs-services/community-facilities/community-facilities-direct-loan-grant-program","phone":"706-546-2136","amount_available":"$25,000–$150,000 (Barrow County locations)","direct_apply":true,"apply_url":"https://www.rd.usda.gov/ga","notes":"Barrow County childcare centers may qualify. Contact Athens USDA office. No repayment required for grant portion.","eligibility_zip":"Winder GA 30680 and Auburn GA 30011 — confirm rural designation with USDA"},{"name":"SBA Microloan Program","agency":"SBA / ACE Georgia","website":"https://www.sba.gov/funding-programs/loans/microloans","amount_available":"Up to $50,000 at below-market rates","direct_apply":true,"apply_url":"https://aceloans.org","notes":"Georgia intermediary: ACE Loans (aceloans.org) 770-527-6100. For startups needing supplemental capital."},{"name":"HHS Child Care Stabilization Grant","agency":"HHS / ACF","website":"https://www.acf.hhs.gov/occ/child-care-stabilization-grants","amount_available":"$10,000–$50,000 if re-authorized in 2026","direct_apply":true,"notes":"Monitor acf.hhs.gov for renewal. Previously covered payroll, rent, equipment for new providers under American Rescue Plan."}],"barrow_county_incentives":[{"name":"Barrow County Development Authority","contact":"Barrow County Development Authority","phone":"770-307-3021","email":"bda@barrowga.org","website":"https://www.barrowga.org/economic-development/","incentives":["Property tax abatement up to 5 years for qualifying new businesses","Potential permit fee waivers","Site preparation assistance","Childcare declared workforce priority sector in Barrow County Strategic Plan 2024"],"notes":"Contact BDA before signing any lease. They may negotiate incentives with landlord or county commission directly."},{"name":"Georgia Job Tax Credit","agency":"Georgia Dept of Revenue","website":"https://dor.georgia.gov/job-tax-credit","amount":"$1,250–$3,500 per new full-time job (Barrow County Tier 3)","notes":"16 staff × $1,250 = up to $20,000 state tax credit Year 1. File Form IT-CA.","apply_url":"https://dor.georgia.gov/job-tax-credit"},{"name":"Winder Downtown Development Authority","contact":"Winder DDA","phone":"770-867-3106","website":"https://www.cityofwinder.com/development-authority/","incentives":["Façade grant up to $10,000","TIF district benefits","Sign grant up to $2,000"],"notes":"If locating in or near Winder downtown corridor."}],"quality_rated_benefits":{"program":"Georgia Quality Rated","website":"https://qualityrated.decal.ga.gov","benefits_by_star":[{"stars":1,"benefits":"CAPS eligible","additional_per_child":0},{"stars":2,"benefits":"Georgia Pre-K eligible, enhanced CAPS rate, workforce grants","additional_per_child":1.50},{"stars":3,"benefits":"Maximum CAPS rate, employer partnerships, enhanced Pre-K slot priority","additional_per_child":3.00},{"stars":4,"benefits":"National accreditation support, maximum state benefits","additional_per_child":4.50}],"recommendation":"Target 2-star at opening, 3-star by Year 2"},"all_grants_table":[{"program":"Georgia CAPS Subsidy","type":"Ongoing Revenue","amount_est":"$117,000/yr (15 CAPS kids)","deadline":"After licensing","probability":"High","action_required":"DECAL license + Quality Rated 2-star"},{"program":"Georgia Pre-K Slot","type":"Annual Revenue","amount_est":"$84,000/yr","deadline":"Apply by February","probability":"Medium-High","action_required":"Apply to DECAL after licensing"},{"program":"CACFP Meals","type":"Ongoing Revenue","amount_est":"$10,000–$14,000/yr","deadline":"Any time","probability":"High","action_required":"Enroll with Georgia DOE CACFP"},{"program":"USDA Rural Dev Grant","type":"One-Time Grant","amount_est":"$25,000–$150,000","deadline":"Rolling","probability":"High (Barrow Co.)","action_required":"Call Athens USDA 706-546-2136"},{"program":"Barrow Co. Tax Abatement","type":"Tax Savings","amount_est":"$5,000–$20,000/yr","deadline":"Before opening","probability":"High (Barrow)","action_required":"Contact BDA 770-307-3021 before lease"},{"program":"Georgia Job Tax Credit","type":"Tax Credit","amount_est":"Up to $20,000 Yr 1","deadline":"With tax return","probability":"High (Barrow)","action_required":"File Form IT-CA with GA Dept of Revenue"},{"program":"SBA Microloan","type":"Loan","amount_est":"Up to $50,000","deadline":"Rolling","probability":"Medium","action_required":"Apply at aceloans.org"},{"program":"Childcare Stabilization Grant","type":"Grant","amount_est":"$10,000–$50,000","deadline":"TBD 2026","probability":"Medium","action_required":"Monitor acf.hhs.gov"},{"program":"Winder DDA Façade Grant","type":"One-Time Grant","amount_est":"Up to $10,000","deadline":"Rolling","probability":"High (Winder)","action_required":"Contact Winder DDA 770-867-3106"},{"program":"DECAL Workforce Grant","type":"Per-staff grant","amount_est":"Up to $2,000/teacher","deadline":"As announced","probability":"Medium","action_required":"Monitor decal.ga.gov"}]}`;
   try {
@@ -2599,81 +2644,89 @@ Return ONLY:
   } catch(e){setDot(12,'error');showOut(12);$('12-sum-t').textContent='Error: '+e.message;throw e}
 }
 
-function buildGrants(d) {
-  $('12-sum-t').textContent=d.summary+`\n\nTotal potential funding (Year 1): $${d.total_potential_funding.toLocaleString()} across grants + ongoing programs.`;
-
-  // CAPS tab
-  const caps=d.caps_program;
-  let ch=`<div class="bp-section"><h3>${caps.program_name}</h3>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <a href="${caps.website}" target="_blank" class="link-btn primary-btn">↗ DECAL CAPS Portal</a>
-      <span style="padding:6px 12px;background:var(--surface2);border-radius:6px;font-size:12px;color:var(--muted)">${caps.phone}</span>
+function buildGrantCard(g) {
+  return `<div class="grant-card">
+    <div class="grant-card-top"><div><div class="grant-name">${g.name||g.program_name||''}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${g.agency||g.contact||''}</div></div>
+    <div class="grant-amount" style="font-size:15px">${g.amount_available||g.amount||''}</div></div>
+    <div class="grant-meta">${g.direct_apply!==undefined?`<span class="badge ${g.direct_apply?'b-green':'b-blue'}">${g.direct_apply?'Direct Apply':'Indirect'}</span>`:''}</div>
+    ${g.incentives?`<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">${g.incentives.map(i=>`<div style="display:flex;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--green);flex-shrink:0">✓</span>${i}</div>`).join('')}</div>`:''}
+    <div class="grant-body">${g.notes||g.what_it_is||''}</div>
+    <div class="grant-actions">
+      ${g.website?`<a href="${g.website}" target="_blank" class="link-btn primary-btn">↗ Info</a>`:''}
+      ${g.apply_url?`<a href="${g.apply_url}" target="_blank" class="link-btn">↗ Apply</a>`:''}
+      ${g.phone?`<span style="padding:5px 10px;font-size:11px;color:var(--muted)">${g.phone}</span>`:''}
     </div>
-    <div class="bp-prose" style="margin-bottom:10px">${caps.what_it_is}</div>
-    <div style="padding:10px 14px;background:var(--green-dim);border:1px solid var(--green);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--muted)"><strong style="color:var(--green)">Revenue Impact: </strong>${caps.revenue_impact}</div>
-    <h4>CAPS Rates — Gwinnett County</h4>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Age Group</th><th>Daily Rate</th><th>Monthly Est.</th><th>Notes</th></tr></thead><tbody>`;
-  caps.current_rates_gwinnett.forEach(r=>{ch+=`<tr><td>${r.age_group}</td><td style="color:var(--green)">$${r.daily_rate}/day</td><td style="color:var(--green)">~$${r.monthly_est}/mo</td><td style="font-size:11px;color:var(--faint)">${r.notes}</td></tr>`;});
-  ch+=`</tbody></table></div><h4 style="margin-top:12px">CAPS Rates — Barrow County</h4>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Age Group</th><th>Daily Rate</th><th>Monthly Est.</th><th>Notes</th></tr></thead><tbody>`;
-  caps.current_rates_barrow.forEach(r=>{ch+=`<tr><td>${r.age_group}</td><td style="color:var(--amber)">$${r.daily_rate}/day</td><td style="color:var(--amber)">~$${r.monthly_est}/mo</td><td style="font-size:11px;color:var(--faint)">${r.notes}</td></tr>`;});
-  ch+=`</tbody></table></div></div>`;
-  const prek=d.georgia_pre_k;
-  ch+=`<div class="bp-section"><h3>${prek.program_name}</h3>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <a href="${prek.website}" target="_blank" class="link-btn primary-btn">↗ Georgia Pre-K Info</a>
-      <a href="${prek.website_apply}" target="_blank" class="link-btn">↗ Apply as Provider</a>
-    </div>
-    <div class="bp-grid"><div class="bp-stat"><div class="bp-stat-label">Annual Revenue / Class</div><div class="bp-stat-val">$${prek.annual_revenue_per_class.toLocaleString()}</div><div class="bp-stat-sub">Guaranteed state payment</div></div>
-    <div class="bp-stat"><div class="bp-stat-label">Class Size</div><div class="bp-stat-val">${prek.class_size}</div><div class="bp-stat-sub">children per classroom</div></div></div>
-    <div class="bp-prose" style="margin-top:8px">${prek.what_it_is}</div>
-    <div style="margin-top:8px;padding:8px 12px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;font-size:12px;color:var(--amber)">⚡ ${prek.notes}</div>
   </div>`;
+}
+
+function buildGrants(d) {
+  const total = d.total_potential_funding||0;
+  $('12-sum-t').textContent=d.summary+(total?`\n\nTotal potential funding (Year 1): $${total.toLocaleString()} across grants + ongoing programs.`:'');
+
+  // Industry subsidy tab — supports both daycare CAPS structure and generic subsidy lists
+  let ch='';
+  if(d.caps_program) {
+    const caps=d.caps_program;
+    ch+=`<div class="bp-section"><h3>${caps.program_name||'Industry Subsidy Program'}</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        ${caps.website?`<a href="${caps.website}" target="_blank" class="link-btn primary-btn">↗ Portal</a>`:''}
+        ${caps.phone?`<span style="padding:6px 12px;background:var(--surface2);border-radius:6px;font-size:12px;color:var(--muted)">${caps.phone}</span>`:''}
+      </div>
+      <div class="bp-prose" style="margin-bottom:10px">${caps.what_it_is||''}</div>
+      ${caps.revenue_impact?`<div style="padding:10px 14px;background:var(--green-dim);border:1px solid var(--green);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--muted)"><strong style="color:var(--green)">Revenue Impact: </strong>${caps.revenue_impact}</div>`:''}`;
+    const rateTable=(rates,title)=>{
+      if(!rates||!rates.length) return '';
+      return `<h4>${title}</h4><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Tier</th><th>Daily Rate</th><th>Monthly Est.</th><th>Notes</th></tr></thead><tbody>`
+        +rates.map(r=>`<tr><td>${r.age_group||r.tier||''}</td><td style="color:var(--green)">$${r.daily_rate}/day</td><td style="color:var(--green)">~$${r.monthly_est}/mo</td><td style="font-size:11px;color:var(--faint)">${r.notes||''}</td></tr>`).join('')
+        +`</tbody></table></div>`;
+    };
+    if(caps.current_rates_gwinnett) ch+=rateTable(caps.current_rates_gwinnett,'Primary Market Rates');
+    if(caps.current_rates_barrow) ch+=rateTable(caps.current_rates_barrow,'Secondary Market Rates');
+    if(caps.current_rates) ch+=rateTable(caps.current_rates,'Subsidy Rates');
+    ch+=`</div>`;
+    if(d.georgia_pre_k) {
+      const prek=d.georgia_pre_k;
+      ch+=`<div class="bp-section"><h3>${prek.program_name||'State Program'}</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          ${prek.website?`<a href="${prek.website}" target="_blank" class="link-btn primary-btn">↗ Info</a>`:''}
+          ${prek.website_apply?`<a href="${prek.website_apply}" target="_blank" class="link-btn">↗ Apply</a>`:''}
+        </div>
+        ${prek.annual_revenue_per_class?`<div class="bp-grid"><div class="bp-stat"><div class="bp-stat-label">Annual Revenue</div><div class="bp-stat-val">$${prek.annual_revenue_per_class.toLocaleString()}</div><div class="bp-stat-sub">Guaranteed state payment</div></div>${prek.class_size?`<div class="bp-stat"><div class="bp-stat-label">Class Size</div><div class="bp-stat-val">${prek.class_size}</div></div>`:''}</div>`:''}
+        <div class="bp-prose">${prek.what_it_is||''}</div>
+        ${prek.notes?`<div style="margin-top:8px;padding:8px 12px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;font-size:12px;color:var(--amber)">⚡ ${prek.notes}</div>`:''}
+      </div>`;
+    }
+  } else if(d.industry_subsidies) {
+    (d.industry_subsidies||[]).forEach(g=>{ch+=buildGrantCard(g);});
+  } else {
+    ch=`<div style="font-size:13px;color:var(--muted);padding:16px">Industry-specific subsidy details will appear here after running the pipeline.</div>`;
+  }
   $('12-caps-c').innerHTML=ch;
 
-  // USDA/Federal tab
-  let fh=`<div class="bp-section"><h3>Federal Grant Programs</h3>`;
-  d.federal_grants.forEach(g=>{
-    fh+=`<div class="grant-card">
-      <div class="grant-card-top"><div><div class="grant-name">${g.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${g.agency}</div></div>
-      <div class="grant-amount" style="font-size:15px">${g.amount_available}</div></div>
-      <div class="grant-meta"><span class="badge ${g.direct_apply?'b-green':'b-blue'}">${g.direct_apply?'Direct Apply':'Indirect'}</span></div>
-      <div class="grant-body">${g.notes}${g.eligibility_zip?`<br><br><strong style="color:var(--amber)">Eligibility: ${g.eligibility_zip}</strong>`:''}</div>
-      <div class="grant-actions">
-        <a href="${g.website}" target="_blank" class="link-btn primary-btn">↗ Program Info</a>
-        ${g.apply_url?`<a href="${g.apply_url}" target="_blank" class="link-btn">↗ Apply</a>`:''}
-        ${g.phone?`<span style="padding:5px 10px;font-size:11px;color:var(--muted)">${g.phone}</span>`:''}
-      </div>
-    </div>`;
-  });
+  // Federal/USDA tab
+  const fedGrants=d.federal_grants||d.grants||[];
+  let fh=`<div class="bp-section"><h3>Federal &amp; SBA Grant Programs</h3>`;
+  fedGrants.forEach(g=>{fh+=buildGrantCard(g);});
+  if(!fedGrants.length) fh+=`<div style="font-size:13px;color:var(--muted)">No federal grants data available.</div>`;
   fh+=`</div>`;
   $('12-usda-c').innerHTML=fh;
 
   // Local incentives tab
-  let lh=`<div class="bp-section"><h3>Barrow County &amp; Local Incentives</h3>`;
-  d.barrow_county_incentives.forEach(g=>{
-    lh+=`<div class="grant-card">
-      <div class="grant-card-top"><div><div class="grant-name">${g.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${g.contact||g.agency||''}</div></div>
-      ${g.amount?`<div class="grant-amount" style="font-size:14px">${g.amount}</div>`:''}</div>
-      ${g.incentives?`<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">${g.incentives.map(i=>`<div style="display:flex;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--green);flex-shrink:0">✓</span>${i}</div>`).join('')}</div>`:''}
-      <div class="grant-body">${g.notes}</div>
-      <div class="grant-actions">
-        ${g.website?`<a href="${g.website}" target="_blank" class="link-btn primary-btn">↗ Website</a>`:''}
-        ${g.apply_url?`<a href="${g.apply_url}" target="_blank" class="link-btn">↗ Apply</a>`:''}
-        ${g.phone?`<span style="padding:5px 10px;font-size:12px;color:var(--blue);font-weight:600">${g.phone}</span>`:''}
-        ${g.email?`<span style="padding:5px 10px;font-size:12px;color:var(--muted)">${g.email}</span>`:''}
-      </div>
-    </div>`;
-  });
+  const localIncentives=d.local_incentives||d.barrow_county_incentives||d.county_incentives||[];
+  let lh=`<div class="bp-section"><h3>Local &amp; County Incentives</h3>`;
+  localIncentives.forEach(g=>{lh+=buildGrantCard(g);});
+  if(!localIncentives.length) lh+=`<div style="font-size:13px;color:var(--muted)">No local incentive data available.</div>`;
   const qr=d.quality_rated_benefits;
-  lh+=`<h3 style="margin-top:16px">${qr.program}</h3>
-  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stars</th><th>Key Benefits</th><th>Extra Per CAPS Child/Day</th></tr></thead><tbody>`;
-  qr.benefits_by_star.forEach(s=>{lh+=`<tr><td>${'★'.repeat(s.stars)}</td><td style="font-size:12px">${s.benefits}</td><td style="color:var(--green)">+$${s.additional_per_child}/day</td></tr>`;});
-  lh+=`</tbody></table></div><div style="margin-top:8px"><a href="${qr.website}" target="_blank" class="link-btn primary-btn">↗ Quality Rated Portal</a></div></div>`;
+  if(qr) {
+    lh+=`<h3 style="margin-top:16px">${qr.program}</h3>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Level</th><th>Key Benefits</th><th>Extra Per Unit/Day</th></tr></thead><tbody>`;
+    (qr.benefits_by_star||[]).forEach(s=>{lh+=`<tr><td>${'★'.repeat(s.stars)}</td><td style="font-size:12px">${s.benefits}</td><td style="color:var(--green)">+$${s.additional_per_child}/day</td></tr>`;});
+    lh+=`</tbody></table></div>${qr.website?`<div style="margin-top:8px"><a href="${qr.website}" target="_blank" class="link-btn primary-btn">↗ Program Portal</a></div>`:''}`;
+  }
+  lh+=`</div>`;
   $('12-local-c').innerHTML=lh;
 
   // Full table
-  const total=d.total_potential_funding;
   let tbl=`<div style="margin-bottom:10px;padding:10px 14px;background:var(--green-dim);border:1px solid var(--green);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">Total Potential Funding (Year 1)</div>
     <div style="font-size:22px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)">$${total.toLocaleString()}</div>
@@ -2693,10 +2746,11 @@ function buildGrants(d) {
 // ══════════════════════════════════════════════════════════
 async function runAgent13(a6) {
   setDot(13,'running');
-  const sys=`You are a competitive intelligence analyst for childcare markets. Search Google reviews, Yelp, and Facebook for real parent complaints about daycares in the target area. Respond JSON only.`;
-  const usr=`Search for Google Maps reviews, Yelp reviews, and Facebook reviews for specific childcare centers near ZIP ${zip()} Georgia. Find real parent complaints and pain points.
+  const ind=industry();
+  const sys=`You are a competitive intelligence analyst for ${ind.unit} markets. Search Google reviews, Yelp, and Facebook for real customer complaints about ${ind.units} in the target area. Respond JSON only.`;
+  const usr=`Search for Google Maps reviews, Yelp reviews, and Facebook reviews for specific ${ind.units} near ZIP ${zip()}. Find real customer complaints and pain points. Known competitors in this market: ${ind.competitors}.
 
-Search: "Primrose school Gwinnett reviews complaints", "KinderCare Gwinnett 1 star reviews", "daycare Suwanee GA Yelp reviews", "childcare Johns Creek GA negative reviews", "daycare Winder GA reviews", site:yelp.com daycare "Duluth GA".
+Search for reviews of the top ${ind.unit} chains and independent operators near ZIP ${zip()}. Find common complaint themes and differentiation opportunities.
 
 Competitor context: ${a6.substring(0,400)}
 
@@ -2788,18 +2842,14 @@ function buildCompDeepDive(d) {
   $('13-msg-c').innerHTML=msg;
 }
 
-    </div>`;
-  });
-  $('13-msg-c').innerHTML=msg;
-}
-
 // ══════════════════════════════════════════════════════════
 // AGENT 14 — Code Review
 // ══════════════════════════════════════════════════════════
 async function runAgent14(allResults) {
   setDot(14,'running');
+  const ind=industry();
   const sys=`You are a senior software engineer and AI API cost optimization specialist. You review multi-agent AI pipelines for correctness, efficiency, and cost. Respond JSON only.`;
-  const usr=`Review this 15-agent browser-based daycare planning pipeline built on claude-sonnet-4-6.
+  const usr=`Review this 15-agent browser-based ${ind.unit} planning pipeline built on claude-sonnet-4-6.
 
 ARCHITECTURE SUMMARY:
 - 15 agents total, sequential with 1 parallel phase (agents 1+5+6)
@@ -2867,7 +2917,8 @@ async function runAgent15(allResults) {
   setDot(15,'running');
   const sys=`You are a senior QA engineer specializing in AI pipeline testing and data validation. Respond JSON only.`;
   const agentsCompleted=Object.keys(allResults).length;
-  const usr=`Perform a comprehensive QA audit of this 15-agent daycare planning pipeline.
+  const ind=industry();
+  const usr=`Perform a comprehensive QA audit of this 15-agent ${ind.unit} planning pipeline.
 
 PIPELINE STATUS: ${agentsCompleted}/15 agents completed
 ZIP: ${zip()}, RADIUS: ${radius()} miles, GRADES: ${grades()}, CAPACITY: ${capacity()}, BUDGET: $${budget()}
@@ -2934,7 +2985,7 @@ function renderQA(d) {
 
 async function runPipeline() {
   if(running) return;
-  if(!key()) { showErr('Please enter your Anthropic API key.'); return; }
+  if(!demoMode && !key()) { showErr('Please enter your Anthropic API key.'); return; }
   hideErr(); running=true;
   $('runBtn').disabled=true;
   $('resetBtn').style.display='none';
@@ -2942,6 +2993,10 @@ async function runPipeline() {
   $('finalBox').className='final-box';
 
   try {
+    setProgress(2,'Pre-flight — Code Review · QA Testing…');
+    await runAgent14(R);
+    await runAgent15(R);
+
     setProgress(4,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
     const [r1,r5,r6]=await Promise.all([runAgent1(),runAgent5(),runAgent6()]);
 
@@ -2973,11 +3028,6 @@ async function runPipeline() {
     setProgress(87,'Phase 10 — Competitor Deep-Dive · Reviews · Differentiation…');
     await runAgent13(r6);
 
-    setProgress(93,'Phase 11 — Code Review · Optimization · Cost Analysis…');
-    await runAgent14(R);
-
-    setProgress(97,'Phase 12 — QA Testing · Data Validation · UX Audit…');
-    await runAgent15(R);
 
     setProgress(100,'Complete — all 15 agents finished successfully');
     $('orchStatus').textContent='done';
@@ -2998,6 +3048,16 @@ function resetAll() {
     if(card) card.className='agent-card';
     if(out) out.className='agent-out';
   });
+  // Clear rendered HTML in all output panels
+  const clearIds=['1-s-t','1-h-c','1-t-c','2-s-t','2-h-c','2-r-c','3-s-t','3-r-c','3-t-c',
+    '4-s-t','4-l-c','4-t-c','5-s-t','5-t-c','6-s-t','6-t-c','7-s-t','7-sc-c','7-t-c',
+    '8-s-t','9-ov-c','9-mkt-c','9-fin-c','9-ops-c','9-sba-c','9-inv-c',
+    '10-gantt-c','10-mile-c','10-budget-c','10-risk-c','10-team-c','10-check-c',
+    '11-map-c','11-leg-c','11-dir-c','12-sum-t','12-caps-c','12-usda-c','12-local-c','12-tbl-c',
+    '13-sum-t','13-comp-c','13-pain-c','13-diff-c','13-msg-c',
+    '14-sum-t','14-issues-c','14-perf-c','14-cost-c','14-fixes-c',
+    '15-sum-t','15-tests-c','15-data-c','15-ux-c','15-score-c'];
+  clearIds.forEach(id=>{const el=$(id);if(el)el.innerHTML='';});
   Object.keys(charts).forEach(k=>{try{charts[k].destroy()}catch{}});
   charts={};
   $('finalBox').className='final-box';
