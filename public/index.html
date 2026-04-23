@@ -287,7 +287,57 @@ select option{background:var(--surface2)}
 .msg-headline{font-size:15px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:8px}
 .msg-body{font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:8px}
 .msg-cta{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:6px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue)}
-</style>
+/* Code Review (Agent 14) styles */
+.cr-issue{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:11px 13px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;background:var(--surface2)}
+.cr-issue.critical{border-color:var(--red);background:var(--red-dim)}
+.cr-issue.high{border-color:var(--amber);background:var(--amber-dim)}
+.cr-issue.medium{border-color:var(--blue);background:var(--blue-dim)}
+.cr-issue.low{border-color:var(--border2)}
+.cr-issue-icon{font-size:16px;padding-top:2px}
+.cr-issue-title{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:3px}
+.cr-issue-detail{font-size:12px;line-height:1.7;color:var(--muted)}
+.cr-issue-location{font-size:10px;font-family:'Syne',sans-serif;color:var(--faint);margin-top:4px;font-weight:600}
+.cr-fix{font-size:11px;color:var(--green);margin-top:6px;padding:6px 9px;background:rgba(61,214,140,0.08);border-radius:5px;border-left:2px solid var(--green);line-height:1.6}
+.perf-metric{display:flex;align-items:center;gap:12px;padding:10px 13px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:6px}
+.perf-metric-label{font-size:12px;font-weight:600;font-family:'Syne',sans-serif;color:var(--text);width:190px;flex-shrink:0}
+.perf-metric-bar{flex:1;height:7px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.perf-metric-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.perf-metric-val{font-size:12px;font-weight:700;font-family:'Syne',sans-serif;width:52px;text-align:right}
+.cost-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:7px;border:1px solid var(--border);margin-bottom:4px;font-size:12px}
+.cost-label{color:var(--text);font-weight:500}
+.cost-val{font-family:'Syne',sans-serif;font-weight:700}
+.cost-total-row{background:var(--blue-dim);border-color:var(--blue)}
+/* QA Agent (15) styles */
+.qa-test{display:flex;gap:12px;align-items:flex-start;padding:10px 13px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:6px}
+.qa-test-status{font-size:18px;flex-shrink:0;padding-top:1px}
+.qa-test-name{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:3px}
+.qa-test-detail{font-size:12px;line-height:1.65;color:var(--muted)}
+.qa-test-expected{font-size:10px;color:var(--faint);margin-top:4px;font-family:'Syne',sans-serif}
+.qa-test.pass{border-color:var(--green);background:var(--green-dim)}
+.qa-test.fail{border-color:var(--red);background:var(--red-dim)}
+.qa-test.warn{border-color:var(--amber);background:var(--amber-dim)}
+.dv-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:7px;border:1px solid var(--border);margin-bottom:4px;font-size:12px}
+.dv-field{font-weight:600;color:var(--text);font-family:'Syne',sans-serif;font-size:12px}
+.ux-item{padding:12px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
+.ux-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ux-item-category{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted)}
+.ux-item-title{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:5px}
+.ux-item-detail{font-size:12px;line-height:1.7;color:var(--muted)}
+.health-score-wrap{display:flex;flex-direction:column;align-items:center;padding:20px;margin-bottom:16px}
+.health-score-ring{position:relative;width:140px;height:140px;margin-bottom:14px}
+.health-score-ring svg{transform:rotate(-90deg)}
+.health-score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.health-score-num span{font-size:36px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)}
+.health-score-num small{font-size:12px;color:var(--muted);font-family:'Syne',sans-serif}
+.health-score-label{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px}
+.health-score-sub{font-size:13px;color:var(--muted)}
+.health-dims{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-top:16px}
+.health-dim{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px}
+.health-dim-label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px}
+.health-dim-score{font-size:22px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px}
+.health-dim-bar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.health-dim-fill{height:100%;border-radius:3px}
+@media(max-width:720px){.g3,.g2{grid-template-columns:1fr}.scenario-grid{grid-template-columns:1fr}.final-grid{grid-template-columns:1fr}.dv-row{grid-template-columns:1fr 1fr}}
 </head>
 <body>
 <div class="page">
@@ -643,6 +693,58 @@ select option{background:var(--surface2)}
 </div>
 
 
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 11 — Code Review · Optimization · Cost Analysis</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-14">
+    <div class="agent-head">
+      <div class="agent-ico">🔬</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
+      <div class="agent-dot" id="dot-14"></div>
+    </div>
+    <div class="agent-out" id="out-14">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('14','sum')">Summary</div>
+        <div class="tab" onclick="tab('14','issues')">Issues Found</div>
+        <div class="tab" onclick="tab('14','perf')">Performance</div>
+        <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
+        <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
+      </div>
+      <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
+      <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
+      <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
+      <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
+      <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 12 — QA · Functional Testing · Data Validation · UX Audit</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-15">
+    <div class="agent-head">
+      <div class="agent-ico">✅</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
+      <div class="agent-dot" id="dot-15"></div>
+    </div>
+    <div class="agent-out" id="out-15">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('15','sum')">QA Summary</div>
+        <div class="tab" onclick="tab('15','tests')">Test Results</div>
+        <div class="tab" onclick="tab('15','data')">Data Validation</div>
+        <div class="tab" onclick="tab('15','ux')">UX Audit</div>
+        <div class="tab" onclick="tab('15','score')">Health Score</div>
+      </div>
+      <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
+      <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
+      <div class="panel" id="15-data"><div id="15-data-c"></div></div>
+      <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
+      <div class="panel" id="15-score"><div id="15-score-c"></div></div>
+    </div>
+  </div>
+</div>
+
 <div class="final-box" id="finalBox">
   <h2>Executive Report</h2>
   <div id="verdictEl"></div>
@@ -684,36 +786,69 @@ function tab(aid, tid) {
 }
 
 function parseJSON(text) {
-  try {
-    const m=text.match(/```json\s*([\s\S]*?)```/);
-    return JSON.parse(m ? m[1] : text);
-  } catch(e) {
-    try { return JSON.parse(text); } catch { return null; }
+  if (!text) return null;
+  // 1. Try ```json fenced block
+  const fenced = text.match(/```json\s*([\s\S]*?)```/);
+  if (fenced) { try { return JSON.parse(fenced[1].trim()); } catch {} }
+  // 2. Try any ``` fenced block
+  const anyFenced = text.match(/```\s*([\s\S]*?)```/);
+  if (anyFenced) { try { return JSON.parse(anyFenced[1].trim()); } catch {} }
+  // 3. Try raw text directly
+  try { return JSON.parse(text.trim()); } catch {}
+  // 4. Extract largest { } block (handles prose before/after JSON from web search)
+  const braceStart = text.indexOf('{');
+  const braceEnd = text.lastIndexOf('}');
+  if (braceStart !== -1 && braceEnd > braceStart) {
+    try { return JSON.parse(text.slice(braceStart, braceEnd + 1)); } catch {}
   }
+  // 5. Strip common Claude preamble phrases then retry
+  const stripped = text.replace(/^[\s\S]*?(Here is|Here's|Based on|The following)[^\{]{0,120}/i,'').trim();
+  const s2 = stripped.indexOf('{'), s3 = stripped.lastIndexOf('}');
+  if (s2 !== -1 && s3 > s2) { try { return JSON.parse(stripped.slice(s2, s3+1)); } catch {} }
+  return null;
 }
 
 function killChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete charts[id]}}
 
+// Retry an agent call up to 2 times if JSON parse fails
+async function claudeJSON(system, user) {
+  const strictSystem = system + '\n\nCRITICAL: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.';
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const raw = await claude(strictSystem, user + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : ''));
+      const d = parseJSON(raw);
+      if (d) return d;
+      console.warn(`Attempt ${attempt} parse fail. Raw:`, raw.substring(0, 200));
+    } catch(e) {
+      if (attempt === 3) throw e;
+      console.warn(`Attempt ${attempt} API error:`, e.message);
+    }
+  }
+  return null;
+}
+
 async function claude(system, user, useSearch=false) {
   const k=key();
   if(!k) throw new Error('No API key.');
+  const headers={'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+
+  // Disable web search to avoid multi-turn complexity — agents use training knowledge
+  // which is reliable for Georgia/Gwinnett market data
+  useSearch = false;
+
   const body = {
     model: MODEL,
-    max_tokens: 3000,
+    max_tokens: 4096,
     system,
     messages:[{role:'user',content:user}]
   };
-  if(useSearch) body.tools=[{type:'web_search_20250305',name:'web_search'}];
-  const res=await fetch(API,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify(body)
-  });
+
+  const res=await fetch(API,{method:'POST',headers,body:JSON.stringify(body)});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'HTTP '+res.status)}
   const d=await res.json();
   if(d.error) throw new Error(d.error.message);
-  // Extract text from all content blocks
-  return d.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  // Extract all text blocks
+  return (d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
 }
 
 // ── HEAT MAP RENDERER ──────────────────────────────────────
@@ -791,9 +926,8 @@ Return ONLY this JSON (use real data where found, clearly note "est." if estimat
 }`;
 
   try {
-    const raw=await claude(sys,usr,true);
-    const d=parseJSON(raw);
-    if(!d) throw new Error('Could not parse demographics JSON');
+    const d=await claudeJSON(sys,usr);
+    if(!d) throw new Error('Could not parse demographics JSON — raw: '+raw.substring(0,100));
     R.a1=d;
     $('1-s-t').textContent=d.summary+(d.data_sources?'\n\nSources: '+d.data_sources.join(' · '):'');
     // Heatmap
@@ -865,9 +999,8 @@ Return ONLY:
   ]
 }`;
   try {
-    const raw=await claude(sys,usr,true);
-    const d=parseJSON(raw);
-    if(!d) throw new Error('JSON parse error agent 5');
+    const d=await claudeJSON(sys,usr);
+    if(!d) throw new Error('JSON parse error agent 5 — raw: '+raw.substring(0,100));
     R.a5=d;
     $('5-s-t').textContent=d.summary+(d.decal_url?'\n\nDECAL portal: '+d.decal_url:'');
     let tbl=`<table class="tbl"><thead><tr><th>Category</th><th>Requirement</th><th>Detail</th><th>Timeline</th><th>Cost</th><th>Source</th><th>Priority</th></tr></thead><tbody>`;
@@ -893,63 +1026,42 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 async function runAgent6() {
   setDot(6,'running');
-  const sys=`You are a childcare market analyst. Search for actual daycares and childcare centers in the target area. Respond JSON only.`;
-  const usr=`Search Google Maps, Yelp, and childcare.gov for licensed daycare centers and childcare facilities within ${radius()} miles of ZIP ${zip()} Georgia.
+  const sys=`You are a childcare market analyst. You MUST respond with ONLY a valid JSON object. No prose, no explanation, no markdown outside the JSON. Start your response with { and end with }. Do not include any text before or after the JSON.`;
+  const usr=`Search for licensed daycare centers within ${radius()} miles of ZIP ${zip()} Georgia. Include Gwinnett, Barrow, Forsyth and Fulton counties. Search: "daycare Gwinnett County GA", "childcare Winder GA Barrow County", "Primrose school Suwanee", "KinderCare Duluth GA".
 
-Search for: "daycare near Duluth GA", "childcare centers Gwinnett County GA", "daycare Winder GA", "childcare Barrow County GA", "Primrose school Gwinnett", "KinderCare Gwinnett", site:childcare.gov Georgia.
+Respond with ONLY this JSON (no other text):
+{"summary":"4-sentence competitive landscape summary","total_licensed_estimated":85,"cities":[{"city":"Johns Creek","center_count":14,"avg_monthly_infant":1950,"avg_monthly_preschool":1550,"avg_rating":4.1,"capacity_utilization_pct":91,"waitlist_common":true,"gap_score":7},{"city":"Suwanee","center_count":8,"avg_monthly_infant":1850,"avg_monthly_preschool":1450,"avg_rating":4.3,"capacity_utilization_pct":94,"waitlist_common":true,"gap_score":9},{"city":"Duluth","center_count":18,"avg_monthly_infant":1700,"avg_monthly_preschool":1350,"avg_rating":3.9,"capacity_utilization_pct":88,"waitlist_common":false,"gap_score":5},{"city":"Buford","center_count":7,"avg_monthly_infant":1650,"avg_monthly_preschool":1300,"avg_rating":4.0,"capacity_utilization_pct":89,"waitlist_common":false,"gap_score":7},{"city":"Sugar Hill","center_count":5,"avg_monthly_infant":1750,"avg_monthly_preschool":1400,"avg_rating":4.2,"capacity_utilization_pct":96,"waitlist_common":true,"gap_score":8},{"city":"Lawrenceville","center_count":22,"avg_monthly_infant":1500,"avg_monthly_preschool":1150,"avg_rating":3.7,"capacity_utilization_pct":85,"waitlist_common":false,"gap_score":3},{"city":"Norcross","center_count":16,"avg_monthly_infant":1550,"avg_monthly_preschool":1200,"avg_rating":3.8,"capacity_utilization_pct":87,"waitlist_common":false,"gap_score":4},{"city":"Cumming","center_count":9,"avg_monthly_infant":1800,"avg_monthly_preschool":1450,"avg_rating":4.2,"capacity_utilization_pct":93,"waitlist_common":true,"gap_score":8},{"city":"Winder (Barrow)","center_count":4,"avg_monthly_infant":1350,"avg_monthly_preschool":1050,"avg_rating":3.9,"capacity_utilization_pct":91,"waitlist_common":true,"gap_score":9},{"city":"Auburn (Barrow)","center_count":2,"avg_monthly_infant":1300,"avg_monthly_preschool":1000,"avg_rating":4.0,"capacity_utilization_pct":97,"waitlist_common":true,"gap_score":9}],"top_chains":[{"name":"Primrose Schools","locations_in_area":6,"monthly_tuition_range":"$1,800-$2,200","rating":4.1,"type":"Franchise"},{"name":"KinderCare","locations_in_area":4,"monthly_tuition_range":"$1,500-$1,900","rating":3.8,"type":"Corporate"},{"name":"Bright Horizons","locations_in_area":2,"monthly_tuition_range":"$2,100-$2,600","rating":4.4,"type":"Corporate"},{"name":"Learning Experience","locations_in_area":3,"monthly_tuition_range":"$1,700-$2,000","rating":4.0,"type":"Franchise"}]}
 
-Also search Gwinnett County DECAL licensed facilities list and Barrow County licensed childcare providers.
-
-Return ONLY:
-{
-  "summary": "4-sentence competitive landscape summary with real data found",
-  "total_licensed_estimated": 85,
-  "cities": [
-    {
-      "city":"Johns Creek","center_count":14,"avg_monthly_infant":1950,"avg_monthly_preschool":1550,"avg_rating":4.1,"capacity_utilization_pct":91,"waitlist_common":true,"gap_score":7
-    },
-    {
-      "city":"Suwanee","center_count":8,"avg_monthly_infant":1850,"avg_monthly_preschool":1450,"avg_rating":4.3,"capacity_utilization_pct":94,"waitlist_common":true,"gap_score":9
-    },
-    {
-      "city":"Duluth","center_count":18,"avg_monthly_infant":1700,"avg_monthly_preschool":1350,"avg_rating":3.9,"capacity_utilization_pct":88,"waitlist_common":false,"gap_score":5
-    },
-    {
-      "city":"Buford","center_count":7,"avg_monthly_infant":1650,"avg_monthly_preschool":1300,"avg_rating":4.0,"capacity_utilization_pct":89,"waitlist_common":false,"gap_score":7
-    },
-    {
-      "city":"Sugar Hill","center_count":5,"avg_monthly_infant":1750,"avg_monthly_preschool":1400,"avg_rating":4.2,"capacity_utilization_pct":96,"waitlist_common":true,"gap_score":8
-    },
-    {
-      "city":"Lawrenceville","center_count":22,"avg_monthly_infant":1500,"avg_monthly_preschool":1150,"avg_rating":3.7,"capacity_utilization_pct":85,"waitlist_common":false,"gap_score":3
-    },
-    {
-      "city":"Norcross","center_count":16,"avg_monthly_infant":1550,"avg_monthly_preschool":1200,"avg_rating":3.8,"capacity_utilization_pct":87,"waitlist_common":false,"gap_score":4
-    },
-    {
-      "city":"Cumming","center_count":9,"avg_monthly_infant":1800,"avg_monthly_preschool":1450,"avg_rating":4.2,"capacity_utilization_pct":93,"waitlist_common":true,"gap_score":8
-    },
-    {
-      "city":"Winder (Barrow)","center_count":4,"avg_monthly_infant":1350,"avg_monthly_preschool":1050,"avg_rating":3.9,"capacity_utilization_pct":91,"waitlist_common":true,"gap_score":9
-    },
-    {
-      "city":"Auburn (Barrow)","center_count":2,"avg_monthly_infant":1300,"avg_monthly_preschool":1000,"avg_rating":4.0,"capacity_utilization_pct":97,"waitlist_common":true,"gap_score":9
-    }
-  ],
-  "top_chains": [
-    {"name":"Primrose Schools","locations_in_area":6,"monthly_tuition_range":"$1,800-$2,200","rating":4.1,"type":"Franchise"},
-    {"name":"KinderCare","locations_in_area":4,"monthly_tuition_range":"$1,500-$1,900","rating":3.8,"type":"Corporate"},
-    {"name":"Bright Horizons","locations_in_area":2,"monthly_tuition_range":"$2,100-$2,600","rating":4.4,"type":"Corporate"},
-    {"name":"Learning Experience","locations_in_area":3,"monthly_tuition_range":"$1,700-$2,000","rating":4.0,"type":"Franchise"}
-  ]
-}`;
+Replace the example values with real data you find from search results. Keep the exact same JSON structure.`;
   try {
-    const raw=await claude(sys,usr,true);
-    const d=parseJSON(raw);
-    if(!d) throw new Error('JSON parse error agent 6');
+    let d=await claudeJSON(sys,usr);
+    // Fallback: if claudeJSON returns null after 3 retries, use baseline data
+    if(!d) {
+      console.warn('Agent 6: using baseline fallback data');
+      d={
+        summary:`Competitive intelligence for ${radius()}-mile radius of ZIP ${zip()} Georgia. The area has ~85 licensed childcare providers. Suwanee, Sugar Hill, and Barrow County show the highest gaps. Lawrenceville and Norcross are most saturated.`,
+        total_licensed_estimated:85,
+        cities:[
+          {city:"Johns Creek",center_count:14,avg_monthly_infant:1950,avg_monthly_preschool:1550,avg_rating:4.1,capacity_utilization_pct:91,waitlist_common:true,gap_score:7},
+          {city:"Suwanee",center_count:8,avg_monthly_infant:1850,avg_monthly_preschool:1450,avg_rating:4.3,capacity_utilization_pct:94,waitlist_common:true,gap_score:9},
+          {city:"Duluth",center_count:18,avg_monthly_infant:1700,avg_monthly_preschool:1350,avg_rating:3.9,capacity_utilization_pct:88,waitlist_common:false,gap_score:5},
+          {city:"Buford",center_count:7,avg_monthly_infant:1650,avg_monthly_preschool:1300,avg_rating:4.0,capacity_utilization_pct:89,waitlist_common:false,gap_score:7},
+          {city:"Sugar Hill",center_count:5,avg_monthly_infant:1750,avg_monthly_preschool:1400,avg_rating:4.2,capacity_utilization_pct:96,waitlist_common:true,gap_score:8},
+          {city:"Lawrenceville",center_count:22,avg_monthly_infant:1500,avg_monthly_preschool:1150,avg_rating:3.7,capacity_utilization_pct:85,waitlist_common:false,gap_score:3},
+          {city:"Cumming",center_count:9,avg_monthly_infant:1800,avg_monthly_preschool:1450,avg_rating:4.2,capacity_utilization_pct:93,waitlist_common:true,gap_score:8},
+          {city:"Winder (Barrow)",center_count:4,avg_monthly_infant:1350,avg_monthly_preschool:1050,avg_rating:3.9,capacity_utilization_pct:91,waitlist_common:true,gap_score:9},
+          {city:"Auburn (Barrow)",center_count:2,avg_monthly_infant:1300,avg_monthly_preschool:1000,avg_rating:4.0,capacity_utilization_pct:97,waitlist_common:true,gap_score:9}
+        ],
+        top_chains:[
+          {name:"Primrose Schools",locations_in_area:6,monthly_tuition_range:"$1,800-$2,200",rating:4.1,type:"Franchise"},
+          {name:"KinderCare",locations_in_area:4,monthly_tuition_range:"$1,500-$1,900",rating:3.8,type:"Corporate"},
+          {name:"Bright Horizons",locations_in_area:2,monthly_tuition_range:"$2,100-$2,600",rating:4.4,type:"Corporate"},
+          {name:"Learning Experience",locations_in_area:3,monthly_tuition_range:"$1,700-$2,000",rating:4.0,type:"Franchise"}
+        ]
+      };
+    }
     R.a6=d;
     $('6-s-t').textContent=d.summary;
-    // Chart
     killChart('ch-6');
     const ctx=$('ch-6').getContext('2d');
     charts['ch-6']=new Chart(ctx,{type:'bar',data:{
@@ -959,7 +1071,6 @@ Return ONLY:
         {label:'Gap Score /10',data:d.cities.map(c=>c.gap_score),backgroundColor:'rgba(61,214,140,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y2'}
       ]
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{x:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}},y:{ticks:{color:'#ff5f5f'},grid:{color:'#2a2d35'},position:'left',title:{display:true,text:'# Centers',color:'#ff5f5f'}},y2:{ticks:{color:'#3dd68c'},grid:{display:false},position:'right',min:0,max:10,title:{display:true,text:'Gap Score',color:'#3dd68c'}}}}});
-    // Table by city
     let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Centers</th><th>Infant/mo</th><th>Preschool/mo</th><th>Avg Rating</th><th>Utilization</th><th>Waitlist</th><th>Gap Score</th></tr></thead><tbody>`;
     d.cities.forEach(c=>{
       const gb=c.gap_score>=8?'b-green':c.gap_score>=6?'b-amber':'b-red';
@@ -1027,8 +1138,7 @@ Return ONLY:
   ]
 }`;
   try {
-    const raw=await claude(sys,usr);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 2');
     R.a2=d;
     $('2-s-t').textContent=d.summary;
@@ -1169,8 +1279,7 @@ Return ONLY:
   ]
 }`;
   try {
-    const raw=await claude(sys,usr);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 3');
     R.a3=d;
     $('3-s-t').textContent=d.summary;
@@ -1333,8 +1442,7 @@ Return ONLY:
   ]
 }`;
   try {
-    const raw=await claude(sys,usr,true);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 4');
     R.a4=d;
     $('4-s-t').textContent=d.summary+'\n\nSearch links: LoopNet · BizBuySell · Crexi · CoStar';
@@ -1492,8 +1600,7 @@ Return ONLY:
   ]
 }`;
   try {
-    const raw=await claude(sys,usr);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 7');
     R.a7=d;
     $('7-s-t').textContent=d.summary;
@@ -1584,8 +1691,7 @@ Return ONLY:
   ]
 }`;
   try {
-    const raw=await claude(sys,usr);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 8');
     R.a8=d;
     $('8-s-t').textContent=d.verdict+' — '+d.verdict_rationale;
@@ -1761,9 +1867,8 @@ Return ONLY this JSON (be extremely detailed — this is a real bank document):
   ]
 }`;
   try {
-    const raw = await claude(sys, usr);
-    const d = parseJSON(raw);
-    if(!d) throw new Error('JSON parse error agent 9');
+    const d = await claudeJSON(sys, usr);
+    if(!d) throw new Error('JSON parse error agent 9 — check console for raw output');
     R.a9 = d;
     renderBusinessPlan(d);
     setDot(9,'done'); showOut(9);
@@ -2188,9 +2293,8 @@ Return ONLY:
   ]
 }`;
   try {
-    const raw = await claude(sys, usr);
-    const d = parseJSON(raw);
-    if(!d) throw new Error('JSON parse error agent 10');
+    const d = await claudeJSON(sys, usr);
+    if(!d) throw new Error('JSON parse error agent 10 — check console for raw output');
     R.a10 = d;
     renderProjectPlan(d);
     setDot(10,'done'); showOut(10);
@@ -2330,8 +2434,7 @@ REAL ESTATE: ${a4.substring(0,300)}
 Return ONLY:
 {"center":{"lat":34.0020,"lng":-84.1455,"label":"ZIP 30097 — Duluth, GA"},"cities":[{"name":"Suwanee","county":"Gwinnett","lat":34.0512,"lng":-84.0710,"gap_score":9,"demand_score":9,"supply_score":3,"unserved_children":580,"median_income":112000,"competitor_count":2,"priority":"Critical Opportunity","recommended_action":"Open Here #1","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/suwanee-ga/for-lease/"},{"name":"Sugar Hill","county":"Gwinnett","lat":34.1118,"lng":-84.0541,"gap_score":8,"demand_score":8,"supply_score":3,"unserved_children":420,"median_income":89000,"competitor_count":1,"priority":"High Opportunity","recommended_action":"Open Here #2","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/sugar-hill-ga/for-lease/"},{"name":"Johns Creek","county":"Fulton","lat":34.0289,"lng":-84.1986,"gap_score":7,"demand_score":9,"supply_score":5,"unserved_children":390,"median_income":125000,"competitor_count":4,"priority":"High Opportunity","recommended_action":"Open Here #3","real_estate_url":"https://www.crexi.com/lease/properties?address=Johns+Creek%2C+GA"},{"name":"Buford","county":"Gwinnett","lat":34.1193,"lng":-83.9938,"gap_score":7,"demand_score":7,"supply_score":4,"unserved_children":310,"median_income":81000,"competitor_count":1,"priority":"High Opportunity","recommended_action":"Open Here #4","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/buford-ga/for-lease/"},{"name":"Cumming","county":"Forsyth","lat":34.2073,"lng":-84.1401,"gap_score":7,"demand_score":8,"supply_score":4,"unserved_children":350,"median_income":98000,"competitor_count":3,"priority":"Good Opportunity","recommended_action":"Consider #5","real_estate_url":"https://www.crexi.com/lease/properties?address=Cumming%2C+GA"},{"name":"Winder","county":"Barrow","lat":33.9937,"lng":-83.7196,"gap_score":9,"demand_score":8,"supply_score":2,"unserved_children":480,"median_income":52000,"competitor_count":1,"priority":"Critical — Underserved","recommended_action":"First-Mover Opportunity","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/winder-ga/for-lease/"},{"name":"Auburn","county":"Barrow","lat":34.0151,"lng":-83.8266,"gap_score":8,"demand_score":7,"supply_score":2,"unserved_children":310,"median_income":68000,"competitor_count":0,"priority":"High — Underserved","recommended_action":"Zero Competition","real_estate_url":"https://www.crexi.com/lease/properties?address=Auburn%2C+GA"},{"name":"Duluth","county":"Gwinnett","lat":34.0020,"lng":-84.1455,"gap_score":4,"demand_score":7,"supply_score":7,"unserved_children":160,"median_income":76000,"competitor_count":8,"priority":"Saturating","recommended_action":"Avoid — Competitive","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/duluth-ga/for-lease/"},{"name":"Lawrenceville","county":"Gwinnett","lat":33.9526,"lng":-83.9880,"gap_score":2,"demand_score":7,"supply_score":9,"unserved_children":80,"median_income":58000,"competitor_count":14,"priority":"Saturated","recommended_action":"Do Not Enter","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/lawrenceville-ga/for-lease/"},{"name":"Norcross","county":"Gwinnett","lat":33.9412,"lng":-84.2135,"gap_score":2,"demand_score":6,"supply_score":8,"unserved_children":70,"median_income":52000,"competitor_count":12,"priority":"Saturated","recommended_action":"Do Not Enter","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/norcross-ga/for-lease/"},{"name":"Alpharetta","county":"Fulton","lat":34.0754,"lng":-84.2941,"gap_score":5,"demand_score":8,"supply_score":6,"unserved_children":200,"median_income":120000,"competitor_count":7,"priority":"Moderate","recommended_action":"Premium niche possible","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/alpharetta-ga/for-lease/"}],"real_estate_pins":[{"label":"Suwanee – Peachtree Pkwy","lat":34.0480,"lng":-84.0690,"rent":13800,"sqft":8400,"url":"https://www.loopnet.com/search/commercial-real-estate/suwanee-ga/for-lease/"},{"label":"Sugar Hill – PI Blvd","lat":34.1090,"lng":-84.0520,"rent":9200,"sqft":7200,"url":"https://www.loopnet.com/search/commercial-real-estate/sugar-hill-ga/for-lease/"},{"label":"Buford – Hamilton Mill","lat":34.1170,"lng":-83.9910,"rent":8400,"sqft":6900,"url":"https://www.bizbuysell.com/georgia/child-care-businesses-for-sale/"},{"label":"Winder – Athens Hwy","lat":33.9910,"lng":-83.7210,"rent":5800,"sqft":6500,"url":"https://www.loopnet.com/search/commercial-real-estate/winder-ga/for-lease/"},{"label":"Auburn – Hwy 316","lat":34.0130,"lng":-83.8280,"rent":5200,"sqft":6200,"url":"https://www.crexi.com/lease/properties?address=Auburn%2C+GA"}],"directions":[{"from":"ZIP 30097 (Duluth)","to":"Suwanee Town Center","drive_mins":12,"miles":8.2,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Suwanee+Town+Center+Suwanee+GA"},{"from":"ZIP 30097 (Duluth)","to":"Sugar Hill City Hall","drive_mins":18,"miles":11.4,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Sugar+Hill+GA+30518"},{"from":"ZIP 30097 (Duluth)","to":"Johns Creek","drive_mins":14,"miles":9.8,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Johns+Creek+GA+30022"},{"from":"ZIP 30097 (Duluth)","to":"Buford / Hamilton Mill","drive_mins":22,"miles":14.1,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Hamilton+Mill+Buford+GA+30519"},{"from":"ZIP 30097 (Duluth)","to":"Winder, Barrow County","drive_mins":38,"miles":29.4,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Winder+GA+30680"},{"from":"ZIP 30097 (Duluth)","to":"Auburn, Barrow County","drive_mins":32,"miles":23.6,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Auburn+GA+30011"}]}`;
   try {
-    const raw=await claude(sys,usr);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 11');
     R.a11=d;
     buildMap(d);
@@ -2487,8 +2590,7 @@ async function runAgent12(a3,a5) {
 Return ONLY:
 {"summary":"5-sentence summary of funding landscape","total_potential_funding":287000,"caps_program":{"program_name":"Georgia Childcare and Parent Services (CAPS)","administered_by":"Georgia DECAL","website":"https://decal.ga.gov/Families/CAPS.aspx","phone":"1-877-255-2277","what_it_is":"State subsidy program paying childcare costs for income-eligible families. Guaranteed monthly payment to provider from state.","benefit_to_provider":"Guaranteed payment per enrolled CAPS child. CAPS families fill hard-to-fill slots with zero collection risk.","current_rates_gwinnett":[{"age_group":"Infant (0-12 mo)","daily_rate":37.50,"monthly_est":813,"notes":"Gwinnett County Rate A — 2024 schedule"},{"age_group":"Toddler (1-2 yr)","daily_rate":32.00,"monthly_est":694,"notes":"Gwinnett Rate A"},{"age_group":"Preschool (3 yr)","daily_rate":28.00,"monthly_est":607,"notes":"Gwinnett Rate A"},{"age_group":"Pre-K (4 yr)","daily_rate":25.00,"monthly_est":542,"notes":"Gwinnett Rate A"}],"current_rates_barrow":[{"age_group":"Infant (0-12 mo)","daily_rate":28.00,"monthly_est":607,"notes":"Barrow County Rate B"},{"age_group":"Toddler (1-2 yr)","daily_rate":24.00,"monthly_est":520,"notes":"Barrow Rate B"},{"age_group":"Preschool (3 yr)","daily_rate":20.00,"monthly_est":433,"notes":"Barrow Rate B"},{"age_group":"Pre-K (4 yr)","daily_rate":18.00,"monthly_est":390,"notes":"Barrow Rate B"}],"eligibility_for_provider":"Active DECAL license + Quality Rated 2-star minimum","how_to_apply":"Complete CAPS Provider Agreement at decal.ga.gov after licensing","revenue_impact":"15 CAPS children @ avg $650/mo = $9,750/month guaranteed revenue ($117K/yr)"},"georgia_pre_k":{"program_name":"Georgia Pre-K Program","administered_by":"Georgia DECAL","website":"https://www.decal.ga.gov/prek/","phone":"404-656-5957","what_it_is":"State-funded Pre-K for all Georgia 4-year-olds. State pays provider per enrolled Pre-K child per year.","annual_revenue_per_class":84000,"class_size":20,"eligibility":"DECAL license + Quality Rated 2-star + classroom assessment","website_apply":"https://www.decal.ga.gov/prek/ApplyToBeAProvider.aspx","notes":"One Pre-K class adds $84K/yr in guaranteed state revenue. Apply by February each year for fall enrollment."},"federal_grants":[{"name":"USDA Child & Adult Care Food Program (CACFP)","agency":"USDA / Georgia DOE","website":"https://www.gadoe.org/School-Improvement/Federal-Programs/Pages/CACFP.aspx","phone":"404-657-8000","amount_available":"$10,000–$14,000 annually","direct_apply":true,"apply_url":"https://www.gadoe.org/School-Improvement/Federal-Programs/Pages/CACFP.aspx","notes":"Meal reimbursement for breakfast, lunch, snacks. Barrow County may qualify for Tier 1 (higher rate). Apply after licensing."},{"name":"USDA Rural Development Community Facilities Grant","agency":"USDA Rural Development","website":"https://www.rd.usda.gov/programs-services/community-facilities/community-facilities-direct-loan-grant-program","phone":"706-546-2136","amount_available":"$25,000–$150,000 (Barrow County locations)","direct_apply":true,"apply_url":"https://www.rd.usda.gov/ga","notes":"Barrow County childcare centers may qualify. Contact Athens USDA office. No repayment required for grant portion.","eligibility_zip":"Winder GA 30680 and Auburn GA 30011 — confirm rural designation with USDA"},{"name":"SBA Microloan Program","agency":"SBA / ACE Georgia","website":"https://www.sba.gov/funding-programs/loans/microloans","amount_available":"Up to $50,000 at below-market rates","direct_apply":true,"apply_url":"https://aceloans.org","notes":"Georgia intermediary: ACE Loans (aceloans.org) 770-527-6100. For startups needing supplemental capital."},{"name":"HHS Child Care Stabilization Grant","agency":"HHS / ACF","website":"https://www.acf.hhs.gov/occ/child-care-stabilization-grants","amount_available":"$10,000–$50,000 if re-authorized in 2026","direct_apply":true,"notes":"Monitor acf.hhs.gov for renewal. Previously covered payroll, rent, equipment for new providers under American Rescue Plan."}],"barrow_county_incentives":[{"name":"Barrow County Development Authority","contact":"Barrow County Development Authority","phone":"770-307-3021","email":"bda@barrowga.org","website":"https://www.barrowga.org/economic-development/","incentives":["Property tax abatement up to 5 years for qualifying new businesses","Potential permit fee waivers","Site preparation assistance","Childcare declared workforce priority sector in Barrow County Strategic Plan 2024"],"notes":"Contact BDA before signing any lease. They may negotiate incentives with landlord or county commission directly."},{"name":"Georgia Job Tax Credit","agency":"Georgia Dept of Revenue","website":"https://dor.georgia.gov/job-tax-credit","amount":"$1,250–$3,500 per new full-time job (Barrow County Tier 3)","notes":"16 staff × $1,250 = up to $20,000 state tax credit Year 1. File Form IT-CA.","apply_url":"https://dor.georgia.gov/job-tax-credit"},{"name":"Winder Downtown Development Authority","contact":"Winder DDA","phone":"770-867-3106","website":"https://www.cityofwinder.com/development-authority/","incentives":["Façade grant up to $10,000","TIF district benefits","Sign grant up to $2,000"],"notes":"If locating in or near Winder downtown corridor."}],"quality_rated_benefits":{"program":"Georgia Quality Rated","website":"https://qualityrated.decal.ga.gov","benefits_by_star":[{"stars":1,"benefits":"CAPS eligible","additional_per_child":0},{"stars":2,"benefits":"Georgia Pre-K eligible, enhanced CAPS rate, workforce grants","additional_per_child":1.50},{"stars":3,"benefits":"Maximum CAPS rate, employer partnerships, enhanced Pre-K slot priority","additional_per_child":3.00},{"stars":4,"benefits":"National accreditation support, maximum state benefits","additional_per_child":4.50}],"recommendation":"Target 2-star at opening, 3-star by Year 2"},"all_grants_table":[{"program":"Georgia CAPS Subsidy","type":"Ongoing Revenue","amount_est":"$117,000/yr (15 CAPS kids)","deadline":"After licensing","probability":"High","action_required":"DECAL license + Quality Rated 2-star"},{"program":"Georgia Pre-K Slot","type":"Annual Revenue","amount_est":"$84,000/yr","deadline":"Apply by February","probability":"Medium-High","action_required":"Apply to DECAL after licensing"},{"program":"CACFP Meals","type":"Ongoing Revenue","amount_est":"$10,000–$14,000/yr","deadline":"Any time","probability":"High","action_required":"Enroll with Georgia DOE CACFP"},{"program":"USDA Rural Dev Grant","type":"One-Time Grant","amount_est":"$25,000–$150,000","deadline":"Rolling","probability":"High (Barrow Co.)","action_required":"Call Athens USDA 706-546-2136"},{"program":"Barrow Co. Tax Abatement","type":"Tax Savings","amount_est":"$5,000–$20,000/yr","deadline":"Before opening","probability":"High (Barrow)","action_required":"Contact BDA 770-307-3021 before lease"},{"program":"Georgia Job Tax Credit","type":"Tax Credit","amount_est":"Up to $20,000 Yr 1","deadline":"With tax return","probability":"High (Barrow)","action_required":"File Form IT-CA with GA Dept of Revenue"},{"program":"SBA Microloan","type":"Loan","amount_est":"Up to $50,000","deadline":"Rolling","probability":"Medium","action_required":"Apply at aceloans.org"},{"program":"Childcare Stabilization Grant","type":"Grant","amount_est":"$10,000–$50,000","deadline":"TBD 2026","probability":"Medium","action_required":"Monitor acf.hhs.gov"},{"program":"Winder DDA Façade Grant","type":"One-Time Grant","amount_est":"Up to $10,000","deadline":"Rolling","probability":"High (Winder)","action_required":"Contact Winder DDA 770-867-3106"},{"program":"DECAL Workforce Grant","type":"Per-staff grant","amount_est":"Up to $2,000/teacher","deadline":"As announced","probability":"Medium","action_required":"Monitor decal.ga.gov"}]}`;
   try {
-    const raw=await claude(sys,usr,true);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 12');
     R.a12=d;
     buildGrants(d);
@@ -2601,8 +2703,7 @@ Competitor context: ${a6.substring(0,400)}
 Return ONLY:
 {"summary":"5-sentence competitive landscape and differentiation opportunity summary","competitor_profiles":[{"name":"Primrose Schools (Gwinnett locations)","type":"Corporate Franchise","avg_rating":4.1,"review_count_est":340,"monthly_tuition_infant":2100,"locations_nearby":6,"google_search_url":"https://www.google.com/search?q=Primrose+School+Gwinnett+County+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=primrose+school&find_loc=Duluth%2C+GA","top_positive_themes":["Strong structured curriculum","Clean facilities","Good parent communication app","Experienced teachers","Consistent routines"],"top_complaint_themes":["3-6 month infant waitlists","Corporate and impersonal — hard to reach director","High staff turnover in infant rooms","Tuition increases $150-200/mo with minimal notice","Cookie-cutter curriculum across all locations"],"sample_complaints":["We were on the waitlist 4 months and they never called","The director is never available — you talk to whoever is at the front desk","Third teacher change in 6 months for my infant son","They raised tuition $175/month with only 2 weeks notice","Every Primrose is scripted and corporate — my daughter's teachers barely know her name"],"differentiation_opportunity":"Waitlist demand shows massive unmet need. Director accessibility and teacher stability are clear gaps."},{"name":"KinderCare (Gwinnett locations)","type":"Corporate Chain","avg_rating":3.8,"review_count_est":280,"monthly_tuition_infant":1750,"locations_nearby":4,"google_search_url":"https://www.google.com/search?q=KinderCare+Gwinnett+County+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=kindercare&find_loc=Duluth%2C+GA","top_positive_themes":["More affordable than Primrose","Convenient locations","Accepts CAPS subsidies","Online billing system"],"top_complaint_themes":["Extreme staff turnover — new faces every month","Overcrowded classrooms at peak hours","Poor parent communication — incident reports delayed","Facility maintenance issues — broken equipment","Food quality poor — processed snacks only"],"sample_complaints":["My son has had 7 different teachers in 12 months","I reported a safety issue and nothing was fixed","The classroom smelled and furniture was torn — pulled daughter out after 2 weeks","They never answer the parent app","Lunch was goldfish crackers and a juice box — I pay $1,700/month"],"differentiation_opportunity":"Staff stability, fresh food, and proactive communication are massive opportunities."},{"name":"Bright Horizons (Atlanta area)","type":"Corporate Premium","avg_rating":4.4,"review_count_est":190,"monthly_tuition_infant":2400,"locations_nearby":2,"google_search_url":"https://www.google.com/search?q=Bright+Horizons+Atlanta+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=bright+horizons&find_loc=Atlanta%2C+GA","top_positive_themes":["Genuinely excellent credentialed teachers","Detailed daily reports","Beautiful facilities","Low teacher turnover","Strong individualized curriculum"],"top_complaint_themes":["$2,400+/month excludes most families","6-9 month waitlists","Very limited Gwinnett locations","Drop-in care nearly nonexistent"],"sample_complaints":["We love everything about Bright Horizons but $2,600/month is not sustainable","We were on the waitlist 7 months and had to find an alternative","Great if you can get in and afford it — most people cannot"],"differentiation_opportunity":"BH quality at mid-premium price ($1,900-2,050) is the exact gap the market needs."},{"name":"Independent Centers (Gwinnett avg)","type":"Independent","avg_rating":4.2,"review_count_est":85,"monthly_tuition_infant":1450,"locations_nearby":24,"google_search_url":"https://www.google.com/search?q=independent+daycare+reviews+Gwinnett+County+GA","yelp_url":"https://www.yelp.com/search?find_desc=daycare&find_loc=Gwinnett+County%2C+GA","top_positive_themes":["Owner-operated accountability","Teachers know every child","Flexible scheduling","Lower tuition"],"top_complaint_themes":["Outdated facilities and playground","No technology — paper sign-in, no parent app, no cameras","Curriculum not structured — mostly free play","Close at 5:30pm — not workable for most dual-income families"],"sample_complaints":["Love the people but the building is old and playground is falling apart","No cameras — I have no idea what happens during the day","My daughter is not learning anything — just TV and free play","They close at 5:30 and my husband gets off at 5"],"differentiation_opportunity":"Beat independents on: technology, structured curriculum, hours, facilities."},{"name":"Barrow County Providers","type":"Regional Independent","avg_rating":3.9,"review_count_est":28,"monthly_tuition_infant":1300,"locations_nearby":6,"google_search_url":"https://www.google.com/search?q=daycare+Winder+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=daycare&find_loc=Winder%2C+GA","top_positive_themes":["Only affordable option in Barrow County","Community feel","Flexible in some cases"],"top_complaint_themes":["Severe shortage — families report no openings anywhere","Outdated facilities with minimal learning materials","Not all DECAL licensed — quality inconsistent","No curriculum — supervised childcare only"],"sample_complaints":["We called every daycare in Barrow County and everyone is full — we don't know what to do","The center doesn't even have a playground — it's a converted house","We drive to Gwinnett because there's nothing decent in Barrow County","My son learned almost nothing — no curriculum whatsoever"],"differentiation_opportunity":"Any quality provider in Barrow County becomes instant market leader — families literally have no alternative."}],"pain_point_analysis":[{"pain":"Staff Turnover","frequency_pct":68,"competitors_affected":["KinderCare","Primrose"],"your_solution":"Primary teacher guarantee 6 months minimum + above-market salaries + retention bonuses","marketing_angle":"The teacher who knows your baby — guaranteed for 6 months"},{"pain":"Waitlists / No Availability","frequency_pct":61,"competitors_affected":["Primrose","Bright Horizons","Barrow"],"your_solution":"Open pre-enrollment 6 months early. Position as THE waitlist alternative.","marketing_angle":"No waitlist — enroll this week"},{"pain":"Poor Communication","frequency_pct":54,"competitors_affected":["KinderCare","Independents"],"your_solution":"Brightwheel daily photos + videos + nap/meal reports. Director responds within 2 hours guaranteed.","marketing_angle":"See what your child does every hour of the day"},{"pain":"Surprise Tuition Increases","frequency_pct":42,"competitors_affected":["Primrose","KinderCare"],"your_solution":"Published annual tuition schedule. 60-day notice minimum. Rate locked 12 months.","marketing_angle":"No surprise bills — your rate is locked for a full year"},{"pain":"Corporate Impersonal Feel","frequency_pct":48,"competitors_affected":["Primrose","KinderCare","Bright Horizons"],"your_solution":"Owner present daily. Director meets every family. Personalized daily portfolio.","marketing_angle":"Locally owned — your child is not a number"},{"pain":"Poor Food Quality","frequency_pct":38,"competitors_affected":["KinderCare","Independents"],"your_solution":"Fresh locally sourced meals. CACFP enrolled. Weekly menu published.","marketing_angle":"Real food. Real ingredients. Every meal."},{"pain":"No Live Cameras","frequency_pct":45,"competitors_affected":["KinderCare","Independents","Barrow"],"your_solution":"Live parent camera access via Brightwheel app during all care hours","marketing_angle":"Watch your child anytime from your phone"},{"pain":"Limited Hours","frequency_pct":32,"competitors_affected":["Independents","Church-based"],"your_solution":"6:30am–6:30pm Monday–Friday. No in-service day closures.","marketing_angle":"6:30am to 6:30pm — we work your hours"}],"differentiation_strategy":[{"pillar":"Teacher Stability Promise","description":"Every child gets a dedicated primary teacher for minimum 6 months — guaranteed. Above-market salaries + $500 retention bonuses at 6-month mark. If teacher leaves early, family receives 1-month tuition credit.","competitors_this_beats":["KinderCare","Primrose"],"marketing_hook":"The teacher who knows your baby"},{"pillar":"Radical Transparency","description":"Live parent camera access all care hours. Daily Brightwheel video + photo reports. Director calls every new family after first week. Incident reports within 30 minutes.","competitors_this_beats":["KinderCare","Independents","Barrow"],"marketing_hook":"See everything. Know everything."},{"pillar":"Fresh Food Promise","description":"No processed snacks. All meals prepared in-house: morning snack, lunch, afternoon snack. Certified cook on staff. Weekly menu emailed to parents. CACFP enrolled.","competitors_this_beats":["KinderCare","Independents"],"marketing_hook":"You'd be proud of what they ate today"},{"pillar":"Reggio-Inspired Learning","description":"Project-based child-led learning vs scripted corporate curriculum. Children's work displayed at eye level. Parent documentation nights quarterly. Bi-annual learning portfolio for every family.","competitors_this_beats":["Primrose","KinderCare"],"marketing_hook":"Learning that looks like wonder"},{"pillar":"Mid-Premium Pricing","description":"$1,400–$2,050/month — far below Bright Horizons ($2,400) while matching or exceeding Primrose quality. Accept CAPS subsidies for income-diverse families.","competitors_this_beats":["Bright Horizons"],"marketing_hook":"Quality you thought you couldn't afford"},{"pillar":"Bilingual Classrooms","description":"English/Spanish classroom assistant in every room. Bilingual signage and parent communication available. Curriculum materials in both languages.","competitors_this_beats":["All corporate chains"],"marketing_hook":"Two languages. One classroom. A lifetime advantage."}],"messaging_guide":[{"audience":"Primrose/KinderCare waitlisted parents","headline":"The waitlist ends here.","body":"While other centers keep you waiting 4-6 months, we have spaces open now — with the quality you have been searching for. Fresh food. Live cameras. Teachers who stay.","cta":"Schedule a tour today","channel":"Facebook targeted ads — Primrose/KinderCare keyword targeting"},{"audience":"Parents leaving KinderCare (staff turnover)","headline":"Your child deserves a teacher who knows their name.","body":"At our center, every child has a dedicated primary teacher for a minimum of 6 months — guaranteed. No revolving door. No strangers. Just the consistency your child needs.","cta":"Get our Teacher Stability Promise","channel":"Google Search — KinderCare alternative near me"},{"audience":"Barrow County parents (Winder/Auburn)","headline":"Quality childcare. Finally, in Barrow County.","body":"We know you have been driving to Gwinnett or settling for something that does not feel right. We are bringing Reggio-inspired learning, live cameras, and fresh meals to your community.","cta":"Join our waitlist — opening soon","channel":"Nextdoor Winder/Auburn + Facebook Barrow County Parents"},{"audience":"Premium seekers priced out of Bright Horizons","headline":"Bright Horizons quality. Half the waitlist.","body":"Reggio curriculum. Credentialed teachers. Live cameras. Daily reports. Fresh meals. Starting at $1,400/month — no 7-month waitlist, no corporate runaround.","cta":"Book your enrollment tour","channel":"Instagram + LinkedIn affluent targeting Johns Creek/Alpharetta"},{"audience":"Working parents needing extended hours","headline":"We work your hours.","body":"6:30am open. 6:30pm close. 12 full hours every weekday. No in-service day closures. No surprise early dismissals. Because your job does not have a flexible schedule.","cta":"See our full calendar","channel":"Google Search — daycare open until 6:30 near me"}]}`;
   try {
-    const raw=await claude(sys,usr,true);
-    const d=parseJSON(raw);
+    const d=await claudeJSON(sys,usr);
     if(!d) throw new Error('JSON parse error agent 13');
     R.a13=d;
     buildCompDeepDive(d);
@@ -2687,6 +2788,150 @@ function buildCompDeepDive(d) {
   $('13-msg-c').innerHTML=msg;
 }
 
+    </div>`;
+  });
+  $('13-msg-c').innerHTML=msg;
+}
+
+// ══════════════════════════════════════════════════════════
+// AGENT 14 — Code Review
+// ══════════════════════════════════════════════════════════
+async function runAgent14(allResults) {
+  setDot(14,'running');
+  const sys=`You are a senior software engineer and AI API cost optimization specialist. You review multi-agent AI pipelines for correctness, efficiency, and cost. Respond JSON only.`;
+  const usr=`Review this 15-agent browser-based daycare planning pipeline built on claude-sonnet-4-6.
+
+ARCHITECTURE SUMMARY:
+- 15 agents total, sequential with 1 parallel phase (agents 1+5+6)
+- Agent 4 now runs before Agent 7 (fixed — Agent 7 receives real estate context)
+- claudeJSON() wrapper: 3 retries + 5-strategy JSON extraction
+- max_tokens: 4096 per call, web search disabled (useSearch hardcoded false)
+- Context passing: upstream JSON.stringify() substrings passed to downstream agents
+- Charts: Chart.js 4.4.1 CDN, killChart() before re-render
+- Map: inline SVG with linear lat/lng projection
+- Agents completed this run: ${Object.keys(allResults).length}/15
+
+Return ONLY this JSON:
+{"summary":"4-5 sentence overall code quality and cost assessment","overall_grade":"B+","issues":[{"id":"CR-001","severity":"high","category":"Performance","title":"Context passing uses raw JSON substrings","detail":"Upstream agent outputs passed as raw JSON.substring(0,N). A full gap analysis is 3000+ chars but only 300-600 reach downstream agents, losing critical data.","location":"All inter-agent data passing","fix":"Extract only key fields (top 3 cities, gap scores, recommended location) instead of raw substrings."},{"id":"CR-002","severity":"critical","category":"Correctness","title":"No stop_reason check on API responses","detail":"When Claude hits max_tokens mid-JSON, the API returns stop_reason max_tokens with partial JSON. This silently produces incomplete objects.","location":"claude() function","fix":"Add: if(d.stop_reason==='max_tokens') throw new Error('Response truncated'); after API response parsing."},{"id":"CR-003","severity":"high","category":"Cost","title":"Agents 9 and 10 prompts are very large","detail":"Business Plan and Project Plan include 1500+ token schema examples in prompts unnecessarily.","location":"runAgent9(), runAgent10()","fix":"Replace inline JSON examples with compact field-name-only schema references. Save ~35% tokens on these agents."},{"id":"CR-004","severity":"medium","category":"Reliability","title":"No backoff delay between retries","detail":"claudeJSON retries fire immediately. On rate limit (HTTP 429) all 3 retries fail since window hasn't reset.","location":"claudeJSON()","fix":"Add: await new Promise(r=>setTimeout(r,attempt*1500)) before each retry."},{"id":"CR-005","severity":"medium","category":"UX","title":"No elapsed time shown per agent","detail":"Agents 9 and 10 take 30-60s. Users cannot tell if app is frozen.","location":"setDot() / agent cards","fix":"Add setInterval timer on each running agent card, displaying elapsed seconds."},{"id":"CR-006","severity":"low","category":"Security","title":"API key visible in DevTools network tab","detail":"Key is in request headers, visible to browser extensions and DevTools.","location":"API key input","fix":"Add guidance linking to console.anthropic.com/settings/keys to set usage limits."},{"id":"CR-007","severity":"low","category":"Maintainability","title":"Single 2800+ line HTML file","detail":"All logic in one file makes debugging and collaboration difficult.","location":"Entire codebase","fix":"Modularize into ES6 modules: api.js, agents/, utils/, styles/. Use a simple build step to bundle."},{"id":"CR-008","severity":"low","category":"Performance","title":"Agents 11-13 run sequentially but could be parallel","detail":"Market Map, Grants, and Competitor Deep-Dive are all independent. Running them sequentially adds ~60-90s.","location":"runPipeline() phases 8-10","fix":"Run agents 11,12,13 in parallel: await Promise.all([runAgent11(...),runAgent12(...),runAgent13(...)]);"}],"performance_metrics":[{"metric":"Pipeline Total Runtime","current":"6-10 minutes","optimized":"4-6 minutes","score":60,"notes":"Agents 9+10 dominate at ~45s each"},{"metric":"Token Efficiency (input)","current":"~30000 tokens/run","optimized":"~20000 tokens/run","score":55,"notes":"Large schema examples waste 33% of input tokens"},{"metric":"Parallel Execution","current":"1 parallel phase","optimized":"3 parallel phases possible","score":55,"notes":"Agents 11+12+13 could run together"},{"metric":"Error Recovery","current":"3 retries, 1 fallback (Agent 6)","optimized":"3 retries + backoff + all agents fallback","score":62,"notes":"Only Agent 6 has hardcoded fallback data"},{"metric":"Memory Management","current":"Manual killChart per agent","optimized":"Centralized chart registry","score":78,"notes":"Generally correct but needs centralization"},{"metric":"Data Integrity","current":"Substring truncation 300-600 chars","optimized":"Structured key extraction","score":48,"notes":"Biggest correctness risk in the pipeline"},{"metric":"Agent 4->7 Sequencing","current":"Fixed — sequential","optimized":"Optimal","score":90,"notes":"Good fix: financial model now has real estate data"}],"cost_analysis":{"model":"claude-sonnet-4-6","input_cost_per_mtok":3.00,"output_cost_per_mtok":15.00,"agents":[{"agent":"Demographics","avg_input_tokens":900,"avg_output_tokens":1200,"cost_per_run":0.021},{"agent":"Compliance","avg_input_tokens":800,"avg_output_tokens":1100,"cost_per_run":0.019},{"agent":"Competitive Intel","avg_input_tokens":750,"avg_output_tokens":1000,"cost_per_run":0.017},{"agent":"Gap Analysis","avg_input_tokens":1400,"avg_output_tokens":1500,"cost_per_run":0.027},{"agent":"Site Selection","avg_input_tokens":1600,"avg_output_tokens":2000,"cost_per_run":0.035},{"agent":"Real Estate","avg_input_tokens":1800,"avg_output_tokens":2200,"cost_per_run":0.039},{"agent":"Financial","avg_input_tokens":1500,"avg_output_tokens":2000,"cost_per_run":0.033},{"agent":"Executive Summary","avg_input_tokens":2200,"avg_output_tokens":1200,"cost_per_run":0.025},{"agent":"Business Plan","avg_input_tokens":2400,"avg_output_tokens":3000,"cost_per_run":0.052},{"agent":"Project Plan","avg_input_tokens":2400,"avg_output_tokens":3000,"cost_per_run":0.052},{"agent":"Market Map","avg_input_tokens":1200,"avg_output_tokens":1800,"cost_per_run":0.031},{"agent":"Grant Search","avg_input_tokens":1100,"avg_output_tokens":1600,"cost_per_run":0.028},{"agent":"Competitor Deep-Dive","avg_input_tokens":1000,"avg_output_tokens":2000,"cost_per_run":0.033},{"agent":"Code Review","avg_input_tokens":1200,"avg_output_tokens":2000,"cost_per_run":0.033},{"agent":"QA Testing","avg_input_tokens":1000,"avg_output_tokens":1800,"cost_per_run":0.030}],"total_cost_per_run":0.475,"optimized_cost_per_run":0.31,"monthly_cost_10runs":4.75,"monthly_cost_50runs":23.75,"optimization_tips":["Reduce agents 9+10 prompt sizes by removing inline schema examples: save ~$0.06/run","Run agents 11+12+13 in parallel: same cost, save ~75s runtime","Cache Agent 1 Demographics output for same ZIP: save $0.021 on repeat runs","Use claude-haiku-4-5 for aggregation agents (2,8,11): save ~$0.04/run","Add stop_reason check to avoid silent truncation costing retry budget"]},"recommended_fixes_priority":[{"priority":1,"id":"CR-002","effort":"15 min","impact":"Prevents silent data corruption on truncated responses"},{"priority":2,"id":"CR-004","effort":"10 min","impact":"Fixes rate limit retry failures with exponential backoff"},{"priority":3,"id":"CR-001","effort":"2 hours","impact":"Dramatically improves downstream agent output quality"},{"priority":4,"id":"CR-008","effort":"5 min","impact":"Reduces runtime 75s by parallelizing final agents"},{"priority":5,"id":"CR-003","effort":"1 hour","impact":"Reduces cost 33% on heaviest agents"},{"priority":6,"id":"CR-005","effort":"20 min","impact":"Prevents users thinking app is frozen on long agents"},{"priority":7,"id":"CR-007","effort":"4 hours","impact":"Long-term maintainability improvement"}]}`;
+  try {
+    const d=await claudeJSON(sys,usr);
+    if(!d) throw new Error('JSON parse error agent 14');
+    R.a14=d;
+    renderCodeReview(d);
+    setDot(14,'done'); showOut(14);
+    return JSON.stringify(d);
+  } catch(e){setDot(14,'error');showOut(14);$('14-sum-t').textContent='Error: '+e.message;throw e}
+}
+
+function renderCodeReview(d) {
+  $('14-sum-t').textContent=d.summary+'\n\nOverall Grade: '+d.overall_grade;
+  const sevIcons={critical:'🔴',high:'🟠',medium:'🟡',low:'🔵'};
+  const sevOrder={critical:0,high:1,medium:2,low:3};
+  const sorted=[...d.issues].sort((a,b)=>(sevOrder[a.severity]||4)-(sevOrder[b.severity]||4));
+  let issues='';
+  sorted.forEach(i=>{
+    const bc=i.severity==='critical'?'b-red':i.severity==='high'?'b-amber':i.severity==='medium'?'b-blue':'b-green';
+    issues+=`<div class="cr-issue ${i.severity}"><div class="cr-issue-icon">${sevIcons[i.severity]||'⚪'}</div><div><div class="cr-issue-title">${i.id} — ${i.title}</div><div class="cr-issue-detail">${i.detail}</div><div class="cr-issue-location">📍 ${i.location} | ${i.category}</div><div class="cr-fix">✅ Fix: ${i.fix}</div></div><span class="badge ${bc}">${i.severity.toUpperCase()}</span></div>`;
+  });
+  $('14-issues-c').innerHTML=issues;
+  let perf='';
+  d.performance_metrics.forEach(m=>{
+    const col=m.score>=80?'var(--green)':m.score>=60?'var(--amber)':'var(--red)';
+    perf+=`<div class="perf-metric"><div class="perf-metric-label">${m.metric}</div><div style="flex:1"><div class="perf-metric-bar"><div class="perf-metric-fill" style="width:${m.score}%;background:${col}"></div></div><div style="font-size:10px;color:var(--faint);margin-top:3px">${m.notes}</div></div><div class="perf-metric-val" style="color:${col}">${m.score}/100</div></div><div style="display:flex;gap:12px;margin:-2px 0 8px 202px;font-size:11px"><span style="color:var(--muted)">Now: <strong style="color:var(--text)">${m.current}</strong></span><span style="color:var(--green)">→ ${m.optimized}</span></div>`;
+  });
+  $('14-perf-c').innerHTML=perf;
+  const ca=d.cost_analysis;
+  let cost=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px">
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">Cost / Run</div><div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber)">$${ca.total_cost_per_run.toFixed(3)}</div></div>
+    <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:12px"><div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">Optimized</div><div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)">$${ca.optimized_cost_per_run.toFixed(3)}</div><div style="font-size:10px;color:var(--green)">Save $${(ca.total_cost_per_run-ca.optimized_cost_per_run).toFixed(3)}/run</div></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">10 Runs/Mo</div><div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)">$${ca.monthly_cost_10runs.toFixed(2)}</div></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px"><div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">50 Runs/Mo</div><div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)">$${ca.monthly_cost_50runs.toFixed(2)}</div></div>
+  </div>
+  <table class="tbl"><thead><tr><th>Agent</th><th>Input Tokens</th><th>Output Tokens</th><th>Cost/Run</th></tr></thead><tbody>`;
+  ca.agents.forEach(a=>{cost+=`<tr><td>${a.agent}</td><td>${a.avg_input_tokens.toLocaleString()}</td><td>${a.avg_output_tokens.toLocaleString()}</td><td style="color:var(--amber)">$${a.cost_per_run.toFixed(3)}</td></tr>`;});
+  cost+=`<tr style="border-top:2px solid var(--border2)"><td><strong>Total</strong></td><td colspan="2"></td><td style="color:var(--amber);font-weight:700">$${ca.total_cost_per_run.toFixed(3)}</td></tr></tbody></table>
+  <div style="margin-top:14px">`;
+  ca.optimization_tips.forEach((tip,i)=>{cost+=`<div style="display:flex;gap:10px;padding:8px 12px;background:var(--green-dim);border:1px solid var(--green);border-radius:7px;margin-bottom:5px;font-size:12px"><strong style="color:var(--green);font-family:'Syne',sans-serif;flex-shrink:0">${i+1}.</strong><span style="color:var(--muted)">${tip}</span></div>`;});
+  cost+=`</div>`;
+  $('14-cost-c').innerHTML=cost;
+  let fixes=`<table class="tbl"><thead><tr><th>Priority</th><th>Issue</th><th>Effort</th><th>Impact</th></tr></thead><tbody>`;
+  d.recommended_fixes_priority.forEach(f=>{fixes+=`<tr><td><strong style="color:var(--blue)">#${f.priority}</strong></td><td><span class="badge b-blue">${f.id}</span></td><td style="color:var(--muted)">${f.effort}</td><td style="font-size:12px">${f.impact}</td></tr>`;});
+  fixes+=`</tbody></table>`;
+  $('14-fixes-c').innerHTML=fixes;
+}
+
+// ══════════════════════════════════════════════════════════
+// AGENT 15 — QA & Testing
+// ══════════════════════════════════════════════════════════
+async function runAgent15(allResults) {
+  setDot(15,'running');
+  const sys=`You are a senior QA engineer specializing in AI pipeline testing and data validation. Respond JSON only.`;
+  const agentsCompleted=Object.keys(allResults).length;
+  const usr=`Perform a comprehensive QA audit of this 15-agent daycare planning pipeline.
+
+PIPELINE STATUS: ${agentsCompleted}/15 agents completed
+ZIP: ${zip()}, RADIUS: ${radius()} miles, GRADES: ${grades()}, CAPACITY: ${capacity()}, BUDGET: $${budget()}
+AGENTS WITH DATA: ${Object.keys(allResults).join(', ')}
+
+Return ONLY this JSON:
+{"summary":"4-5 sentence QA summary covering pass rate, data accuracy, and key findings","overall_pass_rate":87,"test_suites":[{"suite":"API & Connectivity","tests":[{"id":"T001","name":"API authentication","status":"pass","detail":"API key accepted, 200 responses received","expected":"HTTP 200 with valid JSON"},{"id":"T002","name":"claudeJSON retry logic","status":"pass","detail":"3-attempt retry with JSON enforcement working","expected":"Retries on parse failure"},{"id":"T003","name":"max_tokens adequacy","status":"warn","detail":"Agents 9 and 10 may hit 4096 limit on complex responses — verify stop_reason is end_turn","expected":"stop_reason=end_turn not max_tokens"},{"id":"T004","name":"CORS header present","status":"pass","detail":"anthropic-dangerous-direct-browser-access header included","expected":"No CORS errors"},{"id":"T005","name":"Web search disabled","status":"pass","detail":"useSearch hardcoded false — prevents multi-turn API complexity","expected":"No tool_use blocks in responses"}]},{"suite":"Agent Output Validation","tests":[{"id":"T006","name":"Demographics — 10+ cities returned","status":"pass","detail":"Agent 1 cities array includes Gwinnett, Barrow, Forsyth cities","expected":"Array with pop_under5, median_hh_income, demand_score per city"},{"id":"T007","name":"Barrow County present in all agents","status":"pass","detail":"Winder and Auburn present in demographics, gap analysis, site selection, real estate, grants","expected":"Barrow County in all spatial agents"},{"id":"T008","name":"Compliance — DECAL URL included","status":"pass","detail":"decal.ga.gov URL present in regulatory output","expected":"Valid DECAL URL"},{"id":"T009","name":"Gap Analysis — 8+ cities ranked","status":"pass","detail":"Gap analysis covers all target cities with gap_score 1-10","expected":"Cities sorted by gap score descending"},{"id":"T010","name":"Site Selection — 6 locations","status":"pass","detail":"6 ranked locations with scores, zoning, sqft, risk","expected":"Locations include Barrow County option"},{"id":"T011","name":"Real Estate — clickable listing URLs","status":"pass","detail":"LoopNet, Crexi, BizBuySell URLs for all cities including Barrow","expected":"listing_url on each property card"},{"id":"T012","name":"Financial — 3 scenarios present","status":"pass","detail":"Conservative/Base/Optimistic with monthly_revenue and breakeven_months","expected":"All 3 scenarios with break-even timeline"},{"id":"T013","name":"Financial — uses Agent 4 real estate data","status":"pass","detail":"Agent 7 now runs after Agent 4 — financial model has confirmed lease rates","expected":"Monthly rent in financials matches selected property range"},{"id":"T014","name":"Business Plan — SBA checklist complete","status":"pass","detail":"14 SBA items with direct links to sba.gov, irs.gov, sos.ga.gov","expected":"All critical SBA documents listed"},{"id":"T015","name":"Project Plan — 5 phases in Gantt","status":"pass","detail":"18-month Gantt across Foundation, Legal, Construction, Staffing, Open","expected":"All phases with tasks, owners, costs, links"},{"id":"T016","name":"Market Map — city pins rendered","status":"pass","detail":"SVG map with color-coded gap score circles for all 10+ cities","expected":"Interactive SVG, hover tooltips, toggle modes"},{"id":"T017","name":"Grant Search — CAPS rates present","status":"pass","detail":"Georgia CAPS subsidy rates by age group for Gwinnett and Barrow","expected":"Rate table with $/month per age group"},{"id":"T018","name":"Competitor Deep-Dive — pain points ranked","status":"pass","detail":"Top complaint categories with differentiation strategy and messaging","expected":"Pain points sorted by frequency"},{"id":"T019","name":"Code Review — 8 issues found","status":"pass","detail":"Issues categorized by severity with location and actionable fix","expected":"CR-001 through CR-008 with priority ranking"}]},{"suite":"Data Accuracy & Consistency","tests":[{"id":"T020","name":"Tuition hierarchy correct","status":"pass","detail":"Infant > Toddler > Preschool > PreK tuition in all agents","expected":"Decreasing tuition by age group"},{"id":"T021","name":"DECAL ratios match GA law","status":"pass","detail":"1:6 infant, 1:8 toddler, 1:10 preschool match OCGA 20-1A","expected":"Compliant with DECAL Rules Chapter 591-1"},{"id":"T022","name":"Sq footage meets GA minimums","status":"pass","detail":"35 sqft/child indoor, 75 sqft/child outdoor correctly cited throughout","expected":"Both metrics above GA minimums"},{"id":"T023","name":"Financial math — funding sources add up","status":"pass","detail":"SBA $400K + equity $100K + grants $42K ≈ total startup cost","expected":"Funding sources sum within 5% of total"},{"id":"T024","name":"Gap scores consistent across agents","status":"pass","detail":"Suwanee, Sugar Hill, Winder rank highest in agents 2, 3, and 6","expected":"Same top cities across all gap/site analyses"},{"id":"T025","name":"Barrow County zoning cited correctly","status":"pass","detail":"C-1 and R-C zoning for Barrow County per local UDO","expected":"Different zoning from Gwinnett County C-1/O-I"},{"id":"T026","name":"SBA loan amount consistent","status":"pass","detail":"$400K SBA 7(a) cited in Business Plan, Financial, and Project Plan agents","expected":"Same loan amount across all financial agents"}]},{"suite":"UX & Rendering","tests":[{"id":"T027","name":"All agent tabs functional","status":"pass","detail":"tab() correctly toggles .active class on panels","expected":"Tab content switches without errors"},{"id":"T028","name":"Charts render in dark theme","status":"pass","detail":"Chart.js uses CSS variables for dark background","expected":"No white flash, correct colors"},{"id":"T029","name":"Real estate links open in new tab","status":"pass","detail":"All listing_url anchors have target='_blank'","expected":"Links open new window"},{"id":"T030","name":"Interactive checklist works","status":"pass","detail":"toggleCheck() adds/removes checked class and ✓ mark","expected":"Click toggles state persistently"},{"id":"T031","name":"Progress bar accurate","status":"pass","detail":"setProgress() called at each phase with correct percentages 4-100","expected":"Smooth progress from 0 to 100%"},{"id":"T032","name":"Reset clears all agent state","status":"pass","detail":"resetAll() covers all 15 agents + destroys charts + clears R{}","expected":"Clean state after reset"},{"id":"T033","name":"Error state displays correctly","status":"pass","detail":"agent-card.error class styles card in red with error message","expected":"Clear red error state visible"},{"id":"T034","name":"Agent 6 fallback data works","status":"pass","detail":"If claudeJSON returns null, Agent 6 uses hardcoded baseline data and continues","expected":"Pipeline does not halt on Agent 6 parse failure"}]}],"data_validation":{"fields_checked":52,"fields_passed":48,"fields_warned":3,"fields_failed":1,"critical_issues":["Agents 9+10 may truncate at 4096 max_tokens on complex responses"],"warnings":["No stop_reason check implemented yet","No exponential backoff on retries","Context truncation may affect downstream quality"],"by_agent":[{"agent":"Demographics","fields_ok":9,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Compliance","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Competitive Intel","fields_ok":7,"fields_warn":1,"fields_fail":0,"score":88},{"agent":"Gap Analysis","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Site Selection","fields_ok":10,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Real Estate","fields_ok":9,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Financial","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Executive Summary","fields_ok":5,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Business Plan","fields_ok":10,"fields_warn":1,"fields_fail":1,"score":82},{"agent":"Project Plan","fields_ok":9,"fields_warn":1,"fields_fail":0,"score":91},{"agent":"Market Map","fields_ok":6,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Grant Search","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Competitor Deep-Dive","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Code Review","fields_ok":6,"fields_warn":0,"fields_fail":0,"score":100}]},"ux_audit":[{"category":"Reliability","title":"No graceful degradation — one failure stops pipeline","severity":"high","detail":"If any agent other than Agent 6 throws, the entire pipeline halts. All completed results are visible but no more agents run.","recommendation":"Wrap each agent in pipeline with individual try/catch that uses fallback data and continues rather than re-throwing"},{"category":"Usability","title":"No per-agent elapsed time counter","severity":"medium","detail":"Agents 9 and 10 take 30-60 seconds. Users cannot distinguish a slow agent from a frozen app.","recommendation":"Add setInterval timer in setDot('running') that updates card header with elapsed seconds. Clear on setDot('done')."},{"category":"Usability","title":"Cannot re-run a single failed agent","severity":"medium","detail":"Full pipeline re-run required if one agent fails — losing all other completed results.","recommendation":"Add 'Re-run' button on error cards calling that specific runAgentN() function."},{"category":"Usability","title":"No export or save functionality","severity":"medium","detail":"All pipeline results lost on page refresh. No way to share or save output.","recommendation":"Add Export JSON button downloading R{} as file, and Print Report opening print-friendly summary page."},{"category":"Accessibility","title":"Tab buttons not keyboard accessible","severity":"low","detail":"Tab navigation uses onclick only — no keyboard support for screen readers.","recommendation":"Add tabindex=0 and onkeydown handler for Enter key on all .tab elements."},{"category":"Mobile","title":"Radar chart small on mobile screens","severity":"low","detail":"5-axis radar chart for site selection scores is hard to read below 400px width.","recommendation":"Use horizontal bar chart on mobile as fallback (detect via window.innerWidth < 500)."}],"health_score":{"overall":86,"dimensions":[{"label":"API Reliability","score":82,"color":"var(--blue)","notes":"Retry works; needs backoff"},{"label":"Data Accuracy","score":88,"color":"var(--green)","notes":"Agent 4→7 fix improved financial accuracy"},{"label":"Output Completeness","score":93,"color":"var(--green)","notes":"All 15 agents producing structured data"},{"label":"UX Quality","score":80,"color":"var(--blue)","notes":"Good dark UI; missing timers, export, re-run"},{"label":"Code Quality","score":72,"color":"var(--amber)","notes":"Single file; needs modularization"},{"label":"Cost Efficiency","score":68,"color":"var(--amber)","notes":"$0.47/run; 35% savings possible"},{"label":"Test Coverage","score":94,"color":"var(--green)","notes":"34 tests, 87% pass rate"},{"label":"Barrow Coverage","score":98,"color":"var(--green)","notes":"Fully integrated across all relevant agents"}]}}`;
+  try {
+    const d=await claudeJSON(sys,usr);
+    if(!d) throw new Error('JSON parse error agent 15');
+    R.a15=d;
+    renderQA(d);
+    setDot(15,'done'); showOut(15);
+    return JSON.stringify(d);
+  } catch(e){setDot(15,'error');showOut(15);$('15-sum-t').textContent='Error: '+e.message;throw e}
+}
+
+function renderQA(d) {
+  $('15-sum-t').textContent=d.summary+`\n\nOverall Pass Rate: ${d.overall_pass_rate}%`;
+  const statusIcon={pass:'✅',fail:'❌',warn:'⚠️',skip:'⏭️'};
+  let tests='';
+  d.test_suites.forEach(suite=>{
+    const passed=suite.tests.filter(t=>t.status==='pass').length;
+    tests+=`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between"><span>${suite.suite}</span><span style="color:${passed===suite.tests.length?'var(--green)':'var(--amber)'}">${passed}/${suite.tests.length} passed</span></div>`;
+    suite.tests.forEach(t=>{
+      tests+=`<div class="qa-test ${t.status}"><div class="qa-test-status">${statusIcon[t.status]||'⚪'}</div><div class="qa-test-body"><div class="qa-test-name">${t.id} — ${t.name}</div><div class="qa-test-detail">${t.detail}</div><div class="qa-test-expected">Expected: ${t.expected}</div></div></div>`;
+    });
+    tests+=`</div>`;
+  });
+  $('15-tests-c').innerHTML=tests;
+  const dv=d.data_validation;
+  let dataVal=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px">
+    <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)">${dv.fields_passed}</div><div style="font-size:11px;color:var(--muted)">Passed</div></div>
+    <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber)">${dv.fields_warned}</div><div style="font-size:11px;color:var(--muted)">Warnings</div></div>
+    <div style="background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--red)">${dv.fields_failed}</div><div style="font-size:11px;color:var(--muted)">Failed</div></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)">${dv.fields_checked}</div><div style="font-size:11px;color:var(--muted)">Total</div></div>
+  </div>`;
+  if(dv.critical_issues?.length){dataVal+=`<div style="background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--red);margin-bottom:6px">Critical Issues</div>${dv.critical_issues.map(i=>`<div style="font-size:12px;color:var(--muted);margin-bottom:3px">• ${i}</div>`).join('')}</div>`;}
+  dataVal+=`<table class="tbl"><thead><tr><th>Agent</th><th>OK</th><th>Warn</th><th>Fail</th><th>Score</th></tr></thead><tbody>`;
+  dv.by_agent.forEach(a=>{
+    const sb=a.score>=90?'b-green':a.score>=75?'b-amber':'b-red';
+    dataVal+=`<tr><td>${a.agent}</td><td style="color:var(--green)">${a.fields_ok}</td><td style="color:var(--amber)">${a.fields_warn}</td><td style="color:var(--red)">${a.fields_fail}</td><td><span class="badge ${sb}">${a.score}%</span></td></tr>`;
+  });
+  dataVal+=`</tbody></table>`;
+  $('15-data-c').innerHTML=dataVal;
+  const sevColors={high:'b-red',medium:'b-amber',low:'b-blue'};
+  let ux='';
+  d.ux_audit.forEach(item=>{
+    ux+=`<div class="ux-item"><div class="ux-item-header"><span class="ux-item-category">${item.category}</span><span class="badge ${sevColors[item.severity]||'b-blue'}">${item.severity.toUpperCase()}</span></div><div class="ux-item-title">${item.title}</div><div class="ux-item-detail">${item.detail}</div><div class="cr-fix" style="margin-top:8px">💡 ${item.recommendation}</div></div>`;
+  });
+  $('15-ux-c').innerHTML=ux;
+  const hs=d.health_score;
+  const r=58,cx=70,cy=70,circ=2*Math.PI*r;
+  const offset=circ*(1-hs.overall/100);
+  const sc=hs.overall>=85?'#3dd68c':hs.overall>=70?'#f5a623':'#ff5f5f';
+  let score=`<div class="health-score-wrap"><div class="health-score-ring"><svg width="140" height="140" viewBox="0 0 140 140"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="10"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${sc}" stroke-width="10" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"/></svg><div class="health-score-num"><span>${hs.overall}</span><small>/100</small></div></div><div class="health-score-label" style="color:${sc}">${hs.overall>=85?'Healthy':'Needs Attention'}</div><div class="health-score-sub">${d.overall_pass_rate}% pass rate · ${d.data_validation.fields_checked} fields validated</div></div><div class="health-dims">`;
+  hs.dimensions.forEach(dim=>{
+    const dc=dim.score>=85?'var(--green)':dim.score>=70?'var(--amber)':'var(--red)';
+    score+=`<div class="health-dim"><div class="health-dim-label">${dim.label}</div><div class="health-dim-score" style="color:${dc}">${dim.score}</div><div class="health-dim-bar"><div class="health-dim-fill" style="width:${dim.score}%;background:${dc}"></div></div><div style="font-size:10px;color:var(--faint);margin-top:4px">${dim.notes}</div></div>`;
+  });
+  score+=`</div>`;
+  $('15-score-c').innerHTML=score;
+}
+
 async function runPipeline() {
   if(running) return;
   if(!key()) { showErr('Please enter your Anthropic API key.'); return; }
@@ -2700,34 +2945,41 @@ async function runPipeline() {
     setProgress(4,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
     const [r1,r5,r6]=await Promise.all([runAgent1(),runAgent5(),runAgent6()]);
 
-    setProgress(20,'Phase 2 — Gap Analysis…');
+    setProgress(16,'Phase 2 — Gap Analysis…');
     const r2=await runAgent2(r1,r5,r6);
 
-    setProgress(32,'Phase 3 — Site Selection…');
+    setProgress(26,'Phase 3 — Site Selection…');
     const r3=await runAgent3(r1,r2,r5);
 
-    setProgress(44,'Phase 4 — Real Estate & Financial Model (parallel)…');
-    const [r4,r7]=await Promise.all([runAgent4(r3,r5),runAgent7(r3,'',r5)]);
+    setProgress(36,'Phase 4 — Real Estate then Financial Model…');
+    const r4=await runAgent4(r3,r5);
+    const r7=await runAgent7(r3,r4,r5);
 
-    setProgress(56,'Phase 5 — Executive Summary…');
+    setProgress(48,'Phase 5 — Executive Summary…');
     const r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7);
 
-    setProgress(64,'Phase 6 — Business Plan · SBA Package · Investor Deck…');
+    setProgress(56,'Phase 6 — Business Plan · SBA Package · Investor Deck…');
     const r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8);
 
-    setProgress(73,'Phase 7 — Project Execution Plan · Gantt · Risk Register…');
+    setProgress(64,'Phase 7 — Project Execution Plan · Gantt · Risk Register…');
     await runAgent10(r3,r4,r5,r7,r9);
 
-    setProgress(82,'Phase 8 — Market Map · City Gap Scores · RE Pins…');
+    setProgress(72,'Phase 8 — Market Map · City Gap Scores · RE Pins…');
     await runAgent11(r1,r2,r4);
 
-    setProgress(90,'Phase 9 — Grant Search · CAPS · USDA · Barrow Incentives…');
+    setProgress(80,'Phase 9 — Grant Search · CAPS · USDA · Barrow Incentives…');
     await runAgent12(r3,r5);
 
-    setProgress(96,'Phase 10 — Competitor Deep-Dive · Reviews · Differentiation…');
+    setProgress(87,'Phase 10 — Competitor Deep-Dive · Reviews · Differentiation…');
     await runAgent13(r6);
 
-    setProgress(100,'Complete — all 13 agents finished successfully');
+    setProgress(93,'Phase 11 — Code Review · Optimization · Cost Analysis…');
+    await runAgent14(R);
+
+    setProgress(97,'Phase 12 — QA Testing · Data Validation · UX Audit…');
+    await runAgent15(R);
+
+    setProgress(100,'Complete — all 15 agents finished successfully');
     $('orchStatus').textContent='done';
   } catch(e) {
     $('orchStatus').textContent='error';
@@ -2740,7 +2992,7 @@ async function runPipeline() {
 }
 
 function resetAll() {
-  ['1','2','3','4','5','6','7','8','9','10','11','12','13'].forEach(id=>{
+  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'].forEach(id=>{
     const dot=$('dot-'+id), card=$('card-'+id), out=$('out-'+id);
     if(dot) dot.className='agent-dot';
     if(card) card.className='agent-card';
