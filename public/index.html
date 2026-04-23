@@ -786,6 +786,7 @@ const INDUSTRIES = {
     staffing:'licensed lead teachers (CDA credential), assistant teachers, director, cook',
     real_estate:'2,500–6,000 sqft, playground space (75 sqft/child outdoor), commercial kitchen, multiple classrooms, ADA-compliant restrooms',
     revenue_unit:'monthly tuition per child',
+    price_label_primary:'Infant/mo', price_label_secondary:'Preschool/mo',
   },
   gas_station: {
     label:'Gas Station / C-Store', emoji:'⛽',
@@ -802,6 +803,7 @@ const INDUSTRIES = {
     staffing:'cashiers, shift supervisors, maintenance technician',
     real_estate:'1–2 acres, highway or arterial visibility, underground storage tank clearance, canopy space for pumps, truck access for fuel delivery',
     revenue_unit:'daily fuel gallons sold + c-store revenue',
+    price_label_primary:'Fuel Margin', price_label_secondary:'C-Store/mo',
   },
   laundromat: {
     label:'Laundromat', emoji:'🫧',
@@ -818,6 +820,7 @@ const INDUSTRIES = {
     staffing:'part-time attendants, maintenance technician',
     real_estate:'2,000–4,000 sqft, high-traffic strip mall, heavy water/gas lines, strong electrical service (200–400A), parking',
     revenue_unit:'revenue per machine per day',
+    price_label_primary:'Wash Price', price_label_secondary:'Revenue/day',
   },
   car_wash: {
     label:'Car Wash', emoji:'🚗',
@@ -834,6 +837,7 @@ const INDUSTRIES = {
     staffing:'wash attendants, cashiers, detailers, maintenance technician, manager',
     real_estate:'0.5–1.5 acres, high-traffic arterial, drive-through lane space, utility connections (water/sewer/electric), setback for stacking',
     revenue_unit:'cars washed per day × average ticket',
+    price_label_primary:'Avg Ticket', price_label_secondary:'Member/mo',
   },
   restaurant: {
     label:'Restaurant / Food Service', emoji:'🍽️',
@@ -850,6 +854,7 @@ const INDUSTRIES = {
     staffing:'chef/kitchen manager, line cooks, servers, host, dishwasher, manager',
     real_estate:'1,500–4,000 sqft, commercial kitchen, parking (1 space/3 seats), grease trap, hood ventilation, health-dept-compliant layout',
     revenue_unit:'revenue per seat per day',
+    price_label_primary:'Avg Check', price_label_secondary:'Rev/seat/day',
   },
   gym: {
     label:'Gym / Fitness Center', emoji:'💪',
@@ -866,6 +871,7 @@ const INDUSTRIES = {
     staffing:'personal trainers (NASM/ACE certified), front desk staff, group class instructors, maintenance, general manager',
     real_estate:'4,000–15,000 sqft, high-ceiling open floor, parking, locker rooms with showers, HVAC for heat load, ADA restrooms',
     revenue_unit:'monthly recurring membership revenue',
+    price_label_primary:'Member/mo', price_label_secondary:'PT Session',
   },
 };
 
@@ -1090,7 +1096,7 @@ Return ONLY:
     R.a5=d;
     $('5-s-t').textContent=d.summary+(d.decal_url?'\n\nRegulatory portal: '+d.decal_url:'');
     let tbl=`<table class="tbl"><thead><tr><th>Category</th><th>Requirement</th><th>Detail</th><th>Timeline</th><th>Cost</th><th>Source</th><th>Priority</th></tr></thead><tbody>`;
-    d.requirements.forEach(r=>{
+    (d.requirements||[]).forEach(r=>{
       const pb=r.priority==='Critical'?'b-red':r.priority==='High'?'b-amber':'b-blue';
       tbl+=`<tr><td><span class="badge b-blue">${r.category}</span></td><td><strong>${r.item}</strong></td><td style="font-size:11px;color:var(--muted)">${r.detail}</td><td>${r.timeline_weeks>0?r.timeline_weeks+' wks':'—'}</td><td>${r.cost_usd>0?'$'+r.cost_usd.toLocaleString():'—'}</td><td style="font-size:10px;color:var(--faint)">${r.source||''}</td><td><span class="badge ${pb}">${r.priority}</span></td></tr>`;
     });
@@ -1099,8 +1105,8 @@ Return ONLY:
     killChart('ch-5');
     const ctx=$('ch-5').getContext('2d');
     charts['ch-5']=new Chart(ctx,{type:'bar',data:{
-      labels:d.timeline_phases.map(p=>p.phase),
-      datasets:[{label:'Weeks',data:d.timeline_phases.map(p=>p.weeks),backgroundColor:['rgba(74,158,255,0.7)','rgba(61,214,140,0.7)','rgba(245,166,35,0.7)','rgba(167,139,250,0.7)','rgba(45,212,191,0.7)','rgba(255,95,95,0.7)','rgba(74,158,255,0.5)'],borderWidth:0,borderRadius:4}]
+      labels:(d.timeline_phases||[]).map(p=>p.phase),
+      datasets:[{label:'Weeks',data:(d.timeline_phases||[]).map(p=>p.weeks),backgroundColor:['rgba(74,158,255,0.7)','rgba(61,214,140,0.7)','rgba(245,166,35,0.7)','rgba(167,139,250,0.7)','rgba(45,212,191,0.7)','rgba(255,95,95,0.7)','rgba(74,158,255,0.5)'],borderWidth:0,borderRadius:4}]
     },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} weeks — ${d.timeline_phases[c.dataIndex].tasks}`}}},scales:{x:{ticks:{color:'#8a8d96'},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96',font:{size:10}},grid:{color:'#2a2d35'}}}}});
     setDot(5,'done'); showOut(5);
     return JSON.stringify(d);
@@ -1145,17 +1151,21 @@ Use avg_monthly_infant and avg_monthly_preschool as the primary and secondary re
     $('6-s-t').textContent=d.summary;
     killChart('ch-6');
     const ctx=$('ch-6').getContext('2d');
+    const cities6=d.cities||[];
     charts['ch-6']=new Chart(ctx,{type:'bar',data:{
-      labels:d.cities.map(c=>c.city),
+      labels:cities6.map(c=>c.city),
       datasets:[
-        {label:'Centers',data:d.cities.map(c=>c.center_count),backgroundColor:'rgba(255,95,95,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y'},
-        {label:'Gap Score /10',data:d.cities.map(c=>c.gap_score),backgroundColor:'rgba(61,214,140,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y2'}
+        {label:'Centers',data:cities6.map(c=>c.center_count),backgroundColor:'rgba(255,95,95,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y'},
+        {label:'Gap Score /10',data:cities6.map(c=>c.gap_score),backgroundColor:'rgba(61,214,140,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y2'}
       ]
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{x:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}},y:{ticks:{color:'#ff5f5f'},grid:{color:'#2a2d35'},position:'left',title:{display:true,text:'# Centers',color:'#ff5f5f'}},y2:{ticks:{color:'#3dd68c'},grid:{display:false},position:'right',min:0,max:10,title:{display:true,text:'Gap Score',color:'#3dd68c'}}}}});
-    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Centers</th><th>Infant/mo</th><th>Preschool/mo</th><th>Avg Rating</th><th>Utilization</th><th>Waitlist</th><th>Gap Score</th></tr></thead><tbody>`;
-    d.cities.forEach(c=>{
+    const ind6=industry();
+    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Centers</th><th>${ind6.price_label_primary}</th><th>${ind6.price_label_secondary}</th><th>Avg Rating</th><th>Utilization</th><th>Waitlist</th><th>Gap Score</th></tr></thead><tbody>`;
+    cities6.forEach(c=>{
       const gb=c.gap_score>=8?'b-green':c.gap_score>=6?'b-amber':'b-red';
-      tbl+=`<tr><td><strong>${c.city}</strong></td><td>${c.center_count}</td><td>$${c.avg_monthly_infant.toLocaleString()}</td><td>$${c.avg_monthly_preschool.toLocaleString()}</td><td>${c.avg_rating}★</td><td>${c.capacity_utilization_pct}%</td><td><span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes':'No'}</span></td><td><span class="badge ${gb}">${c.gap_score}/10</span></td></tr>`;
+      const pRate=(c.avg_monthly_infant||c.avg_primary_rate||0).toLocaleString();
+      const sRate=(c.avg_monthly_preschool||c.avg_secondary_rate||0).toLocaleString();
+      tbl+=`<tr><td><strong>${c.city}</strong></td><td>${c.center_count}</td><td>$${pRate}</td><td>$${sRate}</td><td>${c.avg_rating}★</td><td>${c.capacity_utilization_pct}%</td><td><span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes':'No'}</span></td><td><span class="badge ${gb}">${c.gap_score}/10</span></td></tr>`;
     });
     tbl+=`</tbody></table>`;
     $('6-t-c').innerHTML=tbl;
@@ -1213,12 +1223,13 @@ Use recommended_tuition_infant as the primary price point and recommended_tuitio
     // Chart
     killChart('ch-2');
     const ctx=$('ch-2').getContext('2d');
+    const ageGaps2=d.age_gaps||[];
     charts['ch-2']=new Chart(ctx,{type:'bar',data:{
-      labels:d.age_gaps.map(a=>a.age),
+      labels:ageGaps2.map(a=>a.age),
       datasets:[
-        {label:'Demand Index',data:d.age_gaps.map(a=>a.demand_idx),backgroundColor:'rgba(74,158,255,0.7)',borderWidth:0,borderRadius:3},
-        {label:'Supply Index',data:d.age_gaps.map(a=>a.supply_idx),backgroundColor:'rgba(245,166,35,0.7)',borderWidth:0,borderRadius:3},
-        {label:'Gap',data:d.age_gaps.map(a=>Math.max(0,a.gap)),backgroundColor:'rgba(61,214,140,0.85)',borderWidth:0,borderRadius:3}
+        {label:'Demand Index',data:ageGaps2.map(a=>a.demand_idx),backgroundColor:'rgba(74,158,255,0.7)',borderWidth:0,borderRadius:3},
+        {label:'Supply Index',data:ageGaps2.map(a=>a.supply_idx),backgroundColor:'rgba(245,166,35,0.7)',borderWidth:0,borderRadius:3},
+        {label:'Gap',data:ageGaps2.map(a=>Math.max(0,a.gap)),backgroundColor:'rgba(61,214,140,0.85)',borderWidth:0,borderRadius:3}
       ]
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{x:{ticks:{color:'#8a8d96'},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96'},grid:{color:'#2a2d35'},max:100}}}});
     setDot(2,'done'); showOut(2);
@@ -1329,9 +1340,12 @@ Return ONLY:
     R.a3=d;
     $('3-s-t').textContent=d.summary;
     // Option cards
+    const ind3=industry();
     const colors=['var(--green)','var(--blue)','var(--amber)','var(--purple)','var(--teal)'];
     let cards=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">`;
-    d.locations.forEach((loc,i)=>{
+    (d.locations||[]).forEach((loc,i)=>{
+      const pRate=(loc.target_infant_tuition||loc.target_primary_rate||0).toLocaleString();
+      const sRate=(loc.target_preschool_tuition||loc.target_secondary_rate||0).toLocaleString();
       cards+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px">
         <div style="font-size:10px;font-weight:700;color:${colors[i]};font-family:'Syne',sans-serif;margin-bottom:4px">#${loc.rank} — ${loc.risk} Risk</div>
         <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:2px">${loc.city}</div>
@@ -1339,14 +1353,14 @@ Return ONLY:
         <div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:${colors[i]};margin-bottom:10px">${loc.overall_score}<span style="font-size:14px">/100</span></div>
         <div style="display:grid;gap:4px;font-size:11px;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Capacity</span><strong>${loc.capacity_recommended}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Infant tuition</span><strong>$${loc.target_infant_tuition.toLocaleString()}/mo</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Pre-K tuition</span><strong>$${loc.target_preschool_tuition.toLocaleString()}/mo</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">${ind3.price_label_primary}</span><strong>$${pRate}/mo</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">${ind3.price_label_secondary}</span><strong>$${sRate}/mo</strong></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Est. rent</span><strong>${loc.est_monthly_rent_range}</strong></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Competitors 2mi</span><strong>${loc.competitors_within_2mi}</strong></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Timeline</span><strong>${loc.timeline_months} mo</strong></div>
         </div>
-        <div style="font-size:10px;color:var(--green);margin-bottom:3px">+ ${loc.pros[0]}</div>
-        <div style="font-size:10px;color:var(--red)">− ${loc.cons[0]}</div>
+        <div style="font-size:10px;color:var(--green);margin-bottom:3px">+ ${(loc.pros||[''])[0]}</div>
+        <div style="font-size:10px;color:var(--red)">− ${(loc.cons||[''])[0]}</div>
       </div>`;
     });
     cards+=`</div>`;
@@ -1357,7 +1371,7 @@ Return ONLY:
     const dims=['demand','competition','demographics','real_estate','regulatory'];
     charts['ch-3']=new Chart(ctx,{type:'radar',data:{
       labels:['Demand','Competition','Demographics','Real Estate','Regulatory'],
-      datasets:d.locations.map((loc,i)=>({
+      datasets:(d.locations||[]).map((loc,i)=>({
         label:loc.city,
         data:dims.map(k=>loc.scores[k]),
         borderColor:['#4a9eff','#3dd68c','#f5a623','#a78bfa','#2dd4bf'][i],
@@ -1366,10 +1380,12 @@ Return ONLY:
       }))
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{r:{ticks:{color:'#8a8d96',backdropColor:'transparent'},grid:{color:'#2a2d35'},pointLabels:{color:'#8a8d96',font:{size:10}},min:60,max:100}}}});
     // Comparison table
-    let tbl=`<table class="tbl"><thead><tr><th>Rank</th><th>City / Submarket</th><th>Score</th><th>Sq Ft</th><th>Rent Range</th><th>Infant Tuition</th><th>Pre-K Tuition</th><th>Competitors 2mi</th><th>Zoning</th><th>Risk</th><th>Timeline</th></tr></thead><tbody>`;
-    d.locations.forEach(loc=>{
-      const rb=loc.risk.startsWith('Low')?'b-green':loc.risk==='Medium'?'b-amber':'b-red';
-      tbl+=`<tr><td><strong>#${loc.rank}</strong></td><td><strong>${loc.city}</strong><br><span style="font-size:10px;color:var(--faint)">${loc.submarket}</span></td><td><span class="badge b-green">${loc.overall_score}</span></td><td>${loc.sqft_needed.toLocaleString()}</td><td>${loc.est_monthly_rent_range}</td><td>$${loc.target_infant_tuition.toLocaleString()}</td><td>$${loc.target_preschool_tuition.toLocaleString()}</td><td>${loc.competitors_within_2mi}</td><td>${loc.zoning_needed}</td><td><span class="badge ${rb}">${loc.risk}</span></td><td>${loc.timeline_months} mo</td></tr>`;
+    let tbl=`<table class="tbl"><thead><tr><th>Rank</th><th>City / Submarket</th><th>Score</th><th>Sq Ft</th><th>Rent Range</th><th>${ind3.price_label_primary}</th><th>${ind3.price_label_secondary}</th><th>Competitors 2mi</th><th>Zoning</th><th>Risk</th><th>Timeline</th></tr></thead><tbody>`;
+    (d.locations||[]).forEach(loc=>{
+      const rb=(loc.risk||'').startsWith('Low')?'b-green':loc.risk==='Medium'?'b-amber':'b-red';
+      const pRate=(loc.target_infant_tuition||loc.target_primary_rate||0).toLocaleString();
+      const sRate=(loc.target_preschool_tuition||loc.target_secondary_rate||0).toLocaleString();
+      tbl+=`<tr><td><strong>#${loc.rank}</strong></td><td><strong>${loc.city}</strong><br><span style="font-size:10px;color:var(--faint)">${loc.submarket}</span></td><td><span class="badge b-green">${loc.overall_score}</span></td><td>${(loc.sqft_needed||0).toLocaleString()}</td><td>${loc.est_monthly_rent_range}</td><td>$${pRate}</td><td>$${sRate}</td><td>${loc.competitors_within_2mi}</td><td>${loc.zoning_needed}</td><td><span class="badge ${rb}">${loc.risk}</span></td><td>${loc.timeline_months} mo</td></tr>`;
     });
     tbl+=`</tbody></table>`;
     $('3-t-c').innerHTML=tbl;
@@ -1388,20 +1404,22 @@ async function runAgent4(a3,a5) {
   const usr=`Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}) near ZIP ${zip()}.
 
 Search these sites:
-1. loopnet.com — search "retail for lease Suwanee GA", "commercial space Duluth GA daycare", "flex space Johns Creek GA"  
-2. bizbuysell.com — search for daycare businesses for sale in Georgia 30097 area
-3. crexi.com — search commercial properties Gwinnett County GA and Barrow County GA
-4. Search "childcare real estate for lease Gwinnett County GA site:loopnet.com" AND "commercial space Winder GA site:loopnet.com"
-5. Contact Barrow County Development Authority (770-307-3021) — they actively recruit childcare businesses
+1. loopnet.com — search "${ind.unit} space for lease near ${zip()}", "commercial space for lease near ZIP ${zip()}", "retail space near ${zip()}"
+2. bizbuysell.com — search for ${ind.unit} businesses for sale near ZIP ${zip()}
+3. crexi.com — search commercial properties near ZIP ${zip()}
+4. Search "${ind.unit} real estate for lease near ${zip()} site:loopnet.com"
+5. Contact local economic development authority — many municipalities actively recruit ${ind.unit} businesses
 
-Requirements per GA DECAL: ${a5.substring(0,300)}
+Regulatory requirements: ${a5.substring(0,300)}
 Top locations recommended: ${a3.substring(0,400)}
+
+Property requirements: ${ind.real_estate}
 
 For each listing found, include the real URL. If you cannot find a specific listing, provide the search URL for that platform. Include broker contacts where available.
 
 Return ONLY:
 {
-  "summary": "3-4 sentence overview of the commercial real estate market for childcare in this area",
+  "summary": "3-4 sentence overview of the commercial real estate market for a ${ind.unit} in this area",
   "search_urls": {
     "loopnet": "https://www.loopnet.com/search/commercial-real-estate/duluth-ga/for-lease/",
     "loopnet_barrow": "https://www.loopnet.com/search/commercial-real-estate/winder-ga/for-lease/",
@@ -1501,7 +1519,7 @@ Return ONLY:
       });
     }
     cards+=`</div><div class="link-cards">`;
-    d.listings.forEach(l=>{
+    (d.listings||[]).forEach(l=>{
       const sc=srcColors[l.source]||'src-other';
       cards+=`<div class="link-card">
         <div class="link-card-top">
@@ -1511,11 +1529,11 @@ Return ONLY:
         <div class="link-card-attrs">
           <div class="lc-attr"><span class="lc-k">City: </span><span class="lc-v">${l.city}</span></div>
           <div class="lc-attr"><span class="lc-k">Type: </span><span class="lc-v">${l.property_type}</span></div>
-          <div class="lc-attr"><span class="lc-k">Sq Ft: </span><span class="lc-v">${l.sqft.toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Rent/mo: </span><span class="lc-v">$${l.monthly_rent.toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Zoning: </span><span class="lc-v">${l.zoning}</span></div>
-          <div class="lc-attr"><span class="lc-k">Outdoor: </span><span class="lc-v">${l.outdoor_space_available?l.outdoor_sqft_est.toLocaleString()+' sqft':'No'}</span></div>
-          <div class="lc-attr"><span class="lc-k">Build-out: </span><span class="lc-v">$${l.buildout_cost_est.toLocaleString()}</span></div>
+          <div class="lc-attr"><span class="lc-k">Sq Ft: </span><span class="lc-v">${(l.sqft||0).toLocaleString()}</span></div>
+          <div class="lc-attr"><span class="lc-k">Rent/mo: </span><span class="lc-v">$${(l.monthly_rent||0).toLocaleString()}</span></div>
+          <div class="lc-attr"><span class="lc-k">Zoning: </span><span class="lc-v">${l.zoning||''}</span></div>
+          <div class="lc-attr"><span class="lc-k">Outdoor: </span><span class="lc-v">${l.outdoor_space_available?(l.outdoor_sqft_est||0).toLocaleString()+' sqft':'No'}</span></div>
+          <div class="lc-attr"><span class="lc-k">Build-out: </span><span class="lc-v">$${(l.buildout_cost_est||0).toLocaleString()}</span></div>
           <div class="lc-attr"><span class="lc-k">Available: </span><span class="lc-v">${l.availability}</span></div>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--surface3);border-radius:6px">${l.notes}</div>
@@ -1530,7 +1548,7 @@ Return ONLY:
     $('4-l-c').innerHTML=cards;
     // By city table
     let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Avg $/sqft</th><th>Est. Listings</th><th>Best Zoning</th><th>Market Note</th><th>Search</th></tr></thead><tbody>`;
-    d.by_city_summary.forEach(c=>{
+    (d.by_city_summary||[]).forEach(c=>{
       const searchUrl=d.search_urls?.loopnet||'https://www.loopnet.com';
       tbl+=`<tr><td><strong>${c.city}</strong></td><td>$${c.avg_rent_sqft}/sqft</td><td>~${c.available_listings_est}</td><td><span class="badge b-blue">${c.best_zoning}</span></td><td style="font-size:11px;color:var(--muted)">${c.market_note}</td><td><a href="${searchUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 8px">↗ Search</a></td></tr>`;
     });
@@ -1539,11 +1557,12 @@ Return ONLY:
     // Cost chart
     killChart('ch-4');
     const ctx=$('ch-4').getContext('2d');
+    const listings4=d.listings||[];
     charts['ch-4']=new Chart(ctx,{type:'bar',data:{
-      labels:d.listings.map(l=>l.city),
+      labels:listings4.map(l=>l.city),
       datasets:[
-        {label:'Annual Rent',data:d.listings.map(l=>l.monthly_rent*12),backgroundColor:'rgba(74,158,255,0.7)',borderWidth:0,borderRadius:4},
-        {label:'Build-Out Est.',data:d.listings.map(l=>l.buildout_cost_est),backgroundColor:'rgba(245,166,35,0.7)',borderWidth:0,borderRadius:4}
+        {label:'Annual Rent',data:listings4.map(l=>(l.monthly_rent||0)*12),backgroundColor:'rgba(74,158,255,0.7)',borderWidth:0,borderRadius:4},
+        {label:'Build-Out Est.',data:listings4.map(l=>l.buildout_cost_est||0),backgroundColor:'rgba(245,166,35,0.7)',borderWidth:0,borderRadius:4}
       ]
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{x:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96',callback:v=>'$'+(v/1000).toFixed(0)+'k'},grid:{color:'#2a2d35'}}}}});
     setDot(4,'done'); showOut(4);
@@ -1652,8 +1671,9 @@ Return ONLY:
     R.a7=d;
     $('7-s-t').textContent=d.summary;
     // Scenarios
+    const ind7=industry();
     let sc=`<div class="scenario-grid">`;
-    d.scenarios.forEach(s=>{
+    (d.scenarios||[]).forEach(s=>{
       sc+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
         <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">${s.name}</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${s.label} · ${s.enrolled} enrolled</div>
@@ -1671,19 +1691,20 @@ Return ONLY:
     // P&L Chart
     killChart('ch-7');
     const ctx=$('ch-7').getContext('2d');
+    const proj7=d.projections||[];
     charts['ch-7']=new Chart(ctx,{type:'line',data:{
-      labels:d.projections.map(p=>p.month),
+      labels:proj7.map(p=>p.month),
       datasets:[
-        {label:'Revenue',data:d.projections.map(p=>p.rev),borderColor:'#3dd68c',tension:0.4,fill:false,pointRadius:3,borderWidth:2},
-        {label:'Expenses',data:d.projections.map(p=>p.exp),borderColor:'#ff5f5f',tension:0.4,fill:false,pointRadius:3,borderWidth:2},
-        {label:'Cumulative P&L',data:d.projections.map(p=>p.cum),borderColor:'#4a9eff',tension:0.4,fill:true,backgroundColor:'rgba(74,158,255,0.08)',pointRadius:3,borderWidth:2,yAxisID:'y2'}
+        {label:'Revenue',data:proj7.map(p=>p.rev),borderColor:'#3dd68c',tension:0.4,fill:false,pointRadius:3,borderWidth:2},
+        {label:'Expenses',data:proj7.map(p=>p.exp),borderColor:'#ff5f5f',tension:0.4,fill:false,pointRadius:3,borderWidth:2},
+        {label:'Cumulative P&L',data:proj7.map(p=>p.cum),borderColor:'#4a9eff',tension:0.4,fill:true,backgroundColor:'rgba(74,158,255,0.08)',pointRadius:3,borderWidth:2,yAxisID:'y2'}
       ]
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{x:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96',callback:v=>'$'+(v/1000).toFixed(0)+'k'},grid:{color:'#2a2d35'},position:'left'},y2:{ticks:{color:'#4a9eff',callback:v=>'$'+(v/1000).toFixed(0)+'k'},grid:{display:false},position:'right'}}}});
     // By city table
-    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Monthly Rent</th><th>Avg Infant Tuition</th><th>Break-Even Enrolled</th><th>Yr 1 Net</th><th>Yr 3 Net</th></tr></thead><tbody>`;
-    d.by_city_financials.forEach(c=>{
-      const n3b=c.yr3_net>=0?'b-green':'b-red';
-      tbl+=`<tr><td><strong>${c.city}</strong></td><td>$${c.monthly_rent.toLocaleString()}</td><td>$${c.avg_infant_tuition.toLocaleString()}</td><td>${c.break_even_enrolled} children</td><td style="color:${c.yr1_net>=0?'var(--green)':'var(--red)'}">$${c.yr1_net.toLocaleString()}</td><td><span class="badge ${n3b}">$${c.yr3_net.toLocaleString()}</span></td></tr>`;
+    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Monthly Rent</th><th>Avg ${ind7.price_label_primary}</th><th>Break-Even Enrolled</th><th>Yr 1 Net</th><th>Yr 3 Net</th></tr></thead><tbody>`;
+    (d.by_city_financials||[]).forEach(c=>{
+      const n3b=(c.yr3_net||0)>=0?'b-green':'b-red';
+      tbl+=`<tr><td><strong>${c.city}</strong></td><td>$${(c.monthly_rent||0).toLocaleString()}</td><td>$${(c.avg_infant_tuition||c.avg_primary_rate||0).toLocaleString()}</td><td>${c.break_even_enrolled||'—'}</td><td style="color:${(c.yr1_net||0)>=0?'var(--green)':'var(--red)'}">$${(c.yr1_net||0).toLocaleString()}</td><td><span class="badge ${n3b}">$${(c.yr3_net||0).toLocaleString()}</span></td></tr>`;
     });
     tbl+=`</tbody></table>`;
     $('7-t-c').innerHTML=tbl;
@@ -1748,9 +1769,9 @@ Return ONLY:
     const vi=d.verdict==='Go'?'✓ GO':d.verdict.toLowerCase().includes('caution')?'⚡ CAUTIOUS GO':'✗ NO GO';
     $('verdictEl').innerHTML=`<div class="verdict ${vc}">${vi} — ${d.verdict_rationale}</div>`;
     $('f-assess').textContent=d.assessment;
-    $('f-success').textContent=d.success_factors.map((f,i)=>`${i+1}. ${f}`).join('\n\n');
-    $('f-risks').textContent=d.risks.map(r=>`[${r.severity}] ${r.risk}\n→ ${r.mitigation}`).join('\n\n');
-    $('f-steps').innerHTML=d.next_steps.map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div>${s}</div></div>`).join('');
+    $('f-success').textContent=(d.success_factors||[]).map((f,i)=>`${i+1}. ${f}`).join('\n\n');
+    $('f-risks').textContent=(d.risks||[]).map(r=>`[${r.severity}] ${r.risk}\n→ ${r.mitigation}`).join('\n\n');
+    $('f-steps').innerHTML=(d.next_steps||[]).map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div>${s}</div></div>`).join('');
     $('finalBox').className='final-box show';
     setDot(8,'done'); showOut(8);
     return JSON.stringify(d);
@@ -1939,17 +1960,17 @@ function renderBusinessPlan(d) {
     <h4>Mission</h4><div class="bp-prose">${d.company_overview.mission}</div>
     <h4>Vision</h4><div class="bp-prose">${d.company_overview.vision}</div>
     <h4>Core Values</h4>
-    <div class="bp-grid">${d.company_overview.values.map(v=>`<div class="bp-stat"><div class="bp-stat-val" style="font-size:13px">✦</div><div class="bp-stat-sub">${v}</div></div>`).join('')}</div>
+    <div class="bp-grid">${(d.company_overview?.values||[]).map(v=>`<div class="bp-stat"><div class="bp-stat-val" style="font-size:13px">✦</div><div class="bp-stat-sub">${v}</div></div>`).join('')}</div>
     <h4>Location Rationale</h4><div class="bp-prose">${d.company_overview.location_rationale}</div>
   </div>
   <div class="bp-section">
     <h3>Services &amp; Revenue by Age Group</h3>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Program</th><th>Capacity</th><th>Ratio</th><th>Tuition/mo</th><th>Annual Revenue</th><th>Description</th></tr></thead><tbody>`;
-  d.company_overview.services.forEach(s=>{
-    ov+=`<tr><td><strong>${s.name}</strong></td><td>${s.capacity}</td><td>${s.ratio}</td><td>$${s.monthly_tuition.toLocaleString()}</td><td style="color:var(--green)">$${s.annual_revenue.toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${s.description}</td></tr>`;
+  (d.company_overview?.services||[]).forEach(s=>{
+    ov+=`<tr><td><strong>${s.name}</strong></td><td>${s.capacity}</td><td>${s.ratio}</td><td>$${(s.monthly_tuition||0).toLocaleString()}</td><td style="color:var(--green)">$${(s.annual_revenue||0).toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${s.description}</td></tr>`;
   });
-  const totalCap=d.company_overview.services.reduce((s,x)=>s+x.capacity,0);
-  const totalRev=d.company_overview.services.reduce((s,x)=>s+x.annual_revenue,0);
+  const totalCap=(d.company_overview?.services||[]).reduce((s,x)=>s+(x.capacity||0),0);
+  const totalRev=(d.company_overview?.services||[]).reduce((s,x)=>s+(x.annual_revenue||0),0);
   ov+=`<tr><td><strong>TOTAL</strong></td><td><strong>${totalCap}</strong></td><td>—</td><td>—</td><td style="color:var(--green);font-weight:700">$${totalRev.toLocaleString()}</td><td>—</td></tr>`;
   ov+=`</tbody></table></div></div>`;
   $('9-ov-c').innerHTML=ov;
@@ -1964,20 +1985,20 @@ function renderBusinessPlan(d) {
       <div class="bp-stat"><div class="bp-stat-label">Our Target Share</div><div class="bp-stat-val" style="font-size:14px">${d.market_analysis.market_size.target_share}</div></div>
     </div>
     <h4>Competitive Comparison Table</h4>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Competitor</th><th>Locations</th><th>Infant Tuition</th><th>Rating</th><th>Waitlist</th><th>Our Advantage</th></tr></thead><tbody>`;
-  d.market_analysis.competitor_comparison.forEach(c=>{
-    mkt+=`<tr><td><strong>${c.name}</strong></td><td>${c.locations}</td><td>$${c.monthly_tuition_infant.toLocaleString()}</td><td>${c.rating}★</td><td><span class="badge ${c.waitlist?'b-amber':'b-green'}">${c.waitlist?'Yes':'No'}</span></td><td style="font-size:11px;color:var(--green)">${c.our_advantage}</td></tr>`;
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Competitor</th><th>Locations</th><th>${industry().price_label_primary}</th><th>Rating</th><th>Waitlist</th><th>Our Advantage</th></tr></thead><tbody>`;
+  (d.market_analysis?.competitor_comparison||[]).forEach(c=>{
+    mkt+=`<tr><td><strong>${c.name}</strong></td><td>${c.locations}</td><td>$${(c.monthly_tuition_infant||c.monthly_primary_rate||0).toLocaleString()}</td><td>${c.rating}★</td><td><span class="badge ${c.waitlist?'b-amber':'b-green'}">${c.waitlist?'Yes':'No'}</span></td><td style="font-size:11px;color:var(--green)">${c.our_advantage}</td></tr>`;
   });
   mkt+=`</tbody></table></div>
     <h4>Key Differentiators</h4>
     <div style="display:flex;flex-direction:column;gap:6px">`;
-  d.market_analysis.differentiators.forEach((diff,i)=>{
+  (d.market_analysis?.differentiators||[]).forEach((diff,i)=>{
     mkt+=`<div style="display:flex;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)"><div style="color:var(--blue);font-weight:700;font-family:'Syne',sans-serif;min-width:20px">${i+1}.</div><div style="font-size:12.5px;color:var(--text)">${diff}</div></div>`;
   });
   mkt+=`</div>
     <h4>Industry Trends Supporting This Investment</h4>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">`;
-  d.market_analysis.trends.forEach(t=>{
+  (d.market_analysis?.trends||[]).forEach(t=>{
     mkt+=`<div style="padding:10px 12px;background:var(--green-dim);border:1px solid var(--green);border-radius:8px;font-size:12px;color:var(--muted)">${t}</div>`;
   });
   mkt+=`</div></div>`;
@@ -1988,14 +2009,14 @@ function renderBusinessPlan(d) {
   let fin=`<div class="bp-section">
     <h3>Startup Capital Requirements — $${fp.startup_capital_needed.toLocaleString()}</h3>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Use of Funds</th><th>Amount</th><th>% of Total</th></tr></thead><tbody>`;
-  fp.use_of_funds.forEach(u=>{
+  (fp.use_of_funds||[]).forEach(u=>{
     fin+=`<tr><td>${u.item}</td><td>$${u.amount.toLocaleString()}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="width:${u.pct}%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:11px;width:36px">${u.pct}%</span></div></td></tr>`;
   });
   fin+=`</tbody></table></div>
     <h4>Funding Sources</h4>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Source</th><th>Amount</th><th>%</th><th>Terms</th><th>Lender Contacts</th></tr></thead><tbody>`;
-  fp.funding_sources.forEach(s=>{
-    const links=s.lender_contacts.map(l=>{
+  (fp.funding_sources||[]).forEach(s=>{
+    const links=(s.lender_contacts||[]).map(l=>{
       const url=l.includes('http')||l.includes('www')||l.includes('.gov')||l.includes('.bank')||l.includes('.com')?`<a href="https://${l.replace(/^https?:\/\//,'').split(':')[0]}" target="_blank" class="link-btn" style="font-size:10px;padding:2px 7px;margin-bottom:3px">${l}</a>`:`<div style="font-size:10px;color:var(--muted)">${l}</div>`;
       return url;
     }).join('');
@@ -2030,7 +2051,7 @@ function renderBusinessPlan(d) {
       <div class="bp-stat"><div class="bp-stat-label">Outdoor / Child</div><div class="bp-stat-val">${ops.facility.outdoor_sqft_per_child}</div><div class="bp-stat-sub">sq ft (GA min: 75)</div></div>
     </div>
     <div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr><th>Room</th><th>Sq Ft</th><th>Capacity</th><th>Ratio</th></tr></thead><tbody>`;
-  ops.facility.rooms.forEach(r=>{
+  (ops.facility?.rooms||[]).forEach(r=>{
     opsHtml+=`<tr><td>${r.name}</td><td>${r.sqft.toLocaleString()}</td><td>${r.capacity||'—'}</td><td>${r.ratio}</td></tr>`;
   });
   opsHtml+=`</tbody></table></div>
@@ -2038,7 +2059,7 @@ function renderBusinessPlan(d) {
     <h4>Staffing Plan</h4>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Role</th><th>Headcount</th><th>Annual Salary</th><th>Annual Cost</th><th>Requirements</th></tr></thead><tbody>`;
   let totalStaff=0,totalCost=0;
-  ops.staffing_plan.forEach(s=>{
+  (ops.staffing_plan||[]).forEach(s=>{
     const cost=s.count*s.salary;totalStaff+=s.count;totalCost+=cost;
     opsHtml+=`<tr><td><strong>${s.role}</strong></td><td>${s.count}</td><td>$${s.salary.toLocaleString()}</td><td>$${cost.toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${s.requirement}</td></tr>`;
   });
@@ -2047,7 +2068,7 @@ function renderBusinessPlan(d) {
     <h4>Curriculum &amp; Assessment</h4><div class="bp-prose">${ops.curriculum}</div>
     <h4>Technology Stack</h4>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">`;
-  ops.technology.forEach(t=>{
+  (ops.technology||[]).forEach(t=>{
     opsHtml+=`<div style="padding:6px 12px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:6px;font-size:12px;color:var(--blue)">${t}</div>`;
   });
   opsHtml+=`</div></div>`;
@@ -2058,7 +2079,7 @@ function renderBusinessPlan(d) {
     <div style="margin-bottom:12px;padding:10px 14px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:8px;font-size:12px;color:var(--blue)">
       Complete all items below before submitting to your SBA lender. Recommended lenders: Truist Bank, Regions Bank, Live Oak Bank (childcare specialist), TD Bank.
     </div>`;
-  d.sba_checklist.forEach(item=>{
+  (d.sba_checklist||[]).forEach(item=>{
     const sb=item.status==='Required'?'b-red':item.status==='This Document'?'b-green':item.status.includes('N/A')?'b-blue':'b-amber';
     sba+=`<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
       <span class="badge ${sb}" style="margin-top:1px;flex-shrink:0">${item.status}</span>
@@ -2649,7 +2670,7 @@ function buildGrantCard(g) {
     <div class="grant-card-top"><div><div class="grant-name">${g.name||g.program_name||''}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${g.agency||g.contact||''}</div></div>
     <div class="grant-amount" style="font-size:15px">${g.amount_available||g.amount||''}</div></div>
     <div class="grant-meta">${g.direct_apply!==undefined?`<span class="badge ${g.direct_apply?'b-green':'b-blue'}">${g.direct_apply?'Direct Apply':'Indirect'}</span>`:''}</div>
-    ${g.incentives?`<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">${g.incentives.map(i=>`<div style="display:flex;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--green);flex-shrink:0">✓</span>${i}</div>`).join('')}</div>`:''}
+    ${Array.isArray(g.incentives)&&g.incentives.length?`<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">${g.incentives.map(i=>`<div style="display:flex;gap:8px;font-size:12px;color:var(--muted)"><span style="color:var(--green);flex-shrink:0">✓</span>${i}</div>`).join('')}</div>`:''}
     <div class="grant-body">${g.notes||g.what_it_is||''}</div>
     <div class="grant-actions">
       ${g.website?`<a href="${g.website}" target="_blank" class="link-btn primary-btn">↗ Info</a>`:''}
@@ -2732,7 +2753,7 @@ function buildGrants(d) {
     <div style="font-size:22px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)">$${total.toLocaleString()}</div>
   </div>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Program</th><th>Type</th><th>Estimated Amount</th><th>Deadline</th><th>Probability</th><th>Next Action</th></tr></thead><tbody>`;
-  d.all_grants_table.forEach(g=>{
+  (d.all_grants_table||[]).forEach(g=>{
     const pb=g.probability.startsWith('High')?'b-green':g.probability.startsWith('Medium')?'b-amber':'b-red';
     const tb=g.type.includes('Revenue')||g.type.includes('Grant')?'b-green':g.type.includes('Tax')?'b-amber':'b-blue';
     tbl+=`<tr><td><strong>${g.program}</strong></td><td><span class="badge ${tb}">${g.type}</span></td><td style="color:var(--green);font-weight:600">${g.amount_est}</td><td style="font-size:11px;color:var(--muted)">${g.deadline}</td><td><span class="badge ${pb}">${g.probability}</span></td><td style="font-size:11px;color:var(--muted)">${g.action_required}</td></tr>`;
@@ -2770,12 +2791,14 @@ function buildCompDeepDive(d) {
   $('13-sum-t').textContent=d.summary;
 
   // Competitor profiles
+  const ind13=industry();
   let ph='';
-  d.competitor_profiles.forEach(c=>{
+  (d.competitor_profiles||[]).forEach(c=>{
     const rc=c.avg_rating>=4.3?'var(--green)':c.avg_rating>=4.0?'var(--amber)':'var(--red)';
+    const primRate=(c.monthly_tuition_infant||c.monthly_primary_rate||0).toLocaleString();
     ph+=`<div class="comp-profile">
       <div class="comp-header">
-        <div><div class="comp-name">${c.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${c.type} · ${c.locations_nearby} locations · $${c.monthly_tuition_infant.toLocaleString()}/mo infant</div></div>
+        <div><div class="comp-name">${c.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${c.type} · ${c.locations_nearby} locations · $${primRate}/mo ${ind13.price_label_primary}</div></div>
         <div style="text-align:right"><div class="comp-rating" style="color:${rc}">${c.avg_rating}★</div><div style="font-size:10px;color:var(--faint)">~${c.review_count_est} reviews</div>
           <div style="display:flex;gap:4px;margin-top:4px">
             <a href="${c.google_search_url}" target="_blank" class="link-btn" style="font-size:10px;padding:2px 7px">↗ Google</a>
@@ -2784,12 +2807,12 @@ function buildCompDeepDive(d) {
         </div>
       </div>
       <div class="comp-reviews-grid">
-        <div class="review-block"><div class="review-block-label" style="color:var(--green)">✓ Top Praise</div>${c.top_positive_themes.map(t=>`<div class="review-item">${t}</div>`).join('')}</div>
-        <div class="review-block"><div class="review-block-label" style="color:var(--red)">✗ Top Complaints</div>${c.top_complaint_themes.map(t=>`<div class="review-item" style="color:var(--red)">${t}</div>`).join('')}</div>
+        <div class="review-block"><div class="review-block-label" style="color:var(--green)">✓ Top Praise</div>${(c.top_positive_themes||[]).map(t=>`<div class="review-item">${t}</div>`).join('')}</div>
+        <div class="review-block"><div class="review-block-label" style="color:var(--red)">✗ Top Complaints</div>${(c.top_complaint_themes||[]).map(t=>`<div class="review-item" style="color:var(--red)">${t}</div>`).join('')}</div>
       </div>
       <div style="margin:10px 0;background:var(--surface3);border-radius:8px;padding:10px">
-        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Actual Parent Quotes</div>
-        ${c.sample_complaints.map(q=>`<div style="font-size:11px;color:var(--muted);margin-bottom:5px;padding-left:8px;border-left:2px solid var(--border2);font-style:italic">${q}</div>`).join('')}
+        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Customer Quotes</div>
+        ${(c.sample_complaints||[]).map(q=>`<div style="font-size:11px;color:var(--muted);margin-bottom:5px;padding-left:8px;border-left:2px solid var(--border2);font-style:italic">${q}</div>`).join('')}
       </div>
       <div style="padding:8px 12px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:8px;font-size:12px"><strong style="font-family:'Syne',sans-serif;color:var(--blue)">Our Opportunity: </strong><span style="color:var(--muted)">${c.differentiation_opportunity}</span></div>
     </div>`;
@@ -2798,7 +2821,7 @@ function buildCompDeepDive(d) {
 
   // Pain points
   let pain=`<div style="margin-bottom:12px;font-size:13px;color:var(--muted)">Frequency = % of negative reviews mentioning this theme across all Gwinnett/Barrow competitors:</div><div class="pain-grid">`;
-  [...d.pain_point_analysis].sort((a,b)=>b.frequency_pct-a.frequency_pct).forEach(p=>{
+  [...(d.pain_point_analysis||[])].sort((a,b)=>b.frequency_pct-a.frequency_pct).forEach(p=>{
     const col=p.frequency_pct>=60?'var(--red)':p.frequency_pct>=45?'var(--amber)':'var(--blue)';
     pain+=`<div class="pain-card">
       <div class="pain-title">${p.pain}</div>
@@ -2815,12 +2838,12 @@ function buildCompDeepDive(d) {
   const cols=['var(--green)','var(--blue)','var(--amber)','var(--purple)','var(--teal)','var(--red)'];
   let diff=`<div style="margin-bottom:8px;font-size:13px;color:var(--muted)">6 strategic pillars — each directly addresses a documented competitor weakness:</div>
   <div style="display:grid;gap:8px">`;
-  d.differentiation_strategy.forEach((s,i)=>{
+  (d.differentiation_strategy||[]).forEach((s,i)=>{
     diff+=`<div style="display:grid;grid-template-columns:1.5fr 2fr auto;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:9px;border:1px solid var(--border);align-items:start">
       <div><div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:${cols[i%cols.length]};margin-bottom:4px">${i+1}. ${s.pillar}</div>
       <div style="font-size:11px;color:var(--faint);font-style:italic">"${s.marketing_hook}"</div></div>
       <div style="font-size:12px;color:var(--muted)">${s.description}</div>
-      <div style="display:flex;flex-direction:column;gap:4px">${s.competitors_this_beats.map(c=>`<span class="badge b-red">${c}</span>`).join('')}</div>
+      <div style="display:flex;flex-direction:column;gap:4px">${(s.competitors_this_beats||[]).map(c=>`<span class="badge b-red">${c}</span>`).join('')}</div>
     </div>`;
   });
   diff+=`</div>`;
@@ -2828,7 +2851,7 @@ function buildCompDeepDive(d) {
 
   // Messaging
   let msg='';
-  d.messaging_guide.forEach(m=>{
+  (d.messaging_guide||[]).forEach(m=>{
     msg+=`<div class="msg-card">
       <div class="msg-audience">${m.audience}</div>
       <div class="msg-headline">${m.headline}</div>
