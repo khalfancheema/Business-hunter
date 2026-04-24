@@ -56,6 +56,8 @@ Return ONLY:
     $('f-risks').textContent=(d.risks||[]).map(r=>`[${r.severity}] ${r.risk}\n→ ${r.mitigation}`).join('\n\n');
     $('f-steps').innerHTML=(d.next_steps||[]).map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div>${s}</div></div>`).join('');
     $('finalBox').className='final-box show';
+    populateLocationDropdown();
+    loadSavedProfile();
     setDot(8,'done'); showOut(8);
     return JSON.stringify(d);
   } catch(e){setDot(8,'error');showOut(8);$('8-s-t').textContent='Error: '+e.message;throw e}

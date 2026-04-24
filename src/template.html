@@ -503,13 +503,65 @@
 </div>
 
 <div class="final-box" id="finalBox">
-  <h2>Executive Report</h2>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+    <h2 style="margin:0;padding:0;border:none">Executive Report</h2>
+    <button onclick="toggleProfileForm()" id="profileFormToggle" style="font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-family:'Instrument Sans',sans-serif">✏️ Personalize Report</button>
+  </div>
+
+  <!-- Personalized header (visible after applyProfile) -->
+  <div id="profileHeader" style="display:none"></div>
+
   <div id="verdictEl"></div>
   <div class="final-grid">
     <div class="final-section full"><h3>Overall Assessment</h3><div class="final-prose" id="f-assess"></div></div>
     <div class="final-section"><h3>Success Factors</h3><div class="final-prose" id="f-success"></div></div>
     <div class="final-section"><h3>Risks &amp; Mitigations</h3><div class="final-prose" id="f-risks"></div></div>
     <div class="final-section full"><h3>Next Steps</h3><div class="step-list" id="f-steps"></div></div>
+  </div>
+
+  <!-- Personalize form -->
+  <div id="profileForm" style="display:none;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px">Personalize This Report</div>
+      <div style="font-size:12px;color:var(--muted)">Your details are saved locally and included in exports and print. None of this is sent anywhere.</div>
+    </div>
+    <div class="profile-grid">
+      <div class="profile-field">
+        <label>Business Name</label>
+        <input id="pf-name" type="text" placeholder="e.g. Little Stars Academy LLC" />
+      </div>
+      <div class="profile-field">
+        <label>Owner / Founder</label>
+        <input id="pf-owner" type="text" placeholder="Your full name" />
+      </div>
+      <div class="profile-field">
+        <label>Target Opening</label>
+        <input id="pf-opening" type="month" />
+      </div>
+      <div class="profile-field">
+        <label>Chosen Location</label>
+        <select id="pf-location">
+          <option value="">— Review Site Selection first —</option>
+        </select>
+      </div>
+      <div class="profile-field">
+        <label>Personal Equity ($)</label>
+        <input id="pf-equity" type="number" placeholder="e.g. 150000" min="0" />
+      </div>
+      <div class="profile-field">
+        <label>Contact Email</label>
+        <input id="pf-email" type="email" placeholder="your@email.com" />
+      </div>
+      <div class="profile-field pf-full">
+        <label>Vision / Notes</label>
+        <textarea id="pf-notes" rows="3" placeholder="What makes your business unique? Any personal goals, constraints, or questions for advisors..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
+      <button onclick="applyProfile()" style="padding:9px 20px;background:var(--blue);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer">✓ Update Report</button>
+      <button onclick="clearProfile()" style="padding:9px 14px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">Clear</button>
+      <span id="pf-saved" style="font-size:12px;color:var(--green);display:none">Saved ✓</span>
+    </div>
   </div>
 </div>
 

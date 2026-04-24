@@ -131,9 +131,110 @@ function printReport() {
   if(R.a7) sections.push(`<h2>Financial Summary</h2><p>${R.a7.summary||''}</p>`);
   if(R.a9) { const es=(R.a9.executive_summary||{}); sections.push(`<h2>Business Plan</h2><p>${es.concept||''}</p><p>${es.opportunity||''}</p>`); }
   if(R.a8 && R.a8.next_steps) sections.push(`<h2>Next Steps</h2><ol>${(R.a8.next_steps||[]).map(s=>`<li>${s}</li>`).join('')}</ol>`);
-  w.document.write(`<!DOCTYPE html><html><head><title>Pipeline Report — ZIP ${zip()}</title><style>body{font-family:sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#222}h1{border-bottom:2px solid #333;padding-bottom:8px}h2{margin-top:2rem;color:#444;border-bottom:1px solid #ddd;padding-bottom:4px}p{line-height:1.7;margin:8px 0}ol{line-height:1.8}@media print{body{margin:0}}</style></head><body><h1>Business Planning Report — ZIP ${zip()}</h1><p style="color:#888;font-size:13px">Generated ${new Date().toLocaleString()} · ${Object.keys(R).length} agents completed</p>${sections.join('')}</body></html>`);
+  const p = R.userProfile || {};
+  const profileHtml = (p.name||p.owner) ? `<div style="background:#f5f5f5;border-radius:8px;padding:14px 18px;margin-bottom:24px">
+    ${p.name?`<div style="font-size:20px;font-weight:700;margin-bottom:8px">${p.name}</div>`:''}
+    <div style="display:flex;flex-wrap:wrap;gap:20px;font-size:13px">
+      ${p.owner?`<span><strong>Founder:</strong> ${p.owner}</span>`:''}
+      ${p.location?`<span><strong>Location:</strong> ${p.location}</span>`:''}
+      ${p.opening?`<span><strong>Target Open:</strong> ${new Date(p.opening+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span>`:''}
+      ${p.equity?`<span><strong>Equity:</strong> $${parseInt(p.equity).toLocaleString()}</span>`:''}
+      ${p.email?`<span><strong>Contact:</strong> ${p.email}</span>`:''}
+    </div>
+    ${p.notes?`<div style="margin-top:10px;font-size:13px;color:#555;font-style:italic">${p.notes}</div>`:''}
+  </div>` : '';
+  w.document.write(`<!DOCTYPE html><html><head><title>Pipeline Report — ZIP ${zip()}</title><style>body{font-family:sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#222}h1{border-bottom:2px solid #333;padding-bottom:8px}h2{margin-top:2rem;color:#444;border-bottom:1px solid #ddd;padding-bottom:4px}p{line-height:1.7;margin:8px 0}ol{line-height:1.8}@media print{body{margin:0}}</style></head><body><h1>Business Planning Report — ZIP ${zip()}</h1><p style="color:#888;font-size:13px">Generated ${new Date().toLocaleString()} · ${Object.keys(R).length} agents completed</p>${profileHtml}${sections.join('')}</body></html>`);
   w.document.close();
   w.print();
+}
+
+// ── Profile / Personalize Report ─────────────────────────────
+
+function toggleProfileForm() {
+  const f = $('profileForm');
+  if (!f) return;
+  const open = f.style.display === 'block';
+  f.style.display = open ? 'none' : 'block';
+  const btn = $('profileFormToggle');
+  if (btn) btn.textContent = open ? '✏️ Personalize Report' : '✕ Close';
+}
+
+function applyProfile() {
+  const get = id => $(id) ? $(id).value.trim() : '';
+  const p = {
+    name:     get('pf-name'),
+    owner:    get('pf-owner'),
+    opening:  get('pf-opening'),
+    location: get('pf-location'),
+    equity:   get('pf-equity'),
+    email:    get('pf-email'),
+    notes:    get('pf-notes')
+  };
+  R.userProfile = p;
+  try { localStorage.setItem('dh_profile', JSON.stringify(p)); } catch(e) {}
+
+  const el = $('profileHeader');
+  if (!el) return;
+  if (!p.name && !p.owner && !p.opening && !p.location && !p.equity) {
+    el.style.display = 'none';
+    return;
+  }
+
+  const items = [];
+  if (p.owner)    items.push({l:'Founder', v: p.owner});
+  if (p.location) items.push({l:'Location', v: p.location});
+  if (p.opening)  items.push({l:'Target Open', v: new Date(p.opening+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'})});
+  if (p.equity)   items.push({l:'Equity', v: '$'+parseInt(p.equity).toLocaleString()});
+  if (p.email)    items.push({l:'Contact', v: p.email});
+
+  el.innerHTML = `<div class="ph-wrap">
+    ${p.name ? `<div class="ph-business">${p.name}</div>` : ''}
+    <div class="ph-row">${items.map(i=>`<div class="ph-item"><span class="ph-label">${i.l}</span><span class="ph-val">${i.v}</span></div>`).join('')}</div>
+    ${p.notes ? `<div class="ph-notes">${p.notes}</div>` : ''}
+  </div>`;
+  el.style.display = 'block';
+
+  const saved = $('pf-saved');
+  if (saved) { saved.style.display='inline'; setTimeout(()=>{ saved.style.display='none'; }, 2500); }
+}
+
+function clearProfile() {
+  ['pf-name','pf-owner','pf-opening','pf-location','pf-equity','pf-email','pf-notes'].forEach(id=>{
+    const el=$(id); if(el) el.value='';
+  });
+  try { localStorage.removeItem('dh_profile'); } catch(e) {}
+  R.userProfile = null;
+  const h=$('profileHeader'); if(h) h.style.display='none';
+}
+
+function loadSavedProfile() {
+  try {
+    const saved = localStorage.getItem('dh_profile');
+    if (!saved) return;
+    const p = JSON.parse(saved);
+    if ($('pf-name'))    $('pf-name').value    = p.name    || '';
+    if ($('pf-owner'))   $('pf-owner').value   = p.owner   || '';
+    if ($('pf-opening')) $('pf-opening').value = p.opening || '';
+    if ($('pf-equity'))  $('pf-equity').value  = p.equity  || '';
+    if ($('pf-email'))   $('pf-email').value   = p.email   || '';
+    if ($('pf-notes'))   $('pf-notes').value   = p.notes   || '';
+    R.userProfile = p;
+    if (p.name || p.owner) applyProfile();
+  } catch(e) {}
+}
+
+function populateLocationDropdown() {
+  const sel = $('pf-location');
+  if (!sel) return;
+  const locs = (R.a3 && R.a3.locations) ? R.a3.locations : [];
+  if (!locs.length) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Select a location —</option>' +
+    locs.map(l => {
+      const label = l.address || l.city || l.submarket || 'Location';
+      const score = l.overall_score || l.score || '';
+      return `<option value="${label}"${current===label?' selected':''}>${label}${score?' · Score '+score:''}</option>`;
+    }).join('');
 }
 
 function resetAll() {
@@ -156,6 +257,8 @@ function resetAll() {
   Object.keys(charts).forEach(k=>{try{charts[k].destroy()}catch{}});
   charts={};
   $('finalBox').className='final-box';
+  const ph=$('profileHeader'); if(ph){ph.innerHTML='';ph.style.display='none';}
+  const pf=$('profileForm'); if(pf) pf.style.display='none';
   $('progressFill').style.width='0%';
   $('progressText').textContent='Enter your API key and click Run';
   $('orchStatus').textContent='idle';
