@@ -1,217 +1,239 @@
-# Daycare Planning Agent System
+# Business Hunter — CLAUDE.md
 
-## Project Overview
-A 15-agent AI pipeline built on the Anthropic API that performs comprehensive daycare/childcare business planning. Runs entirely in the browser — no backend required.
+## What This Is
 
-## Architecture
-- **Single-file deployable**: `public/index.html` — open directly in any browser
-- **15 specialized agents** passing structured JSON context to each other
-- **Sequential pipeline** with one parallel phase (agents 1+5+6)
-- **claudeJSON() wrapper**: 3 retries + 5-strategy JSON parsing on every agent call
-- **Chart.js 4.4.1** for all data visualizations (bar, line, radar, doughnut charts)
-- **SVG map** built inline for the geographic market map
-- **Web search disabled** (`useSearch` hardcoded to `false`) to avoid multi-turn API complexity
+Business Hunter is a **15-agent AI pipeline** that evaluates market viability for opening a small business (daycare, gas station, laundromat, car wash, restaurant, gym) near a target ZIP code. It runs entirely in the browser as a single static HTML file — no backend, no server, no database.
 
-## Agent Pipeline
+The user provides a ZIP code, industry, capacity, and budget. The pipeline runs 15 sequential AI agents (with two parallel phases), each building on the previous, and produces an executive report with a Go / Cautious Go / No Go verdict.
 
-| # | Name | Phase | Inputs | Key Output |
-|---|------|-------|--------|-----------|
-| 1 | Demographics | 1 (parallel) | zip, radius, grades | City population, income, demand scores |
-| 5 | Compliance | 1 (parallel) | zip, grades | DECAL requirements, zoning, timeline |
-| 6 | Competitive Intel | 1 (parallel) | zip, radius | Competitor counts, tuition, gap scores by city |
-| 2 | Gap Analysis | 2 | agents 1,5,6 | City rankings, unserved children, opportunity scores |
-| 3 | Site Selection | 3 | agents 1,2,5 | 6 locations scored on 5 dimensions |
-| 4 | Real Estate | 4 | agents 3,5 | Live listings with LoopNet/Crexi links, broker contacts |
-| 7 | Financial Feasibility | 4 (after 4) | agents 3,4,5 | 3 scenarios, P&L projection, by-city financials |
-| 8 | Executive Summary | 5 | agents 1-7 | Go/No-Go verdict, risks, next steps |
-| 9 | Business Plan | 6 | agents 1-8 | SBA 7(a) package, investor deck, operations plan |
-| 10 | Project Plan | 7 | agents 3,4,5,7,9 | 18-month Gantt, milestones, risk register |
-| 11 | Market Map | 8 | agents 1,2,4 | Interactive SVG map with color-coded gap scores |
-| 12 | Grant Search | 9 | agents 3,5 | CAPS rates, USDA funds, Barrow County incentives |
-| 13 | Competitor Deep-Dive | 10 | agent 6 | Review pain points, differentiation, messaging guide |
-| 14 | Code Review | 11 | all results (R{}) | Issues, performance metrics, cost analysis |
-| 15 | QA & Testing | 12 | all results (R{}) | 34 tests, data validation, UX audit, health score |
-
-## Key Files
-```
-public/index.html          ← THE APP — open this in browser (3,000+ lines)
-src/utils/api.js           ← Anthropic API wrapper + parseJSON utility
-src/utils/charts.js        ← Chart.js helpers (bar, line, radar, doughnut)
-src/utils/map.js           ← SVG map builder with lat/lng projection
-docs/architecture.md       ← Full pipeline diagram + token budget table
-docs/agent-schemas.md      ← All 15 agent JSON schemas
-docs/deployment.md         ← Local, GitHub Pages, Netlify, S3 options
-CLAUDE.md                  ← This file (Claude Code instructions)
-README.md                  ← Project overview and quick start
-package.json               ← npm scripts for serving and linting
-```
-
-## Running Locally
-```bash
-# Simplest — just open the file
-open public/index.html
-
-# Or serve with Python
-python3 -m http.server 8080 --directory public
-
-# Or with Node
-npx serve public -l 8080
-```
-
-## API Configuration
-- **Key**: Entered by user in browser UI — never hardcoded
-- **Model**: `claude-sonnet-4-6`
-- **Max tokens**: 4096 per agent
-- **Required header**: `anthropic-dangerous-direct-browser-access: true`
-- **Web search**: Disabled (`useSearch = false` in `claude()` function)
-- **Retry logic**: `claudeJSON()` wraps every call with 3 attempts + strict JSON enforcement
-
-## Coverage Area (Default)
-- **ZIP**: 30097 (Duluth, GA) — configurable in UI
-- **Radius**: 40 miles
-- **Counties**: Gwinnett, Barrow (Winder/Auburn), Forsyth (Cumming), Fulton (Johns Creek)
-
-## Adding a New Agent
-1. Add HTML card in `public/index.html` with `card-N`, `dot-N`, `out-N` IDs and tab structure
-2. Add CSS for any new component types needed
-3. Write `async function runAgentN(inputs)` following the existing pattern:
-   - Define `sys` (system prompt with strict JSON instruction)
-   - Define `usr` (user prompt with inline JSON schema example)
-   - Call `const d = await claudeJSON(sys, usr)`
-   - Call `renderAgentN(d)` to populate the UI tabs
-   - Call `setDot(N, 'done')` and `showOut(N)`
-   - Return `JSON.stringify(d)`
-4. Add render function `function renderAgentN(d)` that populates all tab panels
-5. Call `await runAgentN(inputs)` in `runPipeline()` at the correct phase
-6. Add `'N'` to the `resetAll()` array
-
-## Modifying Agent Prompts
-Every agent uses a structured JSON response. The prompt includes:
-- A system role with explicit "Respond JSON only" instruction
-- An inline JSON schema example the agent must match exactly
-- Context from upstream agents (truncated to fit token budget)
-
-**Known issue (CR-001)**: Context is passed as `JSON.stringify(d).substring(0, N)` which truncates mid-object. Better approach: extract only the 5-10 most relevant fields before passing downstream.
-
-## Known Issues & Planned Fixes
-| ID | Issue | Priority | Effort |
-|----|-------|----------|--------|
-| CR-001 | Context truncation loses data | High | 2h |
-| CR-002 | No stop_reason check | Critical | 15min |
-| CR-003 | Agents 9+10 prompts too large | High | 1h |
-| CR-004 | No retry backoff | Medium | 10min |
-| CR-005 | No per-agent elapsed timer | Medium | 20min |
-| CR-006 | API key visible in DevTools | Low | 10min |
-| CR-007 | Single-file monolith | Low | 4h |
-| CR-008 | Agents 11+12+13 not parallel | Low | 5min |
-
-## Cost per Pipeline Run
-- **Current**: ~$0.47/run (15 agents × avg $0.031)
-- **Optimized**: ~$0.31/run with prompt size reductions
-- **10 runs/month**: ~$4.75
-- **50 runs/month**: ~$23.75
-
-
-## Project Overview
-A 13-agent AI pipeline built on the Anthropic API that performs comprehensive daycare/childcare business planning. Runs entirely in the browser — no backend required.
+---
 
 ## Architecture
-- **Single-file deployable**: `public/index.html` — open directly in any browser
-- **13 specialized agents** that pass structured JSON context to each other
-- **Live web search** via Anthropic's `web_search_20250305` tool on Agents 1, 4, 5, 6, 12, 13
-- **Chart.js** for all data visualizations
-- **SVG map** built inline for the geographic market map
 
-## Agent Pipeline
-| # | Name | Phase | Search | Inputs |
-|---|------|-------|--------|--------|
-| 1 | Demographics | 1 (parallel) | ✓ | zip, radius, grades |
-| 5 | Compliance | 1 (parallel) | ✓ | zip, grades |
-| 6 | Competitive Intel | 1 (parallel) | ✓ | zip, radius |
-| 2 | Gap Analysis | 2 | — | agents 1,5,6 |
-| 3 | Site Selection | 3 | — | agents 1,2,5 |
-| 4 | Real Estate | 4 (parallel) | ✓ | agents 3,5 |
-| 7 | Financial Feasibility | 4 (parallel) | — | agents 3,5 |
-| 8 | Executive Summary | 5 | — | agents 1-7 |
-| 9 | Business Plan | 6 | — | agents 1-8 |
-| 10 | Project Plan | 7 | — | agents 3,4,5,7,9 |
-| 11 | Market Map | 8 | — | agents 1,2,4 |
-| 12 | Grant Search | 9 | ✓ | agents 3,5 |
-| 13 | Competitor Deep-Dive | 10 | ✓ | agent 6 |
-
-## Key Files
 ```
-public/index.html          # Single deployable file — open this in browser
-src/agents/               # Individual agent prompts and logic (reference)
-src/utils/api.js          # Anthropic API wrapper
-src/utils/charts.js       # Chart.js rendering helpers
-src/utils/map.js          # SVG map builder
-src/styles/main.css       # All CSS (dark theme)
-src/components/           # Reusable HTML component templates
-docs/                     # Architecture diagrams and notes
+src/
+  styles.css           → All CSS
+  template.html        → HTML skeleton with <!-- BUILD:CSS --> and <!-- BUILD:JS --> placeholders
+  js/
+    01-config.js       → INDUSTRIES config, PROVIDERS config, global state vars
+    02-cache.js        → In-memory + localStorage response cache (4h TTL)
+    03-utils.js        → ctx(), parseJSON(), $(), setDot(), showOut() helpers
+    04-api.js          → claudeJSON() — calls AI API with 3 retries + exponential backoff
+    05-fallbacks.js    → getFallbackN() — hardcoded demo responses for all 15 agents
+    06-ui.js           → UI event handlers, tab switching, industry selector, key storage
+    07-render-01.js    → Agent 1: Demographics
+    08-render-02.js    → Agent 2: Gap Analysis
+    09-render-03.js    → Agent 3: Location Scoring
+    10-render-04.js    → Agent 4: Real Estate
+    11-render-05.js    → Agent 5: Regulatory
+    12-render-06.js    → Agent 6: Competitor Analysis
+    13-render-07.js    → Agent 7: Financial Projections
+    14-render-08.js    → Agent 8: Executive Summary (verdict + final report)
+    15-render-09.js    → Agent 9: Business Plan
+    16-render-10.js    → Agent 10: Marketing Strategy
+    17-render-11.js    → Agent 11: Market Map (Leaflet.js pins)
+    18-render-12.js    → Agent 12: Risk Assessment
+    19-render-13.js    → Agent 13: Operations Playbook
+    20-render-14.js    → Agent 14: Code Review (meta-agent reviewing the pipeline)
+    21-render-15.js    → Agent 15: QA Report
+    22-pipeline.js     → runPipeline(), per-agent try/catch, profile form, export, print
+build.mjs              → Concatenates src/ → public/index.html
+public/index.html      → Built output (the app; commit this)
+vercel.json            → { "buildCommand": "node build.mjs", "outputDirectory": "public" }
 ```
 
-## Running the Project
+**Build command:** `node build.mjs`
+
+The build reads `src/styles.css`, concatenates all `src/js/*.js` files in numeric order, and injects them into `src/template.html` via the placeholder comments. The result is written to `public/index.html`.
+
+**IMPORTANT:** `build.mjs` uses a function callback for `.replace()` to avoid corrupting JS template literals:
+```javascript
+html = html.replace('<!-- BUILD:JS -->', () => jsContent);
+```
+
+---
+
+## Key Concepts
+
+### INDUSTRIES config (`01-config.js`)
+
+Six industries: `daycare`, `gas_station`, `laundromat`, `car_wash`, `restaurant`, `gym`. Each has:
+- `label`, `emoji`, `unit`, `units`
+- `capacity_label`, `capacity_default`, `budget_default`
+- `regulatory`, `regulatory_url`, `tiers_label`, `tiers`
+- `compliance`, `grants`, `competitors`, `financials`, `staffing`, `real_estate`
+- `revenue_unit`, `price_label_primary`, `price_label_secondary`
+
+These fields are injected into every agent's prompt via `industry()` and string interpolation.
+
+### PROVIDERS config (`01-config.js`)
+
+Four AI providers: `anthropic`, `openai`, `gemini`, `openai_compat`. Each implements:
+- `url` / `url_custom` — endpoint
+- `headers(key)` — request headers
+- `buildBody(system, user, model)` — request body
+- `extractText(d)` — parse response text
+- `extractStop(d)` — parse stop reason
+
+All providers use `max_tokens: 8192` (Gemini: `maxOutputTokens: 8192`).
+
+### `claudeJSON()` (`04-api.js`)
+
+The core API call function. Features:
+- 3 retries with `attempt * 1500ms` exponential backoff
+- Checks `stop_reason === 'max_tokens'` and throws before attempting JSON parse
+- Hits in-memory cache first, then localStorage cache (4h TTL)
+- **Demo mode**: skips API, parses JSON from the `Return ONLY:` marker in the user prompt
+
+### Demo Mode JSON Parsing (`04-api.js`)
+
+When `demoMode` is true, `claudeJSON()` parses the response template directly from the prompt:
+```javascript
+const marker = user.search(/Return ONLY[:\s]/i);
+const src = marker >= 0 ? user.slice(marker) : user;
+const d = parseJSON(src);
+```
+
+**Why the marker matters:** `ctx()` calls embed upstream agent JSON earlier in the prompt. Without the marker, `parseJSON` (which searches for the first `{`) would parse the ctx JSON instead of the template response JSON, causing crashes like `Cannot read properties of undefined (reading 'map')`.
+
+### `ctx()` helper (`03-utils.js`)
+
+Extracts specified fields from an upstream agent's result object:
+```javascript
+ctx(agentResult, ['summary', 'cities', 'top_chains'])
+```
+Returns a compact JSON string with only those fields. Used in every agent prompt to pass context without token bloat.
+
+### Per-Agent Error Recovery (`22-pipeline.js`)
+
+Every agent call in `runPipeline()` is individually wrapped:
+```javascript
+try {
+  a1 = await runAgent1();
+} catch(e) {
+  a1 = JSON.stringify(getFallback1());
+  console.warn('Agent 1 failed, using fallback:', e.message);
+}
+```
+This lets the pipeline continue even if individual agents fail or return malformed JSON.
+
+### Null Guards Pattern
+
+Every `renderAgentN()` function starts with null guards on deeply nested response objects:
+```javascript
+const es = d.executive_summary || {};
+const co = d.company_overview || {};
+const ma = d.market_analysis || {};
+const ms = ma.market_size || {};
+```
+Then use `es.mission`, `co.vision`, etc. — never `d.executive_summary.mission` directly.
+
+---
+
+## Pipeline Flow
+
+```
+Phase 1 (sequential): Agents 1–7
+  1. Demographics
+  2. Gap Analysis
+  3. Location Scoring
+  4. Real Estate
+  5. Regulatory
+  6. Competitor Analysis
+  7. Financial Projections
+
+Phase 2 (Executive Report): Agent 8
+  8. Executive Summary → verdict + final report card
+
+Phase 3 (parallel): Agents 9–13
+  9.  Business Plan
+  10. Marketing Strategy
+  11. Market Map
+  12. Risk Assessment
+  13. Operations Playbook
+
+Phase 4 (meta): Agents 14–15
+  14. Code Review (reviews the pipeline itself)
+  15. QA Report
+```
+
+---
+
+## Common Tasks
+
+### Add a new industry
+
+Edit `INDUSTRIES` in `src/js/01-config.js`. Add a key with all required fields. The UI selector, all agent prompts, and the report are driven by this config — no other changes needed.
+
+### Change max_tokens
+
+Edit `buildBody` in each provider in `PROVIDERS` (`src/js/01-config.js`). All are currently `8192`. Gemini uses `maxOutputTokens` inside `generationConfig`.
+
+### Update demo data for an agent
+
+Edit the matching `getFallbackN()` function in `src/js/05-fallbacks.js`. The demo JSON must match the schema the agent's `Return ONLY:` template specifies — check `src/js/0N-render-0N.js` for the exact shape.
+
+### Fix a rendering crash (`Cannot read properties of undefined`)
+
+1. Find the agent's render function in `src/js/0N-render-0N.js`
+2. Add null guards at the top: `const field = d.field || defaultValue`
+3. Use the guarded variable throughout the render function
+
+### Add a city to the market map
+
+Edit the `cities` array in `src/js/17-render-11.js`. Each entry:
+```javascript
+{
+  name: 'City Name',
+  lat: 34.0615, lng: -83.7249,
+  gap_score: 8,
+  demand_score: 8, supply_score: 3,
+  unserved_children: 420,
+  median_income: 78000,
+  competitor_count: 1,
+  priority: 'High',
+  recommended_action: 'Prime opportunity — act now',
+  real_estate_url: 'https://...'
+}
+```
+
+### Rebuild and preview
+
 ```bash
-# Option 1: Open directly (no server needed)
-open public/index.html
-
-# Option 2: Serve locally
-npx serve public/
-# or
-python3 -m http.server 8080 --directory public
+node build.mjs
+# open public/index.html in browser
 ```
 
-## Development Commands
-```bash
-# Rebuild single-file bundle from src/
-npm run build
+---
 
-# Watch mode (rebuilds on save)
-npm run dev
+## Executive Report — Personalize Form
 
-# Validate JS syntax
-npm run lint
-```
+After Agent 8 runs, an `✏️ Personalize Report` toggle appears on the final report card. Fields:
+- Business Name, Owner Name, Target Location (dropdown from Agent 3 results)
+- Planned Opening (month/year), Equity Amount
+- Contact Email, Notes
 
-## Environment
-- **API Key**: Entered by user in the browser UI — never hardcoded
-- **Model**: `claude-sonnet-4-6`
-- **Max tokens per agent**: 3000
-- **Required header**: `anthropic-dangerous-direct-browser-access: true`
-- **Web search tool**: `web_search_20250305`
+Saved to `localStorage` under key `bh_profile`. Restored on page load via `loadSavedProfile()`. Included in Export JSON and Print output. The rendered header card uses CSS class `.ph-wrap`.
 
-## Adding a New Agent
-1. Add HTML card in `public/index.html` with a new `card-N` / `dot-N` / `out-N` id
-2. Add `async function runAgentN(inputs)` following the existing pattern
-3. Call it in `runPipeline()` at the correct phase
-4. Add `'N'` to the `resetAll()` array
-5. Write the agent's system prompt and JSON schema in `src/agents/agentN.js`
+Functions in `src/js/22-pipeline.js`: `toggleProfileForm()`, `applyProfile()`, `clearProfile()`, `loadSavedProfile()`, `populateLocationDropdown()`.
 
-## Modifying Agent Prompts
-Each agent uses a structured JSON response format. The prompt includes:
-- A detailed system role
-- An example JSON schema the agent must match
-- Input context from previous agents (truncated to fit token budget)
+---
 
-When modifying prompts, keep the JSON schema stable — the render functions depend on specific field names.
+## Deployment
 
-## Target Market Context
-- **ZIP code**: 30097 (Duluth, GA) — default, configurable in UI
-- **Radius**: 40 miles — covers Gwinnett, Barrow, Forsyth, and Fulton counties
-- **Grades**: Infant–Pre-K (configurable)
-- **Counties covered**: Gwinnett, Barrow (Winder/Auburn), Forsyth (Cumming), Fulton (Johns Creek)
+Hosted on Vercel as a static BYOK (bring your own key) app. The user enters their AI API key in the browser — it is never sent to any server other than the AI provider.
 
-## Known Limitations
-- Browser sandbox blocks API calls from Claude.ai artifacts — must run as a local file
-- CORS requires the `anthropic-dangerous-direct-browser-access` header
-- Agent 13 (Competitor Deep-Dive) references review data from Claude's training — live Yelp/Google scraping is not possible via browser
-- Map uses static SVG coordinates — not a live tile map
+- `vercel.json`: `buildCommand: node build.mjs`, `outputDirectory: public`
+- Zero npm dependencies — `build.mjs` uses only Node.js built-ins
+- GitHub repo: `khalfancheema/Business-Hunter`
 
-## Potential Enhancements
-- [ ] Export full report as PDF
-- [ ] Save/load pipeline results to localStorage
-- [ ] Add a second-location analysis agent
-- [ ] Integrate Google Maps embed for real tile map
-- [ ] Add email draft agent for outreach to brokers/DECAL
-- [ ] Multi-zip comparison mode
+---
+
+## Coding Rules
+
+- **No npm dependencies** — keep the build zero-dependency; `build.mjs` uses only `node:fs` and `node:path`
+- **No ES6 import/export** — all JS files are concatenated into one `<script>` block; use global scope
+- **Always null-guard** nested response fields before rendering
+- **Always use the `Return ONLY:` marker** in demo mode parsing — never assume position of JSON in a prompt
+- **Rebuild after every JS/CSS/HTML change**: `node build.mjs`
+- **Commit `public/index.html`** — it's the deployable artifact
