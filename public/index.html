@@ -1969,8 +1969,9 @@ Return ONLY:
     R.a8=d;
     $('8-s-t').textContent=d.verdict+' — '+d.verdict_rationale;
     // Final report
-    const vc=d.verdict==='Go'?'v-go':d.verdict.toLowerCase().includes('caution')?'v-caution':'v-nogo';
-    const vi=d.verdict==='Go'?'✓ GO':d.verdict.toLowerCase().includes('caution')?'⚡ CAUTIOUS GO':'✗ NO GO';
+    const vl=(d.verdict||'').toLowerCase();
+    const vc=vl==='go'?'v-go':vl.includes('caution')?'v-caution':'v-nogo';
+    const vi=vl==='go'?'✓ GO':vl.includes('caution')?'⚡ CAUTIOUS GO':'✗ NO GO';
     $('verdictEl').innerHTML=`<div class="verdict ${vc}">${vi} — ${d.verdict_rationale}</div>`;
     $('f-assess').textContent=d.assessment;
     $('f-success').textContent=(d.success_factors||[]).map((f,i)=>`${i+1}. ${f}`).join('\n\n');
