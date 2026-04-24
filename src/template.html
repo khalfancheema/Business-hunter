@@ -567,5 +567,24 @@
 
 </div>
 <!-- BUILD:JS -->
+
+<!-- ══ AGENT DRILL-DOWN MODAL ══════════════════════════════ -->
+<div id="agentModalOverlay" onclick="if(event.target===this)closeAgentModal()">
+  <div class="agent-modal">
+    <div class="agent-modal-header">
+      <div class="agent-modal-ico" id="modalAgentIco">🤖</div>
+      <div class="agent-modal-title">
+        <strong id="modalAgentName">Agent</strong>
+        <span id="modalAgentNum">Agent N</span>
+      </div>
+      <div class="agent-modal-actions">
+        <button class="modal-action-btn save"  id="modalSaveBtn"  onclick="saveAgentJSON()">⬇ Save JSON</button>
+        <button class="modal-action-btn print" id="modalPrintBtn" onclick="printAgentData()">🖨 Print</button>
+        <button class="modal-close-btn" onclick="closeAgentModal()" title="Close (Esc)">✕</button>
+      </div>
+    </div>
+    <div class="agent-modal-body" id="modalAgentBody"></div>
+  </div>
+</div>
 </body>
 </html>

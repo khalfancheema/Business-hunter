@@ -40,6 +40,7 @@ const JS_FILES = [
   'src/js/20-render-14.js',
   'src/js/21-render-15.js',
   'src/js/22-pipeline.js',
+  'src/js/23-drilldown.js',
 ];
 
 const CSS_FILES = ['src/styles.css'];
