@@ -1,4 +1,4 @@
-async function runAgent7(a3,a4,a5) {
+async function _legacyRunAgent7(a3,a4,a5) {
   setDot(7,'running');
   const ind=industry();
   const sys=`You are a ${ind.unit} financial analyst. Respond JSON only with realistic numbers.`;

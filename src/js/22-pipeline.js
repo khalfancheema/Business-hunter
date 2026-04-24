@@ -8,15 +8,10 @@ async function runPipeline() {
   $('orchStatus').textContent='orchestrating…';
   $('finalBox').className='final-box';
 
-  const fb = k => JSON.stringify(window['getFallback'+k]());
+  const fb = k => JSON.stringify(window['getFallback'+k]?.() || {});
   try {
-    setProgress(2,'Pre-flight — Code Review · QA Testing…');
-    try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
-    if(stopRequested){showErr('Pipeline stopped by user.');return;}
-    try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
-    if(stopRequested){showErr('Pipeline stopped by user.');return;}
-
-    setProgress(4,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
+    // ── Phase 1: Foundation Research (parallel) ─────────────
+    setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
     const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
     const r1=res1.status==='fulfilled'?res1.value:fb(1);
     const r5=res5.status==='fulfilled'?res5.value:fb(5);
@@ -26,47 +21,74 @@ async function runPipeline() {
     if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
+    // ── Phase 2: Gap Analysis ────────────────────────────────
     setProgress(16,'Phase 2 — Gap Analysis…');
     let r2=fb(2);
     try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(26,'Phase 3 — Site Selection…');
+    // ── Phase 3: Site Selection ──────────────────────────────
+    setProgress(24,'Phase 3 — Site Selection…');
     let r3=fb(3);
     try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(36,'Phase 4 — Real Estate then Financial Model…');
+    // ── Phase 4: Real Estate (needs site selection first) ────
+    setProgress(32,'Phase 4 — Real Estate Search…');
     let r4=fb(4);
     try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
+
+    // ── Phase 5: Financial Feasibility (site-aware, 3 sub-calls) ──
+    setProgress(40,'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…');
     let r7=fb(7);
     try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(48,'Phase 5 — Executive Summary…');
+    // ── Phase 6: Executive Summary ───────────────────────────
+    setProgress(50,'Phase 6 — Executive Summary & Verdict…');
     let r8=fb(8);
     try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(56,'Phase 6 — Business Plan · SBA Package · Investor Deck…');
+    // ── Phase 7: Business Plan (4 sub-calls) ─────────────────
+    setProgress(58,'Phase 7 — Business Plan (4 focused sub-agents)…');
     let r9=fb(9);
     try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(64,'Phase 7 — Project Execution Plan · Gantt · Risk Register…');
+    // ── Phase 8: Project Plan (3 sub-calls) ──────────────────
+    setProgress(66,'Phase 8 — Project Plan (3 focused sub-agents)…');
     try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(72,'Phase 8 — Market Map · Grants · Competitor Analysis (parallel)…');
+    // ── Phase 9: Supplemental Analysis (parallel) ───────────
+    setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
     await Promise.allSettled([
       runAgent11(r1,r2,r4),
       runAgent12(r3,r5),
-      runAgent13(r6)
+      runAgent13(r6),
+      (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
     ]);
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(100,'Complete — all 15 agents finished');
+    // ── Phase 10: Marketing Strategy ────────────────────────
+    // (Agent 10 = project plan, marketing is embedded — no separate agent yet)
+
+    // ── Phase 11: Meta Agents ────────────────────────────────
+    setProgress(86,'Phase 11 — Code Review · QA Testing…');
+    try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+    if(stopRequested){showErr('Pipeline stopped by user.');return;}
+    try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+    if(stopRequested){showErr('Pipeline stopped by user.');return;}
+
+    // ── Phase 12: Sources & Citations ────────────────────────
+    setProgress(94,'Phase 12 — Sources & Citations…');
+    try {
+      if(typeof runAgent17==='function') await runAgent17(R);
+    } catch(e) { console.error('Agent 17 failed:',e.message); }
+
+    setProgress(100,'Complete — all agents finished');
     $('orchStatus').textContent='done';
   } catch(e) {
     $('orchStatus').textContent='error';
@@ -104,6 +126,8 @@ async function reRunAgent(n) {
     else if(n===13){ await runAgent13(s(6)); }
     else if(n===14){ await runAgent14(R); }
     else if(n===15){ await runAgent15(R); }
+    else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
+    else if(n===17){ await runAgent17(R); }
   } catch(e) {
     console.error('Re-run agent '+n+' failed:',e.message);
   } finally {
@@ -238,7 +262,7 @@ function populateLocationDropdown() {
 }
 
 function resetAll() {
-  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'].forEach(id=>{
+  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'].forEach(id=>{
     const dot=$('dot-'+id), card=$('card-'+id), out=$('out-'+id);
     if(dot) dot.className='agent-dot';
     if(card) card.className='agent-card';
@@ -252,7 +276,9 @@ function resetAll() {
     '11-map-c','11-leg-c','11-dir-c','12-sum-t','12-caps-c','12-usda-c','12-local-c','12-tbl-c',
     '13-sum-t','13-comp-c','13-pain-c','13-diff-c','13-msg-c',
     '14-sum-t','14-issues-c','14-perf-c','14-cost-c','14-fixes-c',
-    '15-sum-t','15-tests-c','15-data-c','15-ux-c','15-score-c'];
+    '15-sum-t','15-tests-c','15-data-c','15-ux-c','15-score-c',
+    '16-sum-c','16-list-c','16-comp-c','16-matrix-c','16-steps-c',
+    '17-sum-c','17-sources-c','17-claims-c','17-unsourced-c'];
   clearIds.forEach(id=>{const el=$(id);if(el)el.innerHTML='';});
   Object.keys(charts).forEach(k=>{try{charts[k].destroy()}catch{}});
   charts={};

@@ -1,16 +1,9 @@
 async function runAgent10(a3,a4,a5,a7,a9) {
   setDot(10,'running');
-  const ind=industry();
-  const sys=`You are a senior project manager specializing in ${ind.unit} launches. You create detailed, actionable project plans. Respond JSON only.`;
-  const usr=`Create a comprehensive 18-month project execution plan to open a ${ind.unit} (${ind.capacity_label}: ${capacity()}) near ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
-
-SITE SELECTION: ${ctx(a3,['summary','locations'])}
-REAL ESTATE: ${ctx(a4,['summary','by_city_summary'])}
-COMPLIANCE: ${ctx(a5,['summary','requirements','timeline_phases'])}
-FINANCIALS: ${ctx(a7,['summary','scenarios','startup_breakdown'])}
-BUSINESS PLAN: ${ctx(a9,['executive_summary','financial_plan','operations_plan'])}
-
-Return ONLY:
+  $('10-gantt-c').innerHTML = subProgress(1,3,'Starting project plan sub-agents…');
+  // Sub-call approach — see 25-agent-10-parts.js
+  // Old single-call prompt removed to prevent max_tokens truncation
+  const _unused_marker = `[old template removed — sub-calls handle prompt generation in 25-agent-10-parts.js]
 {
   "project_name": "Bright Futures Early Learning Center — Launch",
   "total_duration_months": 18,
@@ -252,9 +245,10 @@ Return ONLY:
     }
   ]
 }`;
+  // (prompt removed — replaced by sub-call approach below)
   try {
-    let d = await claudeJSON(sys, usr);
-    if(!d) { console.warn('Agent 10 fallback'); d=getFallback10(); }
+    let d = await runAgent10Parts(a3,a4,a5,a7,a9);
+    if(!d || !d.phases) { console.warn('Agent 10 fallback'); d=getFallback10(); }
     R.a10 = d;
     renderProjectPlan(d);
     setDot(10,'done'); showOut(10);

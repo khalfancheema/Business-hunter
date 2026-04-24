@@ -396,7 +396,7 @@ select option{background:var(--surface2)}
 <div class="masthead">
   <div>
     <h1 id="mastheadTitle">Business Planning Agent System</h1>
-    <p id="mastheadSub">15-agent AI pipeline · Demographics · Compliance · Gap Analysis · Site Selection · Real Estate · Financials · Business Plan · Project Plan</p>
+    <p id="mastheadSub">17-agent AI pipeline · Demographics · Compliance · Gap Analysis · Site Selection · Real Estate · Financials · Business Plan · Project Plan · Market Intelligence · Build vs Buy · Sources</p>
   </div>
   <div class="live-badge"><div class="live-dot"></div>Live Search Enabled</div>
 </div>
@@ -428,13 +428,15 @@ select option{background:var(--surface2)}
   <div class="controls-row">
     <div class="field">
       <label>Industry</label>
-      <select id="industrySelect" style="width:185px" onchange="onIndustryChange()">
+      <select id="industrySelect" style="width:210px" onchange="onIndustryChange()">
         <option value="daycare">🏫 Daycare / Childcare</option>
         <option value="gas_station">⛽ Gas Station / C-Store</option>
         <option value="laundromat">🫧 Laundromat</option>
         <option value="car_wash">🚗 Car Wash</option>
         <option value="restaurant">🍽️ Restaurant</option>
         <option value="gym">💪 Gym / Fitness Center</option>
+        <option value="indoor_play">🎠 Indoor Play Area / FEC</option>
+        <option value="dry_cleaning">👔 Dry Cleaning / Laundry</option>
       </select>
     </div>
     <div class="field"><label>ZIP Code</label><input type="text" id="zip" value="30097" style="width:95px" /></div>
@@ -457,66 +459,6 @@ select option{background:var(--surface2)}
     <div class="progress-text" id="progressText">Enter your API key and click Run</div>
   </div>
   <div class="error-banner" id="errorBanner"></div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 11 — Code Review · Optimization · Cost Analysis</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-14">
-    <div class="agent-head">
-      <div class="agent-ico">🔬</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
-      <span id="timer-14" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-14"></div>
-    </div>
-    <div class="agent-out" id="out-14">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('14','sum')">Summary</div>
-        <div class="tab" onclick="tab('14','issues')">Issues Found</div>
-        <div class="tab" onclick="tab('14','perf')">Performance</div>
-        <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
-        <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
-        <button class="raw-toggle" onclick="showRaw(14)">{ } Raw</button>
-      </div>
-      <div id="raw-14" class="raw-data-wrap"></div>
-      <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
-      <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
-      <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
-      <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
-      <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 12 — QA · Functional Testing · Data Validation · UX Audit</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-15">
-    <div class="agent-head">
-      <div class="agent-ico">✅</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
-      <span id="timer-15" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-15"></div>
-    </div>
-    <div class="agent-out" id="out-15">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('15','sum')">QA Summary</div>
-        <div class="tab" onclick="tab('15','tests')">Test Results</div>
-        <div class="tab" onclick="tab('15','data')">Data Validation</div>
-        <div class="tab" onclick="tab('15','ux')">UX Audit</div>
-        <div class="tab" onclick="tab('15','score')">Health Score</div>
-        <button class="raw-toggle" onclick="showRaw(15)">{ } Raw</button>
-      </div>
-      <div id="raw-15" class="raw-data-wrap"></div>
-      <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
-      <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
-      <div class="panel" id="15-data"><div id="15-data-c"></div></div>
-      <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
-      <div class="panel" id="15-score"><div id="15-score-c"></div></div>
-    </div>
-  </div>
 </div>
 
 <div class="arrow">↓</div>
@@ -688,7 +630,7 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 4b — Financial Feasibility · Scenarios · P&L · By City</div>
+<div class="phase-label">Phase 5 — Financial Feasibility · Scenarios · P&amp;L · By City</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-7">
     <div class="agent-head">
@@ -716,93 +658,7 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 5 — Market Map · Color-Coded Gap Scores</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-11">
-    <div class="agent-head">
-      <div class="agent-ico">🗺️</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
-      <span id="timer-11" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-11"></div>
-    </div>
-    <div class="agent-out" id="out-11">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
-        <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
-        <div class="tab" onclick="tab('11','dir')">Directions</div>
-        <button class="raw-toggle" onclick="showRaw(11)">{ } Raw</button>
-      </div>
-      <div id="raw-11" class="raw-data-wrap"></div>
-      <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
-      <div class="panel" id="11-leg"><div id="11-leg-c"></div></div>
-      <div class="panel" id="11-dir"><div id="11-dir-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 6 — Grant Search · Subsidies · Federal Programs · Local Incentives</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-12">
-    <div class="agent-head">
-      <div class="agent-ico">💵</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
-      <span id="timer-12" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-12"></div>
-    </div>
-    <div class="agent-out" id="out-12">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('12','sum')">Summary</div>
-        <div class="tab" onclick="tab('12','caps')">GA CAPS</div>
-        <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
-        <div class="tab" onclick="tab('12','local')">Local Incentives</div>
-        <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
-        <button class="raw-toggle" onclick="showRaw(12)">{ } Raw</button>
-      </div>
-      <div id="raw-12" class="raw-data-wrap"></div>
-      <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
-      <div class="panel" id="12-caps"><div id="12-caps-c"></div></div>
-      <div class="panel" id="12-usda"><div id="12-usda-c"></div></div>
-      <div class="panel" id="12-local"><div id="12-local-c"></div></div>
-      <div class="panel" id="12-tbl"><div class="tbl-wrap" id="12-tbl-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 7 — Competitor Deep-Dive · Reviews · Complaints · Differentiation</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-13">
-    <div class="agent-head">
-      <div class="agent-ico">🎯</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
-      <span id="timer-13" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-13"></div>
-    </div>
-    <div class="agent-out" id="out-13">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('13','sum')">Summary</div>
-        <div class="tab" onclick="tab('13','comp')">Competitor Profiles</div>
-        <div class="tab" onclick="tab('13','pain')">Pain Points</div>
-        <div class="tab" onclick="tab('13','diff')">Differentiation Plan</div>
-        <div class="tab" onclick="tab('13','msg')">Messaging Guide</div>
-        <button class="raw-toggle" onclick="showRaw(13)">{ } Raw</button>
-      </div>
-      <div id="raw-13" class="raw-data-wrap"></div>
-      <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
-      <div class="panel" id="13-comp"><div id="13-comp-c"></div></div>
-      <div class="panel" id="13-pain"><div id="13-pain-c"></div></div>
-      <div class="panel" id="13-diff"><div id="13-diff-c"></div></div>
-      <div class="panel" id="13-msg"><div id="13-msg-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 8 — Executive Summary</div>
+<div class="phase-label">Phase 6 — Executive Summary</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-8">
     <div class="agent-head">
@@ -821,7 +677,7 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 9 — SBA Business Plan · Investor Deck · Financial Projections</div>
+<div class="phase-label">Phase 7 — SBA Business Plan · Investor Deck · Financial Projections</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-9">
     <div class="agent-head">
@@ -853,7 +709,7 @@ select option{background:var(--surface2)}
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 10 — Project Execution Plan · Gantt · Risk Register</div>
+<div class="phase-label">Phase 8 — Project Execution Plan · Gantt · Risk Register</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-10">
     <div class="agent-head">
@@ -880,6 +736,204 @@ select option{background:var(--surface2)}
       <div class="panel" id="10-risk"><div id="10-risk-c"></div></div>
       <div class="panel" id="10-team"><div id="10-team-c"></div></div>
       <div class="panel" id="10-check"><div id="10-check-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 9 — Market Intelligence · Map · Grants · Competitors · Build vs Buy (Parallel)</div>
+<div class="agents-grid g2">
+
+  <!-- Market Map Agent -->
+  <div class="agent-card" id="card-11">
+    <div class="agent-head">
+      <div class="agent-ico">🗺️</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
+      <span id="timer-11" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-11"></div>
+    </div>
+    <div class="agent-out" id="out-11">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
+        <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
+        <div class="tab" onclick="tab('11','dir')">Directions</div>
+        <button class="raw-toggle" onclick="showRaw(11)">{ } Raw</button>
+      </div>
+      <div id="raw-11" class="raw-data-wrap"></div>
+      <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
+      <div class="panel" id="11-leg"><div id="11-leg-c"></div></div>
+      <div class="panel" id="11-dir"><div id="11-dir-c"></div></div>
+    </div>
+  </div>
+
+  <!-- Grant & Funding Agent -->
+  <div class="agent-card" id="card-12">
+    <div class="agent-head">
+      <div class="agent-ico">💵</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
+      <span id="timer-12" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-12"></div>
+    </div>
+    <div class="agent-out" id="out-12">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('12','sum')">Summary</div>
+        <div class="tab" onclick="tab('12','caps')">GA CAPS</div>
+        <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
+        <div class="tab" onclick="tab('12','local')">Local Incentives</div>
+        <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
+        <button class="raw-toggle" onclick="showRaw(12)">{ } Raw</button>
+      </div>
+      <div id="raw-12" class="raw-data-wrap"></div>
+      <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
+      <div class="panel" id="12-caps"><div id="12-caps-c"></div></div>
+      <div class="panel" id="12-usda"><div id="12-usda-c"></div></div>
+      <div class="panel" id="12-local"><div id="12-local-c"></div></div>
+      <div class="panel" id="12-tbl"><div class="tbl-wrap" id="12-tbl-c"></div></div>
+    </div>
+  </div>
+
+  <!-- Competitor Deep-Dive Agent -->
+  <div class="agent-card" id="card-13">
+    <div class="agent-head">
+      <div class="agent-ico">🎯</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
+      <span id="timer-13" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-13"></div>
+    </div>
+    <div class="agent-out" id="out-13">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('13','sum')">Summary</div>
+        <div class="tab" onclick="tab('13','comp')">Competitor Profiles</div>
+        <div class="tab" onclick="tab('13','pain')">Pain Points</div>
+        <div class="tab" onclick="tab('13','diff')">Differentiation Plan</div>
+        <div class="tab" onclick="tab('13','msg')">Messaging Guide</div>
+        <button class="raw-toggle" onclick="showRaw(13)">{ } Raw</button>
+      </div>
+      <div id="raw-13" class="raw-data-wrap"></div>
+      <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
+      <div class="panel" id="13-comp"><div id="13-comp-c"></div></div>
+      <div class="panel" id="13-pain"><div id="13-pain-c"></div></div>
+      <div class="panel" id="13-diff"><div id="13-diff-c"></div></div>
+      <div class="panel" id="13-msg"><div id="13-msg-c"></div></div>
+    </div>
+  </div>
+
+  <!-- Build vs Buy Agent -->
+  <div class="agent-card" id="card-16">
+    <div class="agent-head">
+      <div class="agent-ico">🏗️</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Build vs Buy</div><div class="agent-role">Property Listings · Match Scores · Decision Matrix · Recommendation</div></div>
+      <span id="timer-16" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-16" onclick="reRunAgent(16)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-16"></div>
+    </div>
+    <div class="agent-out" id="out-16">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('16','sum')">Summary</div>
+        <div class="tab" onclick="tab('16','list')">Listings (Buy)</div>
+        <div class="tab" onclick="tab('16','comp')">Build vs Buy</div>
+        <div class="tab" onclick="tab('16','matrix')">Decision Matrix</div>
+        <div class="tab" onclick="tab('16','steps')">Next Steps</div>
+        <button class="raw-toggle" onclick="showRaw(16)">{ } Raw</button>
+      </div>
+      <div id="raw-16" class="raw-data-wrap"></div>
+      <div class="panel active" id="16-sum"><div id="16-sum-c"></div></div>
+      <div class="panel" id="16-list"><div id="16-list-c"></div></div>
+      <div class="panel" id="16-comp"><div id="16-comp-c"></div></div>
+      <div class="panel" id="16-matrix"><div id="16-matrix-c"></div></div>
+      <div class="panel" id="16-steps"><div id="16-steps-c"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 10 — Code Review &amp; QA · Correctness · Performance · Validation (Parallel)</div>
+<div class="agents-grid g2">
+
+  <!-- Code Review Agent -->
+  <div class="agent-card" id="card-14">
+    <div class="agent-head">
+      <div class="agent-ico">🔬</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
+      <span id="timer-14" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-14"></div>
+    </div>
+    <div class="agent-out" id="out-14">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('14','sum')">Summary</div>
+        <div class="tab" onclick="tab('14','issues')">Issues Found</div>
+        <div class="tab" onclick="tab('14','perf')">Performance</div>
+        <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
+        <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
+        <button class="raw-toggle" onclick="showRaw(14)">{ } Raw</button>
+      </div>
+      <div id="raw-14" class="raw-data-wrap"></div>
+      <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
+      <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
+      <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
+      <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
+      <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
+    </div>
+  </div>
+
+  <!-- QA Agent -->
+  <div class="agent-card" id="card-15">
+    <div class="agent-head">
+      <div class="agent-ico">✅</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
+      <span id="timer-15" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-15"></div>
+    </div>
+    <div class="agent-out" id="out-15">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('15','sum')">QA Summary</div>
+        <div class="tab" onclick="tab('15','tests')">Test Results</div>
+        <div class="tab" onclick="tab('15','data')">Data Validation</div>
+        <div class="tab" onclick="tab('15','ux')">UX Audit</div>
+        <div class="tab" onclick="tab('15','score')">Health Score</div>
+        <button class="raw-toggle" onclick="showRaw(15)">{ } Raw</button>
+      </div>
+      <div id="raw-15" class="raw-data-wrap"></div>
+      <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
+      <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
+      <div class="panel" id="15-data"><div id="15-data-c"></div></div>
+      <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
+      <div class="panel" id="15-score"><div id="15-score-c"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 11 — Sources &amp; Citations · Data Provenance · Integrity Audit</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-17">
+    <div class="agent-head">
+      <div class="agent-ico">📚</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Sources &amp; Citations</div><div class="agent-role">All Data Sources · Sourced Claims · Unable to Source · Integrity Audit</div></div>
+      <span id="timer-17" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-17" onclick="reRunAgent(17)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-17"></div>
+    </div>
+    <div class="agent-out" id="out-17">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('17','sum')">Summary</div>
+        <div class="tab" onclick="tab('17','sources')">All Sources</div>
+        <div class="tab" onclick="tab('17','claims')">Sourced Claims</div>
+        <div class="tab" onclick="tab('17','unsourced')">Unable to Source</div>
+        <button class="raw-toggle" onclick="showRaw(17)">{ } Raw</button>
+      </div>
+      <div id="raw-17" class="raw-data-wrap"></div>
+      <div class="panel active" id="17-sum"><div id="17-sum-c"></div></div>
+      <div class="panel" id="17-sources"><div id="17-sources-c"></div></div>
+      <div class="panel" id="17-claims"><div id="17-claims-c"></div></div>
+      <div class="panel" id="17-unsourced"><div id="17-unsourced-c"></div></div>
     </div>
   </div>
 </div>
@@ -1055,6 +1109,40 @@ const INDUSTRIES = {
     real_estate:'4,000–15,000 sqft, high-ceiling open floor, parking, locker rooms with showers, HVAC for heat load, ADA restrooms',
     revenue_unit:'monthly recurring membership revenue',
     price_label_primary:'Member/mo', price_label_secondary:'PT Session',
+  },
+  indoor_play: {
+    label:'Indoor Play Area / FEC', emoji:'🎠',
+    unit:'indoor play center', units:'indoor play centers',
+    capacity_label:'Daily Visitor Capacity', capacity_default:200, budget_default:900000,
+    regulatory:'Local fire marshal, ASTM F1487 equipment standards, ADA, food service permit (if café), state child safety regulations',
+    regulatory_url:'local municipality / ASTM',
+    tiers_label:'Admission Tiers',
+    tiers:['Drop-In (hourly)','Memberships + Drop-In','Full FEC (memberships + parties + café)'],
+    compliance:'CPSC and ASTM F1487 equipment safety standards, fire occupancy limits, ADA accessibility, food service health permit (if café), party room fire egress, liability waivers, staff-to-child supervision ratios',
+    grants:'SBA 7(a) loans, USDA Rural Business Development grants, local economic development incentives, New Markets Tax Credits, tourism development grants',
+    competitors:'Jump! Zone, Sky Zone, Urban Air Adventure Parks, Defy, Pump It Up, Rockin Jump, Altitude Trampoline Park, Chuck E. Cheese, local bounce house venues',
+    financials:'hourly admission by age/height, birthday party packages ($300-$800), monthly memberships, café/concession revenue, arcade/token revenue, special event rentals',
+    staffing:'party hosts, floor monitors (CPR certified), front desk/cashiers, café staff, birthday party coordinator, general manager, maintenance technician',
+    real_estate:'8,000–25,000 sqft, high ceilings (20+ ft for climbing/trampoline zones), anchor or strip mall, large parking, ADA restrooms, separate party rooms, kitchen/café area',
+    revenue_unit:'daily admission revenue + party bookings',
+    price_label_primary:'Admission/child', price_label_secondary:'Party Package',
+  },
+  dry_cleaning: {
+    label:'Dry Cleaning / Laundry Service', emoji:'👔',
+    unit:'dry cleaning business', units:'dry cleaning locations',
+    capacity_label:'Garments/Day Capacity', capacity_default:250, budget_default:420000,
+    regulatory:'EPA PERC regulations (40 CFR Part 63 Subpart M), state dry cleaning fund registration, hazardous waste disposal permit, fire marshal, air quality permit',
+    regulatory_url:'epa.gov / state environmental agency',
+    tiers_label:'Service Mix',
+    tiers:['Dry Clean + Press Only','Full Service (dry clean + laundry + alterations)','Premium (same-day + delivery + alterations)'],
+    compliance:'EPA perchloroethylene (PERC) or wet-cleaning compliance, state dry cleaning environmental fund registration, hazardous waste manifest, fire code for solvent storage, ADA, wastewater discharge permit',
+    grants:'EPA Brownfields grants for PERC remediation, SBA 7(a) loans, state dry cleaning environmental fund low-interest loans, USDA Rural Business grants, green cleaning transition incentives',
+    competitors:'Martinizing Dry Cleaning, CD One Price Cleaners, Tide Cleaners, Lapels Dry Cleaning, Zips Dry Cleaning, local independents, on-demand apps (Rinse, Laundry Care)',
+    financials:'price per garment by type (suit $12-20, shirt $5-8, dress $15-25), alterations revenue, pickup/delivery premium, monthly commercial account contracts, wedding/specialty garment revenue',
+    staffing:'dry cleaning technician (certified), pressers, customer service/counter staff, delivery driver (if delivery), alterations specialist, store manager',
+    real_estate:'1,200–3,500 sqft, strip mall or standalone, drive-through window (high value), adequate ventilation for solvents, utility connections (gas/electric/water), ADA, parking',
+    revenue_unit:'revenue per garment + alterations',
+    price_label_primary:'Avg Ticket/Order', price_label_secondary:'Commercial Acct/mo',
   },
 };
 
@@ -1952,7 +2040,7 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 
 
-async function runAgent7(a3,a4,a5) {
+async function _legacyRunAgent7(a3,a4,a5) {
   setDot(7,'running');
   const ind=industry();
   const sys=`You are a ${ind.unit} financial analyst. Respond JSON only with realistic numbers.`;
@@ -2169,162 +2257,12 @@ Return ONLY:
 
 async function runAgent9(a1,a2,a3,a4,a5,a6,a7,a8) {
   setDot(9,'running');
-  const ind=industry();
-  const sys=`You are a senior business plan writer and SBA loan consultant with 20 years of experience helping ${ind.unit} businesses secure funding. You write detailed, bank-ready business plans. Respond JSON only.`;
-  const usr=`Write a comprehensive SBA 7(a) loan-ready business plan for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) near ZIP ${zip()}.
+  $('9-ov-c').innerHTML = subProgress(1,4,'Starting business plan sub-agents…');
+  // Use 4 focused sub-calls instead of one large call to prevent max_tokens truncation
 
-Use all research below:
-DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'])}
-GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score','age_gaps'])}
-SITE SELECTION: ${ctx(a3,['summary','locations'])}
-REAL ESTATE: ${ctx(a4,['summary','listings','by_city_summary'])}
-COMPLIANCE: ${ctx(a5,['summary','requirements','timeline_phases'])}
-COMPETITIVE INTEL: ${ctx(a6,['summary','cities','top_chains'])}
-FINANCIALS: ${ctx(a7,['summary','scenarios','projections','by_city_financials'])}
-EXECUTIVE SUMMARY: ${ctx(a8,['verdict','verdict_rationale','assessment','success_factors','risks','next_steps'])}
-
-Return ONLY this JSON (be extremely detailed — this is a real bank document):
-{
-  "business_name": "Bright Futures Early Learning Center",
-  "entity_type": "LLC",
-  "owner_placeholder": "[Owner Name]",
-  "executive_summary": {
-    "concept": "3-paragraph detailed concept description covering mission, services, target market, and differentiation",
-    "opportunity": "2-paragraph detailed market opportunity citing specific census data and gap analysis findings",
-    "ask": "Total capital requested, use of funds breakdown, expected ROI for lender"
-  },
-  "company_overview": {
-    "mission": "Full mission statement",
-    "vision": "Full vision statement",
-    "values": ["Value 1 with explanation","Value 2 with explanation","Value 3 with explanation","Value 4 with explanation"],
-    "legal_structure": "Georgia LLC — single-member or multi-member detail",
-    "location_rationale": "Detailed paragraph on why the chosen city/submarket was selected citing data",
-    "services": [
-      {"name":"Infant Care (6 weeks – 12 months)","capacity":12,"ratio":"1:4","monthly_tuition":2050,"annual_revenue":246000,"description":"Full-day care including feeding schedules, milestone tracking, parent communication app"},
-      {"name":"Toddler Care (1–2 years)","capacity":18,"ratio":"1:6","monthly_tuition":1850,"annual_revenue":399600,"description":"Structured play, language development, potty training support"},
-      {"name":"Preschool (3 years)","capacity":20,"ratio":"1:10","monthly_tuition":1600,"annual_revenue":384000,"description":"Pre-reading, STEM intro, social-emotional learning, school readiness"},
-      {"name":"Pre-K (4–5 years)","capacity":20,"ratio":"1:12","monthly_tuition":1400,"annual_revenue":336000,"description":"Kindergarten readiness, Georgia Pre-K program eligible, full curriculum"},
-      {"name":"Before/After School","capacity":15,"ratio":"1:15","monthly_tuition":800,"annual_revenue":144000,"description":"Transportation from local elementary schools, homework help"}
-    ]
-  },
-  "market_analysis": {
-    "target_market": "Detailed description of primary customer — dual-income households, age 25-45, household income $75k+",
-    "market_size": {
-      "total_addressable": "Children under 6 in 40-mile radius: ~65,000",
-      "serviceable": "Children of working parents in target income bracket: ~28,000",
-      "target_share": "Target 0.27% market share = 75 enrolled children at full capacity"
-    },
-    "competitor_comparison": [
-      {"name":"Primrose Schools","locations":6,"monthly_tuition_infant":2100,"rating":4.1,"waitlist":true,"our_advantage":"Lower tuition, more personalized, locally owned"},
-      {"name":"KinderCare","locations":4,"monthly_tuition_infant":1750,"rating":3.8,"waitlist":false,"our_advantage":"Higher quality staff, smaller class sizes, Reggio-inspired"},
-      {"name":"Bright Horizons","locations":2,"monthly_tuition_infant":2400,"rating":4.4,"waitlist":true,"our_advantage":"More accessible price point with equivalent quality"},
-      {"name":"Independent Centers","locations":24,"monthly_tuition_infant":1450,"rating":4.2,"waitlist":true,"our_advantage":"Better facilities, technology, curriculum structure"},
-      {"name":"Winder/Auburn (Barrow)","locations":4,"monthly_tuition_infant":1300,"rating":3.9,"waitlist":true,"our_advantage":"Only quality provider if locating in Barrow County"}
-    ],
-    "differentiators": [
-      "Reggio Emilia-inspired curriculum with STEM integration",
-      "Live parent camera access via HiMama or Brightwheel app",
-      "Bilingual (English/Spanish) classroom assistant in each room",
-      "Georgia Bright from the Start Quality Rated — targeting 3-star minimum",
-      "Fresh, locally-sourced snacks and meals — CACFP enrolled",
-      "Director with Master's in Early Childhood Education"
-    ],
-    "trends": [
-      "Post-pandemic childcare demand surge — supply still recovering",
-      "Georgia childcare desert designation in Barrow County — federal priority funding available",
-      "Dual-income household norm in Gwinnett/Barrow — 71%+ of families need full-day care",
-      "Employer-sponsored childcare benefits growing — corporate partnership opportunity"
-    ]
-  },
-  "operations_plan": {
-    "facility": {
-      "total_sqft": 8000,
-      "indoor_sqft_per_child": 37,
-      "outdoor_sqft_per_child": 80,
-      "rooms": [
-        {"name":"Infant Room A","sqft":480,"capacity":6,"ratio":"1:4"},
-        {"name":"Infant Room B","sqft":480,"capacity":6,"ratio":"1:4"},
-        {"name":"Toddler Room A","sqft":540,"capacity":9,"ratio":"1:6"},
-        {"name":"Toddler Room B","sqft":540,"capacity":9,"ratio":"1:6"},
-        {"name":"Preschool Room A","sqft":700,"capacity":10,"ratio":"1:10"},
-        {"name":"Preschool Room B","sqft":700,"capacity":10,"ratio":"1:10"},
-        {"name":"Pre-K Room A","sqft":700,"capacity":10,"ratio":"1:12"},
-        {"name":"Pre-K Room B","sqft":700,"capacity":10,"ratio":"1:12"},
-        {"name":"Multi-purpose / Before-After","sqft":900,"capacity":15,"ratio":"1:15"},
-        {"name":"Director Office, Reception, Kitchen, Storage","sqft":2260,"capacity":0,"ratio":"N/A"}
-      ]
-    },
-    "hours": "Monday–Friday 6:30 AM – 6:30 PM (12-hour operation)",
-    "staffing_plan": [
-      {"role":"Center Director","count":1,"salary":78000,"requirement":"Master's ECE or BA + 3 yrs director experience, DECAL required"},
-      {"role":"Lead Infant Teacher","count":2,"salary":42000,"requirement":"CDA credential minimum, infant CPR"},
-      {"role":"Lead Toddler Teacher","count":2,"salary":40000,"requirement":"CDA credential minimum"},
-      {"role":"Lead Preschool Teacher","count":2,"salary":38000,"requirement":"CDA or ECE degree"},
-      {"role":"Lead Pre-K Teacher","count":2,"salary":38000,"requirement":"Georgia Pre-K certification preferred"},
-      {"role":"Teacher Assistants","count":5,"salary":29000,"requirement":"High school diploma, enrolled in CDA program"},
-      {"role":"Cook / Nutrition Coordinator","count":1,"salary":32000,"requirement":"ServSafe certified, CACFP trained"},
-      {"role":"Administrative Coordinator","count":1,"salary":36000,"requirement":"Childcare admin experience, billing software"}
-    ],
-    "curriculum": "Reggio Emilia-inspired with Georgia Early Learning & Development Standards (GELDS) alignment. HighScope assessment tools. Ages & Stages Questionnaire (ASQ-3) developmental screening.",
-    "technology": ["Brightwheel parent communication & billing platform","IP camera system with parent portal access","Procare Solutions childcare management software","QuickBooks for accounting","Google Workspace for staff communication"]
-  },
-  "financial_plan": {
-    "startup_capital_needed": 542000,
-    "use_of_funds": [
-      {"item":"Real Estate (deposit + first/last month rent)","amount":42000,"pct":7.8},
-      {"item":"Build-Out & Renovation","amount":185000,"pct":34.1},
-      {"item":"Playground & Outdoor Equipment","amount":48000,"pct":8.9},
-      {"item":"Indoor FF&E (furniture, cribs, mats, etc.)","amount":92000,"pct":17.0},
-      {"item":"Technology & Security Systems","amount":14000,"pct":2.6},
-      {"item":"Licensing, Permits & Legal","amount":22000,"pct":4.1},
-      {"item":"Insurance (first 12 months)","amount":9600,"pct":1.8},
-      {"item":"Initial Marketing & Pre-Enrollment","amount":22000,"pct":4.1},
-      {"item":"Working Capital (6 months operations)","amount":107400,"pct":19.8}
-    ],
-    "funding_sources": [
-      {"source":"SBA 7(a) Loan","amount":400000,"pct":73.8,"terms":"10 year, prime + 2.75% (~7.75%), monthly payment ~$4,800","lender_contacts":["Truist Bank SBA Division: sba@truist.com","Regions Bank SBA: 1-800-REGIONS","Live Oak Bank (childcare specialist): liveoak.bank","TD Bank SBA: tdbank.com/sba"]},
-      {"source":"Owner Equity","amount":100000,"pct":18.5,"terms":"Personal investment","lender_contacts":[]},
-      {"source":"USDA Rural Development (Barrow Co.)","amount":25000,"pct":4.6,"terms":"Low-interest grant/loan if Barrow County site","lender_contacts":["USDA RD Georgia: rd.usda.gov/ga","Athens USDA office: 706-546-2136"]},
-      {"source":"Georgia SBIC / SBDA","amount":17000,"pct":3.1,"terms":"State small business development grant","lender_contacts":["Georgia SBDC: georgiasbdc.org","Gwinnett SBDC: 678-985-6840"]}
-    ],
-    "year1_projections": {"revenue":580000,"cogs":0,"gross_profit":580000,"operating_expenses":480000,"ebitda":100000,"net_income":68000},
-    "year2_projections": {"revenue":820000,"cogs":0,"gross_profit":820000,"operating_expenses":510000,"ebitda":310000,"net_income":248000},
-    "year3_projections": {"revenue":980000,"cogs":0,"gross_profit":980000,"operating_expenses":545000,"ebitda":435000,"net_income":360000},
-    "breakeven_analysis": "Break-even at 47 enrolled children (63% capacity) at average tuition of $1,680/month. Expected to reach break-even in Month 18.",
-    "debt_service_coverage": "DSCR at full operation: 2.8x (well above SBA minimum of 1.25x)",
-    "collateral": "Personal assets, equipment, leasehold improvements, assignment of lease"
-  },
-  "sba_checklist": [
-    {"item":"SBA Form 1919 – Borrower Information","status":"Required","notes":"Complete for all 20%+ owners","link":"https://www.sba.gov/document/sba-form-1919-borrower-information-form"},
-    {"item":"SBA Form 413 – Personal Financial Statement","status":"Required","notes":"All owners with 20%+ stake","link":"https://www.sba.gov/document/sba-form-413-personal-financial-statement"},
-    {"item":"Business Plan (this document)","status":"This Document","notes":"Bank requires 3-5 year projections","link":""},
-    {"item":"3 Years Personal Tax Returns","status":"Gather","notes":"All owners","link":""},
-    {"item":"3 Years Business Tax Returns","status":"N/A – New Business","notes":"Startup exemption","link":""},
-    {"item":"Personal Credit Report","status":"Required","notes":"650+ preferred, 680+ for best rates","link":"https://www.annualcreditreport.com"},
-    {"item":"Business Credit (Dun & Bradstreet)","status":"Establish Now","notes":"Register at dnb.com","link":"https://www.dnb.com/duns-number.html"},
-    {"item":"Georgia LLC Operating Agreement","status":"Required","notes":"File at sos.ga.gov","link":"https://sos.ga.gov/page/business-formation"},
-    {"item":"EIN from IRS","status":"Required","notes":"Apply free at IRS.gov","link":"https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online"},
-    {"item":"Commercial Lease Letter of Intent","status":"Required","notes":"Bank needs to see committed location","link":""},
-    {"item":"DECAL License Application","status":"File After Lease","notes":"decal.ga.gov","link":"https://decal.ga.gov/BftS/Home.aspx"},
-    {"item":"Construction Bids (2-3 minimum)","status":"Required","notes":"For build-out cost validation","link":""},
-    {"item":"Business Insurance Quote","status":"Required","notes":"$1M general liability minimum","link":""},
-    {"item":"Management Resumes","status":"Required","notes":"Director and owner resumes","link":""}
-  ],
-  "investor_slides": [
-    {"slide":1,"title":"The Problem","content":"1 in 3 working families in Gwinnett and Barrow County Georgia cannot find licensed, quality childcare. Waitlists at top centers average 3-4 months. Barrow County has only 6 licensed centers for a county growing at 22% annually. Working parents are forced to reduce hours or leave the workforce entirely — costing Georgia's economy an estimated $1.2B in lost productivity annually."},
-    {"slide":2,"title":"The Solution","content":"Bright Futures Early Learning Center: a premium, Reggio Emilia-inspired childcare center serving Infant through Pre-K in the highest-demand, lowest-supply corridor in the Atlanta metro. 75-child capacity, 12-hour operating day, bilingual staff, live parent cameras, and Quality Rated curriculum — positioned at the mid-premium price point ($1,400–$2,050/month) to capture the largest addressable market."},
-    {"slide":3,"title":"Market Opportunity","content":"Total addressable market: 65,000 children under 6 within 40 miles. Serviceable market: 28,000 children of working parents in target income bracket. Current supply deficit: 2,400+ unserved children in top 3 target cities alone. Market growing 8-22% annually. Average competitor operating at 91% capacity with waitlists. This is a supply-constrained market."},
-    {"slide":4,"title":"Business Model","content":"Revenue from monthly tuition across 5 age groups. Infant: $2,050/mo × 12 slots = $246K annual. Toddler: $1,850/mo × 18 slots = $399K annual. Preschool: $1,600/mo × 20 slots = $384K annual. Pre-K: $1,400/mo × 20 slots = $336K annual. Before/After: $800/mo × 15 slots = $144K annual. Total at full capacity: $1.51M annual revenue. Year 1 target (78% fill): $980K."},
-    {"slide":5,"title":"Financial Projections","content":"Total startup investment: $542,000 (73.8% SBA 7(a) loan). Year 1: $580K revenue, $68K net income. Year 2: $820K revenue, $248K net income. Year 3: $980K revenue, $360K net income. Break-even: Month 18 at 63% capacity. 3-year cumulative net: $676,000. SBA DSCR at maturity: 2.8x."},
-    {"slide":6,"title":"Competitive Advantage","content":"1. First quality provider in Barrow County corridor (if Auburn/Winder site). 2. ONLY Reggio-inspired center with bilingual staff in target market. 3. Technology-forward — Brightwheel app, live cameras, digital daily reports. 4. Georgia Quality Rated target — 3-star opens access to state subsidy families and employer partnerships. 5. Locally owned — personal service that corporate chains cannot match."},
-    {"slide":7,"title":"Use of Funds","content":"$542,000 total: Real estate deposit & first/last rent $42K (7.8%) · Build-out & renovation $185K (34.1%) · Outdoor playground $48K (8.9%) · Indoor FF&E $92K (17.0%) · Technology & security $14K (2.6%) · Licensing, legal & permits $22K (4.1%) · Insurance year 1 $9.6K (1.8%) · Marketing & pre-enrollment $22K (4.1%) · 6-month working capital $107.4K (19.8%)."},
-    {"slide":8,"title":"The Team","content":"[Owner/Operator] – [Background]. Director [Name] – [Credentials, years experience]. Advisory Board includes [DECAL consultant], [local pediatrician for health advisory], [CPA specializing in childcare]. Backed by Georgia SBDC mentorship program."},
-    {"slide":9,"title":"The Ask","content":"Seeking $400,000 SBA 7(a) loan (10 year, ~7.75%) plus $100,000 owner equity and $42,000 in supplemental grants. Total capital: $542,000. Funds deployed over 14-month pre-opening period. Lender receives: 1st lien on all equipment, leasehold assignment, personal guarantee. SBA guarantee reduces lender risk to 25% of loan value."}
-  ]
-}`;
   try {
-    let d = await claudeJSON(sys, usr);
-    if(!d) { console.warn('Agent 9 fallback'); d=getFallback9(); }
+    let d = await runAgent9Parts(a1,a2,a3,a4,a5,a6,a7,a8);
+    if(!d || !d.business_name) { console.warn('Agent 9 fallback'); d=getFallback9(); }
     R.a9 = d;
     renderBusinessPlan(d);
     setDot(9,'done'); showOut(9);
@@ -2396,13 +2334,45 @@ function renderBusinessPlan(d) {
 
   // Financials tab
   const fp=d.financial_plan;
+  // Support both new one_time_costs structure and legacy use_of_funds
+  const oneTimeCosts = fp.one_time_costs || fp.use_of_funds || [];
+  const fixedCosts   = fp.fixed_monthly_costs || [];
+  const varCosts     = fp.variable_monthly_costs || [];
+  const totalOTC = oneTimeCosts.reduce((s,x)=>s+(x.amount||0),0);
+  const startup = fp.startup_capital_needed || totalOTC;
   let fin=`<div class="bp-section">
-    <h3>Startup Capital Requirements — $${fp.startup_capital_needed.toLocaleString()}</h3>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Use of Funds</th><th>Amount</th><th>% of Total</th></tr></thead><tbody>`;
-  (fp.use_of_funds||[]).forEach(u=>{
-    fin+=`<tr><td>${u.item}</td><td>$${u.amount.toLocaleString()}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="width:${u.pct}%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:11px;width:36px">${u.pct}%</span></div></td></tr>`;
+    <h3>One-Time Startup Costs — $${startup.toLocaleString()}</h3>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Capital needed before opening day. These are non-recurring investment costs.</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>Amount</th><th>Category</th><th>Notes</th><th>% of Total</th></tr></thead><tbody>`;
+  oneTimeCosts.forEach(u=>{
+    const pct = u.pct || (startup ? (u.amount/startup*100).toFixed(1) : 0);
+    fin+=`<tr><td><strong>${u.item}</strong></td><td style="color:var(--amber)">$${(u.amount||0).toLocaleString()}</td><td><span class="badge b-blue">${u.category||'Startup'}</span></td><td style="font-size:11px;color:var(--muted)">${u.notes||''}</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;min-width:60px"><div style="width:${Math.min(100,pct)}%;height:100%;background:var(--amber);border-radius:3px"></div></div><span style="font-size:10px;width:32px">${pct}%</span></div></td></tr>`;
   });
-  fin+=`</tbody></table></div>
+  fin+=`</tbody></table></div>`;
+
+  if(fixedCosts.length) {
+    const totalFixed = fixedCosts.reduce((s,x)=>s+(x.amount||0),0);
+    fin+=`<h4 style="margin-top:16px">Fixed Monthly Costs — $${totalFixed.toLocaleString()}/mo</h4>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Costs that do not change with revenue/volume. Must be covered regardless of occupancy.</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>Monthly Amount</th><th>Annual</th><th>Notes</th></tr></thead><tbody>`;
+    fixedCosts.forEach(f=>{
+      fin+=`<tr><td>${f.item}</td><td style="color:var(--red)">$${(f.amount||0).toLocaleString()}</td><td style="color:var(--red)">$${((f.amount||0)*12).toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${f.notes||''}</td></tr>`;
+    });
+    fin+=`<tr><td><strong>Total Fixed</strong></td><td style="color:var(--red);font-weight:700">$${totalFixed.toLocaleString()}</td><td style="color:var(--red);font-weight:700">$${(totalFixed*12).toLocaleString()}</td><td>—</td></tr>`;
+    fin+=`</tbody></table></div>`;
+  }
+
+  if(varCosts.length) {
+    fin+=`<h4 style="margin-top:16px">Variable Monthly Costs</h4>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Costs that scale with revenue, occupancy, or customer volume.</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>Estimated/mo</th><th>Scales With</th><th>Notes</th></tr></thead><tbody>`;
+    varCosts.forEach(v=>{
+      fin+=`<tr><td>${v.item}</td><td style="color:var(--amber)">$${(v.amount||0).toLocaleString()}</td><td style="font-size:11px;color:var(--blue)">${v.per_unit||'revenue'}</td><td style="font-size:11px;color:var(--muted)">${v.notes||''}</td></tr>`;
+    });
+    fin+=`</tbody></table></div>`;
+  }
+
+  fin+=`
     <h4>Funding Sources</h4>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Source</th><th>Amount</th><th>%</th><th>Terms</th><th>Lender Contacts</th></tr></thead><tbody>`;
   (fp.funding_sources||[]).forEach(s=>{
@@ -2504,17 +2474,10 @@ function renderBusinessPlan(d) {
 
 async function runAgent10(a3,a4,a5,a7,a9) {
   setDot(10,'running');
-  const ind=industry();
-  const sys=`You are a senior project manager specializing in ${ind.unit} launches. You create detailed, actionable project plans. Respond JSON only.`;
-  const usr=`Create a comprehensive 18-month project execution plan to open a ${ind.unit} (${ind.capacity_label}: ${capacity()}) near ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
-
-SITE SELECTION: ${ctx(a3,['summary','locations'])}
-REAL ESTATE: ${ctx(a4,['summary','by_city_summary'])}
-COMPLIANCE: ${ctx(a5,['summary','requirements','timeline_phases'])}
-FINANCIALS: ${ctx(a7,['summary','scenarios','startup_breakdown'])}
-BUSINESS PLAN: ${ctx(a9,['executive_summary','financial_plan','operations_plan'])}
-
-Return ONLY:
+  $('10-gantt-c').innerHTML = subProgress(1,3,'Starting project plan sub-agents…');
+  // Sub-call approach — see 25-agent-10-parts.js
+  // Old single-call prompt removed to prevent max_tokens truncation
+  const _unused_marker = `[old template removed — sub-calls handle prompt generation in 25-agent-10-parts.js]
 {
   "project_name": "Bright Futures Early Learning Center — Launch",
   "total_duration_months": 18,
@@ -2756,9 +2719,10 @@ Return ONLY:
     }
   ]
 }`;
+  // (prompt removed — replaced by sub-call approach below)
   try {
-    let d = await claudeJSON(sys, usr);
-    if(!d) { console.warn('Agent 10 fallback'); d=getFallback10(); }
+    let d = await runAgent10Parts(a3,a4,a5,a7,a9);
+    if(!d || !d.phases) { console.warn('Agent 10 fallback'); d=getFallback10(); }
     R.a10 = d;
     renderProjectPlan(d);
     setDot(10,'done'); showOut(10);
@@ -3422,15 +3386,10 @@ async function runPipeline() {
   $('orchStatus').textContent='orchestrating…';
   $('finalBox').className='final-box';
 
-  const fb = k => JSON.stringify(window['getFallback'+k]());
+  const fb = k => JSON.stringify(window['getFallback'+k]?.() || {});
   try {
-    setProgress(2,'Pre-flight — Code Review · QA Testing…');
-    try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
-    if(stopRequested){showErr('Pipeline stopped by user.');return;}
-    try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
-    if(stopRequested){showErr('Pipeline stopped by user.');return;}
-
-    setProgress(4,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
+    // ── Phase 1: Foundation Research (parallel) ─────────────
+    setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
     const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
     const r1=res1.status==='fulfilled'?res1.value:fb(1);
     const r5=res5.status==='fulfilled'?res5.value:fb(5);
@@ -3440,47 +3399,74 @@ async function runPipeline() {
     if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
+    // ── Phase 2: Gap Analysis ────────────────────────────────
     setProgress(16,'Phase 2 — Gap Analysis…');
     let r2=fb(2);
     try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(26,'Phase 3 — Site Selection…');
+    // ── Phase 3: Site Selection ──────────────────────────────
+    setProgress(24,'Phase 3 — Site Selection…');
     let r3=fb(3);
     try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(36,'Phase 4 — Real Estate then Financial Model…');
+    // ── Phase 4: Real Estate (needs site selection first) ────
+    setProgress(32,'Phase 4 — Real Estate Search…');
     let r4=fb(4);
     try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
+
+    // ── Phase 5: Financial Feasibility (site-aware, 3 sub-calls) ──
+    setProgress(40,'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…');
     let r7=fb(7);
     try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(48,'Phase 5 — Executive Summary…');
+    // ── Phase 6: Executive Summary ───────────────────────────
+    setProgress(50,'Phase 6 — Executive Summary & Verdict…');
     let r8=fb(8);
     try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(56,'Phase 6 — Business Plan · SBA Package · Investor Deck…');
+    // ── Phase 7: Business Plan (4 sub-calls) ─────────────────
+    setProgress(58,'Phase 7 — Business Plan (4 focused sub-agents)…');
     let r9=fb(9);
     try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(64,'Phase 7 — Project Execution Plan · Gantt · Risk Register…');
+    // ── Phase 8: Project Plan (3 sub-calls) ──────────────────
+    setProgress(66,'Phase 8 — Project Plan (3 focused sub-agents)…');
     try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(72,'Phase 8 — Market Map · Grants · Competitor Analysis (parallel)…');
+    // ── Phase 9: Supplemental Analysis (parallel) ───────────
+    setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
     await Promise.allSettled([
       runAgent11(r1,r2,r4),
       runAgent12(r3,r5),
-      runAgent13(r6)
+      runAgent13(r6),
+      (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
     ]);
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(100,'Complete — all 15 agents finished');
+    // ── Phase 10: Marketing Strategy ────────────────────────
+    // (Agent 10 = project plan, marketing is embedded — no separate agent yet)
+
+    // ── Phase 11: Meta Agents ────────────────────────────────
+    setProgress(86,'Phase 11 — Code Review · QA Testing…');
+    try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+    if(stopRequested){showErr('Pipeline stopped by user.');return;}
+    try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+    if(stopRequested){showErr('Pipeline stopped by user.');return;}
+
+    // ── Phase 12: Sources & Citations ────────────────────────
+    setProgress(94,'Phase 12 — Sources & Citations…');
+    try {
+      if(typeof runAgent17==='function') await runAgent17(R);
+    } catch(e) { console.error('Agent 17 failed:',e.message); }
+
+    setProgress(100,'Complete — all agents finished');
     $('orchStatus').textContent='done';
   } catch(e) {
     $('orchStatus').textContent='error';
@@ -3518,6 +3504,8 @@ async function reRunAgent(n) {
     else if(n===13){ await runAgent13(s(6)); }
     else if(n===14){ await runAgent14(R); }
     else if(n===15){ await runAgent15(R); }
+    else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
+    else if(n===17){ await runAgent17(R); }
   } catch(e) {
     console.error('Re-run agent '+n+' failed:',e.message);
   } finally {
@@ -3652,7 +3640,7 @@ function populateLocationDropdown() {
 }
 
 function resetAll() {
-  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'].forEach(id=>{
+  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'].forEach(id=>{
     const dot=$('dot-'+id), card=$('card-'+id), out=$('out-'+id);
     if(dot) dot.className='agent-dot';
     if(card) card.className='agent-card';
@@ -3666,7 +3654,9 @@ function resetAll() {
     '11-map-c','11-leg-c','11-dir-c','12-sum-t','12-caps-c','12-usda-c','12-local-c','12-tbl-c',
     '13-sum-t','13-comp-c','13-pain-c','13-diff-c','13-msg-c',
     '14-sum-t','14-issues-c','14-perf-c','14-cost-c','14-fixes-c',
-    '15-sum-t','15-tests-c','15-data-c','15-ux-c','15-score-c'];
+    '15-sum-t','15-tests-c','15-data-c','15-ux-c','15-score-c',
+    '16-sum-c','16-list-c','16-comp-c','16-matrix-c','16-steps-c',
+    '17-sum-c','17-sources-c','17-claims-c','17-unsourced-c'];
   clearIds.forEach(id=>{const el=$(id);if(el)el.innerHTML='';});
   Object.keys(charts).forEach(k=>{try{charts[k].destroy()}catch{}});
   charts={};
@@ -3851,6 +3841,1243 @@ document.addEventListener('DOMContentLoaded', function(){ setTimeout(injectExpan
     window.showOut = function(n){ _orig(n); setTimeout(injectExpandButtons, 60); };
   }
 })();
+
+
+// ══════════════════════════════════════════════════════════
+// BUSINESS PLAN SUB-CALLS  (24-agent-09-parts.js)
+// Splits the single large Agent 9 call into 4 focused calls
+// to prevent Response truncated at max_tokens errors.
+// Each call returns ~1,500–2,000 tokens; they are merged into
+// one R.a9 object before rendering.
+// ══════════════════════════════════════════════════════════
+
+async function runAgent9Parts(a1,a2,a3,a4,a5,a6,a7,a8) {
+  const ind = industry();
+  const base = `${ind.unit} · ${ind.capacity_label}: ${capacity()} · Budget $${parseInt(budget()).toLocaleString()} · ZIP ${zip()}`;
+  const ctx3 = ctx(a3,['summary','locations']);
+  const ctx7 = ctx(a7,['summary','scenarios','startup_breakdown','monthly_ops','by_city_financials']);
+  const ctx8 = ctx(a8,['verdict','verdict_rationale','assessment','success_factors','risks','next_steps']);
+
+  // ── Part 1 of 4: Executive Summary + Company Overview ───
+  setDot(9,'running'); $('9-ov-c').innerHTML = subProgress(1,4,'Executive Summary & Company Overview');
+  const sys1 = `You are a senior business plan writer. Return JSON only. No extra text.`;
+  const usr1 = `Write Part 1 of a business plan for a ${base}.
+SITE: ${ctx3}
+FINANCIALS: ${ctx7}
+VERDICT: ${ctx8}
+
+Return ONLY:
+{
+  "business_name": "string",
+  "entity_type": "LLC",
+  "owner_placeholder": "[Owner Name]",
+  "executive_summary": {
+    "concept": "3-paragraph concept: mission, services, target market, differentiation",
+    "opportunity": "2-paragraph market opportunity citing specific numbers from demographics and gap analysis",
+    "ask": "Total capital requested, use of funds breakdown, expected ROI for lender"
+  },
+  "company_overview": {
+    "mission": "Full mission statement",
+    "vision": "Full vision statement",
+    "values": ["Value 1 with one-sentence explanation","Value 2","Value 3","Value 4"],
+    "legal_structure": "Georgia LLC detail",
+    "location_rationale": "Detailed paragraph why the chosen city/submarket was selected, citing data from site selection",
+    "services": [
+      {"name":"Service name","capacity":12,"ratio":"1:4","monthly_price":2050,"annual_revenue":246000,"description":"Full description of what is included"}
+    ]
+  }
+}`;
+
+  // ── Part 2 of 4: Market Analysis ────────────────────────
+  const p1 = await claudeJSON(sys1, usr1);
+  $('9-mkt-c').innerHTML = subProgress(2,4,'Market Analysis & Competitive Positioning');
+  const sys2 = `You are a market research analyst. Return JSON only.`;
+  const usr2 = `Write Part 2 — market analysis — for a ${base}.
+DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'])}
+GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
+COMPETITORS: ${ctx(a6,['summary','cities','top_chains'])}
+SITE: ${ctx3}
+
+Return ONLY:
+{
+  "market_analysis": {
+    "target_market": "Detailed 2-paragraph description of primary customer demographics, income, needs",
+    "market_size": {
+      "total_addressable": "String — total population / households in radius with data source",
+      "serviceable": "String — customers in target income bracket and demographic segment",
+      "target_share": "String — target market share % and what that equals in customers/revenue"
+    },
+    "competitor_comparison": [
+      {"name":"Competitor","locations":3,"monthly_primary_rate":2100,"rating":4.1,"waitlist":true,"our_advantage":"Why we win against this competitor"}
+    ],
+    "differentiators": [
+      "Specific differentiator 1 with detail",
+      "Specific differentiator 2",
+      "Specific differentiator 3",
+      "Specific differentiator 4",
+      "Specific differentiator 5",
+      "Specific differentiator 6"
+    ],
+    "trends": [
+      "Market trend 1 supporting investment with data",
+      "Market trend 2",
+      "Market trend 3",
+      "Market trend 4"
+    ]
+  }
+}`;
+
+  // ── Part 3 of 4: Operations Plan + Financial Plan ───────
+  const p2 = await claudeJSON(sys2, usr2);
+  $('9-fin-c').innerHTML = subProgress(3,4,'Operations Plan & Financial Model');
+  const sys3 = `You are a ${ind.unit} operations and finance expert. Return JSON only.`;
+  const usr3 = `Write Part 3 — operations and financial plan — for a ${base}.
+SITE SELECTION: ${ctx3}
+REAL ESTATE: ${ctx(a4,['summary','by_city_summary'])}
+COMPLIANCE: ${ctx(a5,['summary','requirements','timeline_phases'])}
+FINANCIALS: ${ctx7}
+
+Return ONLY:
+{
+  "operations_plan": {
+    "facility": {
+      "total_sqft": 8000,
+      "indoor_sqft_per_unit": 37,
+      "outdoor_sqft_per_unit": 80,
+      "rooms": [
+        {"name":"Room name","sqft":480,"capacity":6,"ratio":"1:4"}
+      ]
+    },
+    "hours": "Operating hours string",
+    "staffing_plan": [
+      {"role":"Role title","count":1,"salary":78000,"requirement":"Required credentials/experience"}
+    ],
+    "curriculum": "Curriculum/service approach description",
+    "technology": ["Technology platform 1","Platform 2","Platform 3"]
+  },
+  "financial_plan": {
+    "startup_capital_needed": 542000,
+    "one_time_costs": [
+      {"item":"Cost item","amount":42000,"category":"Real Estate","notes":"What drives this cost"}
+    ],
+    "fixed_monthly_costs": [
+      {"item":"Cost item","amount":13000,"notes":"Fixed regardless of volume"}
+    ],
+    "variable_monthly_costs": [
+      {"item":"Cost item","amount":3400,"per_unit":"per child/customer","notes":"Scales with revenue"}
+    ],
+    "funding_sources": [
+      {"source":"SBA 7(a) Loan","amount":400000,"pct":73.8,"terms":"10 year, prime + 2.75%","lender_contacts":["Contact 1","Contact 2"]}
+    ],
+    "year1_projections": {"revenue":580000,"gross_profit":580000,"operating_expenses":480000,"ebitda":100000,"net_income":68000},
+    "year2_projections": {"revenue":820000,"gross_profit":820000,"operating_expenses":510000,"ebitda":310000,"net_income":248000},
+    "year3_projections": {"revenue":980000,"gross_profit":980000,"operating_expenses":545000,"ebitda":435000,"net_income":360000},
+    "breakeven_analysis": "Break-even at X customers/units at average price of $Y. Expected to reach break-even in Month Z.",
+    "debt_service_coverage": "DSCR at full operation: X.Xx (above SBA minimum of 1.25x)",
+    "collateral": "Collateral offered to lender"
+  }
+}`;
+
+  // ── Part 4 of 4: SBA Checklist + Investor Slides ────────
+  const p3 = await claudeJSON(sys3, usr3);
+  $('9-sba-c').innerHTML = subProgress(4,4,'SBA Package & Investor Deck');
+  const sys4 = `You are an SBA loan consultant and startup pitch coach. Return JSON only.`;
+  const usr4 = `Write Part 4 — SBA checklist and investor pitch deck — for a ${base}.
+VERDICT: ${ctx8}
+FINANCIALS: ${ctx7}
+
+Return ONLY:
+{
+  "sba_checklist": [
+    {"item":"Document name","status":"Required","notes":"What to include / where to get it","link":"https://..."}
+  ],
+  "investor_slides": [
+    {"slide":1,"title":"The Problem","content":"3-4 sentence compelling problem statement with specific data points"},
+    {"slide":2,"title":"The Solution","content":"3-4 sentence solution description"},
+    {"slide":3,"title":"Market Opportunity","content":"TAM/SAM/SOM with specific numbers"},
+    {"slide":4,"title":"Business Model","content":"Revenue streams and unit economics"},
+    {"slide":5,"title":"Financial Projections","content":"3-year summary with key milestones"},
+    {"slide":6,"title":"Competitive Advantage","content":"5 specific moats vs named competitors"},
+    {"slide":7,"title":"Use of Funds","content":"Itemized $X breakdown with percentages"},
+    {"slide":8,"title":"The Team","content":"Owner/operator background and advisory team"},
+    {"slide":9,"title":"The Ask","content":"Specific loan amount, terms, lender return analysis"}
+  ]
+}`;
+
+  const p4 = await claudeJSON(sys4, usr4);
+
+  // Merge all 4 parts into one object
+  const merged = Object.assign(
+    {},
+    p1 || {},
+    p2 || {},
+    p3 || {},
+    p4 || {}
+  );
+  return merged;
+}
+
+function subProgress(current, total, label) {
+  const pct = Math.round((current - 1) / total * 100);
+  return `<div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em">
+      Sub-agent ${current} / ${total}
+    </div>
+    <div style="font-size:13px;color:var(--text)">${label}</div>
+    <div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden">
+      <div style="width:${pct}%;height:100%;background:var(--blue);border-radius:2px;transition:width 0.4s"></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted)">Building in focused sections to ensure full depth…</div>
+  </div>`;
+}
+
+
+// ══════════════════════════════════════════════════════════
+// PROJECT PLAN SUB-CALLS  (25-agent-10-parts.js)
+// Splits the single large Agent 10 call into 3 focused calls
+// to prevent Response truncated at max_tokens errors.
+// Part 1: all 5 phases with tasks (Gantt data)
+// Part 2: milestones + budget tracker
+// Part 3: risk register + team/vendors + checklist
+// ══════════════════════════════════════════════════════════
+
+async function runAgent10Parts(a3,a4,a5,a7,a9) {
+  const ind = industry();
+  const base = `${ind.unit} (${ind.capacity_label}: ${capacity()}) near ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}`;
+  const ctx3 = ctx(a3,['summary','locations']);
+  const ctx7 = ctx(a7,['summary','scenarios','startup_breakdown','total_startup_cost']);
+  const ctx9 = ctx(a9,['executive_summary','financial_plan','operations_plan']);
+
+  // ── Part 1 of 3: All 5 Project Phases (Gantt) ───────────
+  $('10-gantt-c').innerHTML = subProgress(1,3,'Project Phases & Gantt Chart');
+  const sys1 = `You are a senior ${ind.unit} project manager with 15+ years experience on commercial launches. Return JSON only.`;
+  const usr1 = `Create all project phases for launching a ${base}.
+SITE: ${ctx3}
+COMPLIANCE: ${ctx(a5,['summary','requirements','timeline_phases'])}
+
+Return ONLY:
+{
+  "project_name": "string",
+  "total_duration_months": 18,
+  "target_open_date": "Month 19 from start",
+  "phases": [
+    {
+      "phase": "Phase 1: Foundation & Funding",
+      "months": "1-3",
+      "color": "#4a9eff",
+      "tasks": [
+        {
+          "task": "Form Business Entity",
+          "month_start": 1,
+          "duration": 0.5,
+          "owner": "Owner",
+          "priority": "Critical",
+          "cost": 150,
+          "detail": "Detailed step-by-step instructions with specific URLs and phone numbers",
+          "links": ["https://specific-link.com"]
+        }
+      ]
+    }
+  ]
+}
+Include ALL 5 phases: Foundation & Funding (months 1-3), Legal/Lease/Design (months 3-6), Construction & Licensing (months 6-12), Staffing & Pre-Opening (months 12-16), Soft Open & Ramp (months 16-18). Each phase should have 8-12 tasks with detailed step-by-step instructions, specific vendor names, phone numbers, and URLs. Priority must be exactly "Critical", "High", or "Medium".`;
+
+  // ── Part 2 of 3: Milestones + Budget Tracker ─────────────
+  const p1 = await claudeJSON(sys1, usr1);
+  $('10-mile-c').innerHTML = subProgress(2,3,'Milestones & Budget Tracker');
+  const sys2 = `You are a ${ind.unit} project manager. Return JSON only.`;
+  const usr2 = `Create milestones and budget tracker for launching a ${base}.
+FINANCIALS: ${ctx7}
+BUSINESS PLAN: ${ctx9}
+
+Return ONLY:
+{
+  "milestones": [
+    {
+      "month": "Week 1",
+      "title": "Milestone title",
+      "detail": "Specific criteria that prove this milestone is complete",
+      "owner": "Owner",
+      "priority": "critical"
+    }
+  ],
+  "budget_tracker": [
+    {
+      "category": "Budget category",
+      "budgeted": 8000,
+      "phase": "Phase 1",
+      "due": "Month 3",
+      "notes": "What drives this cost and how to minimize it"
+    }
+  ]
+}
+Include 15-20 milestones from Week 1 through Month 18 (use "critical" or "high" for priority). Include 15-20 budget line items covering all startup costs with notes on cost drivers.`;
+
+  // ── Part 3 of 3: Risk Register + Team + Checklist ────────
+  const p2 = await claudeJSON(sys2, usr2);
+  $('10-risk-c').innerHTML = subProgress(3,3,'Risk Register, Team & Checklist');
+  const sys3 = `You are a ${ind.unit} project risk manager and operations consultant. Return JSON only.`;
+  const usr3 = `Create risk register, team/vendor directory, and launch checklist for a ${base}.
+SITE: ${ctx3}
+COMPLIANCE: ${ctx(a5,['summary','requirements'])}
+FINANCIALS: ${ctx7}
+
+Return ONLY:
+{
+  "risk_register": [
+    {
+      "risk": "Risk description",
+      "probability": "High",
+      "impact": "Critical",
+      "mitigation": "Specific mitigation steps with named resources and contacts",
+      "owner": "Owner",
+      "phase": "Phase 1"
+    }
+  ],
+  "team_vendors": [
+    {
+      "role": "SBA Lender",
+      "name": "Specific company name",
+      "contact": "website.com",
+      "phone": "phone number",
+      "type": "Financial",
+      "notes": "Why this vendor, what makes them right for this business type"
+    }
+  ],
+  "checklist_phases": [
+    {
+      "phase": "Month 1-3: Foundation",
+      "items": [
+        {
+          "task": "Specific actionable task",
+          "owner": "Owner",
+          "critical": true
+        }
+      ]
+    }
+  ]
+}
+Risk register: 8-10 risks with probability (High/Medium/Low) and impact (Critical/High/Medium). Team/vendors: 10-14 specific named vendors with real phone numbers and websites. Checklist: 5 phases with 10-15 items each.`;
+
+  const p3 = await claudeJSON(sys3, usr3);
+
+  // Merge all 3 parts
+  return Object.assign(
+    { project_name: '', total_duration_months: 18, target_open_date: '' },
+    p1 || {},
+    p2 || {},
+    p3 || {}
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════
+// FINANCIAL FEASIBILITY SUB-AGENTS  (26-agent-fin-subs.js)
+// Replaces the single large Agent 7 call with 3 focused sub-
+// calls: Revenue Model → Cost Model → Consolidation.
+// Each call returns focused JSON; merged into R.a7 before
+// calling renderAgent7(d).
+// ══════════════════════════════════════════════════════════
+
+async function runAgent7(a3, a4, a5) {
+  setDot(7, 'running');
+  const ind = industry();
+  const base = `${ind.unit} · ${ind.capacity_label}: ${capacity()} · Budget $${parseInt(budget()).toLocaleString()} · ZIP ${zip()}`;
+  const ctx3 = ctx(a3, ['summary', 'locations']);
+  const ctx4 = ctx(a4, ['summary', 'listings', 'by_city_summary']);
+  const ctx5 = ctx(a5, ['summary', 'requirements', 'timeline_phases']);
+
+  // ── Sub-call A: Revenue Model ───────────────────────────
+  $('7-s-t').textContent = '';
+  $('7-sc-c').innerHTML = subProgress(1, 3, 'Sub-agent 1/2: Revenue Model…');
+
+  const sysA = `You are a financial analyst specializing in ${ind.unit} revenue modeling. Return JSON only.`;
+  const usrA = `Build a detailed revenue model for a ${base}.
+SITE RECOMMENDATIONS: ${ctx3}
+REAL ESTATE: ${ctx4}
+
+Return ONLY:
+{
+  "selected_site": {
+    "city": "string",
+    "address": "string",
+    "monthly_rent": 0,
+    "sqft": 0,
+    "rationale": "2-sentence why this site was chosen for financial modeling"
+  },
+  "revenue_streams": [
+    {
+      "name": "Stream name",
+      "unit_price": 0,
+      "units_per_month": 0,
+      "monthly_revenue": 0,
+      "annual_revenue": 0,
+      "occupancy_rate_pct": 0,
+      "notes": "What drives this revenue"
+    }
+  ],
+  "capacity_scenarios": [
+    {"name": "Conservative", "label": "60% Capacity", "units": 0, "monthly_revenue": 0},
+    {"name": "Base Case",    "label": "78% Capacity", "units": 0, "monthly_revenue": 0},
+    {"name": "Optimistic",  "label": "93% Capacity", "units": 0, "monthly_revenue": 0}
+  ],
+  "revenue_assumptions": [
+    "Assumption 1 with data source",
+    "Assumption 2",
+    "Assumption 3"
+  ]
+}`;
+
+  const revModel = await claudeJSON(sysA, usrA);
+
+  // ── Sub-call B: Cost Model ──────────────────────────────
+  $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/2: Cost Model…');
+
+  const sysB = `You are a financial analyst specializing in ${ind.unit} cost structures. Return JSON only.`;
+  const usrB = `Build a detailed cost model for a ${base}.
+SELECTED SITE: ${JSON.stringify((revModel || {}).selected_site || {})}
+REGULATORY: ${ctx5}
+
+Return ONLY:
+{
+  "one_time_startup_costs": [
+    {
+      "item": "Cost name",
+      "amount": 0,
+      "category": "Real Estate|Construction|Equipment|Legal|Marketing|Working Capital",
+      "notes": "What drives this number",
+      "is_negotiable": true
+    }
+  ],
+  "fixed_monthly_costs": [
+    {
+      "item": "Cost name",
+      "amount": 0,
+      "annual": 0,
+      "notes": "Fixed regardless of volume — must cover at 0% occupancy"
+    }
+  ],
+  "variable_monthly_costs": [
+    {
+      "item": "Cost name",
+      "amount_at_base_case": 0,
+      "scales_with": "occupancy|revenue|staffing",
+      "notes": "How this cost scales"
+    }
+  ],
+  "total_startup": 0,
+  "total_fixed_monthly": 0,
+  "total_variable_at_base": 0
+}`;
+
+  const costModel = await claudeJSON(sysB, usrB);
+
+  // ── Main Consolidating Call ─────────────────────────────
+  $('7-sc-c').innerHTML = subProgress(3, 3, 'Consolidating…');
+
+  const sysMain = `You are a ${ind.unit} financial analyst. Respond JSON only with realistic numbers.`;
+  const usrMain = `Consolidate these revenue and cost models into a full financial feasibility analysis for a ${base}.
+
+REVENUE MODEL: ${JSON.stringify(revModel || {})}
+COST MODEL: ${JSON.stringify(costModel || {})}
+
+Return ONLY:
+{
+  "summary": "4-5 sentence financial assessment using specific numbers from revenue and cost models",
+  "selected_site_summary": "City, address, monthly rent, rationale",
+  "total_startup_cost": 0,
+  "scenarios": [
+    {
+      "name": "Conservative", "label": "60% Capacity", "enrolled": 0,
+      "monthly_revenue": 0, "monthly_expenses": 0, "monthly_net": 0,
+      "annual_net": 0, "breakeven_months": 0, "roi_3yr": 0, "color": "var(--red)"
+    },
+    {
+      "name": "Base Case",    "label": "78% Capacity", "enrolled": 0,
+      "monthly_revenue": 0, "monthly_expenses": 0, "monthly_net": 0,
+      "annual_net": 0, "breakeven_months": 0, "roi_3yr": 0, "color": "var(--amber)"
+    },
+    {
+      "name": "Optimistic",   "label": "93% Capacity", "enrolled": 0,
+      "monthly_revenue": 0, "monthly_expenses": 0, "monthly_net": 0,
+      "annual_net": 0, "breakeven_months": 0, "roi_3yr": 0, "color": "var(--green)"
+    }
+  ],
+  "projections": [
+    {"month": "M1",  "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M3",  "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M6",  "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M9",  "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M12", "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M15", "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M18", "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M21", "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M24", "rev": 0, "exp": 0, "cum": 0},
+    {"month": "M30", "rev": 0, "exp": 0, "cum": 0}
+  ],
+  "by_city_financials": [
+    {
+      "city": "string", "monthly_rent": 0, "avg_primary_rate": 0,
+      "break_even_enrolled": 0, "yr1_net": 0, "yr3_net": 0, "site_rank": 1
+    }
+  ],
+  "funding": [
+    {
+      "source": "SBA 7(a) Loan", "amount": 0, "terms": "string",
+      "monthly_payment": 0, "notes": "string"
+    }
+  ],
+  "startup_breakdown": [{"item": "string", "amount": 0, "category": "string"}],
+  "monthly_ops":       [{"item": "string", "amount": 0}],
+  "one_time_startup_costs":  [],
+  "fixed_monthly_costs":     [],
+  "variable_monthly_costs":  []
+}`;
+
+  try {
+    let main = await claudeJSON(sysMain, usrMain);
+    if (!main) { console.warn('Agent 7 consolidation fallback'); main = getFallback7(); }
+
+    // Merge sub-model arrays into result so renderAgent7 can use them
+    main.one_time_startup_costs  = (costModel || {}).one_time_startup_costs  || main.one_time_startup_costs  || [];
+    main.fixed_monthly_costs     = (costModel || {}).fixed_monthly_costs     || main.fixed_monthly_costs     || [];
+    main.variable_monthly_costs  = (costModel || {}).variable_monthly_costs  || main.variable_monthly_costs  || [];
+    main.selected_site           = (revModel  || {}).selected_site           || null;
+    main.revenue_streams         = (revModel  || {}).revenue_streams         || [];
+    main.revenue_assumptions     = (revModel  || {}).revenue_assumptions     || [];
+
+    R.a7 = main;
+    renderAgent7(main);
+    setDot(7, 'done');
+    showOut(7);
+    return JSON.stringify(main);
+  } catch (e) {
+    setDot(7, 'error');
+    showOut(7);
+    $('7-sc-c').innerHTML = `<div class="prose" style="color:var(--red)">Error: ${e.message}</div>`;
+    throw e;
+  }
+}
+
+function renderAgent7(d) {
+  if (!d) return;
+  const ind7 = industry();
+
+  // ── Summary text ───────────────────────────────────────
+  $('7-s-t').textContent = d.summary || '';
+
+  // ── Selected Site callout ──────────────────────────────
+  const site = d.selected_site || {};
+  const siteHtml = (site.city || d.selected_site_summary)
+    ? `<div style="background:var(--surface2);border:1px solid var(--blue);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em">Selected Site</div>
+        <div style="font-size:15px;font-weight:700;font-family:'Syne',sans-serif">${site.city || ''}${site.address ? ' · ' + site.address : ''}</div>
+        ${site.monthly_rent ? `<div style="font-size:12px;color:var(--muted)">Rent: <strong style="color:var(--text)">$${(site.monthly_rent || 0).toLocaleString()}/mo</strong>${site.sqft ? ' · ' + (site.sqft || 0).toLocaleString() + ' sqft' : ''}</div>` : ''}
+        ${site.rationale ? `<div style="font-size:12px;color:var(--muted);line-height:1.6">${site.rationale}</div>` : (d.selected_site_summary ? `<div style="font-size:12px;color:var(--muted)">${d.selected_site_summary}</div>` : '')}
+      </div>`
+    : '';
+
+  // ── Startup costs table ────────────────────────────────
+  const catBadge = {'Real Estate':'b-blue','Construction':'b-amber','Equipment':'b-green','Legal':'b-purple','Marketing':'b-blue','Working Capital':'b-amber','Insurance':'b-red','Technology':'b-blue','Operations':'b-green'};
+  const startupItems = (d.one_time_startup_costs && d.one_time_startup_costs.length)
+    ? d.one_time_startup_costs
+    : (d.startup_breakdown || []).map(i => ({item: i.item, amount: i.amount, category: i.category, notes: '', is_negotiable: false}));
+  const startupTotal = startupItems.reduce((s, i) => s + (i.amount || 0), 0);
+
+  let startupHtml = '';
+  if (startupItems.length) {
+    startupHtml = `<div style="margin-bottom:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">Total Startup Investment</div>
+      <div style="font-size:22px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber)">$${(d.total_startup_cost || startupTotal).toLocaleString()}</div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>Amount</th><th>Category</th><th>Notes</th></tr></thead><tbody>`;
+    startupItems.forEach(item => {
+      const bc = catBadge[item.category] || 'b-blue';
+      startupHtml += `<tr>
+        <td><strong>${item.item || ''}</strong>${item.is_negotiable ? ' <span class="badge b-green" style="font-size:9px">negotiable</span>' : ''}</td>
+        <td style="color:var(--amber);font-weight:700">$${(item.amount || 0).toLocaleString()}</td>
+        <td><span class="badge ${bc}">${item.category || ''}</span></td>
+        <td style="font-size:11px;color:var(--muted)">${item.notes || ''}</td>
+      </tr>`;
+    });
+    startupHtml += `</tbody></table></div>`;
+  }
+
+  // ── Fixed vs Variable costs side-by-side ──────────────
+  const fixedItems    = d.fixed_monthly_costs    || [];
+  const variableItems = d.variable_monthly_costs || [];
+  const fixedTotal    = fixedItems.reduce((s, i) => s + (i.amount || 0), 0);
+  const varTotal      = variableItems.reduce((s, i) => s + (i.amount_at_base_case || 0), 0);
+  const scaleBadge    = {'occupancy':'b-blue','revenue':'b-green','staffing':'b-amber'};
+
+  let costsHtml = '';
+  if (fixedItems.length || variableItems.length) {
+    costsHtml = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">`;
+
+    // Fixed
+    costsHtml += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Fixed Monthly — $${fixedTotal.toLocaleString()}/mo</div>
+      <div style="display:grid;gap:6px">`;
+    fixedItems.forEach(item => {
+      costsHtml += `<div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;gap:8px">
+        <div>
+          <div>${item.item || ''}</div>
+          ${item.notes ? `<div style="font-size:10px;color:var(--muted)">${item.notes}</div>` : ''}
+        </div>
+        <strong style="color:var(--text);white-space:nowrap">$${(item.amount || 0).toLocaleString()}</strong>
+      </div>`;
+    });
+    costsHtml += `</div></div>`;
+
+    // Variable
+    costsHtml += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Variable Monthly @ Base — $${varTotal.toLocaleString()}/mo</div>
+      <div style="display:grid;gap:6px">`;
+    variableItems.forEach(item => {
+      const sb = scaleBadge[item.scales_with] || 'b-blue';
+      costsHtml += `<div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;gap:8px">
+        <div>
+          <div>${item.item || ''} <span class="badge ${sb}" style="font-size:9px">${item.scales_with || ''}</span></div>
+          ${item.notes ? `<div style="font-size:10px;color:var(--muted)">${item.notes}</div>` : ''}
+        </div>
+        <strong style="color:var(--text);white-space:nowrap">$${(item.amount_at_base_case || 0).toLocaleString()}</strong>
+      </div>`;
+    });
+    costsHtml += `</div></div></div>`;
+  }
+
+  // Inject site callout + startup costs + cost breakdown into scenario container
+  // (We prepend to the scenarios section by using the summary area for site info)
+  $('7-sc-c').innerHTML = '';
+
+  // Build a combined pre-scenarios block in the summary area
+  const preBlock = document.createElement('div');
+  preBlock.innerHTML = siteHtml + startupHtml + costsHtml;
+  $('7-sc-c').appendChild(preBlock);
+
+  // ── Scenarios grid ─────────────────────────────────────
+  let sc = `<div class="scenario-grid">`;
+  (d.scenarios || []).forEach(s => {
+    sc += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">${s.name || ''}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${s.label || ''} · ${s.enrolled || 0} enrolled</div>
+      <div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:${s.color || 'var(--text)'};margin-bottom:10px">$${(s.monthly_net >= 0 ? '+' : '')}${(s.monthly_net || 0).toLocaleString()}<span style="font-size:12px">/mo</span></div>
+      <div style="display:grid;gap:4px;font-size:11px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Monthly revenue</span><strong>$${(s.monthly_revenue || 0).toLocaleString()}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Monthly expenses</span><strong>$${(s.monthly_expenses || 0).toLocaleString()}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Break-even</span><strong>${s.breakeven_months || '—'} months</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">3yr ROI</span><strong style="color:${s.color || 'var(--text)'}">${(s.roi_3yr || 0) > 0 ? '+' : ''}${s.roi_3yr || 0}%</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Annual net</span><strong style="color:${s.color || 'var(--text)'}">$${(s.annual_net >= 0 ? '+' : '')}${(s.annual_net || 0).toLocaleString()}</strong></div>
+      </div>
+    </div>`;
+  });
+  sc += `</div>`;
+  $('7-sc-c').innerHTML += sc;
+
+  // ── P&L Chart ──────────────────────────────────────────
+  killChart('ch-7');
+  const ctxEl = $('ch-7');
+  if (ctxEl) {
+    const proj7 = d.projections || [];
+    charts['ch-7'] = new Chart(ctxEl.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: proj7.map(p => p.month),
+        datasets: [
+          {label: 'Revenue',      data: proj7.map(p => p.rev), borderColor: '#3dd68c', tension: 0.4, fill: false, pointRadius: 3, borderWidth: 2},
+          {label: 'Expenses',     data: proj7.map(p => p.exp), borderColor: '#ff5f5f', tension: 0.4, fill: false, pointRadius: 3, borderWidth: 2},
+          {label: 'Cumulative P&L', data: proj7.map(p => p.cum), borderColor: '#4a9eff', tension: 0.4, fill: true, backgroundColor: 'rgba(74,158,255,0.08)', pointRadius: 3, borderWidth: 2, yAxisID: 'y2'}
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {legend: {labels: {color: '#8a8d96', font: {size: 11}}}},
+        scales: {
+          x:  {ticks: {color: '#8a8d96', font: {size: 9}}, grid: {color: '#2a2d35'}},
+          y:  {ticks: {color: '#8a8d96', callback: v => '$' + (v / 1000).toFixed(0) + 'k'}, grid: {color: '#2a2d35'}, position: 'left'},
+          y2: {ticks: {color: '#4a9eff', callback: v => '$' + (v / 1000).toFixed(0) + 'k'}, grid: {display: false}, position: 'right'}
+        }
+      }
+    });
+  }
+
+  // ── By-city comparison table ───────────────────────────
+  let tbl = `<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>City</th><th>Monthly Rent</th><th>Avg ${ind7.price_label_primary || 'Primary Rate'}</th>
+    <th>Break-Even Enrolled</th><th>Yr 1 Net</th><th>Yr 3 Net</th><th>Site Rank</th>
+  </tr></thead><tbody>`;
+  (d.by_city_financials || []).forEach(c => {
+    const n1b = (c.yr1_net || 0) >= 0 ? 'b-green' : 'b-red';
+    const n3b = (c.yr3_net || 0) >= 0 ? 'b-green' : 'b-red';
+    tbl += `<tr>
+      <td><strong>${c.city || ''}</strong></td>
+      <td>$${(c.monthly_rent || 0).toLocaleString()}</td>
+      <td>$${(c.avg_primary_rate || c.avg_infant_tuition || 0).toLocaleString()}</td>
+      <td>${c.break_even_enrolled || '—'}</td>
+      <td><span class="badge ${n1b}">$${(c.yr1_net || 0).toLocaleString()}</span></td>
+      <td><span class="badge ${n3b}">$${(c.yr3_net || 0).toLocaleString()}</span></td>
+      <td>${c.site_rank ? '#' + c.site_rank : '—'}</td>
+    </tr>`;
+  });
+  tbl += `</tbody></table></div>`;
+  $('7-t-c').innerHTML = tbl;
+}
+
+
+// ══════════════════════════════════════════════════════════
+// BUILD VS BUY AGENT  (27-agent-buildvsbuy.js)
+// Agent 16 — 3 sub-calls: Property Listings → Build/Buy
+// Analysis → Recommendation. Merged into R.a16 and rendered
+// in card out-16 with 5 tabs.
+// ══════════════════════════════════════════════════════════
+
+async function runAgent16(a3, a4, a7, a8) {
+  setDot(16, 'running');
+  showOut(16);
+  const ind = industry();
+  const base = `${ind.unit} · ${ind.capacity_label}: ${capacity()} · Budget $${parseInt(budget()).toLocaleString()} · ZIP ${zip()}`;
+  const ctx3 = ctx(a3, ['summary', 'locations']);
+  const ctx7 = ctx(a7, ['summary', 'total_startup_cost', 'scenarios', 'selected_site']);
+  const ctx8 = ctx(a8, ['verdict', 'verdict_rationale', 'assessment']);
+
+  const outEl = $('out-16');
+  if (outEl) {
+    outEl.innerHTML = `<div style="padding:16px">${subProgress(1, 3, 'Sub-agent 1/3: Property Listings…')}</div>`;
+  }
+
+  // ── Sub-call A: Property Listings ───────────────────────
+  const sysA = `You are a commercial real estate broker and business acquisition specialist for ${ind.unit} businesses. Return JSON only.`;
+  const usrA = `Find real businesses or properties available to BUY — existing ${ind.unit} businesses for sale — matching this criteria: ${base}.
+SITE CONTEXT: ${ctx3}
+
+Return ONLY:
+{
+  "buy_listings": [
+    {
+      "title": "Business name or property description",
+      "city": "string",
+      "asking_price": 0,
+      "annual_revenue": 0,
+      "annual_net": 0,
+      "sqft": 0,
+      "listed_since": "Month Year",
+      "match_score": 8,
+      "match_reasons": ["Why this is a strong match"],
+      "gaps": ["What would need to change or require investment"],
+      "search_url": "https://bizbuysell.com/search?q=... or https://www.loopnet.com/search/... relevant to industry and ZIP",
+      "broker": "Broker name and phone if known"
+    }
+  ],
+  "buy_summary": "2-sentence summary of the acquisition landscape for this business type and market"
+}`;
+
+  const listingsData = await claudeJSON(sysA, usrA);
+
+  // ── Sub-call B: Build Analysis ──────────────────────────
+  if (outEl) {
+    outEl.innerHTML = `<div style="padding:16px">${subProgress(2, 3, 'Sub-agent 2/3: Build vs Buy Analysis…')}</div>`;
+  }
+
+  const sysB = `You are a business strategy consultant specializing in ${ind.unit} startups and acquisitions. Return JSON only.`;
+  const usrB = `Analyze the build-from-scratch vs acquisition paths for a ${base}.
+FINANCIALS: ${ctx7}
+LISTINGS LANDSCAPE: ${JSON.stringify((listingsData || {}).buy_summary || '')}
+
+Return ONLY:
+{
+  "build_analysis": {
+    "timeline_months": 18,
+    "total_investment": 0,
+    "year1_revenue": 0,
+    "year3_net": 0,
+    "pros": ["Pro 1 with specific detail", "Pro 2", "Pro 3", "Pro 4"],
+    "cons": ["Con 1 with specific detail", "Con 2", "Con 3"],
+    "key_risks": ["Risk 1 with mitigation", "Risk 2", "Risk 3"]
+  },
+  "buy_analysis": {
+    "typical_asking_price": 0,
+    "acquisition_costs": 0,
+    "renovation_estimate": 0,
+    "total_investment": 0,
+    "time_to_revenue_months": 3,
+    "year1_revenue": 0,
+    "year3_net": 0,
+    "pros": ["Pro 1 with specific detail", "Pro 2", "Pro 3", "Pro 4"],
+    "cons": ["Con 1 with specific detail", "Con 2", "Con 3"],
+    "key_risks": ["Risk 1 with mitigation", "Risk 2", "Risk 3"]
+  }
+}`;
+
+  const analysisData = await claudeJSON(sysB, usrB);
+
+  // ── Sub-call C: Recommendation ──────────────────────────
+  if (outEl) {
+    outEl.innerHTML = `<div style="padding:16px">${subProgress(3, 3, 'Sub-agent 3/3: Recommendation…')}</div>`;
+  }
+
+  const sysC = `You are a senior business strategy advisor. Return JSON only.`;
+  const usrC = `Produce a final recommendation for build vs buy for a ${base}.
+BUILD ANALYSIS: ${JSON.stringify((analysisData || {}).build_analysis || {})}
+BUY ANALYSIS:   ${JSON.stringify((analysisData || {}).buy_analysis  || {})}
+MARKET CONTEXT: ${ctx8}
+
+Return ONLY:
+{
+  "recommendation": "Build|Buy|Lease-to-Own",
+  "recommendation_rationale": "3-4 sentence detailed reasoning with specific numbers comparing both paths",
+  "financial_comparison": {
+    "build_total_investment": 0,
+    "buy_total_investment": 0,
+    "build_break_even_months": 0,
+    "buy_break_even_months": 0,
+    "build_year3_net": 0,
+    "buy_year3_net": 0,
+    "winner": "Build|Buy",
+    "winner_margin_pct": 15
+  },
+  "decision_factors": [
+    {"factor": "Time to market",       "build": "18 months",        "buy": "3-6 months",          "winner": "Buy",   "weight": "High"},
+    {"factor": "Total investment",      "build": "$X",               "buy": "$Y",                  "winner": "Build", "weight": "High"},
+    {"factor": "Brand/location control","build": "Full control",     "buy": "Inherit existing",    "winner": "Build", "weight": "Medium"},
+    {"factor": "Revenue ramp",          "build": "Slow (12-18 mo)",  "buy": "Immediate",           "winner": "Buy",   "weight": "High"},
+    {"factor": "Customization",         "build": "Full",             "buy": "Limited by layout",   "winner": "Build", "weight": "Medium"}
+  ],
+  "next_steps": [
+    "Step 1 with specific action",
+    "Step 2",
+    "Step 3"
+  ]
+}`;
+
+  const recData = await claudeJSON(sysC, usrC);
+
+  // ── Merge & store ───────────────────────────────────────
+  const merged = Object.assign(
+    {},
+    listingsData  || {},
+    analysisData  || {},
+    recData       || {}
+  );
+  R.a16 = merged;
+
+  renderAgent16(merged);
+  setDot(16, 'done');
+  return JSON.stringify(merged);
+}
+
+function renderAgent16(d) {
+  if (!d) return;
+  const out = $('out-16');
+  if (!out) return;
+
+  const rec       = d.recommendation       || 'Build';
+  const rationale = d.recommendation_rationale || '';
+  const fc        = d.financial_comparison  || {};
+  const factors   = d.decision_factors     || [];
+  const steps     = d.next_steps           || [];
+  const listings  = d.buy_listings         || [];
+  const buildA    = d.build_analysis       || {};
+  const buyA      = d.buy_analysis         || {};
+
+  const recColor  = rec === 'Buy' ? 'var(--blue)' : rec === 'Lease-to-Own' ? 'var(--amber)' : 'var(--green)';
+  const recBadge  = rec === 'Buy' ? 'b-blue'      : rec === 'Lease-to-Own' ? 'b-amber'      : 'b-green';
+  const weightBadge = w => w === 'High' ? 'b-red' : w === 'Medium' ? 'b-amber' : 'b-blue';
+  const winnerBadge = (w, side) => w === side ? 'b-green' : 'b-red';
+
+  // ── Tab shell ───────────────────────────────────────────
+  out.innerHTML = `
+    <div style="padding:0 16px;border-bottom:1px solid var(--border);display:flex;gap:2px;flex-wrap:wrap">
+      <button class="tab active"  onclick="tab('16','sum')">Summary</button>
+      <button class="tab"         onclick="tab('16','listings')">Listings (Buy)</button>
+      <button class="tab"         onclick="tab('16','bvb')">Build vs Buy</button>
+      <button class="tab"         onclick="tab('16','matrix')">Decision Matrix</button>
+      <button class="tab"         onclick="tab('16','steps')">Next Steps</button>
+    </div>
+
+    <div id="16-sum" class="panel active" style="padding:16px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Recommendation</span>
+        <span class="badge ${recBadge}" style="font-size:13px;padding:4px 12px">${rec}</span>
+      </div>
+      <div style="font-size:13px;line-height:1.7;color:var(--muted)">${rationale}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${_stat16('Build Investment', '$' + (fc.build_total_investment || 0).toLocaleString(), 'var(--text)')}
+        ${_stat16('Buy Investment',   '$' + (fc.buy_total_investment   || 0).toLocaleString(), 'var(--text)')}
+        ${_stat16('Winner Advantage', (fc.winner_margin_pct || 0) + '% better', recColor)}
+        ${_stat16('Build Break-Even', (fc.build_break_even_months || '—') + ' mo', 'var(--text)')}
+        ${_stat16('Buy Break-Even',   (fc.buy_break_even_months   || '—') + ' mo', 'var(--text)')}
+        ${_stat16('Winner',           fc.winner || rec, recColor)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${_finCard16('Build — Yr 3 Net', fc.build_year3_net || buildA.year3_net || 0, 'var(--green)')}
+        ${_finCard16('Buy — Yr 3 Net',   fc.buy_year3_net   || buyA.year3_net   || 0, 'var(--blue)')}
+      </div>
+    </div>
+
+    <div id="16-listings" class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+      ${listings.length
+        ? listings.map(l => _listingCard16(l)).join('')
+        : `<div class="prose" style="color:var(--muted)">No specific listings found. Use the search URLs below to browse active listings.<br><br>
+           <a href="https://www.bizbuysell.com/childcare-businesses-for-sale/" target="_blank" class="link-btn">BizBuySell</a>
+           &nbsp;<a href="https://www.loopnet.com/" target="_blank" class="link-btn">LoopNet</a></div>`}
+      ${(d.buy_summary || '') ? `<div style="padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--muted)">${d.buy_summary}</div>` : ''}
+    </div>
+
+    <div id="16-bvb" class="panel" style="padding:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        ${_bvbCard16('Build from Scratch', buildA, 'var(--green)', 'b-green')}
+        ${_bvbCard16('Buy / Acquire',      buyA,   'var(--blue)',  'b-blue')}
+      </div>
+    </div>
+
+    <div id="16-matrix" class="panel" style="padding:16px">
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Factor</th><th>Build</th><th>Buy</th><th>Winner</th><th>Weight</th></tr></thead>
+        <tbody>
+          ${factors.map(f => `<tr>
+            <td><strong>${f.factor || ''}</strong></td>
+            <td style="font-size:12px">${f.build || ''}</td>
+            <td style="font-size:12px">${f.buy   || ''}</td>
+            <td><span class="badge b-green">${f.winner || ''}</span></td>
+            <td><span class="badge ${weightBadge(f.weight)}">${f.weight || ''}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+    </div>
+
+    <div id="16-steps" class="panel" style="padding:16px">
+      <ol style="display:flex;flex-direction:column;gap:10px;padding-left:0;list-style:none;margin:0">
+        ${steps.map((s, i) => `<li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Syne',sans-serif">${i + 1}</span>
+          <span style="font-size:13px;line-height:1.7;color:var(--text)">${s}</span>
+        </li>`).join('')}
+      </ol>
+    </div>`;
+
+  // activate first tab
+  tab('16', 'sum');
+}
+
+function _stat16(label, value, color) {
+  return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+    <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">${label}</div>
+    <div style="font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:${color}">${value}</div>
+  </div>`;
+}
+
+function _finCard16(label, amount, color) {
+  const pos = amount >= 0;
+  return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:12px;color:var(--muted)">${label}</div>
+    <div style="font-size:18px;font-weight:700;font-family:'Syne',sans-serif;color:${color}">${pos ? '+' : ''}$${amount.toLocaleString()}</div>
+  </div>`;
+}
+
+function _listingCard16(l) {
+  const score = Math.min(10, Math.max(0, l.match_score || 0));
+  const scorePct = (score / 10 * 100).toFixed(0);
+  const scoreColor = score >= 8 ? 'var(--green)' : score >= 6 ? 'var(--amber)' : 'var(--red)';
+  return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif">${l.title || ''}</div>
+        <div style="font-size:11px;color:var(--muted)">${l.city || ''}${l.listed_since ? ' · Listed ' + l.listed_since : ''}${l.sqft ? ' · ' + l.sqft.toLocaleString() + ' sqft' : ''}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber)">$${(l.asking_price || 0).toLocaleString()}</div>
+        ${l.annual_revenue ? `<div style="font-size:10px;color:var(--muted)">Rev: $${l.annual_revenue.toLocaleString()}/yr</div>` : ''}
+        ${l.annual_net     ? `<div style="font-size:10px;color:var(--green)">Net: $${l.annual_net.toLocaleString()}/yr</div>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:10px;color:var(--muted)">Match</div>
+      <div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden">
+        <div style="width:${scorePct}%;height:100%;background:${scoreColor};border-radius:3px"></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:${scoreColor}">${score}/10</div>
+    </div>
+    ${(l.match_reasons || []).length ? `<div style="display:flex;flex-direction:column;gap:3px">
+      ${l.match_reasons.map(r => `<div style="font-size:11px;color:var(--green)">+ ${r}</div>`).join('')}
+    </div>` : ''}
+    ${(l.gaps || []).length ? `<div style="display:flex;flex-direction:column;gap:3px">
+      ${l.gaps.map(g => `<div style="font-size:11px;color:var(--amber)">△ ${g}</div>`).join('')}
+    </div>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      ${l.search_url ? `<a href="${l.search_url}" target="_blank" class="link-btn" style="font-size:11px">↗ View Listing</a>` : ''}
+      ${l.broker     ? `<span style="font-size:11px;color:var(--muted)">Broker: ${l.broker}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function _bvbCard16(title, analysis, color, badge) {
+  const invest  = analysis.total_investment     || 0;
+  const yr3     = analysis.year3_net            || 0;
+  const timeline = analysis.timeline_months     || analysis.time_to_revenue_months || 0;
+  const pros    = analysis.pros    || [];
+  const cons    = analysis.cons    || [];
+  const risks   = analysis.key_risks || [];
+  return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="badge ${badge}">${title}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div style="font-size:11px"><span style="color:var(--muted)">Total Investment</span><br><strong style="color:${color}">$${invest.toLocaleString()}</strong></div>
+      <div style="font-size:11px"><span style="color:var(--muted)">Yr 3 Net</span><br><strong style="color:${yr3 >= 0 ? 'var(--green)' : 'var(--red)'}">$${yr3.toLocaleString()}</strong></div>
+      <div style="font-size:11px"><span style="color:var(--muted)">Timeline</span><br><strong>${timeline} months</strong></div>
+      <div style="font-size:11px"><span style="color:var(--muted)">Yr 1 Revenue</span><br><strong>$${(analysis.year1_revenue || 0).toLocaleString()}</strong></div>
+    </div>
+    ${pros.length ? `<div>
+      <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Pros</div>
+      ${pros.map(p => `<div style="font-size:11px;color:var(--text);line-height:1.6">+ ${p}</div>`).join('')}
+    </div>` : ''}
+    ${cons.length ? `<div>
+      <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--red);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Cons</div>
+      ${cons.map(c => `<div style="font-size:11px;color:var(--muted);line-height:1.6">− ${c}</div>`).join('')}
+    </div>` : ''}
+    ${risks.length ? `<div>
+      <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Key Risks</div>
+      ${risks.map(r => `<div style="font-size:11px;color:var(--muted);line-height:1.6">⚠ ${r}</div>`).join('')}
+    </div>` : ''}
+  </div>`;
+}
+
+
+// ══════════════════════════════════════════════════════════
+// SOURCES & CITATIONS AGENT  (28-agent-sources.js)
+// Agent 17 — Collects data sources used across all agents
+// (R.a1–R.a16), runs one AI call to validate/complete the
+// list, then renders in out-17 with 4 tabs.
+// ══════════════════════════════════════════════════════════
+
+async function runAgent17(R) {
+  setDot(17, 'running');
+  showOut(17);
+  const out = $('out-17');
+  if (out) out.innerHTML = `<div style="padding:16px">${subProgress(1, 1, 'Collecting & validating sources…')}</div>`;
+
+  const ind = industry();
+
+  // ── Collect partial data from completed agents ──────────
+  function safeStr(key) {
+    try {
+      const v = R[key];
+      if (!v) return '';
+      const s = typeof v === 'string' ? v : JSON.stringify(v);
+      return s.substring(0, 1200);
+    } catch (e) { return ''; }
+  }
+
+  const agentSummaries = [
+    { id: 'a1',  label: 'Agent 1 — Demographics',          snippet: safeStr('a1')  },
+    { id: 'a2',  label: 'Agent 2 — Gap Analysis',           snippet: safeStr('a2')  },
+    { id: 'a3',  label: 'Agent 3 — Site Selection',         snippet: safeStr('a3')  },
+    { id: 'a4',  label: 'Agent 4 — Real Estate Listings',   snippet: safeStr('a4')  },
+    { id: 'a5',  label: 'Agent 5 — Compliance',             snippet: safeStr('a5')  },
+    { id: 'a6',  label: 'Agent 6 — Competitor Analysis',    snippet: safeStr('a6')  },
+    { id: 'a7',  label: 'Agent 7 — Financial Model',        snippet: safeStr('a7')  },
+    { id: 'a8',  label: 'Agent 8 — Executive Summary',      snippet: safeStr('a8')  },
+    { id: 'a9',  label: 'Agent 9 — Business Plan',          snippet: safeStr('a9')  },
+    { id: 'a10', label: 'Agent 10 — Project Plan',          snippet: safeStr('a10') },
+    { id: 'a11', label: 'Agent 11 — Market Map / Grants',   snippet: safeStr('a11') },
+    { id: 'a12', label: 'Agent 12 — Grants',                snippet: safeStr('a12') },
+    { id: 'a13', label: 'Agent 13 — Competitor Messaging',  snippet: safeStr('a13') },
+    { id: 'a14', label: 'Agent 14 — Code Review',           snippet: safeStr('a14') },
+    { id: 'a15', label: 'Agent 15 — QA Testing',            snippet: safeStr('a15') },
+    { id: 'a16', label: 'Agent 16 — Build vs Buy',          snippet: safeStr('a16') },
+  ].filter(a => a.snippet);
+
+  const agentContext = agentSummaries
+    .map(a => `[${a.label}]: ${a.snippet}`)
+    .join('\n\n');
+
+  const sys = `You are a research methodology auditor for a ${ind.unit} business planning system. Return JSON only. Be thorough — flag every data source used and every claim that cannot be independently verified.`;
+  const usr = `Audit all data sources and claims used across this ${ind.unit} business planning analysis for ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
+
+AGENT OUTPUTS (summarized):
+${agentContext}
+
+Return ONLY:
+{
+  "summary": "This analysis drew on X primary data sources across Y categories",
+  "data_sources": [
+    {
+      "category": "Demographics",
+      "source": "U.S. Census Bureau American Community Survey 5-Year Estimates",
+      "url": "https://data.census.gov",
+      "data_used": "Population by age group, household income, employment status for ZIP codes in analysis radius",
+      "agent": "Agent 1 — Demographics",
+      "reliability": "High",
+      "last_updated": "2023 (5-Year ACS 2019-2023)"
+    }
+  ],
+  "data_quality_notes": [
+    {
+      "note": "Note about data quality, recency, or limitation",
+      "severity": "Warning|Info"
+    }
+  ],
+  "sourced_claims": [
+    {
+      "claim": "Specific quantitative claim made in the analysis",
+      "source": "Data source name",
+      "verifiable": true
+    }
+  ],
+  "unable_to_source": [
+    {
+      "claim": "Claim that could not be independently verified",
+      "reason": "Why it cannot be sourced — AI estimate, no public dataset, proprietary data, etc.",
+      "agent": "Which agent made this claim"
+    }
+  ]
+}
+
+Important: Be honest. Flag every number or statistic the AI generated as an estimate that has no public data source. Mark those in unable_to_source. Only mark verifiable:true in sourced_claims if a real public dataset exists.`;
+
+  try {
+    let d = await claudeJSON(sys, usr);
+    if (!d) { d = _fallbackSources17(agentSummaries); }
+
+    R.a17 = d;
+    renderAgent17(d);
+    setDot(17, 'done');
+    return JSON.stringify(d);
+  } catch (e) {
+    setDot(17, 'error');
+    if (out) out.innerHTML = `<div class="prose" style="color:var(--red);padding:16px">Error: ${e.message}</div>`;
+    throw e;
+  }
+}
+
+function _fallbackSources17(agentSummaries) {
+  return {
+    summary: `Analysis drew on ${agentSummaries.length} agent outputs. Source validation could not be completed.`,
+    data_sources: [],
+    data_quality_notes: [{note: 'Source validation failed — review agent outputs manually.', severity: 'Warning'}],
+    sourced_claims: [],
+    unable_to_source: []
+  };
+}
+
+function renderAgent17(d) {
+  if (!d) return;
+  const out = $('out-17');
+  if (!out) return;
+
+  const sources    = d.data_sources     || [];
+  const notes      = d.data_quality_notes || [];
+  const claimed    = d.sourced_claims   || [];
+  const unsourced  = d.unable_to_source || [];
+
+  // ── Stats ────────────────────────────────────────────────
+  const totalSources  = sources.length;
+  const highRelPct    = totalSources
+    ? Math.round(sources.filter(s => (s.reliability || '').toLowerCase() === 'high').length / totalSources * 100)
+    : 0;
+  const claimedCount   = claimed.length;
+  const unsourcedCount = unsourced.length;
+
+  // ── Group sources by category ────────────────────────────
+  const grouped = {};
+  sources.forEach(s => {
+    const cat = s.category || 'Other';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(s);
+  });
+
+  const relBadge  = r => (r || '').toLowerCase() === 'high'   ? 'b-green'
+                       : (r || '').toLowerCase() === 'medium' ? 'b-amber'
+                       :                                         'b-red';
+  const sevBadge  = s => s === 'Warning' ? 'b-amber' : 'b-blue';
+
+  // ── Tab shell ────────────────────────────────────────────
+  out.innerHTML = `
+    <div style="padding:0 16px;border-bottom:1px solid var(--border);display:flex;gap:2px;flex-wrap:wrap">
+      <button class="tab active" onclick="tab('17','sum')">Summary</button>
+      <button class="tab"        onclick="tab('17','src')">All Sources</button>
+      <button class="tab"        onclick="tab('17','claims')">Sourced Claims</button>
+      <button class="tab"        onclick="tab('17','unsrc')">Unable to Source</button>
+    </div>
+
+    <div id="17-sum" class="panel active" style="padding:16px;display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:13px;line-height:1.7;color:var(--muted)">${d.summary || ''}</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        ${_srcStat17('Total Sources',        totalSources,     'var(--blue)')}
+        ${_srcStat17('High Reliability',     highRelPct + '%', highRelPct >= 70 ? 'var(--green)' : 'var(--amber)')}
+        ${_srcStat17('Claims Sourced',       claimedCount,     'var(--green)')}
+        ${_srcStat17('Unable to Source',     unsourcedCount,   unsourcedCount > 5 ? 'var(--red)' : 'var(--amber)')}
+      </div>
+      ${notes.length ? `<div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Data Quality Notes</div>
+        ${notes.map(n => `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)">
+          <span class="badge ${sevBadge(n.severity)}">${n.severity || 'Info'}</span>
+          <span style="font-size:12px;color:var(--text);line-height:1.6">${n.note || ''}</span>
+        </div>`).join('')}
+      </div>` : ''}
+    </div>
+
+    <div id="17-src" class="panel" style="padding:16px;display:flex;flex-direction:column;gap:14px">
+      ${Object.keys(grouped).length
+        ? Object.entries(grouped).map(([cat, items]) => `
+          <div>
+            <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${cat} (${items.length})</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              ${items.map(s => `
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:5px">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
+                    <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${s.source || ''}</div>
+                    <span class="badge ${relBadge(s.reliability)}">${s.reliability || 'Unknown'}</span>
+                  </div>
+                  <div style="font-size:11px;color:var(--muted)">${s.agent || ''}</div>
+                  ${s.data_used    ? `<div style="font-size:12px;color:var(--text);line-height:1.6">${s.data_used}</div>` : ''}
+                  ${s.last_updated ? `<div style="font-size:10px;color:var(--muted)">Last updated: ${s.last_updated}</div>` : ''}
+                  ${s.url ? `<a href="${s.url}" target="_blank" class="link-btn" style="font-size:11px;width:fit-content">↗ Open Source</a>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>`).join('')
+        : `<div class="prose" style="color:var(--muted)">No sources catalogued.</div>`}
+    </div>
+
+    <div id="17-claims" class="panel" style="padding:16px">
+      ${claimed.length
+        ? `<div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Claim</th><th>Source</th><th>Verifiable</th></tr></thead>
+            <tbody>
+              ${claimed.map(c => `<tr>
+                <td style="font-size:12px">${c.claim || ''}</td>
+                <td style="font-size:12px;color:var(--muted)">${c.source || ''}</td>
+                <td><span class="badge ${c.verifiable ? 'b-green' : 'b-amber'}">${c.verifiable ? 'Yes' : 'Partial'}</span></td>
+              </tr>`).join('')}
+            </tbody>
+          </table></div>`
+        : `<div class="prose" style="color:var(--muted)">No sourced claims recorded.</div>`}
+    </div>
+
+    <div id="17-unsrc" class="panel" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+      ${unsourced.length
+        ? `<div style="padding:8px 12px;background:var(--surface2);border:1px solid var(--amber);border-radius:8px;font-size:12px;color:var(--amber);margin-bottom:4px">
+            These ${unsourced.length} claim(s) were generated by the AI and could not be verified against a public data source. Treat them as estimates.
+          </div>
+          ${unsourced.map(u => `
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${u.claim || ''}</div>
+              <div style="font-size:11px;color:var(--muted)">${u.agent || ''}</div>
+              <div style="font-size:12px;color:var(--amber)">${u.reason || ''}</div>
+            </div>`).join('')}`
+        : `<div class="prose" style="color:var(--green)">All claims were successfully sourced.</div>`}
+    </div>`;
+
+  // activate first tab
+  tab('17', 'sum');
+}
+
+function _srcStat17(label, value, color) {
+  return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px">
+    <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">${label}</div>
+    <div style="font-size:22px;font-weight:700;font-family:'Syne',sans-serif;color:${color}">${value}</div>
+  </div>`;
+}
 
 </script>
 

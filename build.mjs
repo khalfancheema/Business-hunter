@@ -30,7 +30,7 @@ const JS_FILES = [
   'src/js/10-render-04.js',
   'src/js/11-render-05.js',
   'src/js/12-render-06.js',
-  'src/js/13-render-07.js',
+  'src/js/13-render-07.js',      // legacy _legacyRunAgent7 (superseded by 26)
   'src/js/14-render-08.js',
   'src/js/15-render-09.js',
   'src/js/16-render-10.js',
@@ -41,6 +41,11 @@ const JS_FILES = [
   'src/js/21-render-15.js',
   'src/js/22-pipeline.js',
   'src/js/23-drilldown.js',
+  'src/js/24-agent-09-parts.js', // Business Plan sub-calls (4 parts)
+  'src/js/25-agent-10-parts.js', // Project Plan sub-calls (3 parts)
+  'src/js/26-agent-fin-subs.js', // Financial Feasibility (replaces runAgent7)
+  'src/js/27-agent-buildvsbuy.js', // Build vs Buy (Agent 16)
+  'src/js/28-agent-sources.js',   // Sources & Citations (Agent 17)
 ];
 
 const CSS_FILES = ['src/styles.css'];

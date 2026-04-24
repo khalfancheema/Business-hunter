@@ -14,7 +14,7 @@
 <div class="masthead">
   <div>
     <h1 id="mastheadTitle">Business Planning Agent System</h1>
-    <p id="mastheadSub">15-agent AI pipeline · Demographics · Compliance · Gap Analysis · Site Selection · Real Estate · Financials · Business Plan · Project Plan</p>
+    <p id="mastheadSub">17-agent AI pipeline · Demographics · Compliance · Gap Analysis · Site Selection · Real Estate · Financials · Business Plan · Project Plan · Market Intelligence · Build vs Buy · Sources</p>
   </div>
   <div class="live-badge"><div class="live-dot"></div>Live Search Enabled</div>
 </div>
@@ -46,13 +46,15 @@
   <div class="controls-row">
     <div class="field">
       <label>Industry</label>
-      <select id="industrySelect" style="width:185px" onchange="onIndustryChange()">
+      <select id="industrySelect" style="width:210px" onchange="onIndustryChange()">
         <option value="daycare">🏫 Daycare / Childcare</option>
         <option value="gas_station">⛽ Gas Station / C-Store</option>
         <option value="laundromat">🫧 Laundromat</option>
         <option value="car_wash">🚗 Car Wash</option>
         <option value="restaurant">🍽️ Restaurant</option>
         <option value="gym">💪 Gym / Fitness Center</option>
+        <option value="indoor_play">🎠 Indoor Play Area / FEC</option>
+        <option value="dry_cleaning">👔 Dry Cleaning / Laundry</option>
       </select>
     </div>
     <div class="field"><label>ZIP Code</label><input type="text" id="zip" value="30097" style="width:95px" /></div>
@@ -75,66 +77,6 @@
     <div class="progress-text" id="progressText">Enter your API key and click Run</div>
   </div>
   <div class="error-banner" id="errorBanner"></div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 11 — Code Review · Optimization · Cost Analysis</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-14">
-    <div class="agent-head">
-      <div class="agent-ico">🔬</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
-      <span id="timer-14" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-14"></div>
-    </div>
-    <div class="agent-out" id="out-14">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('14','sum')">Summary</div>
-        <div class="tab" onclick="tab('14','issues')">Issues Found</div>
-        <div class="tab" onclick="tab('14','perf')">Performance</div>
-        <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
-        <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
-        <button class="raw-toggle" onclick="showRaw(14)">{ } Raw</button>
-      </div>
-      <div id="raw-14" class="raw-data-wrap"></div>
-      <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
-      <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
-      <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
-      <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
-      <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 12 — QA · Functional Testing · Data Validation · UX Audit</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-15">
-    <div class="agent-head">
-      <div class="agent-ico">✅</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
-      <span id="timer-15" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-15"></div>
-    </div>
-    <div class="agent-out" id="out-15">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('15','sum')">QA Summary</div>
-        <div class="tab" onclick="tab('15','tests')">Test Results</div>
-        <div class="tab" onclick="tab('15','data')">Data Validation</div>
-        <div class="tab" onclick="tab('15','ux')">UX Audit</div>
-        <div class="tab" onclick="tab('15','score')">Health Score</div>
-        <button class="raw-toggle" onclick="showRaw(15)">{ } Raw</button>
-      </div>
-      <div id="raw-15" class="raw-data-wrap"></div>
-      <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
-      <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
-      <div class="panel" id="15-data"><div id="15-data-c"></div></div>
-      <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
-      <div class="panel" id="15-score"><div id="15-score-c"></div></div>
-    </div>
-  </div>
 </div>
 
 <div class="arrow">↓</div>
@@ -306,7 +248,7 @@
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 4b — Financial Feasibility · Scenarios · P&L · By City</div>
+<div class="phase-label">Phase 5 — Financial Feasibility · Scenarios · P&amp;L · By City</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-7">
     <div class="agent-head">
@@ -334,93 +276,7 @@
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 5 — Market Map · Color-Coded Gap Scores</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-11">
-    <div class="agent-head">
-      <div class="agent-ico">🗺️</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
-      <span id="timer-11" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-11"></div>
-    </div>
-    <div class="agent-out" id="out-11">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
-        <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
-        <div class="tab" onclick="tab('11','dir')">Directions</div>
-        <button class="raw-toggle" onclick="showRaw(11)">{ } Raw</button>
-      </div>
-      <div id="raw-11" class="raw-data-wrap"></div>
-      <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
-      <div class="panel" id="11-leg"><div id="11-leg-c"></div></div>
-      <div class="panel" id="11-dir"><div id="11-dir-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 6 — Grant Search · Subsidies · Federal Programs · Local Incentives</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-12">
-    <div class="agent-head">
-      <div class="agent-ico">💵</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
-      <span id="timer-12" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-12"></div>
-    </div>
-    <div class="agent-out" id="out-12">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('12','sum')">Summary</div>
-        <div class="tab" onclick="tab('12','caps')">GA CAPS</div>
-        <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
-        <div class="tab" onclick="tab('12','local')">Local Incentives</div>
-        <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
-        <button class="raw-toggle" onclick="showRaw(12)">{ } Raw</button>
-      </div>
-      <div id="raw-12" class="raw-data-wrap"></div>
-      <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
-      <div class="panel" id="12-caps"><div id="12-caps-c"></div></div>
-      <div class="panel" id="12-usda"><div id="12-usda-c"></div></div>
-      <div class="panel" id="12-local"><div id="12-local-c"></div></div>
-      <div class="panel" id="12-tbl"><div class="tbl-wrap" id="12-tbl-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 7 — Competitor Deep-Dive · Reviews · Complaints · Differentiation</div>
-<div class="agents-grid g1">
-  <div class="agent-card" id="card-13">
-    <div class="agent-head">
-      <div class="agent-ico">🎯</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
-      <span id="timer-13" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)">↺ Re-run</button>
-      <div class="agent-dot" id="dot-13"></div>
-    </div>
-    <div class="agent-out" id="out-13">
-      <div class="tabs">
-        <div class="tab active" onclick="tab('13','sum')">Summary</div>
-        <div class="tab" onclick="tab('13','comp')">Competitor Profiles</div>
-        <div class="tab" onclick="tab('13','pain')">Pain Points</div>
-        <div class="tab" onclick="tab('13','diff')">Differentiation Plan</div>
-        <div class="tab" onclick="tab('13','msg')">Messaging Guide</div>
-        <button class="raw-toggle" onclick="showRaw(13)">{ } Raw</button>
-      </div>
-      <div id="raw-13" class="raw-data-wrap"></div>
-      <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
-      <div class="panel" id="13-comp"><div id="13-comp-c"></div></div>
-      <div class="panel" id="13-pain"><div id="13-pain-c"></div></div>
-      <div class="panel" id="13-diff"><div id="13-diff-c"></div></div>
-      <div class="panel" id="13-msg"><div id="13-msg-c"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="arrow">↓</div>
-<div class="phase-label">Phase 8 — Executive Summary</div>
+<div class="phase-label">Phase 6 — Executive Summary</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-8">
     <div class="agent-head">
@@ -439,7 +295,7 @@
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 9 — SBA Business Plan · Investor Deck · Financial Projections</div>
+<div class="phase-label">Phase 7 — SBA Business Plan · Investor Deck · Financial Projections</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-9">
     <div class="agent-head">
@@ -471,7 +327,7 @@
 </div>
 
 <div class="arrow">↓</div>
-<div class="phase-label">Phase 10 — Project Execution Plan · Gantt · Risk Register</div>
+<div class="phase-label">Phase 8 — Project Execution Plan · Gantt · Risk Register</div>
 <div class="agents-grid g1">
   <div class="agent-card" id="card-10">
     <div class="agent-head">
@@ -498,6 +354,204 @@
       <div class="panel" id="10-risk"><div id="10-risk-c"></div></div>
       <div class="panel" id="10-team"><div id="10-team-c"></div></div>
       <div class="panel" id="10-check"><div id="10-check-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 9 — Market Intelligence · Map · Grants · Competitors · Build vs Buy (Parallel)</div>
+<div class="agents-grid g2">
+
+  <!-- Market Map Agent -->
+  <div class="agent-card" id="card-11">
+    <div class="agent-head">
+      <div class="agent-ico">🗺️</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
+      <span id="timer-11" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-11"></div>
+    </div>
+    <div class="agent-out" id="out-11">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
+        <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
+        <div class="tab" onclick="tab('11','dir')">Directions</div>
+        <button class="raw-toggle" onclick="showRaw(11)">{ } Raw</button>
+      </div>
+      <div id="raw-11" class="raw-data-wrap"></div>
+      <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
+      <div class="panel" id="11-leg"><div id="11-leg-c"></div></div>
+      <div class="panel" id="11-dir"><div id="11-dir-c"></div></div>
+    </div>
+  </div>
+
+  <!-- Grant & Funding Agent -->
+  <div class="agent-card" id="card-12">
+    <div class="agent-head">
+      <div class="agent-ico">💵</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
+      <span id="timer-12" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-12"></div>
+    </div>
+    <div class="agent-out" id="out-12">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('12','sum')">Summary</div>
+        <div class="tab" onclick="tab('12','caps')">GA CAPS</div>
+        <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
+        <div class="tab" onclick="tab('12','local')">Local Incentives</div>
+        <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
+        <button class="raw-toggle" onclick="showRaw(12)">{ } Raw</button>
+      </div>
+      <div id="raw-12" class="raw-data-wrap"></div>
+      <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
+      <div class="panel" id="12-caps"><div id="12-caps-c"></div></div>
+      <div class="panel" id="12-usda"><div id="12-usda-c"></div></div>
+      <div class="panel" id="12-local"><div id="12-local-c"></div></div>
+      <div class="panel" id="12-tbl"><div class="tbl-wrap" id="12-tbl-c"></div></div>
+    </div>
+  </div>
+
+  <!-- Competitor Deep-Dive Agent -->
+  <div class="agent-card" id="card-13">
+    <div class="agent-head">
+      <div class="agent-ico">🎯</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
+      <span id="timer-13" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-13"></div>
+    </div>
+    <div class="agent-out" id="out-13">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('13','sum')">Summary</div>
+        <div class="tab" onclick="tab('13','comp')">Competitor Profiles</div>
+        <div class="tab" onclick="tab('13','pain')">Pain Points</div>
+        <div class="tab" onclick="tab('13','diff')">Differentiation Plan</div>
+        <div class="tab" onclick="tab('13','msg')">Messaging Guide</div>
+        <button class="raw-toggle" onclick="showRaw(13)">{ } Raw</button>
+      </div>
+      <div id="raw-13" class="raw-data-wrap"></div>
+      <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
+      <div class="panel" id="13-comp"><div id="13-comp-c"></div></div>
+      <div class="panel" id="13-pain"><div id="13-pain-c"></div></div>
+      <div class="panel" id="13-diff"><div id="13-diff-c"></div></div>
+      <div class="panel" id="13-msg"><div id="13-msg-c"></div></div>
+    </div>
+  </div>
+
+  <!-- Build vs Buy Agent -->
+  <div class="agent-card" id="card-16">
+    <div class="agent-head">
+      <div class="agent-ico">🏗️</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Build vs Buy</div><div class="agent-role">Property Listings · Match Scores · Decision Matrix · Recommendation</div></div>
+      <span id="timer-16" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-16" onclick="reRunAgent(16)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-16"></div>
+    </div>
+    <div class="agent-out" id="out-16">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('16','sum')">Summary</div>
+        <div class="tab" onclick="tab('16','list')">Listings (Buy)</div>
+        <div class="tab" onclick="tab('16','comp')">Build vs Buy</div>
+        <div class="tab" onclick="tab('16','matrix')">Decision Matrix</div>
+        <div class="tab" onclick="tab('16','steps')">Next Steps</div>
+        <button class="raw-toggle" onclick="showRaw(16)">{ } Raw</button>
+      </div>
+      <div id="raw-16" class="raw-data-wrap"></div>
+      <div class="panel active" id="16-sum"><div id="16-sum-c"></div></div>
+      <div class="panel" id="16-list"><div id="16-list-c"></div></div>
+      <div class="panel" id="16-comp"><div id="16-comp-c"></div></div>
+      <div class="panel" id="16-matrix"><div id="16-matrix-c"></div></div>
+      <div class="panel" id="16-steps"><div id="16-steps-c"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 10 — Code Review &amp; QA · Correctness · Performance · Validation (Parallel)</div>
+<div class="agents-grid g2">
+
+  <!-- Code Review Agent -->
+  <div class="agent-card" id="card-14">
+    <div class="agent-head">
+      <div class="agent-ico">🔬</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
+      <span id="timer-14" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-14"></div>
+    </div>
+    <div class="agent-out" id="out-14">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('14','sum')">Summary</div>
+        <div class="tab" onclick="tab('14','issues')">Issues Found</div>
+        <div class="tab" onclick="tab('14','perf')">Performance</div>
+        <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
+        <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
+        <button class="raw-toggle" onclick="showRaw(14)">{ } Raw</button>
+      </div>
+      <div id="raw-14" class="raw-data-wrap"></div>
+      <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
+      <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
+      <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
+      <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
+      <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
+    </div>
+  </div>
+
+  <!-- QA Agent -->
+  <div class="agent-card" id="card-15">
+    <div class="agent-head">
+      <div class="agent-ico">✅</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
+      <span id="timer-15" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-15"></div>
+    </div>
+    <div class="agent-out" id="out-15">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('15','sum')">QA Summary</div>
+        <div class="tab" onclick="tab('15','tests')">Test Results</div>
+        <div class="tab" onclick="tab('15','data')">Data Validation</div>
+        <div class="tab" onclick="tab('15','ux')">UX Audit</div>
+        <div class="tab" onclick="tab('15','score')">Health Score</div>
+        <button class="raw-toggle" onclick="showRaw(15)">{ } Raw</button>
+      </div>
+      <div id="raw-15" class="raw-data-wrap"></div>
+      <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
+      <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
+      <div class="panel" id="15-data"><div id="15-data-c"></div></div>
+      <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
+      <div class="panel" id="15-score"><div id="15-score-c"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="arrow">↓</div>
+<div class="phase-label">Phase 11 — Sources &amp; Citations · Data Provenance · Integrity Audit</div>
+<div class="agents-grid g1">
+  <div class="agent-card" id="card-17">
+    <div class="agent-head">
+      <div class="agent-ico">📚</div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Sources &amp; Citations</div><div class="agent-role">All Data Sources · Sourced Claims · Unable to Source · Integrity Audit</div></div>
+      <span id="timer-17" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-17" onclick="reRunAgent(17)">↺ Re-run</button>
+      <div class="agent-dot" id="dot-17"></div>
+    </div>
+    <div class="agent-out" id="out-17">
+      <div class="tabs">
+        <div class="tab active" onclick="tab('17','sum')">Summary</div>
+        <div class="tab" onclick="tab('17','sources')">All Sources</div>
+        <div class="tab" onclick="tab('17','claims')">Sourced Claims</div>
+        <div class="tab" onclick="tab('17','unsourced')">Unable to Source</div>
+        <button class="raw-toggle" onclick="showRaw(17)">{ } Raw</button>
+      </div>
+      <div id="raw-17" class="raw-data-wrap"></div>
+      <div class="panel active" id="17-sum"><div id="17-sum-c"></div></div>
+      <div class="panel" id="17-sources"><div id="17-sources-c"></div></div>
+      <div class="panel" id="17-claims"><div id="17-claims-c"></div></div>
+      <div class="panel" id="17-unsourced"><div id="17-unsourced-c"></div></div>
     </div>
   </div>
 </div>
