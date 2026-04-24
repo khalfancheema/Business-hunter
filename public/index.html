@@ -2205,6 +2205,9 @@ Return ONLY this JSON (be extremely detailed — this is a real bank document):
 
 function renderBusinessPlan(d) {
   const es = d.executive_summary || {};
+  const co = d.company_overview || {};
+  const ma = d.market_analysis || {};
+  const ms = ma.market_size || {};
   // Overview tab
   let ov = `<div class="bp-section">
     <h3>Executive Summary</h3>
@@ -2215,11 +2218,11 @@ function renderBusinessPlan(d) {
   </div>
   <div class="bp-section">
     <h3>Company Overview</h3>
-    <h4>Mission</h4><div class="bp-prose">${d.company_overview.mission}</div>
-    <h4>Vision</h4><div class="bp-prose">${d.company_overview.vision}</div>
+    <h4>Mission</h4><div class="bp-prose">${co.mission||''}</div>
+    <h4>Vision</h4><div class="bp-prose">${co.vision||''}</div>
     <h4>Core Values</h4>
-    <div class="bp-grid">${(d.company_overview?.values||[]).map(v=>`<div class="bp-stat"><div class="bp-stat-val" style="font-size:13px">✦</div><div class="bp-stat-sub">${v}</div></div>`).join('')}</div>
-    <h4>Location Rationale</h4><div class="bp-prose">${d.company_overview.location_rationale}</div>
+    <div class="bp-grid">${(co.values||[]).map(v=>`<div class="bp-stat"><div class="bp-stat-val" style="font-size:13px">✦</div><div class="bp-stat-sub">${v}</div></div>`).join('')}</div>
+    <h4>Location Rationale</h4><div class="bp-prose">${co.location_rationale||''}</div>
   </div>
   <div class="bp-section">
     <h3>Services &amp; Revenue by Age Group</h3>
@@ -2235,12 +2238,12 @@ function renderBusinessPlan(d) {
 
   // Market tab
   let mkt=`<div class="bp-section">
-    <h3>Target Market</h3><div class="bp-prose">${d.market_analysis.target_market}</div>
+    <h3>Target Market</h3><div class="bp-prose">${ma.target_market||''}</div>
     <h4>Market Size (TAM / SAM / SOM)</h4>
     <div class="bp-grid">
-      <div class="bp-stat"><div class="bp-stat-label">Total Addressable</div><div class="bp-stat-val" style="font-size:14px">${d.market_analysis.market_size.total_addressable}</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Serviceable Market</div><div class="bp-stat-val" style="font-size:14px">${d.market_analysis.market_size.serviceable}</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Our Target Share</div><div class="bp-stat-val" style="font-size:14px">${d.market_analysis.market_size.target_share}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Total Addressable</div><div class="bp-stat-val" style="font-size:14px">${ms.total_addressable||''}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Serviceable Market</div><div class="bp-stat-val" style="font-size:14px">${ms.serviceable||''}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Our Target Share</div><div class="bp-stat-val" style="font-size:14px">${ms.target_share||''}</div></div>
     </div>
     <h4>Competitive Comparison Table</h4>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Competitor</th><th>Locations</th><th>${industry().price_label_primary}</th><th>Rating</th><th>Waitlist</th><th>Our Advantage</th></tr></thead><tbody>`;
