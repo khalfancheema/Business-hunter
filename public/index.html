@@ -341,6 +341,7 @@ select option{background:var(--surface2)}
 .raw-data-wrap{display:none;margin-top:10px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:12px;max-height:400px;overflow-y:auto;}
 .raw-data-wrap pre{font-size:10px;color:var(--muted);white-space:pre-wrap;word-break:break-all;margin:0;}
 .raw-toggle{font-size:11px;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--faint);cursor:pointer;}
+.rerun-btn{display:none;font-size:11px;padding:3px 10px;background:var(--red-dim);border:1px solid var(--red);border-radius:6px;color:var(--red);cursor:pointer;font-family:'Syne',sans-serif;font-weight:600;align-items:center;gap:4px;margin-left:6px;}
 </style>
 </head>
 <body>
@@ -372,6 +373,9 @@ select option{background:var(--surface2)}
     <input type="password" id="apiKey" placeholder="sk-ant-... / sk-... / AIza..." style="flex:1" autocomplete="off" />
   </div>
   <div style="font-size:11px;color:var(--faint);margin-top:6px">Used only in this session · sent directly to the selected provider API</div>
+  <div id="apiKeyGuidance" style="font-size:11px;color:var(--muted);margin-top:4px">
+    Set usage limits at <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue)">console.anthropic.com/settings/keys</a>
+  </div>
 </div>
 
 <div class="card">
@@ -398,6 +402,8 @@ select option{background:var(--surface2)}
     <button id="stopBtn" onclick="stopRequested=true;this.textContent='Stopping…';this.disabled=true" style="display:none;padding:10px 16px;background:var(--red-dim);border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer">⬛ Stop</button>
     <button id="clearCacheBtn" onclick="clearAllCache();this.textContent='✓ Cleared';setTimeout(()=>this.textContent='Clear Cache',1500)" style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">Clear Cache</button>
     <button class="btn" id="resetBtn" onclick="resetAll()" style="display:none">↺ Reset</button>
+    <button class="btn" id="exportBtn" onclick="exportResults()" style="border-color:var(--green);color:var(--green)">⬇ Export JSON</button>
+    <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖨 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
   </div>
   <div class="progress-wrap">
@@ -415,6 +421,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">🔬</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
       <span id="timer-14" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)">↺ Re-run</button>
       <div class="agent-dot" id="dot-14"></div>
     </div>
     <div class="agent-out" id="out-14">
@@ -444,6 +451,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">✅</div>
       <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
       <span id="timer-15" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)">↺ Re-run</button>
       <div class="agent-dot" id="dot-15"></div>
     </div>
     <div class="agent-out" id="out-15">
@@ -483,6 +491,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">📊</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Demographics</div><div class="agent-role">Census · GIS · Population · Income</div></div>
       <span id="timer-1" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-1" onclick="reRunAgent(1)">↺ Re-run</button>
       <div class="agent-dot" id="dot-1"></div>
     </div>
     <div class="agent-out" id="out-1">
@@ -507,6 +516,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">⚖️</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Compliance</div><div class="agent-role">Regulatory · Zoning · Licensing · Permits</div></div>
       <span id="timer-5" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-5" onclick="reRunAgent(5)">↺ Re-run</button>
       <div class="agent-dot" id="dot-5"></div>
     </div>
     <div class="agent-out" id="out-5">
@@ -529,6 +539,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">🔍</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Competitive Intelligence</div><div class="agent-role">Market Research · Competitor Mapping</div></div>
       <span id="timer-6" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-6" onclick="reRunAgent(6)">↺ Re-run</button>
       <div class="agent-dot" id="dot-6"></div>
     </div>
     <div class="agent-out" id="out-6">
@@ -554,6 +565,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">📈</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Gap Analysis</div><div class="agent-role">Supply vs Demand · City Rankings · Opportunity Scoring</div></div>
       <span id="timer-2" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-2" onclick="reRunAgent(2)">↺ Re-run</button>
       <div class="agent-dot" id="dot-2"></div>
     </div>
     <div class="agent-out" id="out-2">
@@ -581,6 +593,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">📍</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Site Selection</div><div class="agent-role">Location Scoring · City Comparison · Radar Charts</div></div>
       <span id="timer-3" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-3" onclick="reRunAgent(3)">↺ Re-run</button>
       <div class="agent-dot" id="dot-3"></div>
     </div>
     <div class="agent-out" id="out-3">
@@ -608,6 +621,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">🏢</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Real Estate</div><div class="agent-role">Live Listings · Direct Links · Broker Contacts · By City</div></div>
       <span id="timer-4" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-4" onclick="reRunAgent(4)">↺ Re-run</button>
       <div class="agent-dot" id="dot-4"></div>
     </div>
     <div class="agent-out" id="out-4">
@@ -635,6 +649,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">💰</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Financial Feasibility</div><div class="agent-role">3-Scenario Model · P&L Projection · Break-Even by City</div></div>
       <span id="timer-7" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-7" onclick="reRunAgent(7)">↺ Re-run</button>
       <div class="agent-dot" id="dot-7"></div>
     </div>
     <div class="agent-out" id="out-7">
@@ -662,6 +677,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">🗺️</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
       <span id="timer-11" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)">↺ Re-run</button>
       <div class="agent-dot" id="dot-11"></div>
     </div>
     <div class="agent-out" id="out-11">
@@ -687,6 +703,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">💵</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
       <span id="timer-12" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)">↺ Re-run</button>
       <div class="agent-dot" id="dot-12"></div>
     </div>
     <div class="agent-out" id="out-12">
@@ -716,6 +733,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">🎯</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
       <span id="timer-13" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)">↺ Re-run</button>
       <div class="agent-dot" id="dot-13"></div>
     </div>
     <div class="agent-out" id="out-13">
@@ -745,6 +763,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">📋</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Executive Summary</div><div class="agent-role">Go/No-Go Decision · Risk Matrix · Action Items</div></div>
       <span id="timer-8" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-8" onclick="reRunAgent(8)">↺ Re-run</button>
       <div class="agent-dot" id="dot-8"></div>
     </div>
     <div class="agent-out" id="out-8">
@@ -763,6 +782,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">🏦</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Business Plan</div><div class="agent-role">SBA 7(a) Loan Package · Investor Deck · Financial Projections</div></div>
       <span id="timer-9" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-9" onclick="reRunAgent(9)">↺ Re-run</button>
       <div class="agent-dot" id="dot-9"></div>
     </div>
     <div class="agent-out" id="out-9">
@@ -794,6 +814,7 @@ select option{background:var(--surface2)}
       <div class="agent-ico">🗂️</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Project Plan</div><div class="agent-role">18-Month Gantt · Milestones · Budget Tracker · Risk Register</div></div>
       <span id="timer-10" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
+      <button class="rerun-btn" id="rerun-10" onclick="reRunAgent(10)">↺ Re-run</button>
       <div class="agent-dot" id="dot-10"></div>
     </div>
     <div class="agent-out" id="out-10">
@@ -1059,6 +1080,8 @@ function setDot(n,state){
   if(dot){dot.className='agent-dot '+state;}
   const card=$('card-'+n);
   if(card){card.className='agent-card '+state;}
+  const rerunBtn=$('rerun-'+n);
+  if(rerunBtn){rerunBtn.style.display=(state==='error')?'inline-flex':'none';}
   if(state==='running'){
     dotTimers[n]=Date.now();
     if(dotIntervals[n]) clearInterval(dotIntervals[n]);
@@ -1127,6 +1150,7 @@ async function claudeJSON(system, user) {
   }
   const strictSystem = system + '\n\nCRITICAL: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.';
   for (let attempt = 1; attempt <= 3; attempt++) {
+    if (attempt > 1) await new Promise(r => setTimeout(r, attempt * 1500));
     try {
       const raw = await claude(strictSystem, user + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : ''));
       const d = parseJSON(raw);
@@ -1135,7 +1159,6 @@ async function claudeJSON(system, user) {
     } catch(e) {
       if (attempt === 3) throw e;
       console.warn(`Attempt ${attempt} API error:`, e.message);
-      await new Promise(r => setTimeout(r, attempt * 1500));
     }
   }
   return null;
@@ -1164,6 +1187,8 @@ function onProviderChange() {
   const pObj = PROVIDERS[p]||PROVIDERS.anthropic;
   const mi = $('modelInput');
   if(mi) mi.placeholder = pObj.model_default;
+  const guidance = $('apiKeyGuidance');
+  if(guidance) guidance.style.display = p==='anthropic' ? 'block' : 'none';
 }
 
 // ── CONTEXT EXTRACTOR ──────────────────────────────────────
@@ -1198,8 +1223,16 @@ function showRaw(n) {
   if(!el)return;
   if(el.style.display==='block'){el.style.display='none';return;}
   const d=R['a'+n];
-  if(!d){el.innerHTML='<pre>No data yet.</pre>';el.style.display='block';return;}
-  el.innerHTML='<pre>'+JSON.stringify(d,null,2).replace(/</g,'&lt;')+'</pre>';
+  if(!d){el.innerHTML='<pre style="color:var(--muted)">No data yet.</pre>';el.style.display='block';return;}
+  const safe=JSON.stringify(d,null,2).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const keyCount=Object.keys(d).length;
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:11px;color:var(--muted)">Raw JSON · ${keyCount} top-level key${keyCount===1?'':'s'}</span>
+      <button onclick="navigator.clipboard.writeText(JSON.stringify(R['a${n}'],null,2)).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})" style="font-size:11px;padding:2px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer">Copy</button>
+    </div>
+    <pre style="max-height:400px;overflow-y:auto;margin:0;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-all">${safe}</pre>
+  `;
   el.style.display='block';
 }
 
@@ -1388,7 +1421,7 @@ async function runAgent2(a1,a5,a6) {
   const usr=`Synthesize a market gap analysis for a ${ind.unit} (capacity: ${capacity()}, budget: $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
 DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'])}
-REGULATORY: ${a5.substring(0,400)}
+REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
 COMPETITORS: ${ctx(a6,['summary','cities','total_licensed_estimated'])}
 
 Return ONLY:
@@ -1452,7 +1485,7 @@ async function runAgent3(a1,a2,a5) {
 
 DEMOGRAPHICS: ${ctx(a1,['summary','cities'])}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
-REGULATORY: ${a5.substring(0,400)}
+REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
 
 Return ONLY:
 {
@@ -1569,20 +1602,35 @@ Return ONLY:
     });
     cards+=`</div>`;
     $('3-r-c').innerHTML=cards;
-    // Chart
+    // Chart — radar on desktop, horizontal bar on mobile
     killChart('ch-3');
     const ctx=$('ch-3').getContext('2d');
     const dims=['demand','competition','demographics','real_estate','regulatory'];
-    charts['ch-3']=new Chart(ctx,{type:'radar',data:{
-      labels:['Demand','Competition','Demographics','Real Estate','Regulatory'],
-      datasets:(d.locations||[]).map((loc,i)=>({
-        label:loc.city,
-        data:dims.map(k=>loc.scores[k]),
-        borderColor:['#4a9eff','#3dd68c','#f5a623','#a78bfa','#2dd4bf'][i],
-        backgroundColor:['rgba(74,158,255,0.08)','rgba(61,214,140,0.08)','rgba(245,166,35,0.08)','rgba(167,139,250,0.08)','rgba(45,212,191,0.08)'][i],
-        borderWidth:2,pointRadius:3
-      }))
-    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{r:{ticks:{color:'#8a8d96',backdropColor:'transparent'},grid:{color:'#2a2d35'},pointLabels:{color:'#8a8d96',font:{size:10}},min:60,max:100}}}});
+    const isMobile = window.innerWidth < 500;
+    if (isMobile) {
+      // Horizontal bar: one dataset per location showing overall_score, stacked by dim
+      const colors=['#4a9eff','#3dd68c','#f5a623','#a78bfa','#2dd4bf'];
+      charts['ch-3']=new Chart(ctx,{type:'bar',data:{
+        labels:['Demand','Competition','Demographics','Real Estate','Regulatory'],
+        datasets:(d.locations||[]).slice(0,3).map((loc,i)=>({
+          label:loc.city,
+          data:dims.map(k=>loc.scores[k]||0),
+          backgroundColor:colors[i]+'cc',
+          borderWidth:0,borderRadius:3
+        }))
+      },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:10}}}},scales:{x:{ticks:{color:'#8a8d96'},grid:{color:'#2a2d35'},min:0,max:100},y:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}}}}});
+    } else {
+      charts['ch-3']=new Chart(ctx,{type:'radar',data:{
+        labels:['Demand','Competition','Demographics','Real Estate','Regulatory'],
+        datasets:(d.locations||[]).map((loc,i)=>({
+          label:loc.city,
+          data:dims.map(k=>loc.scores[k]),
+          borderColor:['#4a9eff','#3dd68c','#f5a623','#a78bfa','#2dd4bf'][i],
+          backgroundColor:['rgba(74,158,255,0.08)','rgba(61,214,140,0.08)','rgba(245,166,35,0.08)','rgba(167,139,250,0.08)','rgba(45,212,191,0.08)'][i],
+          borderWidth:2,pointRadius:3
+        }))
+      },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{r:{ticks:{color:'#8a8d96',backdropColor:'transparent'},grid:{color:'#2a2d35'},pointLabels:{color:'#8a8d96',font:{size:10}},min:60,max:100}}}});
+    }
     // Comparison table
     let tbl=`<table class="tbl"><thead><tr><th>Rank</th><th>City / Submarket</th><th>Score</th><th>Sq Ft</th><th>Rent Range</th><th>${ind3.price_label_primary}</th><th>${ind3.price_label_secondary}</th><th>Competitors 2mi</th><th>Zoning</th><th>Risk</th><th>Timeline</th></tr></thead><tbody>`;
     (d.locations||[]).forEach(loc=>{
@@ -1614,8 +1662,8 @@ Search these sites:
 4. Search "${ind.unit} real estate for lease near ${zip()} site:loopnet.com"
 5. Contact local economic development authority — many municipalities actively recruit ${ind.unit} businesses
 
-Regulatory requirements: ${a5.substring(0,300)}
-Top locations recommended: ${a3.substring(0,400)}
+Regulatory requirements: ${ctx(a5,['summary','requirements'])}
+Top locations recommended: ${ctx(a3,['summary','locations'])}
 
 Property requirements: ${ind.real_estate}
 
@@ -1785,7 +1833,7 @@ async function runAgent7(a3,a4,a5) {
 
 SITE RECOMMENDATIONS: ${ctx(a3,['summary','locations'])}
 REAL ESTATE: ${ctx(a4,['summary','listings','by_city_summary'])}
-REGULATORY: ${a5.substring(0,300)}
+REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
 
 Return ONLY:
 {
@@ -1931,7 +1979,7 @@ KEY FINDINGS:
 - Gap Analysis: ${ctx(a2,['summary','overall_opportunity_score','cities'])}
 - Top Location: ${ctx(a3,['summary','locations'])}
 - Real Estate: ${ctx(a4,['summary','by_city_summary'])}
-- Regulatory: ${a5.substring(0,200)}
+- Regulatory: ${ctx(a5,['summary','requirements'])}
 - Competitors: ${ctx(a6,['summary','cities','top_chains'])}
 - Financials: ${ctx(a7,['summary','scenarios','by_city_financials'])}
 
@@ -1993,14 +2041,14 @@ async function runAgent9(a1,a2,a3,a4,a5,a6,a7,a8) {
   const usr=`Write a comprehensive SBA 7(a) loan-ready business plan for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) near ZIP ${zip()}.
 
 Use all research below:
-DEMOGRAPHICS: ${a1.substring(0,400)}
-GAP ANALYSIS: ${a2.substring(0,400)}
-SITE SELECTION: ${a3.substring(0,400)}
-REAL ESTATE: ${a4.substring(0,400)}
-COMPLIANCE: ${a5.substring(0,300)}
-COMPETITIVE INTEL: ${a6.substring(0,300)}
-FINANCIALS: ${a7.substring(0,500)}
-EXECUTIVE SUMMARY: ${a8.substring(0,300)}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'])}
+GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score','age_gaps'])}
+SITE SELECTION: ${ctx(a3,['summary','locations'])}
+REAL ESTATE: ${ctx(a4,['summary','listings','by_city_summary'])}
+COMPLIANCE: ${ctx(a5,['summary','requirements','timeline_phases'])}
+COMPETITIVE INTEL: ${ctx(a6,['summary','cities','top_chains'])}
+FINANCIALS: ${ctx(a7,['summary','scenarios','projections','by_city_financials'])}
+EXECUTIVE SUMMARY: ${ctx(a8,['verdict','verdict_rationale','assessment','success_factors','risks','next_steps'])}
 
 Return ONLY this JSON (be extremely detailed — this is a real bank document):
 {
@@ -2152,13 +2200,14 @@ Return ONLY this JSON (be extremely detailed — this is a real bank document):
 }
 
 function renderBusinessPlan(d) {
+  const es = d.executive_summary || {};
   // Overview tab
   let ov = `<div class="bp-section">
     <h3>Executive Summary</h3>
     <div class="bp-prose"><strong style="color:var(--text)">${d.business_name}</strong> · ${d.entity_type} · Owner: ${d.owner_placeholder}</div>
-    <div class="bp-prose" style="margin-top:10px">${d.executive_summary.concept}</div>
-    <div class="bp-prose" style="margin-top:8px">${d.executive_summary.opportunity}</div>
-    <div class="bp-prose" style="margin-top:8px;padding:10px;background:var(--blue-dim);border-radius:8px;border:1px solid var(--blue)">${d.executive_summary.ask}</div>
+    <div class="bp-prose" style="margin-top:10px">${es.concept||''}</div>
+    <div class="bp-prose" style="margin-top:8px">${es.opportunity||''}</div>
+    <div class="bp-prose" style="margin-top:8px;padding:10px;background:var(--blue-dim);border-radius:8px;border:1px solid var(--blue)">${es.ask||''}</div>
   </div>
   <div class="bp-section">
     <h3>Company Overview</h3>
@@ -2321,11 +2370,11 @@ async function runAgent10(a3,a4,a5,a7,a9) {
   const sys=`You are a senior project manager specializing in ${ind.unit} launches. You create detailed, actionable project plans. Respond JSON only.`;
   const usr=`Create a comprehensive 18-month project execution plan to open a ${ind.unit} (${ind.capacity_label}: ${capacity()}) near ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
 
-SITE SELECTION: ${a3.substring(0,300)}
-REAL ESTATE: ${a4.substring(0,300)}
-COMPLIANCE: ${a5.substring(0,300)}
-FINANCIALS: ${a7.substring(0,300)}
-BUSINESS PLAN: ${a9.substring(0,400)}
+SITE SELECTION: ${ctx(a3,['summary','locations'])}
+REAL ESTATE: ${ctx(a4,['summary','by_city_summary'])}
+COMPLIANCE: ${ctx(a5,['summary','requirements','timeline_phases'])}
+FINANCIALS: ${ctx(a7,['summary','scenarios','startup_breakdown'])}
+BUSINESS PLAN: ${ctx(a9,['executive_summary','financial_plan','operations_plan'])}
 
 Return ONLY:
 {
@@ -2700,9 +2749,9 @@ async function runAgent11(a1,a2,a4) {
   const ind=industry();
   const sys=`You are a geographic data analyst. Respond with JSON only.`;
   const usr=`Build geographic mapping data for cities within ${radius()} miles of ZIP ${zip()} for a ${ind.unit} site analysis.
-DEMOGRAPHICS: ${a1.substring(0,400)}
-GAP ANALYSIS: ${a2.substring(0,400)}
-REAL ESTATE: ${a4.substring(0,300)}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities'])}
+GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
+REAL ESTATE: ${ctx(a4,['summary','listings','by_city_summary'])}
 Return ONLY:
 {"center":{"lat":34.0020,"lng":-84.1455,"label":"ZIP 30097 — Duluth, GA"},"cities":[{"name":"Suwanee","county":"Gwinnett","lat":34.0512,"lng":-84.0710,"gap_score":9,"demand_score":9,"supply_score":3,"unserved_children":580,"median_income":112000,"competitor_count":2,"priority":"Critical Opportunity","recommended_action":"Open Here #1","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/suwanee-ga/for-lease/"},{"name":"Sugar Hill","county":"Gwinnett","lat":34.1118,"lng":-84.0541,"gap_score":8,"demand_score":8,"supply_score":3,"unserved_children":420,"median_income":89000,"competitor_count":1,"priority":"High Opportunity","recommended_action":"Open Here #2","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/sugar-hill-ga/for-lease/"},{"name":"Johns Creek","county":"Fulton","lat":34.0289,"lng":-84.1986,"gap_score":7,"demand_score":9,"supply_score":5,"unserved_children":390,"median_income":125000,"competitor_count":4,"priority":"High Opportunity","recommended_action":"Open Here #3","real_estate_url":"https://www.crexi.com/lease/properties?address=Johns+Creek%2C+GA"},{"name":"Buford","county":"Gwinnett","lat":34.1193,"lng":-83.9938,"gap_score":7,"demand_score":7,"supply_score":4,"unserved_children":310,"median_income":81000,"competitor_count":1,"priority":"High Opportunity","recommended_action":"Open Here #4","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/buford-ga/for-lease/"},{"name":"Cumming","county":"Forsyth","lat":34.2073,"lng":-84.1401,"gap_score":7,"demand_score":8,"supply_score":4,"unserved_children":350,"median_income":98000,"competitor_count":3,"priority":"Good Opportunity","recommended_action":"Consider #5","real_estate_url":"https://www.crexi.com/lease/properties?address=Cumming%2C+GA"},{"name":"Winder","county":"Barrow","lat":33.9937,"lng":-83.7196,"gap_score":9,"demand_score":8,"supply_score":2,"unserved_children":480,"median_income":52000,"competitor_count":1,"priority":"Critical — Underserved","recommended_action":"First-Mover Opportunity","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/winder-ga/for-lease/"},{"name":"Auburn","county":"Barrow","lat":34.0151,"lng":-83.8266,"gap_score":8,"demand_score":7,"supply_score":2,"unserved_children":310,"median_income":68000,"competitor_count":0,"priority":"High — Underserved","recommended_action":"Zero Competition","real_estate_url":"https://www.crexi.com/lease/properties?address=Auburn%2C+GA"},{"name":"Duluth","county":"Gwinnett","lat":34.0020,"lng":-84.1455,"gap_score":4,"demand_score":7,"supply_score":7,"unserved_children":160,"median_income":76000,"competitor_count":8,"priority":"Saturating","recommended_action":"Avoid — Competitive","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/duluth-ga/for-lease/"},{"name":"Lawrenceville","county":"Gwinnett","lat":33.9526,"lng":-83.9880,"gap_score":2,"demand_score":7,"supply_score":9,"unserved_children":80,"median_income":58000,"competitor_count":14,"priority":"Saturated","recommended_action":"Do Not Enter","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/lawrenceville-ga/for-lease/"},{"name":"Norcross","county":"Gwinnett","lat":33.9412,"lng":-84.2135,"gap_score":2,"demand_score":6,"supply_score":8,"unserved_children":70,"median_income":52000,"competitor_count":12,"priority":"Saturated","recommended_action":"Do Not Enter","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/norcross-ga/for-lease/"},{"name":"Alpharetta","county":"Fulton","lat":34.0754,"lng":-84.2941,"gap_score":5,"demand_score":8,"supply_score":6,"unserved_children":200,"median_income":120000,"competitor_count":7,"priority":"Moderate","recommended_action":"Premium niche possible","real_estate_url":"https://www.loopnet.com/search/commercial-real-estate/alpharetta-ga/for-lease/"}],"real_estate_pins":[{"label":"Suwanee – Peachtree Pkwy","lat":34.0480,"lng":-84.0690,"rent":13800,"sqft":8400,"url":"https://www.loopnet.com/search/commercial-real-estate/suwanee-ga/for-lease/"},{"label":"Sugar Hill – PI Blvd","lat":34.1090,"lng":-84.0520,"rent":9200,"sqft":7200,"url":"https://www.loopnet.com/search/commercial-real-estate/sugar-hill-ga/for-lease/"},{"label":"Buford – Hamilton Mill","lat":34.1170,"lng":-83.9910,"rent":8400,"sqft":6900,"url":"https://www.bizbuysell.com/georgia/child-care-businesses-for-sale/"},{"label":"Winder – Athens Hwy","lat":33.9910,"lng":-83.7210,"rent":5800,"sqft":6500,"url":"https://www.loopnet.com/search/commercial-real-estate/winder-ga/for-lease/"},{"label":"Auburn – Hwy 316","lat":34.0130,"lng":-83.8280,"rent":5200,"sqft":6200,"url":"https://www.crexi.com/lease/properties?address=Auburn%2C+GA"}],"directions":[{"from":"ZIP 30097 (Duluth)","to":"Suwanee Town Center","drive_mins":12,"miles":8.2,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Suwanee+Town+Center+Suwanee+GA"},{"from":"ZIP 30097 (Duluth)","to":"Sugar Hill City Hall","drive_mins":18,"miles":11.4,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Sugar+Hill+GA+30518"},{"from":"ZIP 30097 (Duluth)","to":"Johns Creek","drive_mins":14,"miles":9.8,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Johns+Creek+GA+30022"},{"from":"ZIP 30097 (Duluth)","to":"Buford / Hamilton Mill","drive_mins":22,"miles":14.1,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Hamilton+Mill+Buford+GA+30519"},{"from":"ZIP 30097 (Duluth)","to":"Winder, Barrow County","drive_mins":38,"miles":29.4,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Winder+GA+30680"},{"from":"ZIP 30097 (Duluth)","to":"Auburn, Barrow County","drive_mins":32,"miles":23.6,"google_url":"https://maps.google.com/?saddr=Duluth+GA+30097&daddr=Auburn+GA+30011"}]}`;
   try {
@@ -2979,7 +3028,7 @@ async function runAgent13(a6) {
 
 Search for reviews of the top ${ind.unit} chains and independent operators near ZIP ${zip()}. Find common complaint themes and differentiation opportunities.
 
-Competitor context: ${a6.substring(0,400)}
+Competitor context: ${ctx(a6,['summary','cities','top_chains'])}
 
 Return ONLY:
 {"summary":"5-sentence competitive landscape and differentiation opportunity summary","competitor_profiles":[{"name":"Primrose Schools (Gwinnett locations)","type":"Corporate Franchise","avg_rating":4.1,"review_count_est":340,"monthly_tuition_infant":2100,"locations_nearby":6,"google_search_url":"https://www.google.com/search?q=Primrose+School+Gwinnett+County+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=primrose+school&find_loc=Duluth%2C+GA","top_positive_themes":["Strong structured curriculum","Clean facilities","Good parent communication app","Experienced teachers","Consistent routines"],"top_complaint_themes":["3-6 month infant waitlists","Corporate and impersonal — hard to reach director","High staff turnover in infant rooms","Tuition increases $150-200/mo with minimal notice","Cookie-cutter curriculum across all locations"],"sample_complaints":["We were on the waitlist 4 months and they never called","The director is never available — you talk to whoever is at the front desk","Third teacher change in 6 months for my infant son","They raised tuition $175/month with only 2 weeks notice","Every Primrose is scripted and corporate — my daughter's teachers barely know her name"],"differentiation_opportunity":"Waitlist demand shows massive unmet need. Director accessibility and teacher stability are clear gaps."},{"name":"KinderCare (Gwinnett locations)","type":"Corporate Chain","avg_rating":3.8,"review_count_est":280,"monthly_tuition_infant":1750,"locations_nearby":4,"google_search_url":"https://www.google.com/search?q=KinderCare+Gwinnett+County+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=kindercare&find_loc=Duluth%2C+GA","top_positive_themes":["More affordable than Primrose","Convenient locations","Accepts CAPS subsidies","Online billing system"],"top_complaint_themes":["Extreme staff turnover — new faces every month","Overcrowded classrooms at peak hours","Poor parent communication — incident reports delayed","Facility maintenance issues — broken equipment","Food quality poor — processed snacks only"],"sample_complaints":["My son has had 7 different teachers in 12 months","I reported a safety issue and nothing was fixed","The classroom smelled and furniture was torn — pulled daughter out after 2 weeks","They never answer the parent app","Lunch was goldfish crackers and a juice box — I pay $1,700/month"],"differentiation_opportunity":"Staff stability, fresh food, and proactive communication are massive opportunities."},{"name":"Bright Horizons (Atlanta area)","type":"Corporate Premium","avg_rating":4.4,"review_count_est":190,"monthly_tuition_infant":2400,"locations_nearby":2,"google_search_url":"https://www.google.com/search?q=Bright+Horizons+Atlanta+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=bright+horizons&find_loc=Atlanta%2C+GA","top_positive_themes":["Genuinely excellent credentialed teachers","Detailed daily reports","Beautiful facilities","Low teacher turnover","Strong individualized curriculum"],"top_complaint_themes":["$2,400+/month excludes most families","6-9 month waitlists","Very limited Gwinnett locations","Drop-in care nearly nonexistent"],"sample_complaints":["We love everything about Bright Horizons but $2,600/month is not sustainable","We were on the waitlist 7 months and had to find an alternative","Great if you can get in and afford it — most people cannot"],"differentiation_opportunity":"BH quality at mid-premium price ($1,900-2,050) is the exact gap the market needs."},{"name":"Independent Centers (Gwinnett avg)","type":"Independent","avg_rating":4.2,"review_count_est":85,"monthly_tuition_infant":1450,"locations_nearby":24,"google_search_url":"https://www.google.com/search?q=independent+daycare+reviews+Gwinnett+County+GA","yelp_url":"https://www.yelp.com/search?find_desc=daycare&find_loc=Gwinnett+County%2C+GA","top_positive_themes":["Owner-operated accountability","Teachers know every child","Flexible scheduling","Lower tuition"],"top_complaint_themes":["Outdated facilities and playground","No technology — paper sign-in, no parent app, no cameras","Curriculum not structured — mostly free play","Close at 5:30pm — not workable for most dual-income families"],"sample_complaints":["Love the people but the building is old and playground is falling apart","No cameras — I have no idea what happens during the day","My daughter is not learning anything — just TV and free play","They close at 5:30 and my husband gets off at 5"],"differentiation_opportunity":"Beat independents on: technology, structured curriculum, hours, facilities."},{"name":"Barrow County Providers","type":"Regional Independent","avg_rating":3.9,"review_count_est":28,"monthly_tuition_infant":1300,"locations_nearby":6,"google_search_url":"https://www.google.com/search?q=daycare+Winder+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=daycare&find_loc=Winder%2C+GA","top_positive_themes":["Only affordable option in Barrow County","Community feel","Flexible in some cases"],"top_complaint_themes":["Severe shortage — families report no openings anywhere","Outdated facilities with minimal learning materials","Not all DECAL licensed — quality inconsistent","No curriculum — supervised childcare only"],"sample_complaints":["We called every daycare in Barrow County and everyone is full — we don't know what to do","The center doesn't even have a playground — it's a converted house","We drive to Gwinnett because there's nothing decent in Barrow County","My son learned almost nothing — no curriculum whatsoever"],"differentiation_opportunity":"Any quality provider in Barrow County becomes instant market leader — families literally have no alternative."}],"pain_point_analysis":[{"pain":"Staff Turnover","frequency_pct":68,"competitors_affected":["KinderCare","Primrose"],"your_solution":"Primary teacher guarantee 6 months minimum + above-market salaries + retention bonuses","marketing_angle":"The teacher who knows your baby — guaranteed for 6 months"},{"pain":"Waitlists / No Availability","frequency_pct":61,"competitors_affected":["Primrose","Bright Horizons","Barrow"],"your_solution":"Open pre-enrollment 6 months early. Position as THE waitlist alternative.","marketing_angle":"No waitlist — enroll this week"},{"pain":"Poor Communication","frequency_pct":54,"competitors_affected":["KinderCare","Independents"],"your_solution":"Brightwheel daily photos + videos + nap/meal reports. Director responds within 2 hours guaranteed.","marketing_angle":"See what your child does every hour of the day"},{"pain":"Surprise Tuition Increases","frequency_pct":42,"competitors_affected":["Primrose","KinderCare"],"your_solution":"Published annual tuition schedule. 60-day notice minimum. Rate locked 12 months.","marketing_angle":"No surprise bills — your rate is locked for a full year"},{"pain":"Corporate Impersonal Feel","frequency_pct":48,"competitors_affected":["Primrose","KinderCare","Bright Horizons"],"your_solution":"Owner present daily. Director meets every family. Personalized daily portfolio.","marketing_angle":"Locally owned — your child is not a number"},{"pain":"Poor Food Quality","frequency_pct":38,"competitors_affected":["KinderCare","Independents"],"your_solution":"Fresh locally sourced meals. CACFP enrolled. Weekly menu published.","marketing_angle":"Real food. Real ingredients. Every meal."},{"pain":"No Live Cameras","frequency_pct":45,"competitors_affected":["KinderCare","Independents","Barrow"],"your_solution":"Live parent camera access via Brightwheel app during all care hours","marketing_angle":"Watch your child anytime from your phone"},{"pain":"Limited Hours","frequency_pct":32,"competitors_affected":["Independents","Church-based"],"your_solution":"6:30am–6:30pm Monday–Friday. No in-service day closures.","marketing_angle":"6:30am to 6:30pm — we work your hours"}],"differentiation_strategy":[{"pillar":"Teacher Stability Promise","description":"Every child gets a dedicated primary teacher for minimum 6 months — guaranteed. Above-market salaries + $500 retention bonuses at 6-month mark. If teacher leaves early, family receives 1-month tuition credit.","competitors_this_beats":["KinderCare","Primrose"],"marketing_hook":"The teacher who knows your baby"},{"pillar":"Radical Transparency","description":"Live parent camera access all care hours. Daily Brightwheel video + photo reports. Director calls every new family after first week. Incident reports within 30 minutes.","competitors_this_beats":["KinderCare","Independents","Barrow"],"marketing_hook":"See everything. Know everything."},{"pillar":"Fresh Food Promise","description":"No processed snacks. All meals prepared in-house: morning snack, lunch, afternoon snack. Certified cook on staff. Weekly menu emailed to parents. CACFP enrolled.","competitors_this_beats":["KinderCare","Independents"],"marketing_hook":"You'd be proud of what they ate today"},{"pillar":"Reggio-Inspired Learning","description":"Project-based child-led learning vs scripted corporate curriculum. Children's work displayed at eye level. Parent documentation nights quarterly. Bi-annual learning portfolio for every family.","competitors_this_beats":["Primrose","KinderCare"],"marketing_hook":"Learning that looks like wonder"},{"pillar":"Mid-Premium Pricing","description":"$1,400–$2,050/month — far below Bright Horizons ($2,400) while matching or exceeding Primrose quality. Accept CAPS subsidies for income-diverse families.","competitors_this_beats":["Bright Horizons"],"marketing_hook":"Quality you thought you couldn't afford"},{"pillar":"Bilingual Classrooms","description":"English/Spanish classroom assistant in every room. Bilingual signage and parent communication available. Curriculum materials in both languages.","competitors_this_beats":["All corporate chains"],"marketing_hook":"Two languages. One classroom. A lifetime advantage."}],"messaging_guide":[{"audience":"Primrose/KinderCare waitlisted parents","headline":"The waitlist ends here.","body":"While other centers keep you waiting 4-6 months, we have spaces open now — with the quality you have been searching for. Fresh food. Live cameras. Teachers who stay.","cta":"Schedule a tour today","channel":"Facebook targeted ads — Primrose/KinderCare keyword targeting"},{"audience":"Parents leaving KinderCare (staff turnover)","headline":"Your child deserves a teacher who knows their name.","body":"At our center, every child has a dedicated primary teacher for a minimum of 6 months — guaranteed. No revolving door. No strangers. Just the consistency your child needs.","cta":"Get our Teacher Stability Promise","channel":"Google Search — KinderCare alternative near me"},{"audience":"Barrow County parents (Winder/Auburn)","headline":"Quality childcare. Finally, in Barrow County.","body":"We know you have been driving to Gwinnett or settling for something that does not feel right. We are bringing Reggio-inspired learning, live cameras, and fresh meals to your community.","cta":"Join our waitlist — opening soon","channel":"Nextdoor Winder/Auburn + Facebook Barrow County Parents"},{"audience":"Premium seekers priced out of Bright Horizons","headline":"Bright Horizons quality. Half the waitlist.","body":"Reggio curriculum. Credentialed teachers. Live cameras. Daily reports. Fresh meals. Starting at $1,400/month — no 7-month waitlist, no corporate runaround.","cta":"Book your enrollment tour","channel":"Instagram + LinkedIn affluent targeting Johns Creek/Alpharetta"},{"audience":"Working parents needing extended hours","headline":"We work your hours.","body":"6:30am open. 6:30pm close. 12 full hours every weekday. No in-service day closures. No surprise early dismissals. Because your job does not have a flexible schedule.","cta":"See our full calendar","channel":"Google Search — daycare open until 6:30 near me"}]}`;
@@ -3223,41 +3272,54 @@ async function runPipeline() {
   $('orchStatus').textContent='orchestrating…';
   $('finalBox').className='final-box';
 
+  const fb = k => JSON.stringify(window['getFallback'+k]());
   try {
     setProgress(2,'Pre-flight — Code Review · QA Testing…');
-    await runAgent14(R);
+    try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
-    await runAgent15(R);
+    try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(4,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
-    const [r1,r5,r6]=await Promise.all([runAgent1(),runAgent5(),runAgent6()]);
+    const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
+    const r1=res1.status==='fulfilled'?res1.value:fb(1);
+    const r5=res5.status==='fulfilled'?res5.value:fb(5);
+    const r6=res6.status==='fulfilled'?res6.value:fb(6);
+    if(res1.status==='rejected') console.error('Agent 1 failed:',res1.reason?.message);
+    if(res5.status==='rejected') console.error('Agent 5 failed:',res5.reason?.message);
+    if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(16,'Phase 2 — Gap Analysis…');
-    const r2=await runAgent2(r1,r5,r6);
+    let r2=fb(2);
+    try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(26,'Phase 3 — Site Selection…');
-    const r3=await runAgent3(r1,r2,r5);
+    let r3=fb(3);
+    try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(36,'Phase 4 — Real Estate then Financial Model…');
-    const r4=await runAgent4(r3,r5);
+    let r4=fb(4);
+    try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
-    const r7=await runAgent7(r3,r4,r5);
+    let r7=fb(7);
+    try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(48,'Phase 5 — Executive Summary…');
-    const r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7);
+    let r8=fb(8);
+    try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(56,'Phase 6 — Business Plan · SBA Package · Investor Deck…');
-    const r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8);
+    let r9=fb(9);
+    try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(64,'Phase 7 — Project Execution Plan · Gantt · Risk Register…');
-    await runAgent10(r3,r4,r5,r7,r9);
+    try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     setProgress(72,'Phase 8 — Market Map · Grants · Competitor Analysis (parallel)…');
@@ -3268,11 +3330,11 @@ async function runPipeline() {
     ]);
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    setProgress(100,'Complete — all 15 agents finished successfully');
+    setProgress(100,'Complete — all 15 agents finished');
     $('orchStatus').textContent='done';
   } catch(e) {
     $('orchStatus').textContent='error';
-    showErr('Pipeline stopped: '+e.message+'\n\nTip: Make sure your API key is correct and has credits.');
+    showErr('Pipeline error: '+e.message+'\n\nTip: Make sure your API key is correct and has credits.');
     setProgress(0,'Pipeline failed — see error above');
   } finally {
     running=false;
@@ -3282,6 +3344,60 @@ async function runPipeline() {
     $('stopBtn').disabled=false;
     $('stopBtn').textContent='⬛ Stop';
   }
+}
+
+async function reRunAgent(n) {
+  if(running) return;
+  const btn=$('rerun-'+n);
+  if(btn) btn.style.display='none';
+  running=true;
+  try {
+    const s = k => JSON.stringify(R['a'+k]||{});
+    if(n===1)      { const r=await runAgent1();  R.a1=JSON.parse(r||'{}'); }
+    else if(n===2) { await runAgent2(s(1),s(5),s(6)); }
+    else if(n===3) { await runAgent3(s(1),s(2),s(5)); }
+    else if(n===4) { await runAgent4(s(3),s(5)); }
+    else if(n===5) { await runAgent5(); }
+    else if(n===6) { await runAgent6(); }
+    else if(n===7) { await runAgent7(s(3),s(4),s(5)); }
+    else if(n===8) { await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7)); }
+    else if(n===9) { await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8)); }
+    else if(n===10){ await runAgent10(s(3),s(4),s(5),s(7),s(9)); }
+    else if(n===11){ await runAgent11(s(1),s(2),s(4)); }
+    else if(n===12){ await runAgent12(s(3),s(5)); }
+    else if(n===13){ await runAgent13(s(6)); }
+    else if(n===14){ await runAgent14(R); }
+    else if(n===15){ await runAgent15(R); }
+  } catch(e) {
+    console.error('Re-run agent '+n+' failed:',e.message);
+  } finally {
+    running=false;
+  }
+}
+
+function exportResults() {
+  if(!Object.keys(R).length) { showErr('No results to export yet — run the pipeline first.'); return; }
+  const blob = new Blob([JSON.stringify(R, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `pipeline-results-${zip()}-${Date.now()}.json`;
+  a.click();
+}
+
+function printReport() {
+  if(!Object.keys(R).length) { showErr('No results to print yet — run the pipeline first.'); return; }
+  const w = window.open('', '_blank');
+  const sections = [];
+  if(R.a8) sections.push(`<h2>Executive Summary</h2><p><strong>${R.a8.verdict||''}</strong> — ${R.a8.verdict_rationale||''}</p><p>${R.a8.assessment||''}</p>`);
+  if(R.a1) sections.push(`<h2>Demographics</h2><p>${R.a1.summary||''}</p>`);
+  if(R.a2) sections.push(`<h2>Gap Analysis</h2><p>${R.a2.summary||''}</p>`);
+  if(R.a3) sections.push(`<h2>Top Locations</h2>${(R.a3.locations||[]).slice(0,3).map(l=>`<p><strong>${l.city}</strong> (#${l.rank}, score ${l.overall_score}): ${l.submarket||''}</p>`).join('')}`);
+  if(R.a7) sections.push(`<h2>Financial Summary</h2><p>${R.a7.summary||''}</p>`);
+  if(R.a9) { const es=(R.a9.executive_summary||{}); sections.push(`<h2>Business Plan</h2><p>${es.concept||''}</p><p>${es.opportunity||''}</p>`); }
+  if(R.a8 && R.a8.next_steps) sections.push(`<h2>Next Steps</h2><ol>${(R.a8.next_steps||[]).map(s=>`<li>${s}</li>`).join('')}</ol>`);
+  w.document.write(`<!DOCTYPE html><html><head><title>Pipeline Report — ZIP ${zip()}</title><style>body{font-family:sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#222}h1{border-bottom:2px solid #333;padding-bottom:8px}h2{margin-top:2rem;color:#444;border-bottom:1px solid #ddd;padding-bottom:4px}p{line-height:1.7;margin:8px 0}ol{line-height:1.8}@media print{body{margin:0}}</style></head><body><h1>Business Planning Report — ZIP ${zip()}</h1><p style="color:#888;font-size:13px">Generated ${new Date().toLocaleString()} · ${Object.keys(R).length} agents completed</p>${sections.join('')}</body></html>`);
+  w.document.close();
+  w.print();
 }
 
 function resetAll() {
