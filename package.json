@@ -6,9 +6,10 @@
   "scripts": {
     "start": "python3 -m http.server 8080 --directory public",
     "serve": "npx serve public -l 8080",
-    "dev": "npx serve public -l 8080 --no-clipboard",
-    "build": "node scripts/build.js",
-    "lint": "node --input-type=module --eval \"import { readFileSync } from 'fs'; const h = readFileSync('public/index.html','utf8'); const s = h.match(/<script>([\\s\\S]*?)<\\/script>/g); console.log('Script blocks:', s?.length); console.log('OK');\""
+    "dev": "node build.mjs && npx serve public -l 8080 --no-clipboard",
+    "build": "node build.mjs",
+    "lint": "node --input-type=module --eval \"import { readFileSync } from 'fs'; const h = readFileSync('public/index.html','utf8'); const s = h.match(/<script>([\\s\\S]*?)<\\/script>/g); console.log('Script blocks:', s?.length); console.log('OK');\"",
+    "build-legacy": "node scripts/build.js"
   },
   "keywords": [
     "anthropic",
