@@ -1140,7 +1140,11 @@ function killChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete 
 async function claudeJSON(system, user) {
   if (demoMode) {
     await new Promise(r => setTimeout(r, 400));
-    const d = parseJSON(user);
+    // After CR-001 ctx() calls embed partial JSON early in the prompt.
+    // The template response always follows "Return ONLY:" — parse from there.
+    const marker = user.search(/Return ONLY[:\s]/i);
+    const src = marker >= 0 ? user.slice(marker) : user;
+    const d = parseJSON(src);
     if (d) return d;
     return {};
   }
