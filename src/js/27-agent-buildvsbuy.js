@@ -159,8 +159,11 @@ function renderAgent16(d) {
   const winnerBadge = (w, side) => w === side ? 'b-green' : 'b-red';
 
   // ── Tab shell ───────────────────────────────────────────
+  // IMPORTANT: panels must NOT have display:flex/block in their inline style —
+  // the global tab() function toggles visibility via .panel / .panel.active CSS
+  // rules (display:none / display:block). Any inline display: overrides that.
   out.innerHTML = `
-    <div style="padding:0 16px;border-bottom:1px solid var(--border);display:flex;gap:2px;flex-wrap:wrap">
+    <div class="tabs">
       <button class="tab active"  onclick="tab('16','sum')">Summary</button>
       <button class="tab"         onclick="tab('16','listings')">Listings (Buy)</button>
       <button class="tab"         onclick="tab('16','bvb')">Build vs Buy</button>
@@ -168,64 +171,74 @@ function renderAgent16(d) {
       <button class="tab"         onclick="tab('16','steps')">Next Steps</button>
     </div>
 
-    <div id="16-sum" class="panel active" style="padding:16px;display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Recommendation</span>
-        <span class="badge ${recBadge}" style="font-size:13px;padding:4px 12px">${rec}</span>
-      </div>
-      <div style="font-size:13px;line-height:1.7;color:var(--muted)">${rationale}</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        ${_stat16('Build Investment', '$' + (fc.build_total_investment || 0).toLocaleString(), 'var(--text)')}
-        ${_stat16('Buy Investment',   '$' + (fc.buy_total_investment   || 0).toLocaleString(), 'var(--text)')}
-        ${_stat16('Winner Advantage', (fc.winner_margin_pct || 0) + '% better', recColor)}
-        ${_stat16('Build Break-Even', (fc.build_break_even_months || '—') + ' mo', 'var(--text)')}
-        ${_stat16('Buy Break-Even',   (fc.buy_break_even_months   || '—') + ' mo', 'var(--text)')}
-        ${_stat16('Winner',           fc.winner || rec, recColor)}
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${_finCard16('Build — Yr 3 Net', fc.build_year3_net || buildA.year3_net || 0, 'var(--green)')}
-        ${_finCard16('Buy — Yr 3 Net',   fc.buy_year3_net   || buyA.year3_net   || 0, 'var(--blue)')}
-      </div>
-    </div>
-
-    <div id="16-listings" class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-      ${listings.length
-        ? listings.map(l => _listingCard16(l)).join('')
-        : `<div class="prose" style="color:var(--muted)">No specific listings found. Use the search URLs below to browse active listings.<br><br>
-           <a href="https://www.bizbuysell.com/childcare-businesses-for-sale/" target="_blank" class="link-btn">BizBuySell</a>
-           &nbsp;<a href="https://www.loopnet.com/" target="_blank" class="link-btn">LoopNet</a></div>`}
-      ${(d.buy_summary || '') ? `<div style="padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--muted)">${d.buy_summary}</div>` : ''}
-    </div>
-
-    <div id="16-bvb" class="panel" style="padding:16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        ${_bvbCard16('Build from Scratch', buildA, 'var(--green)', 'b-green')}
-        ${_bvbCard16('Buy / Acquire',      buyA,   'var(--blue)',  'b-blue')}
+    <div id="16-sum" class="panel active">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Recommendation</span>
+          <span class="badge ${recBadge}" style="font-size:13px;padding:4px 12px">${rec}</span>
+        </div>
+        <div style="font-size:13px;line-height:1.7;color:var(--muted)">${rationale}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          ${_stat16('Build Investment', '$' + (fc.build_total_investment || 0).toLocaleString(), 'var(--text)')}
+          ${_stat16('Buy Investment',   '$' + (fc.buy_total_investment   || 0).toLocaleString(), 'var(--text)')}
+          ${_stat16('Winner Advantage', (fc.winner_margin_pct || 0) + '% better', recColor)}
+          ${_stat16('Build Break-Even', (fc.build_break_even_months || '—') + ' mo', 'var(--text)')}
+          ${_stat16('Buy Break-Even',   (fc.buy_break_even_months   || '—') + ' mo', 'var(--text)')}
+          ${_stat16('Winner',           fc.winner || rec, recColor)}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          ${_finCard16('Build — Yr 3 Net', fc.build_year3_net || buildA.year3_net || 0, 'var(--green)')}
+          ${_finCard16('Buy — Yr 3 Net',   fc.buy_year3_net   || buyA.year3_net   || 0, 'var(--blue)')}
+        </div>
       </div>
     </div>
 
-    <div id="16-matrix" class="panel" style="padding:16px">
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Factor</th><th>Build</th><th>Buy</th><th>Winner</th><th>Weight</th></tr></thead>
-        <tbody>
-          ${factors.map(f => `<tr>
-            <td><strong>${f.factor || ''}</strong></td>
-            <td style="font-size:12px">${f.build || ''}</td>
-            <td style="font-size:12px">${f.buy   || ''}</td>
-            <td><span class="badge b-green">${f.winner || ''}</span></td>
-            <td><span class="badge ${weightBadge(f.weight)}">${f.weight || ''}</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table></div>
+    <div id="16-listings" class="panel">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+        ${listings.length
+          ? listings.map(l => _listingCard16(l)).join('')
+          : `<div class="prose" style="color:var(--muted)">No specific listings found. Use the search URLs below to browse active listings.<br><br>
+             <a href="https://www.bizbuysell.com/childcare-businesses-for-sale/" target="_blank" class="link-btn">BizBuySell</a>
+             &nbsp;<a href="https://www.loopnet.com/" target="_blank" class="link-btn">LoopNet</a></div>`}
+        ${(d.buy_summary || '') ? `<div style="padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--muted)">${d.buy_summary}</div>` : ''}
+      </div>
     </div>
 
-    <div id="16-steps" class="panel" style="padding:16px">
-      <ol style="display:flex;flex-direction:column;gap:10px;padding-left:0;list-style:none;margin:0">
-        ${steps.map((s, i) => `<li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Syne',sans-serif">${i + 1}</span>
-          <span style="font-size:13px;line-height:1.7;color:var(--text)">${s}</span>
-        </li>`).join('')}
-      </ol>
+    <div id="16-bvb" class="panel">
+      <div style="padding:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          ${_bvbCard16('Build from Scratch', buildA, 'var(--green)', 'b-green')}
+          ${_bvbCard16('Buy / Acquire',      buyA,   'var(--blue)',  'b-blue')}
+        </div>
+      </div>
+    </div>
+
+    <div id="16-matrix" class="panel">
+      <div style="padding:16px">
+        <div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>Factor</th><th>Build</th><th>Buy</th><th>Winner</th><th>Weight</th></tr></thead>
+          <tbody>
+            ${factors.map(f => `<tr>
+              <td><strong>${f.factor || ''}</strong></td>
+              <td style="font-size:12px">${f.build || ''}</td>
+              <td style="font-size:12px">${f.buy   || ''}</td>
+              <td><span class="badge b-green">${f.winner || ''}</span></td>
+              <td><span class="badge ${weightBadge(f.weight)}">${f.weight || ''}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div id="16-steps" class="panel">
+      <div style="padding:16px">
+        <ol style="display:flex;flex-direction:column;gap:10px;padding-left:0;list-style:none;margin:0">
+          ${steps.map((s, i) => `<li style="display:flex;gap:12px;align-items:flex-start">
+            <span style="background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Syne',sans-serif">${i + 1}</span>
+            <span style="font-size:13px;line-height:1.7;color:var(--text)">${s}</span>
+          </li>`).join('')}
+        </ol>
+      </div>
     </div>`;
 
   // activate first tab

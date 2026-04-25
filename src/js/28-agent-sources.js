@@ -147,81 +147,91 @@ function renderAgent17(d) {
   const sevBadge  = s => s === 'Warning' ? 'b-amber' : 'b-blue';
 
   // ── Tab shell ────────────────────────────────────────────
+  // IMPORTANT: panels must NOT have display: in their inline style —
+  // tab() toggles via .panel{display:none} / .panel.active{display:block} CSS rules.
   out.innerHTML = `
-    <div style="padding:0 16px;border-bottom:1px solid var(--border);display:flex;gap:2px;flex-wrap:wrap">
+    <div class="tabs">
       <button class="tab active" onclick="tab('17','sum')">Summary</button>
       <button class="tab"        onclick="tab('17','src')">All Sources</button>
       <button class="tab"        onclick="tab('17','claims')">Sourced Claims</button>
       <button class="tab"        onclick="tab('17','unsrc')">Unable to Source</button>
     </div>
 
-    <div id="17-sum" class="panel active" style="padding:16px;display:flex;flex-direction:column;gap:14px">
-      <div style="font-size:13px;line-height:1.7;color:var(--muted)">${d.summary || ''}</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-        ${_srcStat17('Total Sources',        totalSources,     'var(--blue)')}
-        ${_srcStat17('High Reliability',     highRelPct + '%', highRelPct >= 70 ? 'var(--green)' : 'var(--amber)')}
-        ${_srcStat17('Claims Sourced',       claimedCount,     'var(--green)')}
-        ${_srcStat17('Unable to Source',     unsourcedCount,   unsourcedCount > 5 ? 'var(--red)' : 'var(--amber)')}
+    <div id="17-sum" class="panel active">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+        <div style="font-size:13px;line-height:1.7;color:var(--muted)">${d.summary || ''}</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          ${_srcStat17('Total Sources',        totalSources,     'var(--blue)')}
+          ${_srcStat17('High Reliability',     highRelPct + '%', highRelPct >= 70 ? 'var(--green)' : 'var(--amber)')}
+          ${_srcStat17('Claims Sourced',       claimedCount,     'var(--green)')}
+          ${_srcStat17('Unable to Source',     unsourcedCount,   unsourcedCount > 5 ? 'var(--red)' : 'var(--amber)')}
+        </div>
+        ${notes.length ? `<div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Data Quality Notes</div>
+          ${notes.map(n => `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)">
+            <span class="badge ${sevBadge(n.severity)}">${n.severity || 'Info'}</span>
+            <span style="font-size:12px;color:var(--text);line-height:1.6">${n.note || ''}</span>
+          </div>`).join('')}
+        </div>` : ''}
       </div>
-      ${notes.length ? `<div style="display:flex;flex-direction:column;gap:6px">
-        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Data Quality Notes</div>
-        ${notes.map(n => `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)">
-          <span class="badge ${sevBadge(n.severity)}">${n.severity || 'Info'}</span>
-          <span style="font-size:12px;color:var(--text);line-height:1.6">${n.note || ''}</span>
-        </div>`).join('')}
-      </div>` : ''}
     </div>
 
-    <div id="17-src" class="panel" style="padding:16px;display:flex;flex-direction:column;gap:14px">
-      ${Object.keys(grouped).length
-        ? Object.entries(grouped).map(([cat, items]) => `
-          <div>
-            <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${cat} (${items.length})</div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              ${items.map(s => `
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:5px">
-                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
-                    <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${s.source || ''}</div>
-                    <span class="badge ${relBadge(s.reliability)}">${s.reliability || 'Unknown'}</span>
+    <div id="17-src" class="panel">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+        ${Object.keys(grouped).length
+          ? Object.entries(grouped).map(([cat, items]) => `
+            <div>
+              <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${cat} (${items.length})</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                ${items.map(s => `
+                  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:5px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
+                      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${s.source || ''}</div>
+                      <span class="badge ${relBadge(s.reliability)}">${s.reliability || 'Unknown'}</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted)">${s.agent || ''}</div>
+                    ${s.data_used    ? `<div style="font-size:12px;color:var(--text);line-height:1.6">${s.data_used}</div>` : ''}
+                    ${s.last_updated ? `<div style="font-size:10px;color:var(--muted)">Last updated: ${s.last_updated}</div>` : ''}
+                    ${s.url ? `<a href="${s.url}" target="_blank" class="link-btn" style="font-size:11px;width:fit-content">↗ Open Source</a>` : ''}
                   </div>
-                  <div style="font-size:11px;color:var(--muted)">${s.agent || ''}</div>
-                  ${s.data_used    ? `<div style="font-size:12px;color:var(--text);line-height:1.6">${s.data_used}</div>` : ''}
-                  ${s.last_updated ? `<div style="font-size:10px;color:var(--muted)">Last updated: ${s.last_updated}</div>` : ''}
-                  ${s.url ? `<a href="${s.url}" target="_blank" class="link-btn" style="font-size:11px;width:fit-content">↗ Open Source</a>` : ''}
-                </div>
-              `).join('')}
+                `).join('')}
+              </div>
+            </div>`).join('')
+          : `<div class="prose" style="color:var(--muted)">No sources catalogued.</div>`}
+      </div>
+    </div>
+
+    <div id="17-claims" class="panel">
+      <div style="padding:16px">
+        ${claimed.length
+          ? `<div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>Claim</th><th>Source</th><th>Verifiable</th></tr></thead>
+              <tbody>
+                ${claimed.map(c => `<tr>
+                  <td style="font-size:12px">${c.claim || ''}</td>
+                  <td style="font-size:12px;color:var(--muted)">${c.source || ''}</td>
+                  <td><span class="badge ${c.verifiable ? 'b-green' : 'b-amber'}">${c.verifiable ? 'Yes' : 'Partial'}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table></div>`
+          : `<div class="prose" style="color:var(--muted)">No sourced claims recorded.</div>`}
+      </div>
+    </div>
+
+    <div id="17-unsrc" class="panel">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+        ${unsourced.length
+          ? `<div style="padding:8px 12px;background:var(--surface2);border:1px solid var(--amber);border-radius:8px;font-size:12px;color:var(--amber);margin-bottom:4px">
+              These ${unsourced.length} claim(s) were generated by the AI and could not be verified against a public data source. Treat them as estimates.
             </div>
-          </div>`).join('')
-        : `<div class="prose" style="color:var(--muted)">No sources catalogued.</div>`}
-    </div>
-
-    <div id="17-claims" class="panel" style="padding:16px">
-      ${claimed.length
-        ? `<div class="tbl-wrap"><table class="tbl">
-            <thead><tr><th>Claim</th><th>Source</th><th>Verifiable</th></tr></thead>
-            <tbody>
-              ${claimed.map(c => `<tr>
-                <td style="font-size:12px">${c.claim || ''}</td>
-                <td style="font-size:12px;color:var(--muted)">${c.source || ''}</td>
-                <td><span class="badge ${c.verifiable ? 'b-green' : 'b-amber'}">${c.verifiable ? 'Yes' : 'Partial'}</span></td>
-              </tr>`).join('')}
-            </tbody>
-          </table></div>`
-        : `<div class="prose" style="color:var(--muted)">No sourced claims recorded.</div>`}
-    </div>
-
-    <div id="17-unsrc" class="panel" style="padding:16px;display:flex;flex-direction:column;gap:8px">
-      ${unsourced.length
-        ? `<div style="padding:8px 12px;background:var(--surface2);border:1px solid var(--amber);border-radius:8px;font-size:12px;color:var(--amber);margin-bottom:4px">
-            These ${unsourced.length} claim(s) were generated by the AI and could not be verified against a public data source. Treat them as estimates.
-          </div>
-          ${unsourced.map(u => `
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
-              <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${u.claim || ''}</div>
-              <div style="font-size:11px;color:var(--muted)">${u.agent || ''}</div>
-              <div style="font-size:12px;color:var(--amber)">${u.reason || ''}</div>
-            </div>`).join('')}`
-        : `<div class="prose" style="color:var(--green)">All claims were successfully sourced.</div>`}
+            ${unsourced.map(u => `
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${u.claim || ''}</div>
+                <div style="font-size:11px;color:var(--muted)">${u.agent || ''}</div>
+                <div style="font-size:12px;color:var(--amber)">${u.reason || ''}</div>
+              </div>`).join('')}`
+          : `<div class="prose" style="color:var(--green)">All claims were successfully sourced.</div>`}
+      </div>
     </div>`;
 
   // activate first tab
