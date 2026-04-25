@@ -128,24 +128,24 @@ Return ONLY:
       const sc=srcColors[l.source]||'src-other';
       cards+=`<div class="link-card">
         <div class="link-card-top">
-          <div class="link-card-name">${l.address}</div>
-          <span class="link-card-source ${sc}">${l.source}</span>
+          <div class="link-card-name">${_nv(l.address)}</div>
+          <span class="link-card-source ${sc}">${_nv(l.source)}</span>
         </div>
         <div class="link-card-attrs">
-          <div class="lc-attr"><span class="lc-k">City: </span><span class="lc-v">${l.city}</span></div>
-          <div class="lc-attr"><span class="lc-k">Type: </span><span class="lc-v">${l.property_type}</span></div>
-          <div class="lc-attr"><span class="lc-k">Sq Ft: </span><span class="lc-v">${(l.sqft||0).toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Rent/mo: </span><span class="lc-v">$${(l.monthly_rent||0).toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Zoning: </span><span class="lc-v">${l.zoning||''}</span></div>
-          <div class="lc-attr"><span class="lc-k">Outdoor: </span><span class="lc-v">${l.outdoor_space_available?(l.outdoor_sqft_est||0).toLocaleString()+' sqft':'No'}</span></div>
-          <div class="lc-attr"><span class="lc-k">Build-out: </span><span class="lc-v">$${(l.buildout_cost_est||0).toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Available: </span><span class="lc-v">${l.availability}</span></div>
+          <div class="lc-attr"><span class="lc-k">City: </span><span class="lc-v">${_nv(l.city)}</span></div>
+          <div class="lc-attr"><span class="lc-k">Type: </span><span class="lc-v">${_nv(l.property_type)}</span></div>
+          <div class="lc-attr"><span class="lc-k">Sq Ft: </span><span class="lc-v">${_nvNum(l.sqft, v=>v.toLocaleString())}</span></div>
+          <div class="lc-attr"><span class="lc-k">Rent/mo: </span><span class="lc-v">${_nvNum(l.monthly_rent, v=>'$'+v.toLocaleString())}</span></div>
+          <div class="lc-attr"><span class="lc-k">Zoning: </span><span class="lc-v">${_nv(l.zoning)}</span></div>
+          <div class="lc-attr"><span class="lc-k">Outdoor: </span><span class="lc-v">${l.outdoor_space_available!=null?(l.outdoor_space_available?_nvNum(l.outdoor_sqft_est,v=>v.toLocaleString()+' sqft','Unknown sqft'):'No'):'N/A'}</span></div>
+          <div class="lc-attr"><span class="lc-k">Build-out: </span><span class="lc-v">${_nvNum(l.buildout_cost_est, v=>'$'+v.toLocaleString())}</span></div>
+          <div class="lc-attr"><span class="lc-k">Available: </span><span class="lc-v">${_nv(l.availability)}</span></div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--surface3);border-radius:6px">${l.notes}</div>
-        ${l.broker_name?`<div style="font-size:11px;color:var(--faint);margin-bottom:8px">Broker: ${l.broker_name} · ${l.broker_phone}</div>`:''}
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--surface3);border-radius:6px">${_nv(l.notes,'','No notes available')}</div>
+        ${l.broker_name?`<div style="font-size:11px;color:var(--faint);margin-bottom:8px">Broker: ${l.broker_name}${l.broker_phone?' · '+l.broker_phone:''}</div>`:''}
         <div class="link-card-actions">
-          <a href="${l.listing_url}" target="_blank" class="link-btn primary-btn">↗ View Listing</a>
-          <span class="badge b-green" style="margin-left:auto;font-size:12px">${l.score}/100</span>
+          ${l.listing_url&&l.listing_url!=='N/A'?`<a href="${l.listing_url}" target="_blank" class="link-btn primary-btn">↗ View Listing</a>`:`<span style="font-size:11px;color:var(--faint)">No listing URL</span>`}
+          ${l.score!=null?`<span class="badge b-green" style="margin-left:auto;font-size:12px">${l.score}/100</span>`:''}
         </div>
       </div>`;
     });
@@ -159,10 +159,10 @@ Return ONLY:
       const crexiUrl=`https://www.crexi.com/lease/properties?address=${encodeURIComponent(c.city||'')}`;
       tbl+=`<tr>
         <td><strong>${c.city}</strong></td>
-        <td>$${c.avg_rent_sqft}/sqft</td>
-        <td>~${c.available_listings_est}</td>
-        <td><span class="badge b-blue">${c.best_zoning}</span></td>
-        <td style="font-size:11px;color:var(--muted)">${c.market_note}</td>
+        <td>${_nv(c.avg_rent_sqft, v=>'$'+v+'/sqft')}</td>
+        <td>${_nv(c.available_listings_est, v=>'~'+v)}</td>
+        <td>${c.best_zoning?`<span class="badge b-blue">${c.best_zoning}</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
+        <td style="font-size:11px;color:var(--muted)">${_nv(c.market_note,'','—')}</td>
         <td>
           <a href="${loopUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 7px">↗ LoopNet</a>
           <a href="${crexiUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 7px;margin-left:3px">↗ Crexi</a>

@@ -185,20 +185,21 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
     // Rich city table with expanded columns
     let tbl=`<table class="tbl"><thead><tr><th>City</th><th>County</th><th>Dist</th><th>Kids&lt;5</th><th>Income</th><th>Dual Income%</th><th>LFP%</th><th>Growth 5yr</th><th>Births/yr</th><th>AADT</th><th>School Enroll.</th><th>Demand</th><th>Source</th></tr></thead><tbody>`;
     cities1.forEach(c=>{
-      const b=(c.demand_score||0)>=80?'b-green':(c.demand_score||0)>=65?'b-amber':'b-red';
+      const score=c.demand_score;
+      const b=score>=80?'b-green':score>=65?'b-amber':'b-red';
       tbl+=`<tr>
         <td><strong>${c.name}</strong></td>
-        <td>${c.county||'—'}</td>
-        <td>${c.distance_miles||'—'}mi</td>
-        <td>${(c.pop_under5||0).toLocaleString()}</td>
-        <td>$${((c.median_hh_income||0)/1000).toFixed(0)}k</td>
-        <td>${c.dual_income_hh_est_pct||'—'}%</td>
-        <td>${c.labor_force_pct||'—'}%</td>
-        <td>${c.pop_growth_pct_5yr||'—'}%</td>
-        <td>${(c.annual_births_county_est||0).toLocaleString()}</td>
-        <td>${(c.traffic_aadt_main_corridor||0).toLocaleString()}</td>
-        <td>${(c.school_enrollment_k12||0).toLocaleString()}</td>
-        <td><span class="badge ${b}">${c.demand_score}</span></td>
+        <td>${_nv(c.county)}</td>
+        <td>${_nv(c.distance_miles, v=>v+'mi')}</td>
+        <td>${_nvNum(c.pop_under5, v=>v.toLocaleString())}</td>
+        <td>${_nvNum(c.median_hh_income, v=>'$'+(v/1000).toFixed(0)+'k')}</td>
+        <td>${_nv(c.dual_income_hh_est_pct, v=>v+'%')}</td>
+        <td>${_nv(c.labor_force_pct, v=>v+'%')}</td>
+        <td>${_nv(c.pop_growth_pct_5yr, v=>v+'%')}</td>
+        <td>${_nvNum(c.annual_births_county_est, v=>v.toLocaleString())}</td>
+        <td>${_nvNum(c.traffic_aadt_main_corridor, v=>v.toLocaleString())}</td>
+        <td>${_nvNum(c.school_enrollment_k12, v=>v.toLocaleString())}</td>
+        <td>${score!=null?`<span class="badge ${b}">${score}</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
         <td style="font-size:10px;color:var(--faint)">${c.data_note||''}</td>
       </tr>`;
     });

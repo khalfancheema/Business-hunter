@@ -1479,7 +1479,20 @@ async function claudeJSON(system, user) {
     const cached = getCache(system, user);
     if(cached) { console.log('Cache hit'); return cached; }
   }
-  const strictSystem = system + '\n\nCRITICAL: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.';
+  const strictSystem = system + `
+
+CRITICAL — JSON FORMAT: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.
+
+CRITICAL — DATA INTEGRITY (strictly enforced):
+- NEVER fabricate, invent, or estimate specific data that you cannot verify from a real source.
+- This includes: business names, addresses, phone numbers, email addresses, URLs, prices, statistics, ratings, counts, percentages, permit costs, agency names, or any numeric value.
+- If a specific piece of information is not available or cannot be verified, use EXACTLY:
+    • null          — for any numeric field (costs, ratings, counts, percentages, scores)
+    • "N/A"         — for short string fields (phone, email, form names, URLs you cannot verify)
+    • "Information not available" — for longer descriptive string fields
+- Do NOT substitute a plausible-sounding made-up value. Do NOT use 0 when the real value is unknown. Do NOT generate fake phone numbers, fake URLs, fake business names, fake addresses, or fake statistics.
+- If you found real data from a search, state the source. If you could not find it, return null/"N/A".
+- It is far better to return null than to return fabricated data.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     if (attempt > 1) await new Promise(r => setTimeout(r, attempt * 1500));
     try {
@@ -1571,6 +1584,38 @@ function showRaw(n) {
 
 // ── HEAT MAP RENDERER ──────────────────────────────────────
 
+
+// ══════════════════════════════════════════════════════════
+// _nv — "null-safe value" display helper
+// Use everywhere a value from agent JSON is rendered.
+// Returns fallback (default "N/A") when value is:
+//   null, undefined, 0 (for numbers), empty string,
+//   "N/A", "Information not available", "n/a"
+// Pass a formatter function for numbers, e.g.:
+//   _nv(c.median_hh_income, v => '$' + (v/1000).toFixed(0) + 'k')
+// ══════════════════════════════════════════════════════════
+function _nv(val, formatter, fallback) {
+  if (fallback === undefined) fallback = 'N/A';
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === 'string') {
+    const t = val.trim().toLowerCase();
+    if (t === '' || t === 'n/a' || t === 'information not available' || t === 'not available' || t === 'unknown') return fallback;
+    return formatter ? formatter(val) : val;
+  }
+  if (typeof val === 'number') {
+    if (!isFinite(val)) return fallback;
+    // Only treat 0 as N/A when explicitly checking — caller passes formatter for numerics
+    return formatter ? formatter(val) : String(val);
+  }
+  return formatter ? formatter(val) : String(val);
+}
+
+// _nvNum — like _nv but treats 0 as missing (use for counts/prices where 0 means "not found")
+function _nvNum(val, formatter, fallback) {
+  if (fallback === undefined) fallback = 'N/A';
+  if (val === null || val === undefined || val === 0) return fallback;
+  return _nv(val, formatter, fallback);
+}
 
 function renderHmap(containerId, cities, dims, onCellClick) {
   if(!cities||!cities.length){$(containerId).innerHTML='';return;}
@@ -1790,20 +1835,21 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
     // Rich city table with expanded columns
     let tbl=`<table class="tbl"><thead><tr><th>City</th><th>County</th><th>Dist</th><th>Kids&lt;5</th><th>Income</th><th>Dual Income%</th><th>LFP%</th><th>Growth 5yr</th><th>Births/yr</th><th>AADT</th><th>School Enroll.</th><th>Demand</th><th>Source</th></tr></thead><tbody>`;
     cities1.forEach(c=>{
-      const b=(c.demand_score||0)>=80?'b-green':(c.demand_score||0)>=65?'b-amber':'b-red';
+      const score=c.demand_score;
+      const b=score>=80?'b-green':score>=65?'b-amber':'b-red';
       tbl+=`<tr>
         <td><strong>${c.name}</strong></td>
-        <td>${c.county||'—'}</td>
-        <td>${c.distance_miles||'—'}mi</td>
-        <td>${(c.pop_under5||0).toLocaleString()}</td>
-        <td>$${((c.median_hh_income||0)/1000).toFixed(0)}k</td>
-        <td>${c.dual_income_hh_est_pct||'—'}%</td>
-        <td>${c.labor_force_pct||'—'}%</td>
-        <td>${c.pop_growth_pct_5yr||'—'}%</td>
-        <td>${(c.annual_births_county_est||0).toLocaleString()}</td>
-        <td>${(c.traffic_aadt_main_corridor||0).toLocaleString()}</td>
-        <td>${(c.school_enrollment_k12||0).toLocaleString()}</td>
-        <td><span class="badge ${b}">${c.demand_score}</span></td>
+        <td>${_nv(c.county)}</td>
+        <td>${_nv(c.distance_miles, v=>v+'mi')}</td>
+        <td>${_nvNum(c.pop_under5, v=>v.toLocaleString())}</td>
+        <td>${_nvNum(c.median_hh_income, v=>'$'+(v/1000).toFixed(0)+'k')}</td>
+        <td>${_nv(c.dual_income_hh_est_pct, v=>v+'%')}</td>
+        <td>${_nv(c.labor_force_pct, v=>v+'%')}</td>
+        <td>${_nv(c.pop_growth_pct_5yr, v=>v+'%')}</td>
+        <td>${_nvNum(c.annual_births_county_est, v=>v.toLocaleString())}</td>
+        <td>${_nvNum(c.traffic_aadt_main_corridor, v=>v.toLocaleString())}</td>
+        <td>${_nvNum(c.school_enrollment_k12, v=>v.toLocaleString())}</td>
+        <td>${score!=null?`<span class="badge ${b}">${score}</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
         <td style="font-size:10px;color:var(--faint)">${c.data_note||''}</td>
       </tr>`;
     });
@@ -2101,17 +2147,22 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
     let tbl = `<table class="tbl"><thead><tr><th>Category</th><th>Requirement</th><th>Detail</th><th>Timeline</th><th>Cost</th><th>Agency</th><th>Priority</th><th>Apply</th></tr></thead><tbody>`;
     (d.requirements||[]).forEach(r => {
       const pb = r.priority==='Critical'?'b-red':r.priority==='High'?'b-amber':'b-blue';
-      const applyBtn = r.apply_url
+      const hasUrl = r.apply_url && r.apply_url !== 'N/A' && r.apply_url.startsWith('http');
+      const applyBtn = hasUrl
         ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:11px;white-space:nowrap">↗ Apply</a>`
         : `<span style="font-size:10px;color:var(--faint)">See How to Apply tab</span>`;
+      const costDisplay = r.cost_usd === null || r.cost_usd === undefined
+        ? 'N/A'
+        : r.cost_usd === 0 ? 'Free'
+        : '$' + r.cost_usd.toLocaleString();
       tbl += `<tr>
-        <td><span class="badge b-blue">${r.category}</span></td>
-        <td><strong>${r.item}</strong></td>
-        <td style="font-size:11px;color:var(--muted)">${r.detail}</td>
-        <td>${r.timeline_weeks>0?r.timeline_weeks+' wks':'—'}</td>
-        <td>${r.cost_usd>0?'$'+r.cost_usd.toLocaleString():'Free'}</td>
-        <td style="font-size:10px;color:var(--faint)">${r.agency_name||r.source||''}</td>
-        <td><span class="badge ${pb}">${r.priority}</span></td>
+        <td><span class="badge b-blue">${_nv(r.category)}</span></td>
+        <td><strong>${_nv(r.item)}</strong></td>
+        <td style="font-size:11px;color:var(--muted)">${_nv(r.detail,'','—')}</td>
+        <td>${_nv(r.timeline_weeks, v=>v>0?v+' wks':'—', '—')}</td>
+        <td>${costDisplay}</td>
+        <td style="font-size:10px;color:var(--faint)">${_nv(r.agency_name||r.source,'','—')}</td>
+        <td>${r.priority?`<span class="badge ${pb}">${r.priority}</span>`:'—'}</td>
         <td>${applyBtn}</td>
       </tr>`;
     });
@@ -2133,9 +2184,11 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
             <span style="font-size:12px;line-height:1.65;color:var(--text)">${step.replace(/^\d+\.\s*/,'')}</span>
           </div>`
         ).join('');
+        const phoneOk = r.apply_phone && r.apply_phone !== 'N/A' && r.apply_phone !== 'null';
+        const emailOk = r.apply_email && r.apply_email !== 'N/A' && r.apply_email !== 'null';
         const contactRow = [
-          r.apply_phone ? `📞 ${r.apply_phone}` : '',
-          r.apply_email ? `✉ <a href="mailto:${r.apply_email}" style="color:var(--blue)">${r.apply_email}</a>` : ''
+          phoneOk ? `📞 ${r.apply_phone}` : '',
+          emailOk ? `✉ <a href="mailto:${r.apply_email}" style="color:var(--blue)">${r.apply_email}</a>` : ''
         ].filter(Boolean).join(' &nbsp;·&nbsp; ');
 
         applyHtml += `
@@ -2153,7 +2206,9 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
               ${stepsHtml ? `<div style="margin-top:4px">${stepsHtml}</div>` : ''}
               ${r.apply_notes ? `<div style="padding:8px 10px;background:var(--surface3);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;font-size:11px;color:var(--amber);line-height:1.6">⚠ ${r.apply_notes}</div>` : ''}
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-                ${r.apply_url ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:12px">↗ Go to Application Portal</a>` : ''}
+                ${r.apply_url && r.apply_url !== 'N/A' && r.apply_url.startsWith('http')
+                  ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:12px">↗ Go to Application Portal</a>`
+                  : `<span style="font-size:11px;color:var(--faint)">Application portal URL not available — contact agency directly</span>`}
               </div>
             </div>
           </div>`;
@@ -2377,20 +2432,21 @@ Be specific about which source each data point came from.`;
     const ind6=industry();
     let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Centers</th><th>Capacity</th><th>NAEYC</th><th>QRIS ★</th><th>${ind6.price_label_primary}</th><th>${ind6.price_label_secondary}</th><th>Avg Rating</th><th>Utilization</th><th>Waitlist</th><th>Gap Score</th></tr></thead><tbody>`;
     cities6.forEach(c=>{
-      const gb=c.gap_score>=8?'b-green':c.gap_score>=6?'b-amber':'b-red';
-      const pRate=(c.avg_monthly_infant||c.avg_primary_rate||0).toLocaleString();
-      const sRate=(c.avg_monthly_preschool||c.avg_secondary_rate||0).toLocaleString();
+      const gs=c.gap_score;
+      const gb=gs>=8?'b-green':gs>=6?'b-amber':'b-red';
+      const pRate=_nvNum(c.avg_monthly_infant||c.avg_primary_rate, v=>'$'+v.toLocaleString());
+      const sRate=_nvNum(c.avg_monthly_preschool||c.avg_secondary_rate, v=>'$'+v.toLocaleString());
       tbl+=`<tr>
         <td><strong>${c.city}</strong></td>
-        <td>${c.center_count}</td>
-        <td>${(c.licensed_capacity_total||0).toLocaleString()}</td>
-        <td>${c.naeyc_accredited_count||0} <span style="font-size:10px;color:var(--faint)">accred.</span></td>
-        <td>${c.qris_avg_stars||'—'}★</td>
-        <td>$${pRate}</td><td>$${sRate}</td>
-        <td>${c.avg_rating}★ <span style="font-size:10px;color:var(--faint)">(${c.avg_review_count||'?'} reviews)</span></td>
-        <td>${c.capacity_utilization_pct}%</td>
-        <td><span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes ('+( c.avg_waitlist_weeks||'?')+'wk)':'No'}</span></td>
-        <td><span class="badge ${gb}">${c.gap_score}/10</span></td>
+        <td>${_nv(c.center_count)}</td>
+        <td>${_nvNum(c.licensed_capacity_total, v=>v.toLocaleString())}</td>
+        <td>${_nv(c.naeyc_accredited_count, v=>v+' <span style="font-size:10px;color:var(--faint)">accred.</span>')}</td>
+        <td>${_nv(c.qris_avg_stars, v=>v+'★')}</td>
+        <td>${pRate}</td><td>${sRate}</td>
+        <td>${_nv(c.avg_rating, v=>v+'★')} <span style="font-size:10px;color:var(--faint)">(${_nv(c.avg_review_count)} reviews)</span></td>
+        <td>${_nv(c.capacity_utilization_pct, v=>v+'%')}</td>
+        <td>${c.waitlist_common!=null?`<span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes ('+(c.avg_waitlist_weeks||'?')+'wk)':'No'}</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
+        <td>${gs!=null?`<span class="badge ${gb}">${gs}/10</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
       </tr>`;
     });
     tbl+=`</tbody></table>`;
@@ -3032,24 +3088,24 @@ Return ONLY:
       const sc=srcColors[l.source]||'src-other';
       cards+=`<div class="link-card">
         <div class="link-card-top">
-          <div class="link-card-name">${l.address}</div>
-          <span class="link-card-source ${sc}">${l.source}</span>
+          <div class="link-card-name">${_nv(l.address)}</div>
+          <span class="link-card-source ${sc}">${_nv(l.source)}</span>
         </div>
         <div class="link-card-attrs">
-          <div class="lc-attr"><span class="lc-k">City: </span><span class="lc-v">${l.city}</span></div>
-          <div class="lc-attr"><span class="lc-k">Type: </span><span class="lc-v">${l.property_type}</span></div>
-          <div class="lc-attr"><span class="lc-k">Sq Ft: </span><span class="lc-v">${(l.sqft||0).toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Rent/mo: </span><span class="lc-v">$${(l.monthly_rent||0).toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Zoning: </span><span class="lc-v">${l.zoning||''}</span></div>
-          <div class="lc-attr"><span class="lc-k">Outdoor: </span><span class="lc-v">${l.outdoor_space_available?(l.outdoor_sqft_est||0).toLocaleString()+' sqft':'No'}</span></div>
-          <div class="lc-attr"><span class="lc-k">Build-out: </span><span class="lc-v">$${(l.buildout_cost_est||0).toLocaleString()}</span></div>
-          <div class="lc-attr"><span class="lc-k">Available: </span><span class="lc-v">${l.availability}</span></div>
+          <div class="lc-attr"><span class="lc-k">City: </span><span class="lc-v">${_nv(l.city)}</span></div>
+          <div class="lc-attr"><span class="lc-k">Type: </span><span class="lc-v">${_nv(l.property_type)}</span></div>
+          <div class="lc-attr"><span class="lc-k">Sq Ft: </span><span class="lc-v">${_nvNum(l.sqft, v=>v.toLocaleString())}</span></div>
+          <div class="lc-attr"><span class="lc-k">Rent/mo: </span><span class="lc-v">${_nvNum(l.monthly_rent, v=>'$'+v.toLocaleString())}</span></div>
+          <div class="lc-attr"><span class="lc-k">Zoning: </span><span class="lc-v">${_nv(l.zoning)}</span></div>
+          <div class="lc-attr"><span class="lc-k">Outdoor: </span><span class="lc-v">${l.outdoor_space_available!=null?(l.outdoor_space_available?_nvNum(l.outdoor_sqft_est,v=>v.toLocaleString()+' sqft','Unknown sqft'):'No'):'N/A'}</span></div>
+          <div class="lc-attr"><span class="lc-k">Build-out: </span><span class="lc-v">${_nvNum(l.buildout_cost_est, v=>'$'+v.toLocaleString())}</span></div>
+          <div class="lc-attr"><span class="lc-k">Available: </span><span class="lc-v">${_nv(l.availability)}</span></div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--surface3);border-radius:6px">${l.notes}</div>
-        ${l.broker_name?`<div style="font-size:11px;color:var(--faint);margin-bottom:8px">Broker: ${l.broker_name} · ${l.broker_phone}</div>`:''}
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--surface3);border-radius:6px">${_nv(l.notes,'','No notes available')}</div>
+        ${l.broker_name?`<div style="font-size:11px;color:var(--faint);margin-bottom:8px">Broker: ${l.broker_name}${l.broker_phone?' · '+l.broker_phone:''}</div>`:''}
         <div class="link-card-actions">
-          <a href="${l.listing_url}" target="_blank" class="link-btn primary-btn">↗ View Listing</a>
-          <span class="badge b-green" style="margin-left:auto;font-size:12px">${l.score}/100</span>
+          ${l.listing_url&&l.listing_url!=='N/A'?`<a href="${l.listing_url}" target="_blank" class="link-btn primary-btn">↗ View Listing</a>`:`<span style="font-size:11px;color:var(--faint)">No listing URL</span>`}
+          ${l.score!=null?`<span class="badge b-green" style="margin-left:auto;font-size:12px">${l.score}/100</span>`:''}
         </div>
       </div>`;
     });
@@ -3063,10 +3119,10 @@ Return ONLY:
       const crexiUrl=`https://www.crexi.com/lease/properties?address=${encodeURIComponent(c.city||'')}`;
       tbl+=`<tr>
         <td><strong>${c.city}</strong></td>
-        <td>$${c.avg_rent_sqft}/sqft</td>
-        <td>~${c.available_listings_est}</td>
-        <td><span class="badge b-blue">${c.best_zoning}</span></td>
-        <td style="font-size:11px;color:var(--muted)">${c.market_note}</td>
+        <td>${_nv(c.avg_rent_sqft, v=>'$'+v+'/sqft')}</td>
+        <td>${_nv(c.available_listings_est, v=>'~'+v)}</td>
+        <td>${c.best_zoning?`<span class="badge b-blue">${c.best_zoning}</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
+        <td style="font-size:11px;color:var(--muted)">${_nv(c.market_note,'','—')}</td>
         <td>
           <a href="${loopUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 7px">↗ LoopNet</a>
           <a href="${crexiUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 7px;margin-left:3px">↗ Crexi</a>

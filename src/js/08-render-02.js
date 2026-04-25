@@ -280,17 +280,22 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
     let tbl = `<table class="tbl"><thead><tr><th>Category</th><th>Requirement</th><th>Detail</th><th>Timeline</th><th>Cost</th><th>Agency</th><th>Priority</th><th>Apply</th></tr></thead><tbody>`;
     (d.requirements||[]).forEach(r => {
       const pb = r.priority==='Critical'?'b-red':r.priority==='High'?'b-amber':'b-blue';
-      const applyBtn = r.apply_url
+      const hasUrl = r.apply_url && r.apply_url !== 'N/A' && r.apply_url.startsWith('http');
+      const applyBtn = hasUrl
         ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:11px;white-space:nowrap">↗ Apply</a>`
         : `<span style="font-size:10px;color:var(--faint)">See How to Apply tab</span>`;
+      const costDisplay = r.cost_usd === null || r.cost_usd === undefined
+        ? 'N/A'
+        : r.cost_usd === 0 ? 'Free'
+        : '$' + r.cost_usd.toLocaleString();
       tbl += `<tr>
-        <td><span class="badge b-blue">${r.category}</span></td>
-        <td><strong>${r.item}</strong></td>
-        <td style="font-size:11px;color:var(--muted)">${r.detail}</td>
-        <td>${r.timeline_weeks>0?r.timeline_weeks+' wks':'—'}</td>
-        <td>${r.cost_usd>0?'$'+r.cost_usd.toLocaleString():'Free'}</td>
-        <td style="font-size:10px;color:var(--faint)">${r.agency_name||r.source||''}</td>
-        <td><span class="badge ${pb}">${r.priority}</span></td>
+        <td><span class="badge b-blue">${_nv(r.category)}</span></td>
+        <td><strong>${_nv(r.item)}</strong></td>
+        <td style="font-size:11px;color:var(--muted)">${_nv(r.detail,'','—')}</td>
+        <td>${_nv(r.timeline_weeks, v=>v>0?v+' wks':'—', '—')}</td>
+        <td>${costDisplay}</td>
+        <td style="font-size:10px;color:var(--faint)">${_nv(r.agency_name||r.source,'','—')}</td>
+        <td>${r.priority?`<span class="badge ${pb}">${r.priority}</span>`:'—'}</td>
         <td>${applyBtn}</td>
       </tr>`;
     });
@@ -312,9 +317,11 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
             <span style="font-size:12px;line-height:1.65;color:var(--text)">${step.replace(/^\d+\.\s*/,'')}</span>
           </div>`
         ).join('');
+        const phoneOk = r.apply_phone && r.apply_phone !== 'N/A' && r.apply_phone !== 'null';
+        const emailOk = r.apply_email && r.apply_email !== 'N/A' && r.apply_email !== 'null';
         const contactRow = [
-          r.apply_phone ? `📞 ${r.apply_phone}` : '',
-          r.apply_email ? `✉ <a href="mailto:${r.apply_email}" style="color:var(--blue)">${r.apply_email}</a>` : ''
+          phoneOk ? `📞 ${r.apply_phone}` : '',
+          emailOk ? `✉ <a href="mailto:${r.apply_email}" style="color:var(--blue)">${r.apply_email}</a>` : ''
         ].filter(Boolean).join(' &nbsp;·&nbsp; ');
 
         applyHtml += `
@@ -332,7 +339,9 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
               ${stepsHtml ? `<div style="margin-top:4px">${stepsHtml}</div>` : ''}
               ${r.apply_notes ? `<div style="padding:8px 10px;background:var(--surface3);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;font-size:11px;color:var(--amber);line-height:1.6">⚠ ${r.apply_notes}</div>` : ''}
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-                ${r.apply_url ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:12px">↗ Go to Application Portal</a>` : ''}
+                ${r.apply_url && r.apply_url !== 'N/A' && r.apply_url.startsWith('http')
+                  ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:12px">↗ Go to Application Portal</a>`
+                  : `<span style="font-size:11px;color:var(--faint)">Application portal URL not available — contact agency directly</span>`}
               </div>
             </div>
           </div>`;

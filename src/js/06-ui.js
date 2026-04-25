@@ -1,3 +1,35 @@
+// ══════════════════════════════════════════════════════════
+// _nv — "null-safe value" display helper
+// Use everywhere a value from agent JSON is rendered.
+// Returns fallback (default "N/A") when value is:
+//   null, undefined, 0 (for numbers), empty string,
+//   "N/A", "Information not available", "n/a"
+// Pass a formatter function for numbers, e.g.:
+//   _nv(c.median_hh_income, v => '$' + (v/1000).toFixed(0) + 'k')
+// ══════════════════════════════════════════════════════════
+function _nv(val, formatter, fallback) {
+  if (fallback === undefined) fallback = 'N/A';
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === 'string') {
+    const t = val.trim().toLowerCase();
+    if (t === '' || t === 'n/a' || t === 'information not available' || t === 'not available' || t === 'unknown') return fallback;
+    return formatter ? formatter(val) : val;
+  }
+  if (typeof val === 'number') {
+    if (!isFinite(val)) return fallback;
+    // Only treat 0 as N/A when explicitly checking — caller passes formatter for numerics
+    return formatter ? formatter(val) : String(val);
+  }
+  return formatter ? formatter(val) : String(val);
+}
+
+// _nvNum — like _nv but treats 0 as missing (use for counts/prices where 0 means "not found")
+function _nvNum(val, formatter, fallback) {
+  if (fallback === undefined) fallback = 'N/A';
+  if (val === null || val === undefined || val === 0) return fallback;
+  return _nv(val, formatter, fallback);
+}
+
 function renderHmap(containerId, cities, dims, onCellClick) {
   if(!cities||!cities.length){$(containerId).innerHTML='';return;}
   const maxes=dims.map(dim=>Math.max(...cities.map(c=>c[dim.key]||0)));

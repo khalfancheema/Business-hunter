@@ -76,7 +76,20 @@ async function claudeJSON(system, user) {
     const cached = getCache(system, user);
     if(cached) { console.log('Cache hit'); return cached; }
   }
-  const strictSystem = system + '\n\nCRITICAL: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.';
+  const strictSystem = system + `
+
+CRITICAL — JSON FORMAT: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.
+
+CRITICAL — DATA INTEGRITY (strictly enforced):
+- NEVER fabricate, invent, or estimate specific data that you cannot verify from a real source.
+- This includes: business names, addresses, phone numbers, email addresses, URLs, prices, statistics, ratings, counts, percentages, permit costs, agency names, or any numeric value.
+- If a specific piece of information is not available or cannot be verified, use EXACTLY:
+    • null          — for any numeric field (costs, ratings, counts, percentages, scores)
+    • "N/A"         — for short string fields (phone, email, form names, URLs you cannot verify)
+    • "Information not available" — for longer descriptive string fields
+- Do NOT substitute a plausible-sounding made-up value. Do NOT use 0 when the real value is unknown. Do NOT generate fake phone numbers, fake URLs, fake business names, fake addresses, or fake statistics.
+- If you found real data from a search, state the source. If you could not find it, return null/"N/A".
+- It is far better to return null than to return fabricated data.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     if (attempt > 1) await new Promise(r => setTimeout(r, attempt * 1500));
     try {

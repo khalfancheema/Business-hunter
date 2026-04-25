@@ -195,20 +195,21 @@ Be specific about which source each data point came from.`;
     const ind6=industry();
     let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Centers</th><th>Capacity</th><th>NAEYC</th><th>QRIS ★</th><th>${ind6.price_label_primary}</th><th>${ind6.price_label_secondary}</th><th>Avg Rating</th><th>Utilization</th><th>Waitlist</th><th>Gap Score</th></tr></thead><tbody>`;
     cities6.forEach(c=>{
-      const gb=c.gap_score>=8?'b-green':c.gap_score>=6?'b-amber':'b-red';
-      const pRate=(c.avg_monthly_infant||c.avg_primary_rate||0).toLocaleString();
-      const sRate=(c.avg_monthly_preschool||c.avg_secondary_rate||0).toLocaleString();
+      const gs=c.gap_score;
+      const gb=gs>=8?'b-green':gs>=6?'b-amber':'b-red';
+      const pRate=_nvNum(c.avg_monthly_infant||c.avg_primary_rate, v=>'$'+v.toLocaleString());
+      const sRate=_nvNum(c.avg_monthly_preschool||c.avg_secondary_rate, v=>'$'+v.toLocaleString());
       tbl+=`<tr>
         <td><strong>${c.city}</strong></td>
-        <td>${c.center_count}</td>
-        <td>${(c.licensed_capacity_total||0).toLocaleString()}</td>
-        <td>${c.naeyc_accredited_count||0} <span style="font-size:10px;color:var(--faint)">accred.</span></td>
-        <td>${c.qris_avg_stars||'—'}★</td>
-        <td>$${pRate}</td><td>$${sRate}</td>
-        <td>${c.avg_rating}★ <span style="font-size:10px;color:var(--faint)">(${c.avg_review_count||'?'} reviews)</span></td>
-        <td>${c.capacity_utilization_pct}%</td>
-        <td><span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes ('+( c.avg_waitlist_weeks||'?')+'wk)':'No'}</span></td>
-        <td><span class="badge ${gb}">${c.gap_score}/10</span></td>
+        <td>${_nv(c.center_count)}</td>
+        <td>${_nvNum(c.licensed_capacity_total, v=>v.toLocaleString())}</td>
+        <td>${_nv(c.naeyc_accredited_count, v=>v+' <span style="font-size:10px;color:var(--faint)">accred.</span>')}</td>
+        <td>${_nv(c.qris_avg_stars, v=>v+'★')}</td>
+        <td>${pRate}</td><td>${sRate}</td>
+        <td>${_nv(c.avg_rating, v=>v+'★')} <span style="font-size:10px;color:var(--faint)">(${_nv(c.avg_review_count)} reviews)</span></td>
+        <td>${_nv(c.capacity_utilization_pct, v=>v+'%')}</td>
+        <td>${c.waitlist_common!=null?`<span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes ('+(c.avg_waitlist_weeks||'?')+'wk)':'No'}</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
+        <td>${gs!=null?`<span class="badge ${gb}">${gs}/10</span>`:'<span style="color:var(--faint);font-size:11px">N/A</span>'}</td>
       </tr>`;
     });
     tbl+=`</tbody></table>`;
