@@ -6,6 +6,8 @@
 <title>Daycare Planning Agent System v4</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <!-- BUILD:CSS -->
 </head>
 <body>
@@ -91,6 +93,7 @@
     <button class="btn" id="fullExportBtn" onclick="fullPipelineExport()" style="border-color:var(--blue);color:var(--blue)">📄 Full PDF</button>
     <button class="btn" id="copyLinkBtn" onclick="copyShareableLink()">🔗 Copy Link</button>
     <button class="btn" id="phasePanelBtn" onclick="togglePhasePanel()">⚙ Phases</button>
+    <button class="btn" id="historyToggleBtn" onclick="toggleHistoryPanel()">🕐 Recent Reports</button>
     <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖨 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
   </div>
@@ -103,6 +106,12 @@
         <button class="phase-quick-btn" onclick="phaseSelectAll(event)">All</button>
         <button class="phase-quick-btn" onclick="phaseSelectNone(event)">None</button>
       </div>
+    </div>
+    <div class="phase-presets">
+      <button id="preset-quick"      class="phase-preset-btn" onclick="setPhasePreset('quick')">⚡ Quick Verdict <span class="preset-meta">~$0.15 · ~2 min</span></button>
+      <button id="preset-foundation" class="phase-preset-btn" onclick="setPhasePreset('foundation')">🔬 Foundation Only <span class="preset-meta">~$0.06 · ~1 min</span></button>
+      <button id="preset-financial"  class="phase-preset-btn" onclick="setPhasePreset('financial')">💰 Thru Financials <span class="preset-meta">~$0.20 · ~3 min</span></button>
+      <button id="preset-full"       class="phase-preset-btn active" onclick="setPhasePreset('full')">📋 Full Report <span class="preset-meta">~$0.40 · ~8 min</span></button>
     </div>
     <div class="phase-checks">
       <label class="phase-check-row"><input type="checkbox" id="phase-cb-1" checked onchange="togglePhase(1,this)"><span class="phase-num">1</span><span>Foundation Research <em>(Demographics · Compliance · Competitive Intel)</em></span></label>
@@ -139,9 +148,18 @@
       </select>
     </div>
     <button class="compare-toggle-btn" onclick="runIndustryComparison()">⚖ Compare Industries</button>
+    <div class="field" style="margin-left:auto">
+      <label>Compare ZIP</label>
+      <input type="text" id="compareZipInput" placeholder="e.g. 30022" maxlength="5" style="width:95px" />
+    </div>
+    <button id="compareZipBtn" class="compare-toggle-btn" onclick="runZipComparison()" style="border-color:var(--teal);color:var(--teal)">⚖ Compare ZIPs</button>
   </div>
   <div id="comparePanel" class="compare-panel"></div>
+  <div id="zipComparePanel" style="display:none;margin-top:12px"></div>
 </div>
+
+<!-- Session History Panel -->
+<div id="historyPanel" class="history-panel" style="display:none"></div>
 
 <div class="arrow">↓</div>
 

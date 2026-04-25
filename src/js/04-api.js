@@ -5,7 +5,7 @@ function setDot(n,state){
   const card=$('card-'+n);
   if(card){card.className='agent-card '+state;}
   const rerunBtn=$('rerun-'+n);
-  if(rerunBtn){rerunBtn.style.display=(state==='error')?'inline-flex':'none';}
+  if(rerunBtn){rerunBtn.style.display=(state==='done'||state==='error')?'inline-flex':'none';}
   if(state==='running'){
     dotTimers[n]=Date.now();
     if(dotIntervals[n]) clearInterval(dotIntervals[n]);

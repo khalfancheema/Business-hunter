@@ -24,99 +24,132 @@ function gapCol(s){return s>=9?'#3dd68c':s>=7?'#f5a623':s>=5?'#4a9eff':s>=3?'#a7
 function gapBadge(s){return s>=9?'b-green':s>=7?'b-amber':s>=5?'b-blue':s>=3?'b-purple':'b-red';}
 
 function buildMap(d) {
-  const cities=d.cities;
-  const lats=cities.map(c=>c.lat), lngs=cities.map(c=>c.lng);
-  const minLat=Math.min(...lats)-0.08, maxLat=Math.max(...lats)+0.08;
-  const minLng=Math.min(...lngs)-0.08, maxLng=Math.max(...lngs)+0.08;
-  const W=880, H=490;
-  function px(lng){return ((lng-minLng)/(maxLng-minLng)*(W-80)+40).toFixed(1);}
-  function py(lat){return (((maxLat-lat)/(maxLat-minLat))*(H-60)+30).toFixed(1);}
+  const container = $('11-map-c');
+  if (!container) return;
 
-  let svg=`<div style="position:relative;width:100%;height:${H}px;border-radius:10px;overflow:hidden;background:#1a1d22;border:1px solid var(--border)">
-  <svg width="100%" height="100%" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${W}" height="${H}" fill="#1a1d22"/>
-    <g stroke="#2a2d35" stroke-width="0.5" opacity="0.4">`;
-  for(let i=0;i<=8;i++) svg+=`<line x1="${40+i*100}" y1="20" x2="${40+i*100}" y2="${H-20}"/>`;
-  for(let i=0;i<=4;i++) svg+=`<line x1="30" y1="${30+i*108}" x2="${W-20}" y2="${30+i*108}"/>`;
-  svg+=`</g>`;
-  const hx=px(d.center.lng), hy=py(d.center.lat);
-  svg+=`<ellipse cx="${hx}" cy="${hy}" rx="270" ry="215" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="6,5" opacity="0.25"/>
-  <text x="${hx}" y="${parseFloat(hy)-222}" fill="#4a9eff" font-size="10" text-anchor="middle" opacity="0.4" font-family="sans-serif">40-mile radius</text>`;
+  // Destroy existing Leaflet instance
+  if (window._leafletMap) {
+    try { window._leafletMap.remove(); } catch(_) {}
+    window._leafletMap = null;
+  }
 
-  // RE pins first (background layer)
-  (d.real_estate_pins||[]).forEach(pin=>{
-    const bx=px(pin.lng), by=py(pin.lat);
-    svg+=`<g style="cursor:pointer" onclick="window.open('${pin.url}','_blank')" title="${pin.label} — $${pin.rent.toLocaleString()}/mo">
-      <rect x="${parseFloat(bx)-9}" y="${parseFloat(by)-9}" width="18" height="18" rx="3" fill="#0f2a45" stroke="#4a9eff" stroke-width="1.5"/>
-      <text x="${bx}" y="${parseFloat(by)+5}" font-size="11" text-anchor="middle" fill="#4a9eff">🏢</text>
-    </g>`;
-  });
-
-  // City circles
-  cities.forEach(city=>{
-    const cx=px(city.lng), cy=py(city.lat);
-    const col=gapCol(city.gap_score);
-    const r=Math.max(16,Math.min(30,12+city.unserved_children/22));
-    const nameShort=city.name.split(' ')[0];
-    svg+=`<g style="cursor:pointer"
-      onmouseover="mTip(event,'${city.name}','${city.county} County','${city.gap_score}/10','${city.priority}','$${Math.round(city.median_income/1000)}k income','${city.unserved_children} unserved','${city.competitor_count} competitors','${city.recommended_action}')"
-      onmouseout="mHide()"
-      onclick="window.open('${city.real_estate_url}','_blank')">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" opacity="0.18"/>
-      <circle cx="${cx}" cy="${cy}" r="${r*0.58}" fill="${col}" opacity="0.9"/>
-      <text x="${cx}" y="${parseFloat(cy)+4}" font-size="${city.gap_score>=8?12:10}" font-weight="700" text-anchor="middle" fill="#000" font-family="'Syne',sans-serif">${city.gap_score}</text>
-      <text x="${cx}" y="${parseFloat(cy)+r+13}" font-size="9" text-anchor="middle" fill="${col}" font-family="'Syne',sans-serif" font-weight="600">${nameShort}</text>
-    </g>`;
-  });
-
-  // Home pin
-  svg+=`<g>
-    <circle cx="${hx}" cy="${hy}" r="9" fill="#f0f0ee" stroke="#4a9eff" stroke-width="2.5"/>
-    <text x="${hx}" y="${parseFloat(hy)+5}" font-size="10" text-anchor="middle" fill="#0e0f11" font-weight="900" font-family="sans-serif">★</text>
-    <text x="${hx}" y="${parseFloat(hy)+23}" font-size="9" text-anchor="middle" fill="#f0f0ee" font-family="sans-serif">30097</text>
-  </g>`;
-
-  svg+=`</svg>
-  <div id="mTipEl" style="position:absolute;background:#16181c;border:1px solid #363a44;border-radius:8px;padding:10px 13px;font-size:12px;display:none;z-index:10;min-width:210px;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.5)"></div>
-  </div>`;
-
-  svg+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)">
-    <span style="font-weight:700;color:var(--muted);font-family:'Syne',sans-serif">Gap Score:</span>
-    ${[['#3dd68c','9-10 Critical'],['#f5a623','7-8 High'],['#4a9eff','5-6 Moderate'],['#a78bfa','3-4 Low'],['#ff5f5f','1-2 Avoid']].map(([c,l])=>`<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:${c};display:inline-block"></span>${l}</span>`).join('')}
-    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:2px;background:#0f2a45;border:1px solid #4a9eff;display:inline-block"></span>🏢 RE Listing</span>
-    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:#f0f0ee;border:2px solid #4a9eff;display:inline-block"></span>★ Home ZIP</span>
-  </div>
-  <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-    <a href="https://maps.google.com/maps?q=${encodeURIComponent(industry().unit)}+near+${zip()}" target="_blank" class="link-btn primary-btn">↗ Google Maps</a>
-    <a href="https://www.loopnet.com/search/commercial-real-estate/${zip()}/for-lease/" target="_blank" class="link-btn">↗ LoopNet Listings</a>
-    <a href="https://www.crexi.com/lease/properties?address=${zip()}" target="_blank" class="link-btn">↗ Crexi Listings</a>
-    <a href="https://www.bizbuysell.com/search/" target="_blank" class="link-btn">↗ BizBuySell</a>
-  </div>`;
-  $('11-map-c').innerHTML=svg;
-}
-
-function mTip(e,name,county,gap,priority,income,unserved,competitors,action){
-  const t=$('mTipEl');
-  if(!t)return;
-  const col=gap.startsWith('9')||gap.startsWith('8')?'#3dd68c':gap.startsWith('7')?'#f5a623':'#ff5f5f';
-  t.innerHTML=`<div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:5px">${name}</div>
-    <div style="font-size:11px;color:#8a8d96;margin-bottom:8px">${county}</div>
-    <div style="display:grid;gap:3px;font-size:11px">
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Gap Score</span><strong style="color:${col}">${gap}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Priority</span><strong>${priority}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Income</span><strong>${income}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Unserved</span><strong>${unserved}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Competitors</span><strong>${competitors}</strong></div>
+  // Build wrapping HTML
+  container.innerHTML = `
+    <div id="leafletMapEl" style="width:100%;height:490px;border-radius:10px;overflow:hidden;border:1px solid var(--border)"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)">
+      <span style="font-weight:700;color:var(--muted);font-family:'Syne',sans-serif">Gap Score:</span>
+      ${[['#3dd68c','9-10 Critical'],['#f5a623','7-8 High'],['#4a9eff','5-6 Moderate'],['#a78bfa','3-4 Low'],['#ff5f5f','1-2 Avoid']].map(([c,l])=>
+        `<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:${c};display:inline-block"></span>${l}</span>`
+      ).join('')}
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="font-size:13px">🏢</span> RE Listing</span>
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="font-size:13px">★</span> Home ZIP</span>
     </div>
-    <div style="margin-top:7px;padding:4px 8px;background:#1a3a5c;border-radius:5px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:#4a9eff">${action}</div>
-    <div style="font-size:10px;color:#4a4d56;margin-top:4px">Click to open listings ↗</div>`;
-  const rect=t.parentElement.getBoundingClientRect();
-  const ex=e.clientX-rect.left+12, ey=e.clientY-rect.top+12;
-  t.style.left=Math.min(ex,rect.width-230)+'px';
-  t.style.top=Math.min(ey,rect.height-200)+'px';
-  t.style.display='block';
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <a href="https://maps.google.com/maps?q=${encodeURIComponent(industry().unit)}+near+${zip()}" target="_blank" class="link-btn primary-btn">↗ Google Maps</a>
+      <a href="https://www.loopnet.com/search/commercial-real-estate/${zip()}/for-lease/" target="_blank" class="link-btn">↗ LoopNet Listings</a>
+      <a href="https://www.crexi.com/lease/properties?address=${zip()}" target="_blank" class="link-btn">↗ Crexi Listings</a>
+      <a href="https://www.bizbuysell.com/search/" target="_blank" class="link-btn">↗ BizBuySell</a>
+    </div>`;
+
+  // Guard: Leaflet must be loaded
+  if (typeof L === 'undefined') {
+    $('leafletMapEl').innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px">Map unavailable — Leaflet library not loaded. Check internet connection.</div>';
+    return;
+  }
+
+  const center = [d.center.lat || 34.0, d.center.lng || -84.1];
+
+  const map = L.map('leafletMapEl', {
+    center,
+    zoom: 10,
+    zoomControl: true,
+    attributionControl: true,
+  });
+  window._leafletMap = map;
+
+  // CartoDB Dark Matter tiles — dark theme, no API key needed
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // ── Home ZIP star marker ──────────────────────────────────
+  const homeHtml = `<div style="background:#4a9eff;width:28px;height:28px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#000;box-shadow:0 2px 8px rgba(0,0,0,.5)">★</div>`;
+  const homeIcon = L.divIcon({ html: homeHtml, className: '', iconSize: [28,28], iconAnchor: [14,14], popupAnchor: [0,-16] });
+  L.marker(center, { icon: homeIcon, zIndexOffset: 1000 })
+    .addTo(map)
+    .bindPopup(`<strong>${d.center.label || 'ZIP ' + zip()}</strong><br>Your search center`);
+
+  // ── Radius circle ─────────────────────────────────────────
+  const radiusMiles = parseFloat(radius()) || 40;
+  L.circle(center, {
+    radius: radiusMiles * 1609.34,
+    color: '#4a9eff',
+    weight: 1.5,
+    dashArray: '6 5',
+    fillOpacity: 0.04,
+    opacity: 0.35,
+  }).addTo(map);
+
+  // ── Real estate pins ──────────────────────────────────────
+  (d.real_estate_pins || []).forEach(pin => {
+    if (!pin.lat || !pin.lng) return;
+    const reHtml = `<div style="background:#0f2a45;border:2px solid #4a9eff;border-radius:5px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.4)">🏢</div>`;
+    const reIcon = L.divIcon({ html: reHtml, className: '', iconSize: [24,24], iconAnchor: [12,12], popupAnchor: [0,-14] });
+    L.marker([pin.lat, pin.lng], { icon: reIcon })
+      .addTo(map)
+      .bindPopup(`<strong>${pin.label}</strong><br>$${(pin.rent||0).toLocaleString()}/mo · ${(pin.sqft||0).toLocaleString()} sqft<br><a href="${pin.url}" target="_blank" style="color:#4a9eff">View listing ↗</a>`);
+  });
+
+  // ── City circles ──────────────────────────────────────────
+  (d.cities || []).forEach(city => {
+    if (!city.lat || !city.lng) return;
+    const col     = gapCol(city.gap_score || 0);
+    const radius  = Math.max(10, Math.min(22, 8 + (city.gap_score || 0) * 1.3));
+    const unserved = (city.unserved_children || 0).toLocaleString();
+    const income   = '$' + Math.round((city.median_income || 0) / 1000) + 'k';
+
+    const circle = L.circleMarker([city.lat, city.lng], {
+      radius,
+      fillColor: col,
+      color:     col,
+      weight:    2,
+      opacity:   1,
+      fillOpacity: 0.75,
+    })
+    .addTo(map)
+    .bindPopup(`
+      <div style="min-width:200px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${city.name}</div>
+        <div style="font-size:11px;color:#888;margin-bottom:8px">${city.county || ''} County</div>
+        <table style="font-size:11px;width:100%;border-collapse:collapse">
+          <tr><td style="color:#888;padding:2px 0">Gap Score</td><td style="font-weight:700;color:${col};text-align:right">${city.gap_score}/10</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Priority</td><td style="font-weight:600;text-align:right">${city.priority||'—'}</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Unserved</td><td style="text-align:right">${unserved}</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Median Income</td><td style="text-align:right">${income}</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Competitors</td><td style="text-align:right">${city.competitor_count || 0}</td></tr>
+        </table>
+        <div style="margin-top:8px;padding:5px 8px;background:#1a3a5c;border-radius:4px;font-size:11px;font-weight:700;color:#4a9eff">${city.recommended_action||''}</div>
+        ${city.real_estate_url ? `<div style="margin-top:6px"><a href="${city.real_estate_url}" target="_blank" style="font-size:11px;color:#4a9eff">View real estate listings ↗</a></div>` : ''}
+      </div>`);
+
+    // Permanent label
+    const label = L.tooltip({
+      permanent:  true,
+      direction:  'top',
+      offset:     [0, -(radius + 4)],
+      className:  'leaflet-city-lbl',
+      interactive: false,
+    })
+    .setContent(`<span style="font-weight:700">${city.gap_score}</span> ${city.name.split(' ')[0]}`)
+    .setLatLng([city.lat, city.lng]);
+    map.addLayer(label);
+  });
+
+  // Fix tile rendering if map was in a hidden panel
+  setTimeout(() => map.invalidateSize(), 100);
 }
-function mHide(){const t=$('mTipEl');if(t)t.style.display='none';}
 
 function buildMapLegend(d) {
   let html=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rank</th><th>City</th><th>County</th><th>Gap Score</th><th>Priority</th><th>Unserved</th><th>Median Income</th><th>Competitors</th><th>Recommendation</th><th>Listings</th></tr></thead><tbody>`;

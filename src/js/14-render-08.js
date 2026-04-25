@@ -42,7 +42,10 @@ Return ONLY:
   ]
 }`;
   try {
-    let d=await claudeJSON(sys,usr);
+    // Show panel early so streaming text is visible immediately
+    showOut(8);
+    // Stream response into summary prose panel while building
+    let d = await claudeStreamJSON(sys, usr, '8-s-t');
     if(!d) { console.warn('Agent 8 fallback'); d=getFallback8(); }
     R.a8=d;
     $('8-s-t').textContent=d.verdict+' — '+d.verdict_rationale;

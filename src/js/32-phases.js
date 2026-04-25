@@ -44,6 +44,28 @@ function phaseSelectNone(ev) {
   }
 }
 
+// ── Quick presets ─────────────────────────────────────────────
+const _PHASE_PRESETS = {
+  quick:      { phases: [1,2,3,4,5,6],         label: 'Quick Verdict',   cost: '~$0.15',  time: '~2 min'  },
+  foundation: { phases: [1],                    label: 'Foundation Only', cost: '~$0.06',  time: '~1 min'  },
+  financial:  { phases: [1,2,3,4,5],            label: 'Thru Financials', cost: '~$0.20',  time: '~3 min'  },
+  full:       { phases: [1,2,3,4,5,6,7,8,9,10,11,12], label: 'Full Report', cost: '~$0.40', time: '~8 min' },
+};
+
+function setPhasePreset(name) {
+  const preset = _PHASE_PRESETS[name];
+  if (!preset) return;
+  for (let n = 1; n <= 12; n++) {
+    _phaseEnabled[n] = preset.phases.includes(n);
+    const cb = $('phase-cb-' + n);
+    if (cb) cb.checked = !!_phaseEnabled[n];
+  }
+  // Highlight active preset button
+  document.querySelectorAll('.phase-preset-btn').forEach(b => b.classList.remove('active'));
+  const btn = $('preset-' + name);
+  if (btn) btn.classList.add('active');
+}
+
 function togglePhasePanel() {
   const panel = $('phasePanel');
   const btn   = $('phasePanelBtn');

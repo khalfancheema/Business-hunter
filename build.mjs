@@ -50,6 +50,9 @@ const JS_FILES = [
   'src/js/30-session.js',         // Auto-save, session restore & shareable URL
   'src/js/31-full-export.js',     // Full pipeline PDF export (all 17 agents)
   'src/js/32-phases.js',          // Phase selection & input validation
+  'src/js/33-streaming.js',       // Streaming responses (claudeStream + claudeStreamJSON)
+  'src/js/34-history.js',         // Session history — last 5 runs
+  'src/js/35-compare-zip.js',     // ZIP comparison mode (two markets side by side)
 ];
 
 const CSS_FILES = ['src/styles.css'];

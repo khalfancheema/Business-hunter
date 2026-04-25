@@ -6,6 +6,8 @@
 <title>Daycare Planning Agent System v4</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -531,6 +533,99 @@ select option{background:var(--surface2)}
 .phase-check-row em{color:var(--muted);font-style:normal;font-size:11px}
 .phase-num{width:20px;height:20px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--blue);flex-shrink:0;font-family:'Syne',sans-serif}
 
+/* ══ PHASE PRESETS ════════════════════════════════════════════ */
+.phase-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.phase-preset-btn{height:30px;padding:0 12px;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:border-color 0.15s,color 0.15s}
+.phase-preset-btn:hover{border-color:var(--blue);color:var(--blue)}
+.phase-preset-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.preset-meta{color:var(--faint);font-size:10px;font-weight:400}
+
+/* ══ STREAMING LIVE PANEL ════════════════════════════════════ */
+.stream-live{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:10px;min-height:48px}
+.stream-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;color:var(--muted);font-family:'Syne',sans-serif}
+.stream-dot{width:8px;height:8px;background:var(--green);border-radius:50%;flex-shrink:0;animation:pulse-stream 1s ease-in-out infinite}
+@keyframes pulse-stream{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
+.stream-text{font-size:12px;color:var(--text);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:220px;overflow:hidden}
+.stream-cur{display:inline-block;width:8px;height:13px;background:var(--blue);vertical-align:text-bottom;animation:blink-cur 0.7s steps(1) infinite;border-radius:1px}
+@keyframes blink-cur{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ══ SESSION HISTORY PANEL ═══════════════════════════════════ */
+.history-panel{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.history-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.history-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.history-meta{display:flex;flex-direction:column;gap:2px;flex:1;min-width:180px}
+.history-zip{font-size:13px;font-weight:700;color:var(--text);font-family:'Syne',sans-serif}
+.history-ind{font-size:11px;color:var(--muted)}
+.history-time{font-size:10px;color:var(--faint);margin-left:auto;white-space:nowrap}
+.history-agents{font-size:11px;color:var(--faint)}
+.history-verdict{padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;white-space:nowrap}
+.h-vgo{background:var(--green-dim);border:1px solid var(--green);color:var(--green)}
+.h-vcaution{background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber)}
+.h-vnogo{background:var(--red-dim);border:1px solid var(--red);color:var(--red)}
+.h-vna{background:var(--surface3);border:1px solid var(--border2);color:var(--muted)}
+.history-rationale{font-size:11px;color:var(--muted);margin-top:3px;width:100%;line-height:1.4}
+.history-detail{font-size:11px;color:var(--faint);display:flex;gap:12px;flex-wrap:wrap;margin-top:2px}
+.history-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.history-btn{height:28px;padding:0 12px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif}
+.history-btn:hover{border-color:var(--blue);color:var(--blue)}
+.history-clear-btn{height:28px;padding:0 12px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--faint);font-size:11px;cursor:pointer;font-family:'Syne',sans-serif}
+.history-clear-btn:hover{border-color:var(--red);color:var(--red)}
+.history-empty{text-align:center;padding:24px;color:var(--faint);font-size:13px}
+.history-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:var(--faint)}
+.history-restore-notice{margin-top:8px;padding:6px 10px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:6px;font-size:12px;color:var(--blue)}
+
+/* ══ ZIP COMPARISON PANEL ════════════════════════════════════ */
+.zcomp-panel{background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden}
+.zcomp-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.zcomp-title{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)}
+.zcomp-close{background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+.zcomp-close:hover{color:var(--red)}
+.zcomp-verdict{padding:16px 20px;text-align:center;border-bottom:1px solid var(--border)}
+.zcomp-winner-a{background:var(--blue-dim)}
+.zcomp-winner-b{background:var(--green-dim)}
+.zcomp-winner-tie{background:var(--surface2)}
+.zcomp-win-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.zcomp-win-zip{font-size:20px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px}
+.zcomp-win-reason{font-size:13px;color:var(--muted);max-width:600px;margin:0 auto}
+.zcomp-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--border)}
+.zcomp-col-a,.zcomp-col-b{padding:10px 16px}
+.zcomp-col-a{border-right:1px solid var(--border)}
+.zcomp-col-head{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);display:flex;flex-direction:column;gap:2px}
+.zcomp-col-winner{color:var(--blue)}
+.zcomp-col-sub{font-size:11px;color:var(--muted);font-weight:400;font-family:'Instrument Sans',sans-serif}
+.zcomp-metrics-wrap{overflow-x:auto;padding:0 0 4px}
+.zcomp-table{width:100%;border-collapse:collapse;font-size:12px}
+.zcomp-table thead tr{background:var(--surface2);border-bottom:1px solid var(--border)}
+.zcomp-table th{padding:8px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);font-family:'Syne',sans-serif;white-space:nowrap}
+.zcomp-table tbody tr:hover{background:var(--surface2)}
+.zcomp-table tbody tr+tr{border-top:1px solid var(--border)}
+.zcomp-metric{padding:8px 12px;color:var(--muted);font-size:12px;white-space:nowrap;min-width:160px}
+.zcomp-val{padding:8px 12px;color:var(--text);font-size:12px;font-weight:500;min-width:120px}
+.zcomp-note{padding:8px 12px;color:var(--faint);font-size:11px}
+.zcomp-best{color:var(--green);font-weight:700}
+.zcomp-pros-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:14px 16px;border-top:1px solid var(--border)}
+.zcomp-pros-head{font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.zcomp-pros-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.zcomp-pros-list li{font-size:12px;color:var(--text);padding-left:14px;position:relative;line-height:1.4}
+.zcomp-pros-list li::before{content:'•';position:absolute;left:0}
+.pro-a li::before,.pro-a::before{color:var(--blue)}
+.pro-b li::before,.pro-b::before{color:var(--green)}
+.con li::before,.con::before{color:var(--red)}
+.zcomp-rec{padding:12px 16px;background:var(--surface2);border-top:1px solid var(--border);font-size:13px;color:var(--text);line-height:1.5}
+.zcomp-sources{padding:6px 16px 10px;font-size:10px;color:var(--faint);border-top:1px solid var(--border)}
+.comp-loading{padding:20px;text-align:center;color:var(--muted);font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* ══ LEAFLET DARK OVERRIDES ══════════════════════════════════ */
+.leaflet-city-lbl{background:transparent!important;border:none!important;box-shadow:none!important;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#f0f0ee;text-shadow:0 1px 3px rgba(0,0,0,0.9),-1px -1px 0 rgba(0,0,0,0.6)}
+.leaflet-popup-content-wrapper{background:var(--surface2)!important;border:1px solid var(--border2)!important;border-radius:8px!important;box-shadow:0 4px 24px rgba(0,0,0,0.5)!important;color:var(--text)!important}
+.leaflet-popup-content{color:var(--text)!important;font-family:'Instrument Sans',sans-serif!important;font-size:12px!important;line-height:1.5!important}
+.leaflet-popup-tip{background:var(--surface2)!important}
+.leaflet-popup-close-button{color:var(--muted)!important}
+.leaflet-container{background:#1a1c21!important}
+.leaflet-control-zoom a{background:var(--surface2)!important;color:var(--text)!important;border-color:var(--border)!important}
+.leaflet-control-zoom a:hover{background:var(--surface3)!important}
+.leaflet-bar{border:1px solid var(--border)!important}
+
 </style>
 </head>
 <body>
@@ -616,6 +711,7 @@ select option{background:var(--surface2)}
     <button class="btn" id="fullExportBtn" onclick="fullPipelineExport()" style="border-color:var(--blue);color:var(--blue)">📄 Full PDF</button>
     <button class="btn" id="copyLinkBtn" onclick="copyShareableLink()">🔗 Copy Link</button>
     <button class="btn" id="phasePanelBtn" onclick="togglePhasePanel()">⚙ Phases</button>
+    <button class="btn" id="historyToggleBtn" onclick="toggleHistoryPanel()">🕐 Recent Reports</button>
     <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖨 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
   </div>
@@ -628,6 +724,12 @@ select option{background:var(--surface2)}
         <button class="phase-quick-btn" onclick="phaseSelectAll(event)">All</button>
         <button class="phase-quick-btn" onclick="phaseSelectNone(event)">None</button>
       </div>
+    </div>
+    <div class="phase-presets">
+      <button id="preset-quick"      class="phase-preset-btn" onclick="setPhasePreset('quick')">⚡ Quick Verdict <span class="preset-meta">~$0.15 · ~2 min</span></button>
+      <button id="preset-foundation" class="phase-preset-btn" onclick="setPhasePreset('foundation')">🔬 Foundation Only <span class="preset-meta">~$0.06 · ~1 min</span></button>
+      <button id="preset-financial"  class="phase-preset-btn" onclick="setPhasePreset('financial')">💰 Thru Financials <span class="preset-meta">~$0.20 · ~3 min</span></button>
+      <button id="preset-full"       class="phase-preset-btn active" onclick="setPhasePreset('full')">📋 Full Report <span class="preset-meta">~$0.40 · ~8 min</span></button>
     </div>
     <div class="phase-checks">
       <label class="phase-check-row"><input type="checkbox" id="phase-cb-1" checked onchange="togglePhase(1,this)"><span class="phase-num">1</span><span>Foundation Research <em>(Demographics · Compliance · Competitive Intel)</em></span></label>
@@ -664,9 +766,18 @@ select option{background:var(--surface2)}
       </select>
     </div>
     <button class="compare-toggle-btn" onclick="runIndustryComparison()">⚖ Compare Industries</button>
+    <div class="field" style="margin-left:auto">
+      <label>Compare ZIP</label>
+      <input type="text" id="compareZipInput" placeholder="e.g. 30022" maxlength="5" style="width:95px" />
+    </div>
+    <button id="compareZipBtn" class="compare-toggle-btn" onclick="runZipComparison()" style="border-color:var(--teal);color:var(--teal)">⚖ Compare ZIPs</button>
   </div>
   <div id="comparePanel" class="compare-panel"></div>
+  <div id="zipComparePanel" style="display:none;margin-top:12px"></div>
 </div>
+
+<!-- Session History Panel -->
+<div id="historyPanel" class="history-panel" style="display:none"></div>
 
 <div class="arrow">↓</div>
 
@@ -1483,7 +1594,7 @@ function setDot(n,state){
   const card=$('card-'+n);
   if(card){card.className='agent-card '+state;}
   const rerunBtn=$('rerun-'+n);
-  if(rerunBtn){rerunBtn.style.display=(state==='error')?'inline-flex':'none';}
+  if(rerunBtn){rerunBtn.style.display=(state==='done'||state==='error')?'inline-flex':'none';}
   if(state==='running'){
     dotTimers[n]=Date.now();
     if(dotIntervals[n]) clearInterval(dotIntervals[n]);
@@ -3416,7 +3527,10 @@ Return ONLY:
   ]
 }`;
   try {
-    let d=await claudeJSON(sys,usr);
+    // Show panel early so streaming text is visible immediately
+    showOut(8);
+    // Stream response into summary prose panel while building
+    let d = await claudeStreamJSON(sys, usr, '8-s-t');
     if(!d) { console.warn('Agent 8 fallback'); d=getFallback8(); }
     R.a8=d;
     $('8-s-t').textContent=d.verdict+' — '+d.verdict_rationale;
@@ -4061,99 +4175,132 @@ function gapCol(s){return s>=9?'#3dd68c':s>=7?'#f5a623':s>=5?'#4a9eff':s>=3?'#a7
 function gapBadge(s){return s>=9?'b-green':s>=7?'b-amber':s>=5?'b-blue':s>=3?'b-purple':'b-red';}
 
 function buildMap(d) {
-  const cities=d.cities;
-  const lats=cities.map(c=>c.lat), lngs=cities.map(c=>c.lng);
-  const minLat=Math.min(...lats)-0.08, maxLat=Math.max(...lats)+0.08;
-  const minLng=Math.min(...lngs)-0.08, maxLng=Math.max(...lngs)+0.08;
-  const W=880, H=490;
-  function px(lng){return ((lng-minLng)/(maxLng-minLng)*(W-80)+40).toFixed(1);}
-  function py(lat){return (((maxLat-lat)/(maxLat-minLat))*(H-60)+30).toFixed(1);}
+  const container = $('11-map-c');
+  if (!container) return;
 
-  let svg=`<div style="position:relative;width:100%;height:${H}px;border-radius:10px;overflow:hidden;background:#1a1d22;border:1px solid var(--border)">
-  <svg width="100%" height="100%" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${W}" height="${H}" fill="#1a1d22"/>
-    <g stroke="#2a2d35" stroke-width="0.5" opacity="0.4">`;
-  for(let i=0;i<=8;i++) svg+=`<line x1="${40+i*100}" y1="20" x2="${40+i*100}" y2="${H-20}"/>`;
-  for(let i=0;i<=4;i++) svg+=`<line x1="30" y1="${30+i*108}" x2="${W-20}" y2="${30+i*108}"/>`;
-  svg+=`</g>`;
-  const hx=px(d.center.lng), hy=py(d.center.lat);
-  svg+=`<ellipse cx="${hx}" cy="${hy}" rx="270" ry="215" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="6,5" opacity="0.25"/>
-  <text x="${hx}" y="${parseFloat(hy)-222}" fill="#4a9eff" font-size="10" text-anchor="middle" opacity="0.4" font-family="sans-serif">40-mile radius</text>`;
+  // Destroy existing Leaflet instance
+  if (window._leafletMap) {
+    try { window._leafletMap.remove(); } catch(_) {}
+    window._leafletMap = null;
+  }
 
-  // RE pins first (background layer)
-  (d.real_estate_pins||[]).forEach(pin=>{
-    const bx=px(pin.lng), by=py(pin.lat);
-    svg+=`<g style="cursor:pointer" onclick="window.open('${pin.url}','_blank')" title="${pin.label} — $${pin.rent.toLocaleString()}/mo">
-      <rect x="${parseFloat(bx)-9}" y="${parseFloat(by)-9}" width="18" height="18" rx="3" fill="#0f2a45" stroke="#4a9eff" stroke-width="1.5"/>
-      <text x="${bx}" y="${parseFloat(by)+5}" font-size="11" text-anchor="middle" fill="#4a9eff">🏢</text>
-    </g>`;
-  });
-
-  // City circles
-  cities.forEach(city=>{
-    const cx=px(city.lng), cy=py(city.lat);
-    const col=gapCol(city.gap_score);
-    const r=Math.max(16,Math.min(30,12+city.unserved_children/22));
-    const nameShort=city.name.split(' ')[0];
-    svg+=`<g style="cursor:pointer"
-      onmouseover="mTip(event,'${city.name}','${city.county} County','${city.gap_score}/10','${city.priority}','$${Math.round(city.median_income/1000)}k income','${city.unserved_children} unserved','${city.competitor_count} competitors','${city.recommended_action}')"
-      onmouseout="mHide()"
-      onclick="window.open('${city.real_estate_url}','_blank')">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" opacity="0.18"/>
-      <circle cx="${cx}" cy="${cy}" r="${r*0.58}" fill="${col}" opacity="0.9"/>
-      <text x="${cx}" y="${parseFloat(cy)+4}" font-size="${city.gap_score>=8?12:10}" font-weight="700" text-anchor="middle" fill="#000" font-family="'Syne',sans-serif">${city.gap_score}</text>
-      <text x="${cx}" y="${parseFloat(cy)+r+13}" font-size="9" text-anchor="middle" fill="${col}" font-family="'Syne',sans-serif" font-weight="600">${nameShort}</text>
-    </g>`;
-  });
-
-  // Home pin
-  svg+=`<g>
-    <circle cx="${hx}" cy="${hy}" r="9" fill="#f0f0ee" stroke="#4a9eff" stroke-width="2.5"/>
-    <text x="${hx}" y="${parseFloat(hy)+5}" font-size="10" text-anchor="middle" fill="#0e0f11" font-weight="900" font-family="sans-serif">★</text>
-    <text x="${hx}" y="${parseFloat(hy)+23}" font-size="9" text-anchor="middle" fill="#f0f0ee" font-family="sans-serif">30097</text>
-  </g>`;
-
-  svg+=`</svg>
-  <div id="mTipEl" style="position:absolute;background:#16181c;border:1px solid #363a44;border-radius:8px;padding:10px 13px;font-size:12px;display:none;z-index:10;min-width:210px;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.5)"></div>
-  </div>`;
-
-  svg+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)">
-    <span style="font-weight:700;color:var(--muted);font-family:'Syne',sans-serif">Gap Score:</span>
-    ${[['#3dd68c','9-10 Critical'],['#f5a623','7-8 High'],['#4a9eff','5-6 Moderate'],['#a78bfa','3-4 Low'],['#ff5f5f','1-2 Avoid']].map(([c,l])=>`<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:${c};display:inline-block"></span>${l}</span>`).join('')}
-    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:2px;background:#0f2a45;border:1px solid #4a9eff;display:inline-block"></span>🏢 RE Listing</span>
-    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:#f0f0ee;border:2px solid #4a9eff;display:inline-block"></span>★ Home ZIP</span>
-  </div>
-  <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-    <a href="https://maps.google.com/maps?q=${encodeURIComponent(industry().unit)}+near+${zip()}" target="_blank" class="link-btn primary-btn">↗ Google Maps</a>
-    <a href="https://www.loopnet.com/search/commercial-real-estate/${zip()}/for-lease/" target="_blank" class="link-btn">↗ LoopNet Listings</a>
-    <a href="https://www.crexi.com/lease/properties?address=${zip()}" target="_blank" class="link-btn">↗ Crexi Listings</a>
-    <a href="https://www.bizbuysell.com/search/" target="_blank" class="link-btn">↗ BizBuySell</a>
-  </div>`;
-  $('11-map-c').innerHTML=svg;
-}
-
-function mTip(e,name,county,gap,priority,income,unserved,competitors,action){
-  const t=$('mTipEl');
-  if(!t)return;
-  const col=gap.startsWith('9')||gap.startsWith('8')?'#3dd68c':gap.startsWith('7')?'#f5a623':'#ff5f5f';
-  t.innerHTML=`<div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:5px">${name}</div>
-    <div style="font-size:11px;color:#8a8d96;margin-bottom:8px">${county}</div>
-    <div style="display:grid;gap:3px;font-size:11px">
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Gap Score</span><strong style="color:${col}">${gap}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Priority</span><strong>${priority}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Income</span><strong>${income}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Unserved</span><strong>${unserved}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#8a8d96">Competitors</span><strong>${competitors}</strong></div>
+  // Build wrapping HTML
+  container.innerHTML = `
+    <div id="leafletMapEl" style="width:100%;height:490px;border-radius:10px;overflow:hidden;border:1px solid var(--border)"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)">
+      <span style="font-weight:700;color:var(--muted);font-family:'Syne',sans-serif">Gap Score:</span>
+      ${[['#3dd68c','9-10 Critical'],['#f5a623','7-8 High'],['#4a9eff','5-6 Moderate'],['#a78bfa','3-4 Low'],['#ff5f5f','1-2 Avoid']].map(([c,l])=>
+        `<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:${c};display:inline-block"></span>${l}</span>`
+      ).join('')}
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="font-size:13px">🏢</span> RE Listing</span>
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="font-size:13px">★</span> Home ZIP</span>
     </div>
-    <div style="margin-top:7px;padding:4px 8px;background:#1a3a5c;border-radius:5px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:#4a9eff">${action}</div>
-    <div style="font-size:10px;color:#4a4d56;margin-top:4px">Click to open listings ↗</div>`;
-  const rect=t.parentElement.getBoundingClientRect();
-  const ex=e.clientX-rect.left+12, ey=e.clientY-rect.top+12;
-  t.style.left=Math.min(ex,rect.width-230)+'px';
-  t.style.top=Math.min(ey,rect.height-200)+'px';
-  t.style.display='block';
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <a href="https://maps.google.com/maps?q=${encodeURIComponent(industry().unit)}+near+${zip()}" target="_blank" class="link-btn primary-btn">↗ Google Maps</a>
+      <a href="https://www.loopnet.com/search/commercial-real-estate/${zip()}/for-lease/" target="_blank" class="link-btn">↗ LoopNet Listings</a>
+      <a href="https://www.crexi.com/lease/properties?address=${zip()}" target="_blank" class="link-btn">↗ Crexi Listings</a>
+      <a href="https://www.bizbuysell.com/search/" target="_blank" class="link-btn">↗ BizBuySell</a>
+    </div>`;
+
+  // Guard: Leaflet must be loaded
+  if (typeof L === 'undefined') {
+    $('leafletMapEl').innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px">Map unavailable — Leaflet library not loaded. Check internet connection.</div>';
+    return;
+  }
+
+  const center = [d.center.lat || 34.0, d.center.lng || -84.1];
+
+  const map = L.map('leafletMapEl', {
+    center,
+    zoom: 10,
+    zoomControl: true,
+    attributionControl: true,
+  });
+  window._leafletMap = map;
+
+  // CartoDB Dark Matter tiles — dark theme, no API key needed
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // ── Home ZIP star marker ──────────────────────────────────
+  const homeHtml = `<div style="background:#4a9eff;width:28px;height:28px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#000;box-shadow:0 2px 8px rgba(0,0,0,.5)">★</div>`;
+  const homeIcon = L.divIcon({ html: homeHtml, className: '', iconSize: [28,28], iconAnchor: [14,14], popupAnchor: [0,-16] });
+  L.marker(center, { icon: homeIcon, zIndexOffset: 1000 })
+    .addTo(map)
+    .bindPopup(`<strong>${d.center.label || 'ZIP ' + zip()}</strong><br>Your search center`);
+
+  // ── Radius circle ─────────────────────────────────────────
+  const radiusMiles = parseFloat(radius()) || 40;
+  L.circle(center, {
+    radius: radiusMiles * 1609.34,
+    color: '#4a9eff',
+    weight: 1.5,
+    dashArray: '6 5',
+    fillOpacity: 0.04,
+    opacity: 0.35,
+  }).addTo(map);
+
+  // ── Real estate pins ──────────────────────────────────────
+  (d.real_estate_pins || []).forEach(pin => {
+    if (!pin.lat || !pin.lng) return;
+    const reHtml = `<div style="background:#0f2a45;border:2px solid #4a9eff;border-radius:5px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.4)">🏢</div>`;
+    const reIcon = L.divIcon({ html: reHtml, className: '', iconSize: [24,24], iconAnchor: [12,12], popupAnchor: [0,-14] });
+    L.marker([pin.lat, pin.lng], { icon: reIcon })
+      .addTo(map)
+      .bindPopup(`<strong>${pin.label}</strong><br>$${(pin.rent||0).toLocaleString()}/mo · ${(pin.sqft||0).toLocaleString()} sqft<br><a href="${pin.url}" target="_blank" style="color:#4a9eff">View listing ↗</a>`);
+  });
+
+  // ── City circles ──────────────────────────────────────────
+  (d.cities || []).forEach(city => {
+    if (!city.lat || !city.lng) return;
+    const col     = gapCol(city.gap_score || 0);
+    const radius  = Math.max(10, Math.min(22, 8 + (city.gap_score || 0) * 1.3));
+    const unserved = (city.unserved_children || 0).toLocaleString();
+    const income   = '$' + Math.round((city.median_income || 0) / 1000) + 'k';
+
+    const circle = L.circleMarker([city.lat, city.lng], {
+      radius,
+      fillColor: col,
+      color:     col,
+      weight:    2,
+      opacity:   1,
+      fillOpacity: 0.75,
+    })
+    .addTo(map)
+    .bindPopup(`
+      <div style="min-width:200px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${city.name}</div>
+        <div style="font-size:11px;color:#888;margin-bottom:8px">${city.county || ''} County</div>
+        <table style="font-size:11px;width:100%;border-collapse:collapse">
+          <tr><td style="color:#888;padding:2px 0">Gap Score</td><td style="font-weight:700;color:${col};text-align:right">${city.gap_score}/10</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Priority</td><td style="font-weight:600;text-align:right">${city.priority||'—'}</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Unserved</td><td style="text-align:right">${unserved}</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Median Income</td><td style="text-align:right">${income}</td></tr>
+          <tr><td style="color:#888;padding:2px 0">Competitors</td><td style="text-align:right">${city.competitor_count || 0}</td></tr>
+        </table>
+        <div style="margin-top:8px;padding:5px 8px;background:#1a3a5c;border-radius:4px;font-size:11px;font-weight:700;color:#4a9eff">${city.recommended_action||''}</div>
+        ${city.real_estate_url ? `<div style="margin-top:6px"><a href="${city.real_estate_url}" target="_blank" style="font-size:11px;color:#4a9eff">View real estate listings ↗</a></div>` : ''}
+      </div>`);
+
+    // Permanent label
+    const label = L.tooltip({
+      permanent:  true,
+      direction:  'top',
+      offset:     [0, -(radius + 4)],
+      className:  'leaflet-city-lbl',
+      interactive: false,
+    })
+    .setContent(`<span style="font-weight:700">${city.gap_score}</span> ${city.name.split(' ')[0]}`)
+    .setLatLng([city.lat, city.lng]);
+    map.addLayer(label);
+  });
+
+  // Fix tile rendering if map was in a hidden panel
+  setTimeout(() => map.invalidateSize(), 100);
 }
-function mHide(){const t=$('mTipEl');if(t)t.style.display='none';}
 
 function buildMapLegend(d) {
   let html=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rank</th><th>City</th><th>County</th><th>Gap Score</th><th>Priority</th><th>Unserved</th><th>Median Income</th><th>Competitors</th><th>Recommendation</th><th>Listings</th></tr></thead><tbody>`;
@@ -7245,6 +7392,28 @@ function phaseSelectNone(ev) {
   }
 }
 
+// ── Quick presets ─────────────────────────────────────────────
+const _PHASE_PRESETS = {
+  quick:      { phases: [1,2,3,4,5,6],         label: 'Quick Verdict',   cost: '~$0.15',  time: '~2 min'  },
+  foundation: { phases: [1],                    label: 'Foundation Only', cost: '~$0.06',  time: '~1 min'  },
+  financial:  { phases: [1,2,3,4,5],            label: 'Thru Financials', cost: '~$0.20',  time: '~3 min'  },
+  full:       { phases: [1,2,3,4,5,6,7,8,9,10,11,12], label: 'Full Report', cost: '~$0.40', time: '~8 min' },
+};
+
+function setPhasePreset(name) {
+  const preset = _PHASE_PRESETS[name];
+  if (!preset) return;
+  for (let n = 1; n <= 12; n++) {
+    _phaseEnabled[n] = preset.phases.includes(n);
+    const cb = $('phase-cb-' + n);
+    if (cb) cb.checked = !!_phaseEnabled[n];
+  }
+  // Highlight active preset button
+  document.querySelectorAll('.phase-preset-btn').forEach(b => b.classList.remove('active'));
+  const btn = $('preset-' + name);
+  if (btn) btn.classList.add('active');
+}
+
 function togglePhasePanel() {
   const panel = $('phasePanel');
   const btn   = $('phasePanelBtn');
@@ -7366,6 +7535,518 @@ function _bindGuidanceTips() {
     _bindGuidanceTips();
   });
 })();
+
+
+// ══════════════════════════════════════════════════════════
+// 33-streaming.js — Token-by-token streaming responses
+//
+// claudeStream(system, user, onChunk)
+//   Low-level SSE stream reader for Anthropic.
+//   Falls back to regular claude() for other providers.
+//
+// claudeStreamJSON(system, user, streamPanelId)
+//   Drop-in replacement for claudeJSON that streams the raw
+//   text into streamPanelId while building, then parses JSON.
+//   Falls back to claudeJSON if streaming parse fails.
+// ══════════════════════════════════════════════════════════
+
+async function claudeStream(system, user, onChunk) {
+  const k = key();
+  if (!k) throw new Error('No API key.');
+
+  // Only Anthropic natively supported for SSE streaming here
+  if (provider() !== 'anthropic') {
+    const text = await claude(system, user);
+    if (onChunk) onChunk(text);
+    return text;
+  }
+
+  const p = PROVIDERS.anthropic;
+  const body = {
+    model: model(),
+    max_tokens: 8192,
+    system,
+    messages: [{ role: 'user', content: user }],
+    stream: true
+  };
+
+  const res = await fetch(p.url, {
+    method: 'POST',
+    headers: p.headers(k),
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'HTTP ' + res.status);
+  }
+
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let sseBuffer = '';
+  let fullText  = '';
+  let lastFlush = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    sseBuffer += decoder.decode(value, { stream: true });
+    const lines = sseBuffer.split('\n');
+    sseBuffer = lines.pop(); // keep last incomplete line
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (data === '[DONE]') continue;
+      try {
+        const evt = JSON.parse(data);
+        if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+          fullText += evt.delta.text;
+          // Throttle DOM updates to ≤ 30fps
+          const now = Date.now();
+          if (onChunk && now - lastFlush >= 33) {
+            lastFlush = now;
+            onChunk(fullText);
+          }
+        }
+      } catch(_) {}
+    }
+  }
+
+  // Final chunk
+  if (onChunk && fullText) onChunk(fullText);
+  return fullText;
+}
+
+// ── HTML escaper (used in stream preview) ────────────────────
+function _escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── claudeStreamJSON ─────────────────────────────────────────
+async function claudeStreamJSON(system, user, streamPanelId) {
+  // Demo mode: use normal path
+  if (demoMode) {
+    const marker = user.search(/Return ONLY[:\s]/i);
+    const src    = marker >= 0 ? user.slice(marker) : user;
+    await new Promise(r => setTimeout(r, 300));
+    return parseJSON(src) || {};
+  }
+
+  // Cache hit: skip streaming
+  const cached = getCache(system, user);
+  if (cached) { console.log('Cache hit (stream)'); return cached; }
+
+  const strictSystem = system + `
+
+CRITICAL — JSON FORMAT: Your ENTIRE response must be a single valid JSON object. Start with { and end with }. No text before or after. No markdown. No explanation. Just JSON.
+
+CRITICAL — DATA INTEGRITY: Never fabricate specific data. Use null for unknown numbers, "N/A" for short strings, "Information not available" for longer strings.`;
+
+  // Prime the display panel
+  const proseEl = streamPanelId ? $(streamPanelId) : null;
+  if (proseEl) {
+    proseEl.innerHTML =
+      `<div class="stream-live">` +
+        `<div class="stream-header"><span class="stream-dot"></span>Streaming response…</div>` +
+        `<div class="stream-text" id="${streamPanelId}-st"></div>` +
+      `</div>`;
+  }
+
+  let rawText = '';
+  const onChunk = (text) => {
+    rawText = text;
+    const stEl = $(streamPanelId + '-st');
+    if (!stEl) return;
+    // Show last 700 chars to keep DOM lean
+    const display = text.length > 700 ? '…' + text.slice(-700) : text;
+    stEl.innerHTML = _escHtml(display) + '<span class="stream-cur">▋</span>';
+  };
+
+  try {
+    rawText = await claudeStream(strictSystem, user, onChunk);
+  } catch(e) {
+    if (proseEl) proseEl.innerHTML = '';
+    throw e;
+  }
+
+  if (proseEl) proseEl.innerHTML = ''; // clear streaming preview
+
+  const d = parseJSON(rawText);
+  if (d) { setCache(system, user, d); return d; }
+
+  // Streaming parse failed → fall back to regular retry path
+  console.warn('Streaming JSON parse failed — retrying with claudeJSON');
+  return await claudeJSON(system, user);
+}
+
+
+// ══════════════════════════════════════════════════════════
+// 34-history.js — Session history: last 5 pipeline runs
+//
+// After every pipeline completion, saves a lightweight
+// summary to localStorage (biz_history_v1).
+// The "Recent Reports" panel lists them with key stats
+// and lets users restore inputs or re-run.
+// ══════════════════════════════════════════════════════════
+
+const HISTORY_KEY  = 'biz_history_v1';
+const HISTORY_LIMIT = 5;
+
+// ── Save a history entry after pipeline completes ────────────
+(function patchRunPipelineForHistory() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const _orig = window.runPipeline;
+    if (!_orig) return;
+    window.runPipeline = async function() {
+      let result;
+      try {
+        result = await _orig.apply(this, arguments);
+      } finally {
+        // Save regardless of whether it completed fully or partially
+        const count = Object.keys(R).filter(k => k.match(/^a\d+$/)).length;
+        if (count > 0) historySave();
+      }
+      return result;
+    };
+  });
+})();
+
+function historySave() {
+  try {
+    const entry = {
+      id:         Date.now(),
+      date:       new Date().toISOString(),
+      zip:        $('zip')            ? $('zip').value.trim()           : '?',
+      industry:   $('industrySelect') ? $('industrySelect').value       : 'daycare',
+      radius:     $('radius')         ? $('radius').value               : '40',
+      capacity:   $('capacity')       ? $('capacity').value             : '',
+      budget:     $('budget')         ? $('budget').value               : '',
+      verdict:    R.a8?.verdict       || null,
+      verdictRationale: (R.a8?.verdict_rationale || '').slice(0, 120),
+      agentCount: Object.keys(R).filter(k => k.match(/^a\d+$/)).length,
+      oppScore:   R.a2?.overall_opportunity_score || null,
+      topCity:    (R.a3?.locations?.[0]?.city) || null,
+      summary:    (R.a8?.assessment || R.a1?.summary || '').slice(0, 200),
+    };
+
+    const history = historyLoad();
+    // Remove duplicate (same ZIP + industry + same day)
+    const today = entry.date.slice(0, 10);
+    const filtered = history.filter(h =>
+      !(h.zip === entry.zip && h.industry === entry.industry && h.date.slice(0, 10) === today)
+    );
+    filtered.unshift(entry);
+    const trimmed = filtered.slice(0, HISTORY_LIMIT);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+    historyRenderPanel();
+  } catch(e) { console.warn('History save failed:', e.message); }
+}
+
+function historyLoad() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function historyClear() {
+  try { localStorage.removeItem(HISTORY_KEY); } catch(e) {}
+  historyRenderPanel();
+}
+
+// ── Restore inputs from a history entry ─────────────────────
+function historyRestoreInputs(id) {
+  const history = historyLoad();
+  const entry = history.find(h => h.id === id);
+  if (!entry) return;
+
+  if ($('zip') && entry.zip)          $('zip').value          = entry.zip;
+  if ($('radius') && entry.radius)    $('radius').value       = entry.radius;
+  if ($('capacity') && entry.capacity) $('capacity').value    = entry.capacity;
+  if ($('budget') && entry.budget)    $('budget').value       = entry.budget;
+  if ($('industrySelect') && entry.industry) {
+    $('industrySelect').value = entry.industry;
+    if (typeof onIndustryChange === 'function') onIndustryChange();
+  }
+
+  // Show restore confirmation
+  const panel = $('historyPanel');
+  if (panel) {
+    const notice = panel.querySelector('.history-restore-notice');
+    if (notice) {
+      notice.textContent = `✓ Inputs restored — ZIP ${entry.zip} · ${entry.industry}. Click ▶ Run Pipeline to re-run.`;
+      notice.style.display = 'block';
+      setTimeout(() => { notice.style.display = 'none'; }, 4000);
+    }
+  }
+  if (typeof urlParamsUpdate === 'function') urlParamsUpdate();
+}
+
+// ── Render the Recent Reports panel ─────────────────────────
+function historyRenderPanel() {
+  const panel = $('historyPanel');
+  if (!panel) return;
+  const history = historyLoad();
+
+  if (!history.length) {
+    panel.innerHTML = `<div class="history-empty">No saved runs yet — run the pipeline to start building history.</div>`;
+    return;
+  }
+
+  const verdictClass = v => {
+    if (!v) return 'h-vna';
+    const vl = v.toLowerCase();
+    if (vl === 'go') return 'h-vgo';
+    if (vl.includes('caution')) return 'h-vcaution';
+    return 'h-vnogo';
+  };
+  const verdictIcon = v => {
+    if (!v) return '—';
+    const vl = v.toLowerCase();
+    if (vl === 'go') return '✓ Go';
+    if (vl.includes('caution')) return '⚡ Cautious';
+    return '✗ No Go';
+  };
+  const relTime = iso => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.round(diff / 60000);
+    if (m < 60) return m + 'm ago';
+    const h = Math.round(m / 60);
+    if (h < 24) return h + 'h ago';
+    return Math.round(h / 24) + 'd ago';
+  };
+  const ind = id => {
+    const found = Object.values(INDUSTRIES || {}).find((_, i) => Object.keys(INDUSTRIES)[i] === id);
+    return found ? found.emoji + ' ' + found.label : id;
+  };
+
+  let html = `<div class="history-restore-notice" style="display:none"></div><div class="history-list">`;
+  history.forEach(h => {
+    html += `
+    <div class="history-item">
+      <div class="history-meta">
+        <span class="history-zip">ZIP ${h.zip}</span>
+        <span class="history-ind">${ind(h.industry)}</span>
+        <span class="history-time">${relTime(h.date)}</span>
+        <span class="history-agents">${h.agentCount} agents</span>
+        ${h.verdict ? `<span class="history-verdict ${verdictClass(h.verdict)}">${verdictIcon(h.verdict)}</span>` : ''}
+      </div>
+      ${h.verdictRationale ? `<div class="history-rationale">${h.verdictRationale}</div>` : ''}
+      ${h.topCity ? `<div class="history-detail">Top location: ${h.topCity}${h.oppScore ? ` · Opportunity score ${h.oppScore}/10` : ''}</div>` : ''}
+      <div class="history-actions">
+        <button class="history-btn" onclick="historyRestoreInputs(${h.id})">↩ Restore Inputs</button>
+      </div>
+    </div>`;
+  });
+  html += `</div>
+  <div class="history-footer">
+    <button class="history-clear-btn" onclick="historyClear()">✕ Clear History</button>
+  </div>`;
+  panel.innerHTML = html;
+}
+
+function toggleHistoryPanel() {
+  const panel   = $('historyPanel');
+  const btn     = $('historyToggleBtn');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (btn) btn.textContent = isOpen ? '🕐 Recent Reports' : '🕐 Recent Reports ▲';
+  if (!isOpen) historyRenderPanel();
+}
+
+// ── Init ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  historyRenderPanel();
+});
+
+
+// ══════════════════════════════════════════════════════════
+// 35-compare-zip.js — Compare two ZIP codes side by side
+//
+// Uses a single focused AI call that pulls real data for
+// both ZIPs and returns a structured comparison JSON.
+// Does NOT re-run all 17 agents — just one comparison call
+// that is aware of the already-run primary results.
+// ══════════════════════════════════════════════════════════
+
+async function runZipComparison() {
+  const zip2 = $('compareZipInput')?.value.trim();
+  if (!zip2 || !/^\d{5}$/.test(zip2)) {
+    showErr('Enter a valid 5-digit ZIP code for comparison.');
+    return;
+  }
+
+  const zip1 = zip();
+  if (zip2 === zip1) {
+    showErr('Comparison ZIP must be different from your primary ZIP.');
+    return;
+  }
+
+  const btn = $('compareZipBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Comparing…'; }
+
+  const panel = $('zipComparePanel');
+  if (panel) {
+    panel.innerHTML = `<div class="comp-loading"><span class="stream-dot"></span> Researching ZIP ${zip2} and comparing with ZIP ${zip1}…</div>`;
+    panel.style.display = 'block';
+  }
+
+  const ind = industry();
+
+  // Build context from existing primary run (if available)
+  const ctx1 = {
+    verdict:    R.a8?.verdict || null,
+    rationale:  (R.a8?.verdict_rationale || '').slice(0, 150),
+    opp_score:  R.a2?.overall_opportunity_score || null,
+    top_city:   R.a3?.locations?.[0]?.city || null,
+    top_income: R.a1?.cities?.[0]?.median_hh_income || null,
+    top_kids:   R.a1?.cities?.[0]?.pop_under5 || null,
+    metro:      R.a1?.metro_overview?.metro_name || null,
+    ndcp_rate:  R.a2?.ndcp_median_preschool_rate || null,
+  };
+
+  const sys = `You are a comparative market research analyst specializing in ${ind.unit} business opportunities. Always respond with a JSON object only.`;
+
+  const usr = `Compare two ZIP code markets for opening a ${ind.unit}.
+
+PRIMARY MARKET — ZIP ${zip1} (already analyzed):
+${JSON.stringify(ctx1)}
+Industry: ${ind.label} · Capacity: ${capacity()} · Budget: $${parseInt(budget()).toLocaleString()}
+
+COMPARISON MARKET — ZIP ${zip2}:
+Search for real data for ZIP ${zip2}: population, median household income, children under 5, income growth, labor force participation, competitor count, and available real estate.
+
+Return ONLY this JSON:
+{
+  "zip1": "${zip1}",
+  "zip2": "${zip2}",
+  "industry": "${ind.label}",
+  "winner": "${zip1}|${zip2}|Tie",
+  "winner_reason": "One sentence explaining which ZIP is the stronger opportunity and why",
+  "zip1_name": "City/area name for ${zip1}",
+  "zip2_name": "City/area name for ${zip2}",
+  "metrics": [
+    {
+      "metric": "Population (Primary City)",
+      "zip1_value": "string or null",
+      "zip2_value": "string or null",
+      "winner": "${zip1}|${zip2}|Tie",
+      "notes": "string"
+    }
+  ],
+  "zip1_pros": ["string"],
+  "zip2_pros": ["string"],
+  "zip1_cons": ["string"],
+  "zip2_cons": ["string"],
+  "recommendation": "2-3 sentences on which ZIP to prioritize and why",
+  "data_sources": ["string"]
+}
+
+Include these metrics: Population, Children Under 5 / Primary Demographic, Median HH Income, Income Growth %, Dual-Income HH %, Competitor Count, Real Estate Cost, Opportunity Score (1-10).`;
+
+  try {
+    const d = await claudeJSON(sys, usr);
+    if (!d) throw new Error('No comparison data returned');
+    renderZipComparisonPanel(d, zip1, zip2);
+  } catch(e) {
+    if (panel) panel.innerHTML = `<div class="prose" style="color:var(--red)">Comparison failed: ${e.message}</div>`;
+    showErr('ZIP comparison failed: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⚖ Compare ZIPs'; }
+  }
+}
+
+function renderZipComparisonPanel(d, zip1, zip2) {
+  const panel = $('zipComparePanel');
+  if (!panel) return;
+
+  const winnerClass = (metric_winner) => {
+    if (!metric_winner) return '';
+    return metric_winner === zip1 ? 'zip-win-a' : metric_winner === zip2 ? 'zip-win-b' : '';
+  };
+
+  const winnerIcon = (metric_winner, side) => {
+    if (!metric_winner || metric_winner === 'Tie') return '';
+    return metric_winner === side ? '★' : '';
+  };
+
+  const overallWinClass = w => w === zip1 ? 'zcomp-winner-a' : w === zip2 ? 'zcomp-winner-b' : 'zcomp-winner-tie';
+
+  let metricsHtml = '';
+  (d.metrics || []).forEach(m => {
+    metricsHtml += `
+    <tr class="${winnerClass(m.winner)}">
+      <td class="zcomp-metric">${m.metric}</td>
+      <td class="zcomp-val ${m.winner === zip1 ? 'zcomp-best' : ''}">${winnerIcon(m.winner, zip1)} ${m.zip1_value ?? 'N/A'}</td>
+      <td class="zcomp-val ${m.winner === zip2 ? 'zcomp-best' : ''}">${winnerIcon(m.winner, zip2)} ${m.zip2_value ?? 'N/A'}</td>
+      <td class="zcomp-note">${m.notes || ''}</td>
+    </tr>`;
+  });
+
+  const prosList = (items, cls) =>
+    (items || []).map(p => `<li class="${cls}">${p}</li>`).join('');
+
+  panel.innerHTML = `
+  <div class="zcomp-panel">
+    <div class="zcomp-header">
+      <div class="zcomp-title">ZIP Comparison — ${d.industry || industry().label}</div>
+      <button class="zcomp-close" onclick="$('zipComparePanel').style.display='none'">✕</button>
+    </div>
+
+    <div class="zcomp-verdict ${overallWinClass(d.winner)}">
+      <div class="zcomp-win-label">Recommended Market</div>
+      <div class="zcomp-win-zip">${d.winner === zip1 ? (d.zip1_name||zip1) : d.winner === zip2 ? (d.zip2_name||zip2) : 'Tie'}</div>
+      <div class="zcomp-win-reason">${d.winner_reason || ''}</div>
+    </div>
+
+    <div class="zcomp-grid">
+      <div class="zcomp-col-a">
+        <div class="zcomp-col-head ${d.winner===zip1?'zcomp-col-winner':''}">
+          ${d.winner===zip1?'★ ':''}ZIP ${zip1}
+          <span class="zcomp-col-sub">${d.zip1_name||''}</span>
+        </div>
+      </div>
+      <div class="zcomp-col-b">
+        <div class="zcomp-col-head ${d.winner===zip2?'zcomp-col-winner':''}">
+          ${d.winner===zip2?'★ ':''}ZIP ${zip2}
+          <span class="zcomp-col-sub">${d.zip2_name||''}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="zcomp-metrics-wrap">
+      <table class="zcomp-table">
+        <thead><tr>
+          <th>Metric</th>
+          <th>ZIP ${zip1}</th>
+          <th>ZIP ${zip2}</th>
+          <th>Notes</th>
+        </tr></thead>
+        <tbody>${metricsHtml}</tbody>
+      </table>
+    </div>
+
+    <div class="zcomp-pros-grid">
+      <div>
+        <div class="zcomp-pros-head">ZIP ${zip1} — Strengths</div>
+        <ul class="zcomp-pros-list">${prosList(d.zip1_pros, 'pro-a')}</ul>
+        ${(d.zip1_cons||[]).length ? `<div class="zcomp-pros-head" style="margin-top:10px">Weaknesses</div><ul class="zcomp-pros-list">${prosList(d.zip1_cons,'con')}</ul>` : ''}
+      </div>
+      <div>
+        <div class="zcomp-pros-head">ZIP ${zip2} — Strengths</div>
+        <ul class="zcomp-pros-list">${prosList(d.zip2_pros, 'pro-b')}</ul>
+        ${(d.zip2_cons||[]).length ? `<div class="zcomp-pros-head" style="margin-top:10px">Weaknesses</div><ul class="zcomp-pros-list">${prosList(d.zip2_cons,'con')}</ul>` : ''}
+      </div>
+    </div>
+
+    ${d.recommendation ? `<div class="zcomp-rec">${d.recommendation}</div>` : ''}
+    ${(d.data_sources||[]).length ? `<div class="zcomp-sources">Sources: ${d.data_sources.join(' · ')}</div>` : ''}
+  </div>`;
+  panel.style.display = 'block';
+}
 
 </script>
 
