@@ -47,6 +47,9 @@ const JS_FILES = [
   'src/js/27-agent-buildvsbuy.js', // Build vs Buy (Agent 16)
   'src/js/28-agent-sources.js',   // Sources & Citations (Agent 17)
   'src/js/29-export.js',          // Per-agent export (PDF/Word/Excel/Slides) + industry comparison
+  'src/js/30-session.js',         // Auto-save, session restore & shareable URL
+  'src/js/31-full-export.js',     // Full pipeline PDF export (all 17 agents)
+  'src/js/32-phases.js',          // Phase selection & input validation
 ];
 
 const CSS_FILES = ['src/styles.css'];

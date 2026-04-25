@@ -502,6 +502,35 @@ select option{background:var(--surface2)}
   #agentModalOverlay,.gap-detail-overlay,.comp-city-overlay{display:none!important}
 }
 
+/* ══ SESSION RESTORE BANNER ══════════════════════════════════ */
+.session-banner{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px 16px;margin-bottom:10px}
+.session-inner{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.session-ico{font-size:18px;flex-shrink:0}
+.session-text{flex:1;min-width:180px;font-size:13px;color:var(--text)}
+.session-age{color:var(--faint);font-size:11px;margin-left:6px}
+.session-btn-restore{height:32px;padding:0 14px;background:var(--blue);border:none;border-radius:6px;color:#000;font-size:12px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif}
+.session-btn-restore:hover{background:#6ab4ff}
+.session-btn-discard{height:32px;padding:0 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Syne',sans-serif}
+.session-btn-discard:hover{border-color:var(--red);color:var(--red)}
+
+/* ══ INPUT VALIDATION TIPS ═══════════════════════════════════ */
+.input-tip{font-size:11px;margin-top:3px;border-radius:4px;padding:2px 6px;line-height:1.4}
+.input-tip.tip-error{color:var(--red);background:var(--red-dim)}
+.input-tip.tip-ok{color:var(--muted)}
+
+/* ══ PHASE SELECTOR PANEL ════════════════════════════════════ */
+.phase-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-top:10px}
+.phase-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;color:var(--muted)}
+.phase-panel-actions{display:flex;gap:6px}
+.phase-quick-btn{height:26px;padding:0 10px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif}
+.phase-quick-btn:hover{border-color:var(--blue);color:var(--blue)}
+.phase-checks{display:flex;flex-direction:column;gap:6px}
+.phase-check-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;padding:4px 6px;border-radius:5px;transition:background 0.12s}
+.phase-check-row:hover{background:var(--surface3)}
+.phase-check-row input[type=checkbox]{accent-color:var(--blue);width:14px;height:14px;cursor:pointer}
+.phase-check-row em{color:var(--muted);font-style:normal;font-size:11px}
+.phase-num{width:20px;height:20px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--blue);flex-shrink:0;font-family:'Syne',sans-serif}
+
 </style>
 </head>
 <body>
@@ -514,6 +543,9 @@ select option{background:var(--surface2)}
   </div>
   <div class="live-badge"><div class="live-dot"></div>Live Search Enabled</div>
 </div>
+
+<!-- Session Restore Banner -->
+<div id="sessionRestoreBanner" class="session-banner" style="display:none"></div>
 
 <div class="card">
   <label>API Key</label>
@@ -553,20 +585,63 @@ select option{background:var(--surface2)}
         <option value="dry_cleaning">👔 Dry Cleaning / Laundry</option>
       </select>
     </div>
-    <div class="field"><label>ZIP Code</label><input type="text" id="zip" value="30097" style="width:95px" /></div>
-    <div class="field"><label>Radius (mi)</label><input type="number" id="radius" value="40" min="5" max="100" style="width:85px" /></div>
+    <div class="field">
+      <label>ZIP Code</label>
+      <input type="text" id="zip" value="30097" style="width:95px" />
+      <div id="tip-zip" class="input-tip" style="display:none"></div>
+    </div>
+    <div class="field">
+      <label>Radius (mi)</label>
+      <input type="number" id="radius" value="40" min="5" max="150" style="width:85px" />
+      <div id="tip-radius" class="input-tip" style="display:none"></div>
+    </div>
     <div class="field" id="tiersField"><label id="tiersLabel">Service Tiers</label>
       <select id="grades" style="width:170px"></select>
     </div>
-    <div class="field"><label id="capacityLabel">Capacity</label><input type="number" id="capacity" value="75" min="1" max="9999" style="width:90px" /></div>
-    <div class="field"><label>Budget ($)</label><input type="number" id="budget" value="600000" min="100000" step="50000" style="width:120px" /></div>
+    <div class="field">
+      <label id="capacityLabel">Capacity</label>
+      <input type="number" id="capacity" value="75" min="1" max="9999" style="width:90px" />
+      <div id="tip-capacity" class="input-tip" style="display:none"></div>
+    </div>
+    <div class="field">
+      <label>Budget ($)</label>
+      <input type="number" id="budget" value="600000" min="50000" step="50000" style="width:120px" />
+      <div id="tip-budget" class="input-tip" style="display:none"></div>
+    </div>
     <button class="btn primary" id="runBtn" onclick="runPipeline()">▶ Run Pipeline</button>
     <button id="stopBtn" onclick="stopRequested=true;this.textContent='Stopping…';this.disabled=true" style="display:none;padding:10px 16px;background:var(--red-dim);border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer">⬛ Stop</button>
     <button id="clearCacheBtn" onclick="clearAllCache();this.textContent='✓ Cleared';setTimeout(()=>this.textContent='Clear Cache',1500)" style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">Clear Cache</button>
     <button class="btn" id="resetBtn" onclick="resetAll()" style="display:none">↺ Reset</button>
     <button class="btn" id="exportBtn" onclick="exportResults()" style="border-color:var(--green);color:var(--green)">⬇ Export JSON</button>
+    <button class="btn" id="fullExportBtn" onclick="fullPipelineExport()" style="border-color:var(--blue);color:var(--blue)">📄 Full PDF</button>
+    <button class="btn" id="copyLinkBtn" onclick="copyShareableLink()">🔗 Copy Link</button>
+    <button class="btn" id="phasePanelBtn" onclick="togglePhasePanel()">⚙ Phases</button>
     <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖨 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
+  </div>
+
+  <!-- Phase selector panel (collapsed by default) -->
+  <div id="phasePanel" class="phase-panel" style="display:none">
+    <div class="phase-panel-header">
+      <span>Select which phases to run — uncheck to skip and use cached data instead</span>
+      <div class="phase-panel-actions">
+        <button class="phase-quick-btn" onclick="phaseSelectAll(event)">All</button>
+        <button class="phase-quick-btn" onclick="phaseSelectNone(event)">None</button>
+      </div>
+    </div>
+    <div class="phase-checks">
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-1" checked onchange="togglePhase(1,this)"><span class="phase-num">1</span><span>Foundation Research <em>(Demographics · Compliance · Competitive Intel)</em></span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-2" checked onchange="togglePhase(2,this)"><span class="phase-num">2</span><span>Gap Analysis</span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-3" checked onchange="togglePhase(3,this)"><span class="phase-num">3</span><span>Site Selection</span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-4" checked onchange="togglePhase(4,this)"><span class="phase-num">4</span><span>Real Estate Search</span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-5" checked onchange="togglePhase(5,this)"><span class="phase-num">5</span><span>Financial Feasibility</span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-6" checked onchange="togglePhase(6,this)"><span class="phase-num">6</span><span>Executive Summary</span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-7" checked onchange="togglePhase(7,this)"><span class="phase-num">7</span><span>Business Plan</span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-8" checked onchange="togglePhase(8,this)"><span class="phase-num">8</span><span>Project Plan</span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-9" checked onchange="togglePhase(9,this)"><span class="phase-num">9</span><span>Supplemental Analysis <em>(Market Map · Grants · Competitor · Build vs Buy)</em></span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-11" checked onchange="togglePhase(11,this)"><span class="phase-num">11</span><span>Meta Agents <em>(Code Review · QA Testing)</em></span></label>
+      <label class="phase-check-row"><input type="checkbox" id="phase-cb-12" checked onchange="togglePhase(12,this)"><span class="phase-num">12</span><span>Sources &amp; Citations</span></label>
+    </div>
   </div>
   <div class="progress-wrap">
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -4498,85 +4573,119 @@ async function runPipeline() {
   $('orchStatus').textContent='orchestrating…';
   $('finalBox').className='final-box';
 
-  const fb = k => JSON.stringify(window['getFallback'+k]?.() || {});
+  const fb     = k => JSON.stringify(window['getFallback'+k]?.() || {});
+  const cached = k => R['a'+k] ? JSON.stringify(R['a'+k]) : null;
+  const best   = k => cached(k) || fb(k);
   try {
     // ── Phase 1: Foundation Research (parallel) ─────────────
-    setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
-    const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
-    const r1=res1.status==='fulfilled'?res1.value:fb(1);
-    const r5=res5.status==='fulfilled'?res5.value:fb(5);
-    const r6=res6.status==='fulfilled'?res6.value:fb(6);
-    if(res1.status==='rejected') console.error('Agent 1 failed:',res1.reason?.message);
-    if(res5.status==='rejected') console.error('Agent 5 failed:',res5.reason?.message);
-    if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
+    let r1, r5, r6;
+    if (phaseShouldRun(1)) {
+      setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
+      const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
+      r1=res1.status==='fulfilled'?res1.value:fb(1);
+      r5=res5.status==='fulfilled'?res5.value:fb(5);
+      r6=res6.status==='fulfilled'?res6.value:fb(6);
+      if(res1.status==='rejected') console.error('Agent 1 failed:',res1.reason?.message);
+      if(res5.status==='rejected') console.error('Agent 5 failed:',res5.reason?.message);
+      if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
+    } else {
+      setProgress(5,'Phase 1 — skipped (using cached data)');
+      r1=best(1); r5=best(5); r6=best(6);
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 2: Gap Analysis ────────────────────────────────
-    setProgress(16,'Phase 2 — Gap Analysis…');
-    let r2=fb(2);
-    try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); }
+    setProgress(16, phaseShouldRun(2)?'Phase 2 — Gap Analysis…':'Phase 2 — skipped');
+    let r2=best(2);
+    if (phaseShouldRun(2)) {
+      try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); r2=fb(2); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 3: Site Selection ──────────────────────────────
-    setProgress(24,'Phase 3 — Site Selection…');
-    let r3=fb(3);
-    try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); }
+    setProgress(24, phaseShouldRun(3)?'Phase 3 — Site Selection…':'Phase 3 — skipped');
+    let r3=best(3);
+    if (phaseShouldRun(3)) {
+      try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); r3=fb(3); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 4: Real Estate (needs site selection first) ────
-    setProgress(32,'Phase 4 — Real Estate Search…');
-    let r4=fb(4);
-    try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); }
+    setProgress(32, phaseShouldRun(4)?'Phase 4 — Real Estate Search…':'Phase 4 — skipped');
+    let r4=best(4);
+    if (phaseShouldRun(4)) {
+      try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); r4=fb(4); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 5: Financial Feasibility (site-aware, 3 sub-calls) ──
-    setProgress(40,'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…');
-    let r7=fb(7);
-    try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); }
+    setProgress(40, phaseShouldRun(5)?'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…':'Phase 5 — skipped');
+    let r7=best(7);
+    if (phaseShouldRun(5)) {
+      try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 6: Executive Summary ───────────────────────────
-    setProgress(50,'Phase 6 — Executive Summary & Verdict…');
-    let r8=fb(8);
-    try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); }
+    setProgress(50, phaseShouldRun(6)?'Phase 6 — Executive Summary & Verdict…':'Phase 6 — skipped');
+    let r8=best(8);
+    if (phaseShouldRun(6)) {
+      try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); r8=fb(8); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 7: Business Plan (4 sub-calls) ─────────────────
-    setProgress(58,'Phase 7 — Business Plan (4 focused sub-agents)…');
-    let r9=fb(9);
-    try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); }
+    setProgress(58, phaseShouldRun(7)?'Phase 7 — Business Plan (4 focused sub-agents)…':'Phase 7 — skipped');
+    let r9=best(9);
+    if (phaseShouldRun(7)) {
+      try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); r9=fb(9); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 8: Project Plan (3 sub-calls) ──────────────────
-    setProgress(66,'Phase 8 — Project Plan (3 focused sub-agents)…');
-    try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+    setProgress(66, phaseShouldRun(8)?'Phase 8 — Project Plan (3 focused sub-agents)…':'Phase 8 — skipped');
+    if (phaseShouldRun(8)) {
+      try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 9: Supplemental Analysis (parallel) ───────────
-    setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
-    await Promise.allSettled([
-      runAgent11(r1,r2,r4),
-      runAgent12(r3,r5),
-      runAgent13(r6),
-      (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
-    ]);
+    if (phaseShouldRun(9)) {
+      setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
+      await Promise.allSettled([
+        runAgent11(r1,r2,r4),
+        runAgent12(r3,r5),
+        runAgent13(r6),
+        (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
+      ]);
+    } else {
+      setProgress(72,'Phase 9 — skipped');
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 10: Marketing Strategy ────────────────────────
     // (Agent 10 = project plan, marketing is embedded — no separate agent yet)
 
     // ── Phase 11: Meta Agents ────────────────────────────────
-    setProgress(86,'Phase 11 — Code Review · QA Testing…');
-    try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
-    if(stopRequested){showErr('Pipeline stopped by user.');return;}
-    try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+    if (phaseShouldRun(11)) {
+      setProgress(86,'Phase 11 — Code Review · QA Testing…');
+      try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+    } else {
+      setProgress(86,'Phase 11 — skipped');
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 12: Sources & Citations ────────────────────────
-    setProgress(94,'Phase 12 — Sources & Citations…');
-    try {
-      if(typeof runAgent17==='function') await runAgent17(R);
-    } catch(e) { console.error('Agent 17 failed:',e.message); }
+    if (phaseShouldRun(12)) {
+      setProgress(94,'Phase 12 — Sources & Citations…');
+      try {
+        if(typeof runAgent17==='function') await runAgent17(R);
+      } catch(e) { console.error('Agent 17 failed:',e.message); }
+    } else {
+      setProgress(94,'Phase 12 — skipped');
+    }
 
     setProgress(100,'Complete — all agents finished');
     $('orchStatus').textContent='done';
@@ -6669,6 +6778,593 @@ document.addEventListener('DOMContentLoaded', function(){
       setTimeout(injectExportButtons, 80);
     };
   }
+})();
+
+
+// ══════════════════════════════════════════════════════════
+// 30-session.js — Auto-save, Session Restore & Shareable URL
+// Features:
+//   • Auto-saves R + rendered HTML to localStorage after every agent
+//   • Session restore banner on page load (24-hour TTL)
+//   • Restore R + inputs + HTML without re-running agents
+//   • URL params: ?zip=&industry=&radius=&capacity=&budget=
+//   • Copy shareable link button
+// ══════════════════════════════════════════════════════════
+
+const SESSION_KEY = 'biz_session_v1';
+const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+// ── Auto-save (wrap showOut) ─────────────────────────────────
+(function patchShowOutForSession() {
+  const _prev = window.showOut;
+  window.showOut = function(n) {
+    if (_prev) _prev(n);
+    clearTimeout(window._sessionSaveTimer);
+    window._sessionSaveTimer = setTimeout(_sessionAutoSave, 600);
+  };
+})();
+
+function _sessionAutoSave() {
+  try {
+    const agentHtml = {};
+    for (let n = 1; n <= 17; n++) {
+      const el = $('out-' + n);
+      if (el && el.innerHTML.trim()) agentHtml[n] = el.innerHTML;
+    }
+    const snap = {
+      ts:       Date.now(),
+      zip:      $('zip')            ? $('zip').value             : '',
+      radius:   $('radius')         ? $('radius').value          : '',
+      capacity: $('capacity')       ? $('capacity').value        : '',
+      budget:   $('budget')         ? $('budget').value          : '',
+      industry: $('industrySelect') ? $('industrySelect').value  : 'daycare',
+      grades:   $('grades')         ? $('grades').value          : '',
+      R:        R,
+      html:     agentHtml,
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(snap));
+  } catch(e) { console.warn('Session auto-save failed:', e.message); }
+}
+
+// ── Session restore ──────────────────────────────────────────
+function _sessionLoad() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (Date.now() - d.ts > SESSION_TTL) { localStorage.removeItem(SESSION_KEY); return null; }
+    return d;
+  } catch(e) { return null; }
+}
+
+function sessionRestore() {
+  const d = _sessionLoad();
+  if (!d) return;
+
+  // Restore inputs
+  if ($('zip')            && d.zip)      $('zip').value            = d.zip;
+  if ($('radius')         && d.radius)   $('radius').value         = d.radius;
+  if ($('capacity')       && d.capacity) $('capacity').value       = d.capacity;
+  if ($('budget')         && d.budget)   $('budget').value         = d.budget;
+  if ($('industrySelect') && d.industry) {
+    $('industrySelect').value = d.industry;
+    if (typeof onIndustryChange === 'function') onIndustryChange();
+  }
+  if ($('grades') && d.grades) $('grades').value = d.grades;
+
+  // Restore R object
+  if (d.R) { try { Object.assign(R, d.R); } catch(e) {} }
+
+  // Restore rendered HTML into agent output panels
+  if (d.html) {
+    Object.entries(d.html).forEach(([n, html]) => {
+      const out  = $('out-'  + n);
+      const card = $('card-' + n);
+      const dot  = $('dot-'  + n);
+      if (out) {
+        out.innerHTML = html;
+        out.classList.add('visible');
+      }
+      if (card) card.classList.add('done');
+      if (dot)  dot.className = 'agent-dot done';
+    });
+  }
+
+  // Hide banner
+  const banner = $('sessionRestoreBanner');
+  if (banner) banner.style.display = 'none';
+
+  // Friendly notice
+  const count = d.html ? Object.keys(d.html).length : 0;
+  showErr(`Session restored — ${count} agent${count!==1?'s':''} loaded. Charts need a ↺ Re-run to re-render.`, 'info');
+  setTimeout(hideErr, 6000);
+}
+
+function sessionDiscard() {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  const banner = $('sessionRestoreBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+function sessionCheckOnLoad() {
+  const d = _sessionLoad();
+  if (!d) return;
+  const ageMs  = Date.now() - d.ts;
+  const ageMin = Math.round(ageMs / 60000);
+  const ageStr = ageMin < 60 ? ageMin + ' min ago' : Math.round(ageMin / 60) + 'h ago';
+  const count  = d.html ? Object.keys(d.html).length : 0;
+  const banner = $('sessionRestoreBanner');
+  if (!banner) return;
+  banner.innerHTML = `
+    <div class="session-inner">
+      <span class="session-ico">💾</span>
+      <div class="session-text">
+        <strong>Previous session found</strong> &mdash;
+        ZIP&nbsp;${d.zip||'?'} &middot; ${d.industry||'?'} &middot; ${count} agent${count!==1?'s':''} completed
+        <span class="session-age">(saved ${ageStr})</span>
+      </div>
+      <button class="session-btn-restore" onclick="sessionRestore()">↩ Restore</button>
+      <button class="session-btn-discard" onclick="sessionDiscard()">✕ Discard</button>
+    </div>`;
+  banner.style.display = 'block';
+}
+
+// ── Shareable URL ────────────────────────────────────────────
+function urlParamsApply() {
+  const p = new URLSearchParams(window.location.search);
+  if (p.has('zip')      && $('zip'))            $('zip').value            = p.get('zip');
+  if (p.has('radius')   && $('radius'))         $('radius').value         = p.get('radius');
+  if (p.has('capacity') && $('capacity'))       $('capacity').value       = p.get('capacity');
+  if (p.has('budget')   && $('budget'))         $('budget').value         = p.get('budget');
+  if (p.has('industry') && $('industrySelect')) {
+    $('industrySelect').value = p.get('industry');
+    if (typeof onIndustryChange === 'function') onIndustryChange();
+  }
+}
+
+function urlParamsUpdate() {
+  try {
+    const p = new URLSearchParams();
+    const ind = $('industrySelect') ? $('industrySelect').value : '';
+    const z   = $('zip')            ? $('zip').value.trim()     : '';
+    const rad = $('radius')         ? $('radius').value         : '';
+    const cap = $('capacity')       ? $('capacity').value       : '';
+    const bud = $('budget')         ? $('budget').value         : '';
+    if (ind) p.set('industry', ind);
+    if (z)   p.set('zip',      z);
+    if (rad) p.set('radius',   rad);
+    if (cap) p.set('capacity', cap);
+    if (bud) p.set('budget',   bud);
+    history.replaceState(null, '', window.location.pathname + '?' + p.toString());
+  } catch(e) {}
+}
+
+function copyShareableLink() {
+  urlParamsUpdate();
+  const url = window.location.href;
+  const btn = $('copyLinkBtn');
+  const done = () => {
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = '🔗 Copy Link', 2200); }
+  };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(done).catch(() => { prompt('Copy this URL:', url); });
+  } else {
+    prompt('Copy this URL:', url);
+    done();
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  urlParamsApply();
+  sessionCheckOnLoad();
+  // Keep URL in sync when inputs change
+  ['zip','radius','capacity','budget','industrySelect'].forEach(id => {
+    const el = $(id);
+    if (el) el.addEventListener('change', urlParamsUpdate);
+  });
+});
+
+
+// ══════════════════════════════════════════════════════════
+// 31-full-export.js — Full Pipeline PDF / Print Report
+// Opens a new window with all 17 agents in a print-ready
+// paginated HTML document. Charts are captured as PNG images.
+// ══════════════════════════════════════════════════════════
+
+const _FULL_EXPORT_LABELS = {
+  1:  'Demographics',
+  2:  'Gap Analysis',
+  3:  'Site Selection',
+  4:  'Real Estate Search',
+  5:  'Compliance & Regulatory',
+  6:  'Competitive Intelligence',
+  7:  'Financial Feasibility',
+  8:  'Executive Summary',
+  9:  'Business Plan',
+  10: 'Project Plan',
+  11: 'Market Map & Opportunities',
+  12: 'Grants & Funding',
+  13: 'Competitive Strategy',
+  14: 'Code Review',
+  15: 'QA & Testing',
+  16: 'Build vs Buy Analysis',
+  17: 'Sources & Citations',
+};
+
+function fullPipelineExport() {
+  if (!Object.keys(R).length) {
+    showErr('No results to export yet — run the pipeline first.');
+    return;
+  }
+
+  // Capture all chart canvases as base64 images BEFORE opening new window
+  const chartImgs = {};
+  document.querySelectorAll('canvas').forEach(c => {
+    try { chartImgs[c.id] = c.toDataURL('image/png'); } catch(e) {}
+  });
+
+  const w = window.open('', '_blank');
+  if (!w) { showErr('Pop-up blocked — please allow pop-ups for this page and try again.'); return; }
+
+  const ind   = industry();
+  const zipV  = zip();
+  const now   = new Date().toLocaleString();
+  const p     = R.userProfile || {};
+  const agentCount = Object.keys(R).filter(k => k.startsWith('a') && !isNaN(k.slice(1))).length;
+
+  // ── Cover page ────────────────────────────────────────────
+  const coverHtml = `
+  <div class="fp-cover pba">
+    <div class="fp-cover-logo">Business Planning Agent System · 17-Agent AI Pipeline</div>
+    <div class="fp-cover-icon">${ind.emoji || '🏢'}</div>
+    <h1 class="fp-cover-title">${ind.label}</h1>
+    <div class="fp-cover-sub">Business Feasibility &amp; Planning Report</div>
+    <div class="fp-cover-zip">ZIP Code Area: <strong>${zipV}</strong></div>
+    ${p.name  ? `<div class="fp-cover-biz">${p.name}</div>` : ''}
+    ${p.owner ? `<div class="fp-cover-owner">Prepared for: ${p.owner}</div>` : ''}
+    ${p.location ? `<div class="fp-cover-detail">Location: ${p.location}</div>` : ''}
+    ${p.opening  ? `<div class="fp-cover-detail">Target Opening: ${new Date(p.opening+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>` : ''}
+    <div class="fp-cover-meta">
+      <span>Generated: ${now}</span>
+      <span>${agentCount} of 17 agents completed</span>
+    </div>
+  </div>`;
+
+  // ── Table of contents ─────────────────────────────────────
+  const tocRows = Object.entries(_FULL_EXPORT_LABELS)
+    .map(([n, label]) => {
+      const hasData = !!R['a' + n];
+      return `<tr class="${hasData?'toc-done':'toc-skip'}">
+        <td class="toc-n">${n}</td>
+        <td>${label}</td>
+        <td class="toc-s">${hasData ? '✓' : '—'}</td>
+      </tr>`;
+    }).join('');
+
+  const tocHtml = `
+  <div class="fp-toc pba">
+    <h2>Table of Contents</h2>
+    <table class="toc-tbl">
+      <thead><tr><th>#</th><th>Section</th><th>Status</th></tr></thead>
+      <tbody>${tocRows}</tbody>
+    </table>
+  </div>`;
+
+  // ── Agent sections ────────────────────────────────────────
+  // Executive summary goes first after TOC
+  const agentOrder = [8, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+  const sections = [];
+
+  agentOrder.forEach(n => {
+    const outEl = $('out-' + n);
+    if (!outEl || !outEl.innerHTML.trim()) return;
+
+    // Swap canvas elements → captured PNG images
+    let content = outEl.innerHTML;
+    content = content.replace(/<canvas([^>]*)id="([^"]*)"([^>]*)><\/canvas>/g, (match, pre, cid, post) => {
+      if (chartImgs[cid]) {
+        return `<img src="${chartImgs[cid]}" class="fp-chart-img" alt="Chart ${cid}" />`;
+      }
+      return `<div class="fp-chart-missing">Chart not available (re-run agent to regenerate)</div>`;
+    });
+
+    // Strip export dropdown menus and drill-down overlays from content
+    content = content.replace(/<div class="export-dropdown[^"]*"[^>]*>[\s\S]*?<\/div>/g, '');
+
+    const label = _FULL_EXPORT_LABELS[n] || ('Agent ' + n);
+    sections.push(`
+  <div class="fp-section pba">
+    <h2 class="fp-section-h"><span class="fp-num">${n}</span> ${label}</h2>
+    <div class="fp-agent-body">${content}</div>
+  </div>`);
+  });
+
+  // ── Print styles ──────────────────────────────────────────
+  const printCSS = `
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --ink:#1a1a2e; --ink2:#444; --muted:#777; --faint:#aaa;
+    --blue:#2563eb; --green:#16a34a; --red:#dc2626; --amber:#d97706;
+    --bg:#fff; --surface:#f8f9fa; --border:#e0e3e8;
+  }
+  body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:12px;line-height:1.65;padding:0}
+  h1,h2,h3,h4{font-family:'Segoe UI Semibold',Arial,sans-serif;color:var(--ink)}
+  a{color:var(--blue);word-break:break-all}
+
+  /* Print layout */
+  @page{size:A4;margin:18mm 16mm}
+  @media print{
+    .no-print{display:none!important}
+    .pba{page-break-after:always}
+    body{font-size:11px}
+    .fp-cover{min-height:auto;padding:60px 40px}
+  }
+
+  /* Cover */
+  .fp-cover{min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(150deg,#0f172a 0%,#1e3a5f 100%);color:#fff;border-radius:16px;
+    padding:80px 48px;text-align:center;margin:24px 0 32px}
+  .fp-cover-logo{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#94a3b8;margin-bottom:28px}
+  .fp-cover-icon{font-size:56px;margin-bottom:16px}
+  .fp-cover-title{font-size:38px;font-weight:700;color:#60a5fa;margin:0 0 8px}
+  .fp-cover-sub{font-size:16px;color:#cbd5e1;margin-bottom:24px}
+  .fp-cover-zip{font-size:15px;color:#94a3b8}
+  .fp-cover-biz{font-size:22px;font-weight:600;color:#4ade80;margin-top:20px}
+  .fp-cover-owner{font-size:13px;color:#94a3b8;margin-top:6px}
+  .fp-cover-detail{font-size:12px;color:#94a3b8;margin-top:4px}
+  .fp-cover-meta{display:flex;gap:32px;justify-content:center;margin-top:36px;font-size:11px;color:#64748b}
+
+  /* TOC */
+  .fp-toc{padding:32px 0}
+  .fp-toc h2{font-size:20px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+  .toc-tbl{width:100%;border-collapse:collapse}
+  .toc-tbl th{text-align:left;padding:7px 10px;border-bottom:2px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .toc-tbl td{padding:7px 10px;border-bottom:1px solid var(--border)}
+  .toc-n{font-weight:700;color:var(--blue);width:36px}
+  .toc-s{width:56px}
+  .toc-done .toc-s{color:var(--green)}
+  .toc-skip{color:var(--faint)}
+
+  /* Section */
+  .fp-section{padding:28px 0}
+  .fp-section-h{font-size:20px;font-weight:700;display:flex;align-items:center;gap:12px;
+    border-bottom:2px solid var(--border);padding-bottom:10px;margin-bottom:18px;color:var(--ink)}
+  .fp-num{width:30px;height:30px;background:var(--blue);color:#fff;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+  .fp-agent-body{color:var(--ink2)}
+  .fp-chart-img{max-width:100%;height:auto;border-radius:6px;margin:8px 0;border:1px solid var(--border)}
+  .fp-chart-missing{background:var(--surface);border:1px dashed var(--border);border-radius:6px;
+    padding:10px 14px;font-size:11px;color:var(--muted);margin:8px 0;font-style:italic}
+
+  /* Tables inside agent bodies */
+  .fp-agent-body table{width:100%;border-collapse:collapse;font-size:11px;margin:10px 0}
+  .fp-agent-body th{background:var(--surface);padding:5px 8px;text-align:left;border-bottom:2px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .fp-agent-body td{padding:5px 8px;border-bottom:1px solid var(--border)}
+  .fp-agent-body tr:hover td{background:#f5f7fa}
+
+  /* Cards / panels reset for print */
+  .fp-agent-body .agent-out,.fp-agent-body .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+  .fp-agent-body .tabs{display:none}
+  .fp-agent-body .panel,.fp-agent-body .panel.active{display:block!important}
+  .fp-agent-body .raw-data-wrap{display:none}
+  .fp-agent-body .rerun-btn,.fp-agent-body .raw-toggle,.fp-agent-body .export-menu-wrap{display:none}
+
+  /* Badges */
+  .fp-agent-body .badge,.fp-agent-body .b-green{background:#dcfce7;color:#166534;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600}
+  .fp-agent-body .b-red{background:#fee2e2;color:#991b1b;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600}
+  .fp-agent-body .b-amber{background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600}
+  .fp-agent-body .b-blue{background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600}
+
+  /* Prose */
+  .fp-agent-body .prose{white-space:pre-wrap;font-size:12px;line-height:1.75;color:var(--ink2)}
+
+  /* Print action bar */
+  .fp-bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);
+    padding:10px 24px;display:flex;gap:10px;align-items:center;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+  .fp-bar button{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit}
+  .fp-btn-print{background:#2563eb;color:#fff}
+  .fp-btn-print:hover{background:#1d4ed8}
+  .fp-btn-close{background:#f1f5f9;color:#334155}
+  .fp-bar-title{margin-left:12px;font-size:13px;color:var(--muted)}
+
+  /* Page wrap */
+  .fp-page{max-width:900px;margin:0 auto;padding:0 24px 40px}
+  `;
+
+  const fullDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Business Plan — ${ind.label} — ZIP ${zipV}</title>
+  <style>${printCSS}</style>
+</head>
+<body>
+  <div class="fp-bar no-print">
+    <button class="fp-btn-print" onclick="window.print()">🖨 Print / Save as PDF</button>
+    <button class="fp-btn-close" onclick="window.close()">✕ Close</button>
+    <span class="fp-bar-title">${ind.label} · ZIP ${zipV} · ${agentCount} agents · ${now}</span>
+  </div>
+  <div class="fp-page">
+    ${coverHtml}
+    ${tocHtml}
+    ${sections.join('\n')}
+  </div>
+</body>
+</html>`;
+
+  w.document.write(fullDoc);
+  w.document.close();
+}
+
+
+// ══════════════════════════════════════════════════════════
+// 32-phases.js — Phase Selection & Input Validation
+// Features:
+//   • Phase checkboxes — run only the phases you need
+//   • phaseShouldRun(n) — called by 22-pipeline.js
+//   • Input validation for ZIP, radius, capacity, budget
+//   • Inline tip messages under each invalid field
+//   • Patches runPipeline to validate before launching
+// ══════════════════════════════════════════════════════════
+
+// ── Phase enable/disable state ────────────────────────────────
+const _phaseEnabled = {
+  1:true, 2:true, 3:true, 4:true,  5:true,  6:true,
+  7:true, 8:true, 9:true, 10:true, 11:true, 12:true,
+};
+
+/**
+ * Called inside runPipeline() at each phase.
+ * Returns false when user has unchecked that phase — skip its agents.
+ */
+function phaseShouldRun(n) {
+  return _phaseEnabled[n] !== false;
+}
+
+function togglePhase(n, checkbox) {
+  _phaseEnabled[n] = checkbox.checked;
+}
+
+function phaseSelectAll(ev) {
+  if (ev) ev.stopPropagation();
+  for (let n = 1; n <= 12; n++) {
+    _phaseEnabled[n] = true;
+    const cb = $('phase-cb-' + n);
+    if (cb) cb.checked = true;
+  }
+}
+
+function phaseSelectNone(ev) {
+  if (ev) ev.stopPropagation();
+  for (let n = 1; n <= 12; n++) {
+    _phaseEnabled[n] = false;
+    const cb = $('phase-cb-' + n);
+    if (cb) cb.checked = false;
+  }
+}
+
+function togglePhasePanel() {
+  const panel = $('phasePanel');
+  const btn   = $('phasePanelBtn');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (btn) btn.textContent = isOpen ? '⚙ Phases' : '⚙ Phases ▲';
+}
+
+// ── Input validation ──────────────────────────────────────────
+// Max capacity by industry; min budget by industry
+const _capMax = { daycare:300, gas_station:32, laundromat:100, car_wash:20,
+                  restaurant:500, gym:5000, indoor_play:2000, dry_cleaning:2000 };
+const _budMin = { daycare:150000, gas_station:500000, laundromat:100000, car_wash:300000,
+                  restaurant:100000, gym:150000, indoor_play:200000, dry_cleaning:100000 };
+
+const _tipText = {
+  zip:      'Must be a valid 5-digit US ZIP code (e.g. 30097)',
+  radius:   'Enter a search radius between 10 and 150 miles',
+  capacity: '',   // set dynamically
+  budget:   '',   // set dynamically
+};
+
+function _setTip(id, msg, isError) {
+  const el = $('tip-' + id);
+  const inp = $(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+  el.className = 'input-tip ' + (isError ? 'tip-error' : 'tip-ok');
+  if (inp) inp.style.borderColor = isError ? 'var(--red)' : (msg ? 'var(--green)' : '');
+}
+
+function validateInputs() {
+  const ind  = $('industrySelect') ? $('industrySelect').value : 'daycare';
+  const zipV = $('zip')      ? $('zip').value.trim()     : '';
+  const radV = $('radius')   ? $('radius').value.trim()  : '';
+  const capV = $('capacity') ? $('capacity').value.trim(): '';
+  const budV = $('budget')   ? $('budget').value.trim()  : '';
+  let ok = true;
+
+  // ZIP
+  if (!/^\d{5}$/.test(zipV)) {
+    _setTip('zip', 'Must be exactly 5 digits', true); ok = false;
+  } else { _setTip('zip', '', false); }
+
+  // Radius
+  const rad = parseInt(radV);
+  if (isNaN(rad) || rad < 10 || rad > 150) {
+    _setTip('radius', 'Enter a value between 10 and 150', true); ok = false;
+  } else { _setTip('radius', '', false); }
+
+  // Capacity
+  const cap = parseInt(capV);
+  const maxCap = _capMax[ind] || 9999;
+  if (isNaN(cap) || cap < 1) {
+    _setTip('capacity', 'Enter a positive number', true); ok = false;
+  } else if (cap > maxCap) {
+    _setTip('capacity', `Typical max for ${ind.replace('_',' ')} is ${maxCap}`, true); ok = false;
+  } else { _setTip('capacity', '', false); }
+
+  // Budget
+  const bud = parseInt(budV);
+  const minBud = _budMin[ind] || 50000;
+  if (isNaN(bud) || bud < 50000) {
+    _setTip('budget', 'Minimum budget is $50,000', true); ok = false;
+  } else if (bud < minBud) {
+    _setTip('budget', `Typical minimum for ${ind.replace('_',' ')} is $${(minBud/1000).toFixed(0)}k`, true); ok = false;
+  } else { _setTip('budget', '', false); }
+
+  return ok;
+}
+
+function clearValidation() {
+  ['zip','radius','capacity','budget'].forEach(id => {
+    _setTip(id, '', false);
+    const el = $(id);
+    if (el) el.style.borderColor = '';
+  });
+}
+
+// Show guidance tips as the user types
+function _bindGuidanceTips() {
+  const hints = {
+    zip:      '5-digit US ZIP code',
+    radius:   '10 – 150 miles',
+    capacity: 'Number of units/slots for this business type',
+    budget:   'Total startup investment budget (USD)',
+  };
+  Object.entries(hints).forEach(([id, hint]) => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener('focus', () => { if (!el.value) _setTip(id, hint, false); });
+    el.addEventListener('blur',  () => {
+      // Only validate on blur if field has been touched
+      const tip = $('tip-' + id);
+      if (tip && tip.classList.contains('tip-ok') && el.value) {
+        // Keep guidance tip visible briefly, then clear
+        setTimeout(() => _setTip(id, '', false), 1500);
+      }
+    });
+  });
+}
+
+// ── Patch runPipeline to validate first ──────────────────────
+(function patchRunPipelineForValidation() {
+  // Wait for DOMContentLoaded so runPipeline is definitely available
+  document.addEventListener('DOMContentLoaded', function() {
+    const _orig = window.runPipeline;
+    if (!_orig) return;
+    window.runPipeline = async function() {
+      if (!validateInputs()) {
+        showErr('Please fix the highlighted input errors before running the pipeline.');
+        return;
+      }
+      clearValidation();
+      return _orig.apply(this, arguments);
+    };
+    _bindGuidanceTips();
+  });
 })();
 
 </script>

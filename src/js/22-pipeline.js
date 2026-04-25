@@ -8,85 +8,119 @@ async function runPipeline() {
   $('orchStatus').textContent='orchestrating…';
   $('finalBox').className='final-box';
 
-  const fb = k => JSON.stringify(window['getFallback'+k]?.() || {});
+  const fb     = k => JSON.stringify(window['getFallback'+k]?.() || {});
+  const cached = k => R['a'+k] ? JSON.stringify(R['a'+k]) : null;
+  const best   = k => cached(k) || fb(k);
   try {
     // ── Phase 1: Foundation Research (parallel) ─────────────
-    setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
-    const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
-    const r1=res1.status==='fulfilled'?res1.value:fb(1);
-    const r5=res5.status==='fulfilled'?res5.value:fb(5);
-    const r6=res6.status==='fulfilled'?res6.value:fb(6);
-    if(res1.status==='rejected') console.error('Agent 1 failed:',res1.reason?.message);
-    if(res5.status==='rejected') console.error('Agent 5 failed:',res5.reason?.message);
-    if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
+    let r1, r5, r6;
+    if (phaseShouldRun(1)) {
+      setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
+      const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
+      r1=res1.status==='fulfilled'?res1.value:fb(1);
+      r5=res5.status==='fulfilled'?res5.value:fb(5);
+      r6=res6.status==='fulfilled'?res6.value:fb(6);
+      if(res1.status==='rejected') console.error('Agent 1 failed:',res1.reason?.message);
+      if(res5.status==='rejected') console.error('Agent 5 failed:',res5.reason?.message);
+      if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
+    } else {
+      setProgress(5,'Phase 1 — skipped (using cached data)');
+      r1=best(1); r5=best(5); r6=best(6);
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 2: Gap Analysis ────────────────────────────────
-    setProgress(16,'Phase 2 — Gap Analysis…');
-    let r2=fb(2);
-    try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); }
+    setProgress(16, phaseShouldRun(2)?'Phase 2 — Gap Analysis…':'Phase 2 — skipped');
+    let r2=best(2);
+    if (phaseShouldRun(2)) {
+      try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); r2=fb(2); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 3: Site Selection ──────────────────────────────
-    setProgress(24,'Phase 3 — Site Selection…');
-    let r3=fb(3);
-    try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); }
+    setProgress(24, phaseShouldRun(3)?'Phase 3 — Site Selection…':'Phase 3 — skipped');
+    let r3=best(3);
+    if (phaseShouldRun(3)) {
+      try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); r3=fb(3); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 4: Real Estate (needs site selection first) ────
-    setProgress(32,'Phase 4 — Real Estate Search…');
-    let r4=fb(4);
-    try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); }
+    setProgress(32, phaseShouldRun(4)?'Phase 4 — Real Estate Search…':'Phase 4 — skipped');
+    let r4=best(4);
+    if (phaseShouldRun(4)) {
+      try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); r4=fb(4); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 5: Financial Feasibility (site-aware, 3 sub-calls) ──
-    setProgress(40,'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…');
-    let r7=fb(7);
-    try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); }
+    setProgress(40, phaseShouldRun(5)?'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…':'Phase 5 — skipped');
+    let r7=best(7);
+    if (phaseShouldRun(5)) {
+      try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 6: Executive Summary ───────────────────────────
-    setProgress(50,'Phase 6 — Executive Summary & Verdict…');
-    let r8=fb(8);
-    try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); }
+    setProgress(50, phaseShouldRun(6)?'Phase 6 — Executive Summary & Verdict…':'Phase 6 — skipped');
+    let r8=best(8);
+    if (phaseShouldRun(6)) {
+      try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); r8=fb(8); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 7: Business Plan (4 sub-calls) ─────────────────
-    setProgress(58,'Phase 7 — Business Plan (4 focused sub-agents)…');
-    let r9=fb(9);
-    try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); }
+    setProgress(58, phaseShouldRun(7)?'Phase 7 — Business Plan (4 focused sub-agents)…':'Phase 7 — skipped');
+    let r9=best(9);
+    if (phaseShouldRun(7)) {
+      try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); r9=fb(9); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 8: Project Plan (3 sub-calls) ──────────────────
-    setProgress(66,'Phase 8 — Project Plan (3 focused sub-agents)…');
-    try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+    setProgress(66, phaseShouldRun(8)?'Phase 8 — Project Plan (3 focused sub-agents)…':'Phase 8 — skipped');
+    if (phaseShouldRun(8)) {
+      try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 9: Supplemental Analysis (parallel) ───────────
-    setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
-    await Promise.allSettled([
-      runAgent11(r1,r2,r4),
-      runAgent12(r3,r5),
-      runAgent13(r6),
-      (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
-    ]);
+    if (phaseShouldRun(9)) {
+      setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
+      await Promise.allSettled([
+        runAgent11(r1,r2,r4),
+        runAgent12(r3,r5),
+        runAgent13(r6),
+        (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
+      ]);
+    } else {
+      setProgress(72,'Phase 9 — skipped');
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 10: Marketing Strategy ────────────────────────
     // (Agent 10 = project plan, marketing is embedded — no separate agent yet)
 
     // ── Phase 11: Meta Agents ────────────────────────────────
-    setProgress(86,'Phase 11 — Code Review · QA Testing…');
-    try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
-    if(stopRequested){showErr('Pipeline stopped by user.');return;}
-    try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+    if (phaseShouldRun(11)) {
+      setProgress(86,'Phase 11 — Code Review · QA Testing…');
+      try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+    } else {
+      setProgress(86,'Phase 11 — skipped');
+    }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
     // ── Phase 12: Sources & Citations ────────────────────────
-    setProgress(94,'Phase 12 — Sources & Citations…');
-    try {
-      if(typeof runAgent17==='function') await runAgent17(R);
-    } catch(e) { console.error('Agent 17 failed:',e.message); }
+    if (phaseShouldRun(12)) {
+      setProgress(94,'Phase 12 — Sources & Citations…');
+      try {
+        if(typeof runAgent17==='function') await runAgent17(R);
+      } catch(e) { console.error('Agent 17 failed:',e.message); }
+    } else {
+      setProgress(94,'Phase 12 — skipped');
+    }
 
     setProgress(100,'Complete — all agents finished');
     $('orchStatus').textContent='done';
