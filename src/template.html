@@ -77,6 +77,24 @@
     <div class="progress-text" id="progressText">Enter your API key and click Run</div>
   </div>
   <div class="error-banner" id="errorBanner"></div>
+  <div class="compare-bar" style="margin-top:12px">
+    <div class="field">
+      <label>Compare With</label>
+      <select id="compareIndustrySelect" style="width:210px">
+        <option value="">— Select industry to compare —</option>
+        <option value="daycare">🏫 Daycare / Childcare</option>
+        <option value="gas_station">⛽ Gas Station / C-Store</option>
+        <option value="laundromat">🫧 Laundromat</option>
+        <option value="car_wash">🚗 Car Wash</option>
+        <option value="restaurant">🍽️ Restaurant</option>
+        <option value="gym">💪 Gym / Fitness Center</option>
+        <option value="indoor_play">🎠 Indoor Play Area / FEC</option>
+        <option value="dry_cleaning">👔 Dry Cleaning / Laundry</option>
+      </select>
+    </div>
+    <button class="compare-toggle-btn" onclick="runIndustryComparison()">⚖ Compare Industries</button>
+  </div>
+  <div id="comparePanel" class="compare-panel"></div>
 </div>
 
 <div class="arrow">↓</div>

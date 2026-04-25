@@ -378,3 +378,117 @@ select option{background:var(--surface2)}
 .agent-modal-body{padding:20px;flex:1;overflow-y:auto}
 .agent-modal-body .agent-out{display:block!important;margin-top:0;padding-top:0;border-top:none}
 .agent-modal-body .prose{font-size:14px;line-height:1.7;max-height:none}
+
+/* ══ EXPORT DROPDOWN ═══════════════════════════════════════ */
+.export-dropdown{position:relative;display:inline-flex;flex-shrink:0}
+.export-btn{height:26px;padding:0 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);cursor:pointer;transition:all 0.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;font-family:'Syne',sans-serif;font-weight:600}
+.export-btn:hover{background:var(--surface3);border-color:var(--blue);color:var(--blue)}
+.export-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:5px;min-width:152px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.5);flex-direction:column;gap:2px}
+.export-menu.open{display:flex}
+.export-menu button{width:100%;padding:7px 11px;background:transparent;border:none;border-radius:7px;color:var(--text);font-size:12px;font-family:'Instrument Sans',sans-serif;text-align:left;cursor:pointer;transition:background 0.12s;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.export-menu button:hover{background:var(--surface3)}
+
+/* ══ RECOMMENDATION REASONING CARD ════════════════════════ */
+.reasoning-card{background:linear-gradient(135deg,rgba(74,158,255,0.06) 0%,rgba(167,139,250,0.06) 100%);border:1px solid rgba(74,158,255,0.2);border-radius:10px;padding:14px 18px;margin:12px 0}
+.reasoning-title{font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.reasoning-item{display:flex;gap:8px;margin-bottom:6px;font-size:12.5px;color:var(--muted);line-height:1.7}
+.reasoning-item::before{content:'→';color:var(--blue);flex-shrink:0;font-weight:700;margin-top:1px}
+.reasoning-source{font-size:10px;color:var(--faint);font-family:'Syne',sans-serif;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)}
+
+/* ══ CLICKABLE HEATMAP CELLS ═══════════════════════════════ */
+.hmap-cell.clickable{cursor:pointer;transition:transform 0.15s,box-shadow 0.15s,filter 0.15s}
+.hmap-cell.clickable:hover{transform:scale(1.12);box-shadow:0 4px 12px rgba(0,0,0,0.5);z-index:2;position:relative;filter:brightness(1.3)}
+
+/* ══ GAP DETAIL OVERLAY ════════════════════════════════════ */
+.gap-detail-overlay{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px}
+.gap-detail-overlay.open{display:flex}
+.gap-detail-panel{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:26px;width:100%;max-width:520px;box-shadow:0 24px 80px rgba(0,0,0,0.6);position:relative}
+.gap-detail-city{font-size:22px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:3px}
+.gap-detail-metric{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);margin-bottom:14px;font-family:'Syne',sans-serif}
+.gap-detail-value{font-size:42px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:14px;line-height:1}
+.gap-detail-why{font-size:13px;line-height:1.85;color:var(--muted);margin-bottom:14px;white-space:pre-wrap}
+.gap-detail-sources{font-size:11px;color:var(--faint);padding-top:10px;border-top:1px solid var(--border)}
+.gap-detail-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:all 0.15s}
+.gap-detail-close:hover{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+.gap-data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.gdp-item{background:var(--surface2);border-radius:7px;padding:10px 12px;border:1px solid var(--border)}
+.gdp-label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px}
+.gdp-val{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)}
+
+/* ══ COMPETITIVE INTEL CITY DETAIL ════════════════════════ */
+.comp-city-overlay{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto}
+.comp-city-overlay.open{display:flex}
+.comp-city-panel{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:22px;width:100%;max-width:620px;box-shadow:0 24px 80px rgba(0,0,0,0.6);position:relative;margin:auto}
+.comp-center-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.comp-center-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.comp-center-name{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)}
+.comp-center-rating{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber)}
+.comp-center-detail{font-size:11px;color:var(--muted);line-height:1.65}
+.comp-gap-box{background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:12px 14px;margin:12px 0;font-size:12px;color:var(--green)}
+.comp-city-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:all 0.15s}
+.comp-city-close:hover{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+
+/* ══ SITE SELECTION REASONING ══════════════════════════════ */
+.loc-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color 0.2s,box-shadow 0.2s}
+.loc-card:hover{border-color:var(--border2);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.loc-reasoning-body{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.loc-reasoning-body.open{display:block}
+.loc-reasoning-toggle{font-size:11px;color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:4px;margin-top:8px;font-family:'Syne',sans-serif;font-weight:600;background:none;border:none;text-align:left;width:100%;padding:2px 0;transition:opacity 0.15s}
+.loc-reasoning-toggle:hover{opacity:0.75}
+
+/* ══ INDUSTRY COMPARISON ════════════════════════════════════ */
+.compare-bar{display:flex;align-items:flex-end;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-top:8px;flex-wrap:wrap}
+.compare-toggle-btn{height:32px;padding:0 14px;font-size:12px;font-weight:600;font-family:'Syne',sans-serif;border:1px solid var(--amber);border-radius:8px;background:var(--amber-dim);color:var(--amber);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.compare-toggle-btn:hover,.compare-toggle-btn.active{background:var(--amber);color:#000}
+.compare-panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-top:1rem;display:none}
+.compare-panel.show{display:block}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.compare-grid{grid-template-columns:1fr}}
+.compare-col{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.compare-col-title{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.compare-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.compare-row:last-child{border-bottom:none}
+.compare-row-label{color:var(--muted)}
+.compare-row-val{font-weight:600;font-family:'Syne',sans-serif}
+.compare-winner{color:var(--green)!important}
+
+/* ══ AGENT CARD IMPROVED STATES ════════════════════════════ */
+.agent-card.running{box-shadow:0 0 0 1px rgba(74,158,255,0.35),0 4px 24px rgba(74,158,255,0.15)!important}
+.agent-card.done{box-shadow:0 0 0 1px rgba(61,214,140,0.25)!important}
+
+/* ══ PROGRESS & TAB POLISH ══════════════════════════════════ */
+.progress-fill{background:linear-gradient(90deg,var(--blue) 0%,var(--purple) 100%)}
+.tab.active{background:linear-gradient(135deg,var(--blue) 0%,#2d7fff 100%);border-color:var(--blue);box-shadow:0 2px 8px rgba(74,158,255,0.35);color:#fff!important}
+
+/* ══ TABLE POLISH ═══════════════════════════════════════════ */
+.tbl-wrap{border-radius:8px;border:1px solid var(--border);overflow:hidden}
+.tbl tbody tr:nth-child(even) td{background:rgba(255,255,255,0.018)}
+.tbl thead{position:sticky;top:0;z-index:1}
+.tbl th{background:rgba(26,29,36,0.97);backdrop-filter:blur(8px)}
+
+/* ══ MODAL EXPORT BUTTONS ═══════════════════════════════════ */
+.modal-action-btn.word{border-color:#2d7dd4;color:#2d7dd4}
+.modal-action-btn.word:hover{background:rgba(45,125,212,0.12)}
+.modal-action-btn.excel{border-color:#1d7a4f;color:#1d7a4f}
+.modal-action-btn.excel:hover{background:rgba(29,122,79,0.12)}
+.modal-action-btn.slides{border-color:#c85820;color:#c85820}
+.modal-action-btn.slides:hover{background:rgba(200,88,32,0.12)}
+
+/* ══ PHASE LABEL LINES ══════════════════════════════════════ */
+.phase-label{display:flex;align-items:center;gap:8px}
+.phase-label::before,.phase-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ══ PRINT STYLES ═══════════════════════════════════════════ */
+@media print{
+  .controls-row,.progress-wrap,.error-banner,.live-badge,.compare-bar{display:none!important}
+  .btn,.rerun-btn,.expand-btn,.export-dropdown,.raw-toggle,.loc-reasoning-toggle{display:none!important}
+  body{background:#fff!important;color:#111!important;padding:10px}
+  .card,.agent-card,.final-box,.orch-card{background:#fff!important;border:1px solid #ddd!important;box-shadow:none!important;break-inside:avoid}
+  .agent-out{display:block!important}
+  .panel{display:block!important}
+  .tabs{display:none!important}
+  .prose,.tbl td,.tbl th,.agent-name,.agent-role,.bp-prose,.final-prose{color:#111!important}
+  .badge{border:1px solid #ccc}
+  .hmap-cell{color:#111!important}
+  #agentModalOverlay,.gap-detail-overlay,.comp-city-overlay{display:none!important}
+}

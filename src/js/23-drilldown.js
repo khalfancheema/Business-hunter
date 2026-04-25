@@ -3,25 +3,27 @@
 // ══════════════════════════════════════════════════════════
 
 const AGENT_META = {
-  1:  { name:'Demographics',             ico:'👥' },
+  1:  { name:'Demographics',             ico:'📊' },
   2:  { name:'Gap Analysis',             ico:'📈' },
   3:  { name:'Site Selection',           ico:'📍' },
   4:  { name:'Real Estate',              ico:'🏢' },
   5:  { name:'Compliance',               ico:'⚖️' },
   6:  { name:'Competitive Intelligence', ico:'🔍' },
-  7:  { name:'Financial Projections',    ico:'💰' },
+  7:  { name:'Financial Feasibility',    ico:'💰' },
   8:  { name:'Executive Summary',        ico:'📋' },
-  9:  { name:'Business Plan',            ico:'📄' },
-  10: { name:'Marketing Strategy',       ico:'📣' },
+  9:  { name:'Business Plan',            ico:'🏦' },
+  10: { name:'Project Plan',             ico:'🗂️' },
   11: { name:'Market Map',               ico:'🗺️' },
-  12: { name:'Risk Assessment',          ico:'⚠️' },
+  12: { name:'Grant & Funding',          ico:'💵' },
   13: { name:'Competitor Deep-Dive',     ico:'🎯' },
   14: { name:'Code Review',              ico:'🔬' },
-  15: { name:'QA Report',               ico:'✅' },
+  15: { name:'QA & Testing',             ico:'✅' },
+  16: { name:'Build vs Buy',             ico:'🏗️' },
+  17: { name:'Sources & Citations',      ico:'📚' },
 };
 
 function injectExpandButtons() {
-  for (let n = 1; n <= 15; n++) {
+  for (let n = 1; n <= 17; n++) {
     const head = document.querySelector('#card-' + n + ' .agent-head');
     if (!head || head.querySelector('.expand-btn')) continue;
     const btn = document.createElement('button');
@@ -63,9 +65,68 @@ function openAgentModal(n) {
   }
   document.getElementById('modalSaveBtn').style.display  = data ? '' : 'none';
   document.getElementById('modalPrintBtn').style.display = (srcOut && srcOut.classList.contains('show')) ? '' : 'none';
+
+  // Inject reasoning card if agent data has reasoning fields
+  if (data) {
+    var reasoningHtml = _buildModalReasoningCard(data, n);
+    if (reasoningHtml) {
+      var reasoningDiv = document.createElement('div');
+      reasoningDiv.innerHTML = reasoningHtml;
+      body.insertBefore(reasoningDiv, body.firstChild);
+    }
+  }
+
   overlay.dataset.agentN = n;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function _buildModalReasoningCard(rawData, agentN) {
+  var d;
+  try { d = typeof rawData === 'string' ? JSON.parse(rawData) : rawData; } catch(e) { return ''; }
+  if (!d || typeof d !== 'object') return '';
+
+  // Look for top-level reasoning fields
+  var reasoningFields = ['reasoning', 'why_chosen', 'selection_rationale', 'recommendation_reasoning',
+    'rationale', 'decision_rationale', 'why', 'key_insights', 'go_no_go_reasoning',
+    'summary_reasoning', 'recommendation_rationale'];
+  var found = null;
+  var foundKey = '';
+  for (var i = 0; i < reasoningFields.length; i++) {
+    if (d[reasoningFields[i]]) { found = d[reasoningFields[i]]; foundKey = reasoningFields[i]; break; }
+  }
+  // Also check nested recommendation object
+  if (!found && d.recommendation && typeof d.recommendation === 'object') {
+    for (var j = 0; j < reasoningFields.length; j++) {
+      if (d.recommendation[reasoningFields[j]]) {
+        found = d.recommendation[reasoningFields[j]]; foundKey = reasoningFields[j]; break;
+      }
+    }
+  }
+  if (!found) return '';
+
+  var items = [];
+  if (typeof found === 'string') {
+    items = found.split(/\.\s+/).filter(function(s){ return s.trim().length > 20; }).slice(0, 6);
+  } else if (Array.isArray(found)) {
+    items = found.slice(0, 6).map(function(x){ return typeof x === 'string' ? x : JSON.stringify(x); });
+  }
+  if (!items.length) return '';
+
+  var itemsHtml = items.map(function(item) {
+    return '<div class="reasoning-item">' + item.trim().replace(/\.$/, '') + '.</div>';
+  }).join('');
+
+  // Check for sources
+  var sources = d.reasoning_sources || d.data_sources || d.sources_used || null;
+  var sourcesHtml = '';
+  if (sources && Array.isArray(sources) && sources.length) {
+    sourcesHtml = '<div class="reasoning-source">📚 Sources: ' + sources.slice(0,5).join(' · ') + '</div>';
+  }
+
+  return '<div class="reasoning-card" style="margin-bottom:16px">' +
+    '<div class="reasoning-title">💡 Why This Recommendation</div>' +
+    itemsHtml + sourcesHtml + '</div>';
 }
 
 function closeAgentModal() {

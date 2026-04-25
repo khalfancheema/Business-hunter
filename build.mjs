@@ -46,6 +46,7 @@ const JS_FILES = [
   'src/js/26-agent-fin-subs.js', // Financial Feasibility (replaces runAgent7)
   'src/js/27-agent-buildvsbuy.js', // Build vs Buy (Agent 16)
   'src/js/28-agent-sources.js',   // Sources & Citations (Agent 17)
+  'src/js/29-export.js',          // Per-agent export (PDF/Word/Excel/Slides) + industry comparison
 ];
 
 const CSS_FILES = ['src/styles.css'];

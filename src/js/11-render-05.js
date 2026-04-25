@@ -1,7 +1,7 @@
 async function runAgent3(a1,a2,a5) {
   setDot(3,'running');
   const ind=industry();
-  const sys=`You are a ${ind.unit} site selection consultant. Respond JSON only.`;
+  const sys=`You are a ${ind.unit} site selection consultant with deep knowledge of demographics, zoning, and real estate. You cite specific data sources. Respond JSON only.`;
   const usr=`Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
 DEMOGRAPHICS: ${ctx(a1,['summary','cities'])}
@@ -23,7 +23,9 @@ Return ONLY:
       "ideal_property_type":"Freestanding commercial, end-cap retail, or former restaurant",
       "zoning_needed":"C-1 or C-2",
       "pros":["Fastest-growing ZIP in Gwinnett","Premium income demographics","Only 2 competitors within 2 miles","Strong town center foot traffic"],
-      "cons":["Higher lease rates","Land becoming scarce","Premium build-out expectations"]
+      "cons":["Higher lease rates","Land becoming scarce","Premium build-out expectations"],
+      "reasoning":"Ranked #1 because Census ACS 2022 shows 3,900 children under 5 within 2 miles (highest in search area) against only 2 licensed competitors with combined capacity of ~180. Median household income of $112,000 supports premium tuition. Suwanee is the fastest-growing ZIP in Gwinnett County (7.2% 5yr growth per Census). The Peachtree Pkwy corridor has 28,000+ daily traffic count and mixed-use zoning actively welcomes childcare tenants. Risk is Low because zoning is already permitted use and the city has a proactive business licensing office.",
+      "reasoning_sources":["US Census Bureau ACS 2022 (B01001, B19013)","Georgia CAPS licensing database","Google Maps competitor search","Gwinnett County GIS traffic data","Suwanee City business development office"]
     },
     {
       "rank":2,"city":"Sugar Hill","submarket":"Sugar Hill Town Center / Ga-20 corridor",
@@ -99,26 +101,41 @@ Return ONLY:
     $('3-s-t').textContent=d.summary;
     // Option cards
     const ind3=industry();
-    const colors=['var(--green)','var(--blue)','var(--amber)','var(--purple)','var(--teal)'];
-    let cards=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">`;
+    const colors=['var(--green)','var(--blue)','var(--amber)','var(--purple)','var(--teal)','var(--pink)'];
+    let cards=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">`;
     (d.locations||[]).forEach((loc,i)=>{
       const pRate=(loc.target_infant_tuition||loc.target_primary_rate||0).toLocaleString();
       const sRate=(loc.target_preschool_tuition||loc.target_secondary_rate||0).toLocaleString();
-      cards+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px">
-        <div style="font-size:10px;font-weight:700;color:${colors[i]};font-family:'Syne',sans-serif;margin-bottom:4px">#${loc.rank} — ${loc.risk} Risk</div>
-        <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:2px">${loc.city}</div>
+      const col=colors[i]||'var(--muted)';
+      const rid=`loc-r-${i}`;
+      const prosHtml=(loc.pros||[]).map(p=>`<div style="font-size:10px;color:var(--green);margin-bottom:2px;display:flex;gap:4px"><span>+</span><span>${p}</span></div>`).join('');
+      const consHtml=(loc.cons||[]).map(p=>`<div style="font-size:10px;color:var(--red);margin-bottom:2px;display:flex;gap:4px"><span>−</span><span>${p}</span></div>`).join('');
+      const sourcesHtml=loc.reasoning_sources?`<div class="reasoning-source">📚 ${loc.reasoning_sources.join(' · ')}</div>`:'';
+      const reasoningHtml=loc.reasoning?`
+        <div class="loc-reasoning-body" id="${rid}">
+          <div class="reasoning-card" style="margin:0">
+            <div class="reasoning-title">💡 Why #${loc.rank}?</div>
+            ${loc.reasoning.split(/\.\s+/).filter(s=>s.trim()).map(s=>`<div class="reasoning-item">${s.trim().replace(/\.$/,'')}.</div>`).join('')}
+            ${sourcesHtml}
+          </div>
+        </div>
+        <button class="loc-reasoning-toggle" onclick="(function(btn,id){const el=document.getElementById(id);el.classList.toggle('open');btn.textContent=el.classList.contains('open')?'▲ Hide Reasoning':'💡 Why #${loc.rank}? (show reasoning)';})(this,'${rid}')">💡 Why #${loc.rank}? (show reasoning)</button>
+      `:''
+      cards+=`<div class="loc-card">
+        <div style="font-size:10px;font-weight:700;color:${col};font-family:'Syne',sans-serif;margin-bottom:4px">#${loc.rank} · ${loc.risk} Risk · ${loc.timeline_months} mo</div>
+        <div style="font-size:15px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:1px">${loc.city}</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${loc.submarket}</div>
-        <div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:${colors[i]};margin-bottom:10px">${loc.overall_score}<span style="font-size:14px">/100</span></div>
+        <div style="font-size:30px;font-weight:700;font-family:'Syne',sans-serif;color:${col};margin-bottom:10px">${loc.overall_score}<span style="font-size:13px;color:var(--faint)">/100</span></div>
         <div style="display:grid;gap:4px;font-size:11px;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Capacity</span><strong>${loc.capacity_recommended}</strong></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">${ind3.price_label_primary}</span><strong>$${pRate}/mo</strong></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">${ind3.price_label_secondary}</span><strong>$${sRate}/mo</strong></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Est. rent</span><strong>${loc.est_monthly_rent_range}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Kids &lt;5 nearby</span><strong>${(loc.children_under5_nearby||0).toLocaleString()}</strong></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Competitors 2mi</span><strong>${loc.competitors_within_2mi}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Timeline</span><strong>${loc.timeline_months} mo</strong></div>
         </div>
-        <div style="font-size:10px;color:var(--green);margin-bottom:3px">+ ${(loc.pros||[''])[0]}</div>
-        <div style="font-size:10px;color:var(--red)">− ${(loc.cons||[''])[0]}</div>
+        <div style="margin-bottom:8px">${prosHtml}${consHtml}</div>
+        ${reasoningHtml}
       </div>`;
     });
     cards+=`</div>`;

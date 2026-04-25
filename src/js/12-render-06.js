@@ -1,35 +1,39 @@
 async function runAgent4(a3,a5) {
   setDot(4,'running');
   const ind=industry();
-  const sys=`You are a commercial real estate analyst. Search LoopNet, BizBuySell, CoStar, and Crexi for real available listings. Respond JSON only.`;
-  const usr=`Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}) near ZIP ${zip()}.
+  const sys=`You are a commercial real estate analyst. Search LoopNet, BizBuySell, CoStar, Crexi, Zillow Commercial, and PropertyShark for real available listings. Always construct the most specific search URL possible with filters (city, sqft range, property type). Respond JSON only.`;
+  const usr=`Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}, sqft needed: ${ind.real_estate}) near ZIP ${zip()}.
 
-Search these sites:
-1. loopnet.com — search "${ind.unit} space for lease near ${zip()}", "commercial space for lease near ZIP ${zip()}", "retail space near ${zip()}"
-2. bizbuysell.com — search for ${ind.unit} businesses for sale near ZIP ${zip()}
-3. crexi.com — search commercial properties near ZIP ${zip()}
-4. Search "${ind.unit} real estate for lease near ${zip()} site:loopnet.com"
-5. Contact local economic development authority — many municipalities actively recruit ${ind.unit} businesses
+CRITICAL: For each listing, try to find the ACTUAL listing URL (e.g. https://www.loopnet.com/listing/123-main-st/12345678/). If you find a specific listing, use that URL. If not, construct the most filtered search URL possible.
+
+Search these sources:
+1. loopnet.com — search "commercial space lease ${zip()} ${ind.unit}" → try to find specific listing pages. Construct filtered URL: https://www.loopnet.com/search/commercial-real-estate/ZIP/for-lease/?ListingType=1&MinSize=MIN&MaxSize=MAX
+2. bizbuysell.com — search ${ind.unit} businesses for sale near ${zip()} with city filter
+3. crexi.com — https://www.crexi.com/lease/properties?address=CITY+STATE with sqft and type filters
+4. zillow.com/commercial — commercial listings near ${zip()}
+5. propertyshark.com — commercial properties near ${zip()}
+6. costar.com — if accessible
+7. Local economic development authority and county GIS/property records
+8. Search: "commercial space for lease ${zip()} site:loopnet.com" and "FOR LEASE commercial ${zip()}"
 
 Regulatory requirements: ${ctx(a5,['summary','requirements'])}
-Top locations recommended: ${ctx(a3,['summary','locations'])}
+Top recommended locations: ${ctx(a3,['summary','locations'])}
 
 Property requirements: ${ind.real_estate}
-
-For each listing found, include the real URL. If you cannot find a specific listing, provide the search URL for that platform. Include broker contacts where available.
 
 Return ONLY:
 {
   "summary": "3-4 sentence overview of the commercial real estate market for a ${ind.unit} in this area",
   "search_urls": {
-    "loopnet": "https://www.loopnet.com/search/commercial-real-estate/duluth-ga/for-lease/",
-    "loopnet_barrow": "https://www.loopnet.com/search/commercial-real-estate/winder-ga/for-lease/",
-    "bizbuysell": "https://www.bizbuysell.com/georgia/child-care-businesses-for-sale/",
-    "crexi": "https://www.crexi.com/lease/properties?address=Gwinnett%20County%2C%20GA",
-    "crexi_barrow": "https://www.crexi.com/lease/properties?address=Barrow%20County%2C%20GA",
+    "loopnet_primary": "https://www.loopnet.com/search/commercial-real-estate/ZIP-CITY/for-lease/?ListingType=1&MinSize=5000&MaxSize=15000",
+    "loopnet_secondary": "https://www.loopnet.com/search/commercial-real-estate/nearby-city/for-lease/",
+    "bizbuysell": "https://www.bizbuysell.com/STATE/INDUSTRY-businesses-for-sale/",
+    "crexi_primary": "https://www.crexi.com/lease/properties?address=PRIMARY+CITY+STATE&minSqft=5000&maxSqft=15000",
+    "crexi_secondary": "https://www.crexi.com/lease/properties?address=SECONDARY+CITY+STATE",
+    "zillow_commercial": "https://www.zillow.com/commercial/",
     "costar": "https://www.costar.com/",
-    "gwinnett_gis": "https://www.gwinnettcounty.com/web/gwinnett/departments/planningdevelopment/zoningdivision",
-    "barrow_planning": "https://www.barrowga.org/planning-zoning/"
+    "county_gis": "https://www.COUNTY.gov/planning",
+    "economic_dev": "https://www.CITY.gov/economic-development"
   },
   "listings": [
     {
@@ -150,8 +154,20 @@ Return ONLY:
     // By city table
     let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Avg $/sqft</th><th>Est. Listings</th><th>Best Zoning</th><th>Market Note</th><th>Search</th></tr></thead><tbody>`;
     (d.by_city_summary||[]).forEach(c=>{
-      const searchUrl=d.search_urls?.loopnet||'https://www.loopnet.com';
-      tbl+=`<tr><td><strong>${c.city}</strong></td><td>$${c.avg_rent_sqft}/sqft</td><td>~${c.available_listings_est}</td><td><span class="badge b-blue">${c.best_zoning}</span></td><td style="font-size:11px;color:var(--muted)">${c.market_note}</td><td><a href="${searchUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 8px">↗ Search</a></td></tr>`;
+      const citySlug=encodeURIComponent((c.city||'').toLowerCase().replace(/[^a-z0-9]/g,'-'));
+      const loopUrl=`https://www.loopnet.com/search/commercial-real-estate/${citySlug}/for-lease/?ListingType=1`;
+      const crexiUrl=`https://www.crexi.com/lease/properties?address=${encodeURIComponent(c.city||'')}`;
+      tbl+=`<tr>
+        <td><strong>${c.city}</strong></td>
+        <td>$${c.avg_rent_sqft}/sqft</td>
+        <td>~${c.available_listings_est}</td>
+        <td><span class="badge b-blue">${c.best_zoning}</span></td>
+        <td style="font-size:11px;color:var(--muted)">${c.market_note}</td>
+        <td>
+          <a href="${loopUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 7px">↗ LoopNet</a>
+          <a href="${crexiUrl}" target="_blank" class="link-btn" style="font-size:10px;padding:3px 7px;margin-left:3px">↗ Crexi</a>
+        </td>
+      </tr>`;
     });
     tbl+=`</tbody></table>`;
     $('4-t-c').innerHTML=tbl;
