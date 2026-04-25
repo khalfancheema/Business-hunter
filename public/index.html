@@ -1604,47 +1604,206 @@ function renderHmap(containerId, cities, dims, onCellClick) {
 async function runAgent1() {
   setDot(1,'running');
   const ind=industry();
-  const sys=`You are a demographics and market analyst with expertise in US Census ACS data and GIS mapping. You are researching demand signals for a ${ind.unit} business. Always respond with a JSON object only.`;
+  const sys=`You are a senior demographics and market research analyst with deep expertise in US Census data, GIS mapping, labor economics, and consumer demand modeling. You source data from multiple authoritative federal, state, and commercial databases. Always respond with a JSON object only.`;
 
-  const usr=`Search US Census Bureau ACS 2022 5-year estimates for cities within ${radius()} miles of ZIP ${zip()}.
+  const usr=`Conduct a comprehensive demographic research sweep for a ${ind.unit} business opportunity within ${radius()} miles of ZIP ${zip()}.
 
 Industry: ${ind.label}. Revenue unit: ${ind.revenue_unit}.
 
-Identify the top cities by population, income, traffic, and growth. For a ${ind.unit}, the most relevant demand signals are: total population, median household income, labor force participation, population growth 2019–2023, household counts, and daily traffic volume.
+PRIMARY DATA SOURCES — search and cite as many of the following as possible:
+1. US Census Bureau ACS 2023 1-year & 2022 5-year estimates
+   - Table B01001 (sex by age), B01003 (total population)
+   - Table B19013 (median household income), B19001 (income distribution)
+   - Table B23025 (employment status), B23022 (employment by sex/age)
+   - Table B25001 (housing units), B25003 (tenure — own vs rent)
+   - Table S1101 (households and families), S0901 (children characteristics)
+   - Table B08303 (travel time to work — commute demand proxy)
+   - Table B14001 (school enrollment), B14003 (school type)
+2. Census Bureau Population Estimates Program (PEP) — annual population estimates 2020–2023
+3. Census TIGER/Line shapefiles + ZIP Code Tabulation Areas (ZCTAs) for geographic precision
+4. BLS Quarterly Census of Employment and Wages (QCEW) — local industry employment levels
+5. BLS Consumer Expenditure Survey (CES) — spending on ${ind.units} / relevant services by income tier
+6. BLS Occupational Employment and Wage Statistics (OEWS) — working parent occupations in area
+7. HUD Location Affordability Portal — housing cost burden, who can afford premium services
+8. EPA Smart Location Database — walkability index, transit access, employment accessibility score
+9. FHWA / state DOT Annual Average Daily Traffic (AADT) counts near major corridors
+10. National Center for Education Statistics (NCES) — public school enrollment as demand proxy
+11. State vital statistics / birth records — annual birth rates by county (lagging demand indicator)
+12. FRED (Federal Reserve Economic Data) — local unemployment rate, GDP, housing starts for area
+13. Esri / ArcGIS Business Analyst Community Profile (if accessible) — lifestyle segmentation
+14. NAR / Realtor.com migration data — net in-migration by metro area
+15. USDA ERS rural-urban commuting area (RUCA) codes — urban density classification
 
-Return ONLY this JSON (use real data, note "est." if estimated):
-{"data_sources":["US Census ACS 2022 5-year estimates","ACS Table B19013","local GIS data"],"summary":"4-5 sentence narrative on demographic opportunity for a ${ind.unit} in this area","cities":[{"name":"City A","county":"County","distance_miles":10,"pop_total":82000,"pop_under5":4800,"pop_under5_pct":5.8,"median_hh_income":112000,"labor_force_pct":68,"pop_growth_pct_5yr":4.2,"households":28000,"working_parents_est_pct":71,"demand_score":88,"data_note":"ACS 2022 est."},{"name":"City B","county":"County","distance_miles":28,"pop_total":18000,"pop_under5":1400,"pop_under5_pct":7.8,"median_hh_income":52000,"labor_force_pct":65,"pop_growth_pct_5yr":14,"households":6800,"working_parents_est_pct":74,"demand_score":72,"data_note":"ACS 2022 est."}],"age_breakdown_county":[{"age_group":"Segment 1","gwinnett_pop":7200,"fulton_pop":5100,"gap_capacity":380},{"age_group":"Segment 2","gwinnett_pop":14800,"fulton_pop":10400,"gap_capacity":620}]}`;
+SEARCH STRATEGY:
+- Search "US Census ACS ZIP ${zip()} population income"
+- Search "Census QuickFacts [county name]"
+- Search "BLS employment [city/county name] QCEW"
+- Search "FRED [city/metro] economic data"
+- Search "birth rate [county name] vital statistics [state]"
+- Search "[city name] school enrollment NCES"
+- For each city within ${radius()} miles, find ACTUAL census tract / place-level data
+
+KEY DEMAND SIGNALS FOR A ${ind.unit.toUpperCase()}:
+- ${ind.capacity_label} population density (children under 5 or primary demographic)
+- Median household income and income tier distribution
+- Dual-income / working parent household percentage
+- Labor force participation rate (especially women 25–44)
+- Population growth rate 2019–2023 (momentum indicator)
+- Household formation rate (new construction permits as proxy)
+- Daily traffic count on primary commercial corridors
+- School-age population as pipeline / future demand
+- Birth rate trend (leading indicator, 2–3 yr lag)
+- Housing affordability index (determines ability to pay)
+
+Return ONLY this JSON (use real data from the sources above, note source and "est." if estimated):
+{
+  "data_sources": [
+    "US Census ACS 2023 1-year estimates (Tables B01001, B19013, B23025, B25001)",
+    "US Census ACS 2022 5-year estimates (Tables S0901, B08303, B14001)",
+    "Census Population Estimates Program 2020–2023",
+    "BLS QCEW Q3 2023 — county-level employment",
+    "BLS Consumer Expenditure Survey 2022",
+    "HUD Location Affordability Portal",
+    "FHWA AADT traffic counts",
+    "NCES school enrollment data 2022–23",
+    "State vital statistics birth records 2022",
+    "FRED economic data — local metro",
+    "NAR migration trends 2023"
+  ],
+  "summary": "5-sentence narrative citing specific numbers and sources on demographic opportunity for a ${ind.unit} in this area",
+  "metro_overview": {
+    "metro_name": "Atlanta-Sandy Springs-Alpharetta MSA",
+    "total_pop_metro": 6200000,
+    "pop_growth_pct_1yr": 1.8,
+    "median_hh_income_metro": 78000,
+    "unemployment_rate_pct": 3.4,
+    "net_migration_annual": 45000,
+    "birth_rate_per_1000": 11.2,
+    "source": "Census PEP 2023 / FRED / Vital Statistics"
+  },
+  "cities": [
+    {
+      "name": "City A", "county": "County", "distance_miles": 10,
+      "pop_total": 82000, "pop_under5": 4800, "pop_under5_pct": 5.8,
+      "median_hh_income": 112000, "income_distribution": {"under_50k_pct": 12, "50_100k_pct": 28, "over_100k_pct": 60},
+      "labor_force_pct": 68, "women_25_44_lfp_pct": 74,
+      "pop_growth_pct_5yr": 4.2, "pop_growth_pct_1yr": 1.1,
+      "households": 28000, "owner_occupied_pct": 72, "renter_pct": 28,
+      "working_parents_est_pct": 71, "dual_income_hh_est_pct": 64,
+      "avg_commute_minutes": 28,
+      "school_enrollment_k12": 14200,
+      "annual_births_county_est": 1800,
+      "traffic_aadt_main_corridor": 32000,
+      "walkability_score": 42,
+      "housing_affordability_index": 88,
+      "demand_score": 88,
+      "data_note": "ACS 2022 5yr est. + PEP 2023"
+    },
+    {
+      "name": "City B", "county": "County", "distance_miles": 28,
+      "pop_total": 18000, "pop_under5": 1400, "pop_under5_pct": 7.8,
+      "median_hh_income": 52000, "income_distribution": {"under_50k_pct": 45, "50_100k_pct": 38, "over_100k_pct": 17},
+      "labor_force_pct": 65, "women_25_44_lfp_pct": 68,
+      "pop_growth_pct_5yr": 14, "pop_growth_pct_1yr": 3.2,
+      "households": 6800, "owner_occupied_pct": 58, "renter_pct": 42,
+      "working_parents_est_pct": 74, "dual_income_hh_est_pct": 55,
+      "avg_commute_minutes": 34,
+      "school_enrollment_k12": 3800,
+      "annual_births_county_est": 620,
+      "traffic_aadt_main_corridor": 14000,
+      "walkability_score": 28,
+      "housing_affordability_index": 112,
+      "demand_score": 72,
+      "data_note": "ACS 2022 5yr est. + Vital Stats 2022"
+    }
+  ],
+  "age_breakdown_county": [
+    {"age_group": "Segment 1", "gwinnett_pop": 7200, "fulton_pop": 5100, "gap_capacity": 380, "source": "ACS B01001"},
+    {"age_group": "Segment 2", "gwinnett_pop": 14800, "fulton_pop": 10400, "gap_capacity": 620, "source": "ACS B01001"}
+  ],
+  "labor_market_summary": {
+    "top_employer_sectors": ["Healthcare", "Professional Services", "Technology", "Education"],
+    "median_wage_primary_occupation": 72000,
+    "female_labor_force_pct_county": 59,
+    "source": "BLS QCEW + OEWS 2023"
+  },
+  "housing_market_summary": {
+    "median_home_value": 420000,
+    "new_permits_issued_2023": 3200,
+    "yoy_permit_growth_pct": 8.4,
+    "source": "Census Building Permits Survey 2023"
+  }
+}`;
 
   try {
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 1 fallback'); d=getFallback1(); }
     R.a1=d;
-    $('1-s-t').textContent=d.summary+(d.data_sources?'\n\nSources: '+d.data_sources.join(' · '):'');
-    // Heatmap
+
+    // Summary + sources
+    let summaryHtml = d.summary || '';
+    if (d.data_sources && d.data_sources.length) {
+      summaryHtml += '\n\n📚 Sources used: ' + d.data_sources.join(' · ');
+    }
+    // Metro overview panel
+    if (d.metro_overview) {
+      const m = d.metro_overview;
+      summaryHtml += `\n\n🌆 Metro: ${m.metro_name||''} · Pop ${(m.total_pop_metro||0).toLocaleString()} · Growth ${m.pop_growth_pct_1yr||'—'}%/yr · Median HHI $${((m.median_hh_income_metro||0)/1000).toFixed(0)}k · Unemployment ${m.unemployment_rate_pct||'—'}% · Net migration +${(m.net_migration_annual||0).toLocaleString()}/yr · Birth rate ${m.birth_rate_per_1000||'—'}/1k (${m.source||''})`;
+    }
+    if (d.labor_market_summary) {
+      const l = d.labor_market_summary;
+      summaryHtml += `\n\n💼 Labor market: Top sectors — ${(l.top_employer_sectors||[]).join(', ')} · Female LFP ${l.female_labor_force_pct_county||'—'}% · Median wage $${((l.median_wage_primary_occupation||0)/1000).toFixed(0)}k (${l.source||''})`;
+    }
+    if (d.housing_market_summary) {
+      const h = d.housing_market_summary;
+      summaryHtml += `\n\n🏠 Housing: Median value $${((h.median_home_value||0)/1000).toFixed(0)}k · ${(h.new_permits_issued_2023||0).toLocaleString()} new permits · ${h.yoy_permit_growth_pct||'—'}% YoY growth (${h.source||''})`;
+    }
+    $('1-s-t').textContent=summaryHtml;
+
+    // Heatmap — now with more dimensions
     const ind=industry();
     const cities1=d.cities||[];
     renderHmap('1-h-c',cities1,[
       {key:'pop_under5',label:ind.capacity_label.split(' ')[0]+' Pop',fmt:v=>v.toLocaleString()},
       {key:'median_hh_income',label:'Median Income',fmt:v=>'$'+(v/1000).toFixed(0)+'k'},
-      {key:'working_parents_est_pct',label:'Labor Force %',fmt:v=>v+'%'},
+      {key:'dual_income_hh_est_pct',label:'Dual Income %',fmt:v=>v+'%'},
       {key:'pop_growth_pct_5yr',label:'Pop Growth 5yr',fmt:v=>v+'%'},
+      {key:'annual_births_county_est',label:'Annual Births',fmt:v=>(v||0).toLocaleString()},
+      {key:'traffic_aadt_main_corridor',label:'Traffic AADT',fmt:v=>(v||0).toLocaleString()},
       {key:'demand_score',label:'Demand Score',fmt:v=>v+'/100'}
     ]);
-    // Chart
+
+    // Chart — 3 datasets: children under 5, dual-income HHs, demand score
     killChart('ch-1');
     const ctx=$('ch-1').getContext('2d');
     charts['ch-1']=new Chart(ctx,{type:'bar',data:{
       labels:cities1.map(c=>c.name),
       datasets:[
         {label:'Children Under 5',data:cities1.map(c=>c.pop_under5||0),backgroundColor:'rgba(74,158,255,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y'},
+        {label:'Annual Births (est.)',data:cities1.map(c=>c.annual_births_county_est||0),backgroundColor:'rgba(167,139,250,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y'},
         {label:'Demand Score',data:cities1.map(c=>c.demand_score||0),backgroundColor:'rgba(61,214,140,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y2'}
       ]
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{x:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}},y:{ticks:{color:'#4a9eff'},grid:{color:'#2a2d35'},position:'left'},y2:{ticks:{color:'#3dd68c'},grid:{display:false},position:'right',min:0,max:100}}}});
-    // Table
-    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>County</th><th>Dist</th><th>Children &lt;5</th><th>Median Income</th><th>Labor Force</th><th>Growth 5yr</th><th>Demand</th><th>Notes</th></tr></thead><tbody>`;
+
+    // Rich city table with expanded columns
+    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>County</th><th>Dist</th><th>Kids&lt;5</th><th>Income</th><th>Dual Income%</th><th>LFP%</th><th>Growth 5yr</th><th>Births/yr</th><th>AADT</th><th>School Enroll.</th><th>Demand</th><th>Source</th></tr></thead><tbody>`;
     cities1.forEach(c=>{
       const b=(c.demand_score||0)>=80?'b-green':(c.demand_score||0)>=65?'b-amber':'b-red';
-      tbl+=`<tr><td><strong>${c.name}</strong></td><td>${c.county}</td><td>${c.distance_miles}mi</td><td>${(c.pop_under5||0).toLocaleString()}</td><td>$${((c.median_hh_income||0)/1000).toFixed(0)}k</td><td>${c.labor_force_pct||'—'}%</td><td>${c.pop_growth_pct_5yr||'—'}%</td><td><span class="badge ${b}">${c.demand_score}</span></td><td style="font-size:10px;color:var(--faint)">${c.data_note||''}</td></tr>`;
+      tbl+=`<tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.county||'—'}</td>
+        <td>${c.distance_miles||'—'}mi</td>
+        <td>${(c.pop_under5||0).toLocaleString()}</td>
+        <td>$${((c.median_hh_income||0)/1000).toFixed(0)}k</td>
+        <td>${c.dual_income_hh_est_pct||'—'}%</td>
+        <td>${c.labor_force_pct||'—'}%</td>
+        <td>${c.pop_growth_pct_5yr||'—'}%</td>
+        <td>${(c.annual_births_county_est||0).toLocaleString()}</td>
+        <td>${(c.traffic_aadt_main_corridor||0).toLocaleString()}</td>
+        <td>${(c.school_enrollment_k12||0).toLocaleString()}</td>
+        <td><span class="badge ${b}">${c.demand_score}</span></td>
+        <td style="font-size:10px;color:var(--faint)">${c.data_note||''}</td>
+      </tr>`;
     });
     tbl+=`</tbody></table>`;
     $('1-t-c').innerHTML=tbl;
@@ -1700,22 +1859,140 @@ Return ONLY:
 async function runAgent6() {
   setDot(6,'running');
   const ind=industry();
-  const sys=`You are a market analyst specializing in competitive intelligence for ${ind.units}. Use Google Maps, Yelp, state licensing databases, and industry association data. Respond with ONLY a valid JSON object — no prose before or after.`;
-  const usr=`Search for ALL existing ${ind.units} within ${radius()} miles of ZIP ${zip()}. Key competitors: ${ind.competitors}.
+  const sys=`You are a senior competitive intelligence analyst specializing in ${ind.unit} market research. You cross-reference commercial directories, state licensing systems, consumer review platforms, accreditation databases, and non-profit financial disclosures to build a complete competitor landscape. Always cite your specific sources and search queries. Respond with ONLY a valid JSON object — no prose before or after.`;
+  const usr=`Conduct a comprehensive competitive intelligence sweep for ALL existing ${ind.units} within ${radius()} miles of ZIP ${zip()}.
+Key national/regional competitors to look for: ${ind.competitors}.
 
-Search sources to use:
-1. Google Maps: "${ind.unit} near ${zip()}" — find actual business names, addresses, ratings
-2. Yelp: search ${ind.units} in each city
-3. State licensing database / CAPS / CCLD / similar
-4. Industry association directories
-5. "${ind.unit} reviews [city name]"
+AUTHORITATIVE DATA SOURCES — search ALL of the following and cite each one used:
 
-For each city, find the ACTUAL names and addresses of competitors. Include gap_score_explanation (WHY this gap score — e.g. "8/10 because only 3 centers serve 2,800 children under 5").
+COMMERCIAL DIRECTORIES & REVIEW PLATFORMS:
+1. Google Maps / Google Business Profile — search "${ind.unit} near ${zip()}" and per-city searches. Note name, address, rating, review count, hours, website.
+2. Yelp Business Search — search "${ind.units} [city, state]" for ratings, reviews, price tier, photos
+3. Winnie.com — childcare-specific aggregator with real availability, tuition, and waitlist data
+4. Care.com provider directory — includes both licensed centers and home daycares
+5. Daycare.com / ChildcareCenter.us — location + rating directories
+6. Facebook Business Pages — community-recommended centers, local parents groups
+7. Nextdoor business listings — hyper-local competitor discovery
+
+STATE LICENSING & REGULATORY DATABASES:
+8. State child care licensing portal (primary source for OFFICIAL licensed capacity):
+   - Georgia: childcare.georgia.gov/find-licensed-program (CAPS — search by county/city)
+   - Texas: hhs.texas.gov/childcare-licensing-search
+   - California: ccld.dss.ca.gov
+   - Florida: childcarefacilities.net
+   - All states: childcareeta.acf.hhs.gov/cclc (federal CCDF gateway)
+9. State QRIS (Quality Rating and Improvement System) database — quality star ratings:
+   - Georgia QRIS: qualityrated.decal.ga.gov
+   - Search "[state] QRIS childcare quality ratings database"
+10. Head Start / Early Head Start locator — eclkc.acf.hhs.gov/center-locator (subsidized competition)
+11. State Pre-K program locator — publicly funded competition for 3–4 year olds
+
+ACCREDITATION & QUALITY DATABASES:
+12. NAEYC accreditation finder — naeyc.org/accreditation/find (gold standard for center quality)
+13. NAC (National Accreditation Commission) database — naccreditation.org
+14. National School-Age Care Alliance (NSACA/COA) accreditation
+15. State QRIS quality level lookup (star ratings 1–5)
+
+NON-PROFIT / FINANCIAL TRANSPARENCY:
+16. ProPublica Nonprofit Explorer — search non-profit center names for Form 990 data (revenue, capacity, executive pay)
+17. Charity Navigator / GuideStar — for non-profit competitors' financials and mission
+
+EMPLOYER-SPONSORED & INSTITUTIONAL COMPETITION:
+18. Hospital / large employer backup care programs (Bright Horizons, KinderCare employer partnerships)
+19. University campus childcare centers (often subsidized — direct competition for staff families)
+20. Military family childcare (MFCC) / CDCs on bases (if near military installation)
+
+PRICING INTELLIGENCE:
+21. NDCP (National Database of Childcare Prices) — DOL Women's Bureau — county median rates
+22. Child Care Aware "Price of Care" annual state report — average rates by age group and care type
+23. State CCDF subsidy rate schedules — market floor pricing
+
+SEARCH QUERIES TO EXECUTE:
+- Google Maps: "${ind.unit} near ${zip()}"
+- Yelp: "${ind.units} in [each city within ${radius()} miles]"
+- State licensing portal: search by county name for all licensed ${ind.units}
+- Winnie.com: search by ZIP code
+- NAEYC: search by ZIP or city
+- Head Start locator: search by county/ZIP
+- Google: "${ind.unit} [city name] reviews 2024"
+- Google: "${ind.unit} [city name] waitlist"
+- Google: "${ind.unit} tuition [city name] [state]"
+
+For each city, find the ACTUAL names and addresses of competitors.
+Include gap_score_explanation (cite specific numbers and sources).
+Note accreditation status, QRIS rating, and whether center is chain/independent/non-profit/faith-based/employer-sponsored.
 
 Return ONLY this JSON:
-{"summary":"4-sentence competitive landscape citing specific numbers and sources","total_licensed_estimated":40,"data_sources":["Google Maps search","State CAPS database","Yelp"],"cities":[{"city":"City A","center_count":8,"avg_monthly_infant":0,"avg_monthly_preschool":0,"avg_rating":4.1,"capacity_utilization_pct":88,"waitlist_common":false,"gap_score":7,"gap_score_explanation":"Gap score 7/10: 8 centers serving estimated 3,400 children under 5 (Census ACS 2022). Utilization 88% with waitlists at 3 of 8 centers. Market is underserved but not critical.","centers":[{"name":"Bright Horizons Suwanee","address":"123 Main St, City A","rating":4.3,"type":"Chain","monthly_rate_est":1900,"google_maps_url":"https://maps.google.com/?q=Bright+Horizons+Suwanee+GA","notes":"120 capacity, waitlist 6 weeks"},{"name":"KinderCare City A","address":"456 Oak Ave, City A","rating":4.0,"type":"Chain","monthly_rate_est":1750,"google_maps_url":"https://maps.google.com/?q=KinderCare+City+A+GA","notes":"90 capacity, currently full"}]},{"city":"City B","center_count":3,"avg_monthly_infant":0,"avg_monthly_preschool":0,"avg_rating":4.3,"capacity_utilization_pct":94,"waitlist_common":true,"gap_score":9,"gap_score_explanation":"Gap score 9/10: only 3 centers for 2,200 children under 5. 94% utilization and all centers report 8+ week waitlists. Critical underservice.","centers":[{"name":"Happy Kids Academy","address":"789 Pine Rd, City B","rating":4.4,"type":"Independent","monthly_rate_est":1650,"google_maps_url":"https://maps.google.com/?q=Happy+Kids+Academy+City+B","notes":"75 capacity, 10-week waitlist"}]}],"top_chains":[{"name":"Competitor A","locations_in_area":4,"monthly_tuition_range":"$1,600–$2,100","rating":4.1,"type":"Chain","market_share_pct":22},{"name":"Competitor B","locations_in_area":2,"monthly_tuition_range":"$1,400–$1,800","rating":3.8,"type":"Independent","market_share_pct":8}]}
+{
+  "summary": "5-sentence competitive landscape citing specific numbers, sources, and market structure",
+  "total_licensed_estimated": 40,
+  "total_accredited_naeyc": 4,
+  "total_head_start_slots": 280,
+  "ndcp_county_median_infant": 1820,
+  "ndcp_county_median_preschool": 1280,
+  "ndcp_source": "DOL NDCP 2022 — [County Name] County",
+  "data_sources": ["Google Maps search '${ind.unit} near ${zip()}'", "State CAPS licensing database (childcare.georgia.gov)", "Winnie.com ZIP search", "NAEYC accreditation finder", "Head Start locator (eclkc.acf.hhs.gov)", "NDCP DOL Women's Bureau 2022", "Yelp business search", "ProPublica Nonprofit Explorer"],
+  "cities": [
+    {
+      "city": "City A",
+      "center_count": 8,
+      "licensed_capacity_total": 640,
+      "chain_count": 3, "independent_count": 4, "nonprofit_count": 1,
+      "naeyc_accredited_count": 2,
+      "qris_avg_stars": 3.4,
+      "head_start_slots_city": 60,
+      "avg_monthly_infant": 1950,
+      "avg_monthly_preschool": 1580,
+      "avg_rating": 4.1,
+      "avg_review_count": 87,
+      "capacity_utilization_pct": 88,
+      "waitlist_common": false,
+      "avg_waitlist_weeks": 4,
+      "gap_score": 7,
+      "gap_score_explanation": "Gap score 7/10: 8 licensed centers (CAPS database) with ~640 total capacity serving est. 3,400 children under 5 (Census ACS 2022). Utilization 88% per Winnie.com availability data. 3 of 8 centers report 4+ week waitlists. Market underserved but not critical. NDCP median infant rate $1,820/mo.",
+      "centers": [
+        {
+          "name": "Bright Horizons Suwanee", "address": "123 Main St, City A, GA",
+          "rating": 4.3, "review_count": 124, "type": "Chain", "nonprofit": false,
+          "capacity_est": 120, "monthly_rate_est": 1950,
+          "accreditation": "NAEYC", "qris_stars": 4,
+          "waitlist_weeks": 6, "currently_enrolling": false,
+          "google_maps_url": "https://maps.google.com/?q=Bright+Horizons+Suwanee+GA",
+          "yelp_url": "https://www.yelp.com/search?find_desc=daycare&find_loc=Suwanee+GA",
+          "winnie_url": "https://winnie.com/place/bright-horizons-suwanee",
+          "notes": "120 capacity, NAEYC accredited, 4-star QRIS, 6-week waitlist for infants"
+        },
+        {
+          "name": "KinderCare City A", "address": "456 Oak Ave, City A, GA",
+          "rating": 4.0, "review_count": 89, "type": "Chain", "nonprofit": false,
+          "capacity_est": 90, "monthly_rate_est": 1780,
+          "accreditation": "None", "qris_stars": 3,
+          "waitlist_weeks": 0, "currently_enrolling": true,
+          "google_maps_url": "https://maps.google.com/?q=KinderCare+City+A+GA",
+          "yelp_url": "", "winnie_url": "",
+          "notes": "90 capacity, currently enrolling, 3-star QRIS"
+        }
+      ]
+    }
+  ],
+  "top_chains": [
+    {
+      "name": "Competitor A", "locations_in_area": 4,
+      "monthly_tuition_range": "$1,600–$2,100", "rating": 4.1,
+      "type": "Chain", "nonprofit": false, "market_share_pct": 22,
+      "naeyc_accredited": true, "employer_partnerships": true,
+      "strengths": "Brand recognition, employer subsidies, NAEYC accreditation",
+      "weaknesses": "Premium pricing, rigid curriculum, long waitlists"
+    }
+  ],
+  "competitive_intensity_score": 6,
+  "market_structure_note": "Fragmented market — 4 chains (55% market share) + 6 independents + 1 non-profit Head Start program"
+}
 
-Replace ALL example values with real search data for ZIP ${zip()}. Use avg_monthly_infant and avg_monthly_preschool as the primary and secondary revenue price points. Revenue model: ${ind.revenue_unit}.`;
+Replace ALL example values with real search data for ZIP ${zip()}.
+Use avg_monthly_infant and avg_monthly_preschool as the primary and secondary revenue price points.
+Revenue model: ${ind.revenue_unit}.
+Be specific about which source each data point came from.`;
   try {
     let d=await claudeJSON(sys,usr);
     // Fallback: if claudeJSON returns null after 3 retries, use baseline data
@@ -1736,7 +2013,17 @@ Replace ALL example values with real search data for ZIP ${zip()}. Use avg_month
       };
     }
     R.a6=d;
-    $('6-s-t').textContent=d.summary;
+
+    // Summary + market meta
+    let summaryText = d.summary || '';
+    if (d.ndcp_county_median_infant) summaryText += `\n\n💰 NDCP Market Rates (${d.ndcp_source||'DOL NDCP'}): Infant $${(d.ndcp_county_median_infant||0).toLocaleString()}/mo · Preschool $${(d.ndcp_county_median_preschool||0).toLocaleString()}/mo`;
+    if (d.total_accredited_naeyc) summaryText += ` · NAEYC accredited: ${d.total_accredited_naeyc}`;
+    if (d.total_head_start_slots) summaryText += ` · Head Start slots: ${d.total_head_start_slots}`;
+    if (d.market_structure_note) summaryText += `\n\n🏢 Market structure: ${d.market_structure_note}`;
+    if (d.competitive_intensity_score != null) summaryText += ` · Competitive intensity: ${d.competitive_intensity_score}/10`;
+    if (d.data_sources && d.data_sources.length) summaryText += '\n\n📚 Sources: ' + d.data_sources.join(' · ');
+    $('6-s-t').textContent=summaryText;
+
     killChart('ch-6');
     const ctx=$('ch-6').getContext('2d');
     const cities6=d.cities||[];
@@ -1745,6 +2032,7 @@ Replace ALL example values with real search data for ZIP ${zip()}. Use avg_month
       labels:cities6.map(c=>c.city),
       datasets:[
         {label:'Centers',data:cities6.map(c=>c.center_count),backgroundColor:'rgba(255,95,95,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y'},
+        {label:'NAEYC Accredited',data:cities6.map(c=>c.naeyc_accredited_count||0),backgroundColor:'rgba(74,158,255,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y'},
         {label:'Gap Score /10',data:cities6.map(c=>c.gap_score),backgroundColor:'rgba(61,214,140,0.7)',borderWidth:0,borderRadius:3,yAxisID:'y2'}
       ]
     },options:{responsive:true,maintainAspectRatio:false,
@@ -1763,12 +2051,23 @@ Replace ALL example values with real search data for ZIP ${zip()}. Use avg_month
       scales:{x:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}},y:{ticks:{color:'#ff5f5f'},grid:{color:'#2a2d35'},position:'left',title:{display:true,text:'# Centers (click bar)',color:'#ff5f5f'}},y2:{ticks:{color:'#3dd68c'},grid:{display:false},position:'right',min:0,max:10,title:{display:true,text:'Gap Score',color:'#3dd68c'}}}
     }});
     const ind6=industry();
-    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Centers</th><th>${ind6.price_label_primary}</th><th>${ind6.price_label_secondary}</th><th>Avg Rating</th><th>Utilization</th><th>Waitlist</th><th>Gap Score</th></tr></thead><tbody>`;
+    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Centers</th><th>Capacity</th><th>NAEYC</th><th>QRIS ★</th><th>${ind6.price_label_primary}</th><th>${ind6.price_label_secondary}</th><th>Avg Rating</th><th>Utilization</th><th>Waitlist</th><th>Gap Score</th></tr></thead><tbody>`;
     cities6.forEach(c=>{
       const gb=c.gap_score>=8?'b-green':c.gap_score>=6?'b-amber':'b-red';
       const pRate=(c.avg_monthly_infant||c.avg_primary_rate||0).toLocaleString();
       const sRate=(c.avg_monthly_preschool||c.avg_secondary_rate||0).toLocaleString();
-      tbl+=`<tr><td><strong>${c.city}</strong></td><td>${c.center_count}</td><td>$${pRate}</td><td>$${sRate}</td><td>${c.avg_rating}★</td><td>${c.capacity_utilization_pct}%</td><td><span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes':'No'}</span></td><td><span class="badge ${gb}">${c.gap_score}/10</span></td></tr>`;
+      tbl+=`<tr>
+        <td><strong>${c.city}</strong></td>
+        <td>${c.center_count}</td>
+        <td>${(c.licensed_capacity_total||0).toLocaleString()}</td>
+        <td>${c.naeyc_accredited_count||0} <span style="font-size:10px;color:var(--faint)">accred.</span></td>
+        <td>${c.qris_avg_stars||'—'}★</td>
+        <td>$${pRate}</td><td>$${sRate}</td>
+        <td>${c.avg_rating}★ <span style="font-size:10px;color:var(--faint)">(${c.avg_review_count||'?'} reviews)</span></td>
+        <td>${c.capacity_utilization_pct}%</td>
+        <td><span class="badge ${c.waitlist_common?'b-amber':'b-blue'}">${c.waitlist_common?'Yes ('+( c.avg_waitlist_weeks||'?')+'wk)':'No'}</span></td>
+        <td><span class="badge ${gb}">${c.gap_score}/10</span></td>
+      </tr>`;
     });
     tbl+=`</tbody></table>`;
     $('6-t-c').innerHTML=tbl;
@@ -1786,21 +2085,37 @@ function openCompCityDetail(idx) {
   const ind6 = industry();
 
   const gapColor = c.gap_score >= 8 ? 'var(--green)' : c.gap_score >= 6 ? 'var(--amber)' : 'var(--red)';
-  const centersHtml = (c.centers || []).map(center =>
-    `<div class="comp-center-card">
+
+  const centersHtml = (c.centers || []).map(center => {
+    const accrBadge = center.accreditation && center.accreditation !== 'None'
+      ? `<span class="badge b-blue" style="font-size:10px;margin-left:4px">${center.accreditation}</span>` : '';
+    const qrisBadge = center.qris_stars
+      ? `<span class="badge b-amber" style="font-size:10px;margin-left:4px">${center.qris_stars}★ QRIS</span>` : '';
+    const enrollBadge = center.currently_enrolling != null
+      ? `<span class="badge ${center.currently_enrolling?'b-green':'b-red'}" style="font-size:10px;margin-left:4px">${center.currently_enrolling?'Enrolling':'Full'}</span>` : '';
+    const waitBadge = center.waitlist_weeks
+      ? `<span class="badge b-amber" style="font-size:10px;margin-left:4px">Wait: ${center.waitlist_weeks}wk</span>` : '';
+    const typeTag = center.nonprofit ? '🏛 Non-profit' : (center.type||'');
+    const links = [
+      center.google_maps_url ? `<a href="${center.google_maps_url}" target="_blank" class="link-btn" style="font-size:11px">↗ Maps</a>` : '',
+      center.yelp_url ? `<a href="${center.yelp_url}" target="_blank" class="link-btn" style="font-size:11px">↗ Yelp</a>` : '',
+      center.winnie_url ? `<a href="${center.winnie_url}" target="_blank" class="link-btn" style="font-size:11px">↗ Winnie</a>` : ''
+    ].filter(Boolean).join(' ');
+    return `<div class="comp-center-card">
       <div class="comp-center-top">
-        <div class="comp-center-name">${center.name || 'Unknown'}</div>
-        <div class="comp-center-rating">${center.rating ? center.rating + '★' : '—'}</div>
+        <div class="comp-center-name">${center.name || 'Unknown'}${accrBadge}${qrisBadge}${enrollBadge}${waitBadge}</div>
+        <div class="comp-center-rating">${center.rating ? center.rating + '★' : '—'} <span style="font-size:10px;color:var(--faint)">(${center.review_count||'?'} reviews)</span></div>
       </div>
       <div class="comp-center-detail">
         📍 ${center.address || '—'}<br>
         💰 Est. ${ind6.price_label_primary}: $${(center.monthly_rate_est||0).toLocaleString()}/mo
-        · Type: ${center.type || '—'}<br>
+        · Capacity: ~${center.capacity_est||'?'}
+        · ${typeTag}<br>
         ${center.notes ? '📝 ' + center.notes : ''}
       </div>
-      ${center.google_maps_url ? `<a href="${center.google_maps_url}" target="_blank" class="link-btn" style="margin-top:8px;font-size:11px">↗ Google Maps</a>` : ''}
-    </div>`
-  ).join('');
+      ${links ? `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${links}</div>` : ''}
+    </div>`;
+  }).join('');
 
   const noCentersMsg = c.centers && c.centers.length ? '' :
     `<div style="font-size:12px;color:var(--muted);padding:12px 0">Individual center data not available. Search Google Maps for "${ind6.unit} in ${c.city}" for a live list.</div>`;
@@ -1817,11 +2132,14 @@ function openCompCityDetail(idx) {
     <div class="comp-city-panel">
       <button class="comp-city-close" onclick="closeCompCityDetail()">✕</button>
       <div style="font-size:22px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px">${c.city}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">${c.center_count} ${ind6.units} · Avg Rating ${c.avg_rating}★ · Utilization ${c.capacity_utilization_pct}%</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">${c.center_count} ${ind6.units} · Avg Rating ${c.avg_rating}★ · Utilization ${c.capacity_utilization_pct}% · NAEYC: ${c.naeyc_accredited_count||0} · QRIS avg: ${c.qris_avg_stars||'—'}★</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
         <div class="gdp-item"><div class="gdp-label">Gap Score</div><div class="gdp-val" style="color:${gapColor}">${c.gap_score}/10</div></div>
         <div class="gdp-item"><div class="gdp-label">${ind6.price_label_primary}</div><div class="gdp-val">$${(c.avg_monthly_infant||0).toLocaleString()}</div></div>
-        <div class="gdp-item"><div class="gdp-label">Waitlist</div><div class="gdp-val">${c.waitlist_common ? '🔴 Yes' : '🟢 No'}</div></div>
+        <div class="gdp-item"><div class="gdp-label">Total Capacity</div><div class="gdp-val">${(c.licensed_capacity_total||0).toLocaleString()}</div></div>
+        <div class="gdp-item"><div class="gdp-label">Waitlist</div><div class="gdp-val">${c.waitlist_common ? '🔴 Yes ('+(c.avg_waitlist_weeks||'?')+'wk)' : '🟢 No'}</div></div>
+        <div class="gdp-item"><div class="gdp-label">Chain / Indep / NP</div><div class="gdp-val" style="font-size:13px">${c.chain_count||0} / ${c.independent_count||0} / ${c.nonprofit_count||0}</div></div>
+        <div class="gdp-item"><div class="gdp-label">Head Start Slots</div><div class="gdp-val">${c.head_start_slots_city||0}</div></div>
       </div>
       ${c.gap_score_explanation ? `<div class="comp-gap-box">💡 ${c.gap_score_explanation}</div>` : ''}
       <div style="font-size:12px;font-weight:700;font-family:'Syne',sans-serif;margin:12px 0 8px">
@@ -1847,41 +2165,132 @@ function closeCompCityDetail() {
 async function runAgent2(a1,a5,a6) {
   setDot(2,'running');
   const ind=industry();
-  const sys=`You are a market gap analyst for small businesses. You cite real data sources. Respond JSON only.`;
-  const usr=`Synthesize a market gap analysis for a ${ind.unit} (capacity: ${capacity()}, budget: $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
+  const sys=`You are a senior market gap analyst specializing in small business feasibility studies. You cross-reference federal, state, and local data sources to quantify supply-demand imbalances. You always cite your sources with specific table numbers, database names, and retrieval methods. Respond JSON only.`;
+  const usr=`Conduct a comprehensive market gap analysis for a ${ind.unit} (capacity: ${capacity()}, budget: $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
-Data sources to reference: US Census Bureau ACS 2022-2023, Georgia CAPS licensing database, Google Maps business search, BLS labor statistics, local county GIS data, state licensing registries.
+AUTHORITATIVE DATA SOURCES — search, reference, and cite as many of the following as possible:
 
-DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'])}
+SUPPLY-SIDE (licensed provider data):
+1. State child care licensing database — search your state's licensing portal for licensed ${ind.units}
+   - Georgia: childcare.georgia.gov/find-licensed-program (CAPS database)
+   - National lookup: childcareeta.acf.hhs.gov or state-specific portals
+2. Child Care Aware of America — state fact sheets & supply estimates (childcareaware.org)
+3. CCDF (Child Care Development Fund) state data — HHS Office of Child Care annual reports
+4. National Database of Childcare Prices (NDCP) — DOL Women's Bureau, county-level pricing & supply
+5. Head Start / Early Head Start locator — eclkc.acf.hhs.gov/center-locator
+6. NAEYC accreditation database — naeyc.org/accreditation/find (quality-accredited centers only)
+7. Google Maps business search — "${ind.unit} near [city, state]" for total count + ratings
+8. Winnie.com — childcare-specific directory with real-time availability
+9. Care.com provider directory — additional unlicensed/in-home providers
+10. Child Care Resource and Referral (CCR&R) agencies — local referral network data
+11. IRS Form 990 data — ProPublica Nonprofit Explorer for non-profit center capacity/revenue
+
+DEMAND-SIDE (population & economic data):
+12. US Census ACS 2023 1-yr & 2022 5-yr estimates — Tables B01001, S0901, B23025, B19013
+13. Census Bureau Population Estimates Program (PEP) 2020–2023 — growth trajectory
+14. State vital statistics — county birth rates 2019–2022 (lagging demand signal)
+15. NCES school enrollment — K-12 enrollment as pipeline demand proxy
+16. BLS Women's Labor Force Participation rates by county (QCEW + LAUS)
+17. Child Trends — childcare access and affordability research
+18. Urban Institute — child care affordability gap maps (urban.org)
+19. National Women's Law Center — childcare shortage data by county
+20. Annie E. Casey Foundation KIDS COUNT Data Center — child well-being & care access by state
+
+PRICING DATA:
+21. NDCP (National Database of Childcare Prices) — median market rates by county for all care types
+22. Child Care Aware of America — annual "Price of Care" state report
+23. State subsidy rate schedules (CCDF) — sets market floor pricing
+
+DEMOGRAPHICS: ${ctx(a1,['summary','cities','metro_overview','labor_market_summary'])}
 REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
-COMPETITORS: ${ctx(a6,['summary','cities','total_licensed_estimated'])}
+COMPETITORS: ${ctx(a6,['summary','cities','total_licensed_estimated','data_sources'])}
+
+SEARCH STRATEGY:
+- Search "child care desert [county name]" (Child Care Aware defines deserts as <1 slot per 3 children)
+- Search "NDCP childcare prices [county name] [state]"
+- Search "licensed childcare [city] [state]" on state licensing portal
+- Search "Head Start [county name]" on eclkc.acf.hhs.gov
+- Search "KIDS COUNT [state] child care" on datacenter.kidscount.org
+- Check if county is a "child care desert" per Child Care Aware criteria
 
 Return ONLY:
-{"summary":"5-sentence gap analysis citing specific data sources","overall_opportunity_score":81,"cities":[{"city":"City A","rank":1,"demand_score":9,"supply_score":3,"gap_score":9,"unserved_children":580,"income_tier":"Premium","recommended_tuition_infant":2050,"recommended_tuition_preschool":1650,"priority":"Critical Opportunity","rationale":"High demand, low competition","why_gap":"Specific 2-3 sentence explanation of WHY this gap exists — cite actual numbers (e.g. '3,900 children under 5 per Census ACS 2022 vs only 8 licensed centers with ~480 total capacity per state CAPS database, leaving an estimated gap of 3,420+ unserved children')","data_points":[{"label":"Children Under 5","value":"3,900","source":"US Census ACS 2022"},{"label":"Licensed Centers","value":"8","source":"State licensing database"},{"label":"Est. Capacity Gap","value":"3,420+","source":"Derived"}],"sources":["US Census Bureau ACS 2022","State licensing/CAPS database","Google Maps search","County GIS data"]},{"city":"City B","rank":2,"demand_score":8,"supply_score":4,"gap_score":7,"unserved_children":310,"income_tier":"Mid","recommended_tuition_infant":1750,"recommended_tuition_preschool":1380,"priority":"High Opportunity","rationale":"Growing area, few competitors","why_gap":"Population growing 14% over 5 years per Census estimates but licensed provider count unchanged, creating expanding unmet demand.","data_points":[{"label":"Pop Growth 5yr","value":"14%","source":"Census ACS 2022"},{"label":"New Households","value":"1,200+","source":"County GIS"}],"sources":["US Census ACS 2022","County planning data"]}],"age_gaps":[{"age":"${ind.tiers[0]||'Tier 1'}","demand_idx":95,"supply_idx":42,"gap":53},{"age":"${ind.tiers[1]||'Tier 2'}","demand_idx":82,"supply_idx":71,"gap":11}]}
+{
+  "summary": "5-sentence gap analysis citing specific data sources and numbers",
+  "overall_opportunity_score": 81,
+  "data_sources_used": ["US Census ACS 2022 (Tables B01001, S0901)", "State CAPS licensing database", "NDCP DOL county childcare prices", "Child Care Aware of America state report", "Head Start locator", "Google Maps search", "KIDS COUNT Data Center"],
+  "is_childcare_desert": true,
+  "childcare_desert_ratio": "1 slot per 4.8 children (Child Care Aware threshold: >3 children per slot)",
+  "ndcp_median_infant_rate": 1820,
+  "ndcp_median_toddler_rate": 1540,
+  "ndcp_median_preschool_rate": 1280,
+  "ndcp_source": "National Database of Childcare Prices, DOL Women's Bureau 2022",
+  "cities": [
+    {
+      "city": "City A", "rank": 1,
+      "demand_score": 9, "supply_score": 3, "gap_score": 9,
+      "unserved_children": 580, "licensed_centers_count": 8, "total_licensed_capacity_est": 480,
+      "children_under5_census": 3900, "demand_to_supply_ratio": 4.8,
+      "income_tier": "Premium",
+      "recommended_tuition_infant": 2050, "recommended_tuition_preschool": 1650,
+      "ndcp_county_median_infant": 1820, "pricing_premium_vs_market_pct": 12,
+      "head_start_slots": 120, "subsidized_slots_est": 80,
+      "is_desert": true,
+      "priority": "Critical Opportunity",
+      "rationale": "High demand, critically low supply",
+      "why_gap": "3,900 children under 5 per Census ACS 2022 vs 8 licensed centers with ~480 total capacity per state CAPS database. Demand-to-supply ratio of 4.8:1 exceeds Child Care Aware desert threshold (3:1). Only 120 Head Start slots serve income-qualified families. Net gap of 3,420+ unserved children, growing at 4.2%/yr per Census PEP.",
+      "data_points": [
+        {"label": "Children Under 5", "value": "3,900", "source": "US Census ACS 2022 Table B01001"},
+        {"label": "Licensed Centers", "value": "8", "source": "State CAPS licensing database"},
+        {"label": "Total Licensed Capacity", "value": "~480 slots", "source": "State CAPS + Google Maps"},
+        {"label": "Demand:Supply Ratio", "value": "4.8:1", "source": "Derived (CAPS + Census)"},
+        {"label": "Head Start Slots", "value": "120", "source": "eclkc.acf.hhs.gov locator"},
+        {"label": "NDCP Median Infant Rate", "value": "$1,820/mo", "source": "DOL NDCP 2022"},
+        {"label": "Child Care Desert", "value": "Yes — exceeds 3:1 threshold", "source": "Child Care Aware of America"}
+      ],
+      "sources": ["US Census ACS 2022 (B01001)", "State CAPS licensing database", "NDCP DOL 2022", "Head Start locator eclkc.acf.hhs.gov", "Child Care Aware of America", "Google Maps business search"]
+    }
+  ],
+  "age_gaps": [
+    {"age": "${ind.tiers[0]||'Tier 1'}", "demand_idx": 95, "supply_idx": 42, "gap": 53, "source": "Census S0901 + State CAPS"},
+    {"age": "${ind.tiers[1]||'Tier 2'}", "demand_idx": 82, "supply_idx": 71, "gap": 11, "source": "Census ACS + NCES enrollment"}
+  ]
+}
 
-Use recommended_tuition_infant as the primary price point and recommended_tuition_preschool as the secondary price point for a ${ind.unit}. Revenue model: ${ind.revenue_unit}.`;
+Use recommended_tuition_infant as the primary price point and recommended_tuition_preschool as the secondary price point for a ${ind.unit}. Revenue model: ${ind.revenue_unit}.
+For pricing, cross-reference NDCP county median rates to validate recommendations (premium operators typically price 10-20% above market median).`;
   try {
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 2 fallback'); d=getFallback2(); }
     R.a2=d;
-    $('2-s-t').textContent=d.summary;
+
+    // Summary + meta badges
+    let summaryText = d.summary || '';
+    if (d.is_childcare_desert) summaryText += '\n\n🚨 CHILD CARE DESERT: ' + (d.childcare_desert_ratio || 'Supply critically below demand threshold (Child Care Aware: >3 children per slot)');
+    if (d.ndcp_median_infant_rate) summaryText += `\n\n💰 NDCP Market Rates (${d.ndcp_source||'DOL NDCP'}): Infant $${(d.ndcp_median_infant_rate||0).toLocaleString()}/mo · Toddler $${(d.ndcp_median_toddler_rate||0).toLocaleString()}/mo · Preschool $${(d.ndcp_median_preschool_rate||0).toLocaleString()}/mo`;
+    if (d.data_sources_used && d.data_sources_used.length) summaryText += '\n\n📚 Sources: ' + d.data_sources_used.join(' · ');
+    $('2-s-t').textContent=summaryText;
+
     // Heatmap — cells are clickable for drill-down detail
     renderHmap('2-h-c',d.cities,[
       {key:'demand_score',label:'Demand Score',fmt:v=>v+'/10'},
       {key:'supply_score',label:'Supply Score',fmt:v=>v+'/10'},
       {key:'gap_score',label:'Gap Score',fmt:v=>v+'/10'},
+      {key:'demand_to_supply_ratio',label:'D:S Ratio',fmt:v=>(v||0).toFixed(1)+'x'},
       {key:'unserved_children',label:'Unserved Kids',fmt:v=>v.toLocaleString()}
     ],'openGapCellDetail');
-    // Rankings
+
+    // Rankings — now with desert badge and NDCP pricing
     let ranks=`<div class="city-compare">`;
     (d.cities||[]).forEach((c,i)=>{
       const pct=c.gap_score/10*100;
       const col=c.gap_score>=8?'var(--green)':c.gap_score>=6?'var(--amber)':'var(--red)';
+      const desertBadge = c.is_desert ? `<span class="badge b-red" style="font-size:10px;margin-left:6px">🏜 Desert</span>` : '';
+      const ndcpNote = c.ndcp_county_median_infant ? `<span style="font-size:10px;color:var(--faint);margin-left:4px">NDCP median: $${(c.ndcp_county_median_infant||0).toLocaleString()}/mo</span>` : '';
       ranks+=`<div class="city-row">
         <div class="city-rank">${c.rank}</div>
-        <div class="city-name">${c.city}</div>
+        <div class="city-name">${c.city}${desertBadge}${ndcpNote}</div>
         <div class="city-bar-wrap">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">${c.priority} · ${c.income_tier}</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">${c.priority} · ${c.income_tier} · ${c.licensed_centers_count||'?'} licensed centers · D:S ${(c.demand_to_supply_ratio||'?')}:1</div>
           <div class="city-bar-track"><div class="city-bar-fill" style="width:${pct}%;background:${col}"></div></div>
         </div>
         <div class="city-score" style="color:${col}">${c.gap_score}/10</div>
