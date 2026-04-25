@@ -118,7 +118,7 @@ All prompts, financial models, compliance checklists, and output labels adapt au
 | **8** | **Executive Summary** | Go/No-Go verdict + rationale + risk matrix + next steps |
 | **9** | **Business Plan** | Overview · Market · Financials · Operations · SBA Package · Investor Deck |
 | **10** | **Project Plan** | Gantt · Milestones · Budget Tracker · Risk Register · Team & Vendors · Launch Checklist |
-| **11** | **Market Map** | Interactive SVG Map · Legend · Drive Directions |
+| **11** | **Market Map** | Interactive Leaflet Map (real tiles) · City Markers · Competitor Pins · Radius Ring |
 | **12** | **Grant Search** | Summary · Federal Grants · State Grants · Local Incentives · Full Table |
 | **13** | **Competitor Deep-Dive** | Profiles · Pain Points · Differentiation Matrix · Messaging Guide |
 | **14** | **Code Review** | Issues Found · Performance · Cost Analysis · Recommended Fixes |
@@ -129,7 +129,7 @@ All prompts, financial models, compliance checklists, and output labels adapt au
 Every agent card has:
 - **{ } Raw** — inspect the full JSON output driving that panel
 - **↗ Expand** — open a full-screen drill-down modal with raw data + reasoning card
-- **↺ Re-run** — re-run that single agent using cached context from upstream agents
+- **↺ Re-run** — re-run that single agent using cached context from upstream agents (visible on every *completed* agent, not just errors)
 - **⬇ Export** — export this agent's data as PDF, Word doc, Excel, or Slides
 
 ---
@@ -150,6 +150,7 @@ Every agent card has:
 |--------|--------|
 | **🔗 Copy Link** | Copies a shareable URL with all inputs encoded (`?zip=&industry=&radius=&capacity=&budget=`) |
 | **Session Restore Banner** | Appears on page load if a previous session exists (24-hour TTL) — click **↩ Restore** to reload all agent outputs without re-running |
+| **🕐 Recent Reports** | Opens the session history panel showing your last 5 pipeline runs with verdict badges — click any run to restore its inputs |
 
 ### 📄 Export
 | Button | Action |
@@ -159,8 +160,31 @@ Every agent card has:
 | **🖨 Print Report** | Quick print of executive summary + key sections |
 | **Per-agent ⬇ Export** | Each agent card has PDF / Word / Excel / Slides export |
 
-### ⚙ Phase Selection (Run Specific Phases)
-Click the **⚙ Phases** button to expand the phase selector. Uncheck any phase to skip it — the pipeline will use cached R data from a previous run for those agents so downstream agents still receive context. Use **All** / **None** shortcuts to select or clear all phases at once.
+### ⚙ Phase Selection & Quick Presets
+Click **⚙ Phases** to open the phase selector. Uncheck any phase to skip it — the pipeline uses cached R data from a previous run for skipped phases so downstream agents still receive context.
+
+**One-click presets:**
+
+| Preset | Phases | Est. Cost | Est. Time |
+|--------|--------|-----------|-----------|
+| ⚡ **Quick Verdict** | 1–6 (Foundation → Executive) | ~$0.15 | ~2 min |
+| 🔬 **Foundation Only** | 1 (Demographics · Compliance · Competitive) | ~$0.06 | ~1 min |
+| 💰 **Thru Financials** | 1–5 (Foundation → Financial Feasibility) | ~$0.20 | ~3 min |
+| 📋 **Full Report** | All 12 phases (all 17 agents) | ~$0.40 | ~8 min |
+
+Use **All** / **None** to select or clear all phases at once, or mix and match individual checkboxes.
+
+### 🔄 Streaming Responses
+Agent 8 (Executive Summary) streams its response token-by-token directly into the prose panel using Anthropic's SSE API. You see the verdict and assessment building in real time as it generates — eliminating the "is it frozen?" wait. Other providers (OpenAI, Gemini) fall back to the standard call silently.
+
+### ⚖ ZIP Comparison Mode
+Enter a second ZIP code in the **Compare ZIP** field and click **⚖ Compare ZIPs** to run a single focused AI call comparing both markets. The comparison panel renders:
+- An overall recommended market with rationale
+- Side-by-side metrics table (population, income, children under 5, competitor count, real estate cost, opportunity score)
+- Strengths and weaknesses for each ZIP
+- A 2–3 sentence recommendation
+
+Uses context from your existing primary-run results — no need to re-run 17 agents.
 
 ### ✔ Input Validation
 Before launching, all inputs are validated:
@@ -187,6 +211,14 @@ Errors appear inline as red tips under each field. The pipeline will not launch 
 ### 📊 Industry Comparison
 - Select a second industry in the **Compare With** dropdown and click **⚖ Compare Industries** to run a side-by-side analysis with the current ZIP and radius
 
+### 🗺️ Interactive Market Map (Agent 11)
+Agent 11's Market Map uses **Leaflet.js** with CartoDB Dark Matter tiles — real street-level geography with no API key required. Features:
+- City circle markers sized and colored by gap score
+- Radius ring showing your search boundary
+- Competitor location pins with 🏢 markers
+- Permanent city name labels
+- Click any marker for a full stats popup (income, children under 5, gap score, RE listings)
+
 ### ✏️ Personalize Report
 - Click the **✏️ Personalize Report** section to add your business name, founder, target opening date, equity, email, and notes
 - This information appears in the profile header and is included in all export formats
@@ -211,14 +243,15 @@ Errors appear inline as red tips under each field. The pipeline will not launch 
 
 ## API Cost Estimate
 
-| Scenario | Agents | Est. cost (Claude Sonnet) |
-|----------|--------|---------------------------|
-| Full pipeline — all 17 agents | 17 agents | ~$0.40–$0.70 |
-| Foundation only (phases 1–4) | 4 agents | ~$0.08–$0.15 |
-| Financial + exec only (phases 5–6) | 2 agents | ~$0.05–$0.10 |
-| Cached re-run (same inputs) | 17 agents | ~$0.00 |
+| Preset | Phases | Est. cost (Claude Sonnet) | Est. time |
+|--------|--------|---------------------------|-----------|
+| ⚡ Quick Verdict | 1–6 | ~$0.15 | ~2 min |
+| 🔬 Foundation Only | 1 | ~$0.06 | ~1 min |
+| 💰 Thru Financials | 1–5 | ~$0.20 | ~3 min |
+| 📋 Full Report | All 12 phases | ~$0.40–$0.70 | ~8 min |
+| Cached re-run (same inputs) | — | ~$0.00 | instant |
 
-Costs vary based on industry, response length, and provider pricing. Use **⚙ Phases** to run only the phases you need.
+Costs vary by industry, response length, and provider pricing. Use the preset buttons inside **⚙ Phases** to pick the right scope before running.
 
 ---
 
@@ -262,7 +295,10 @@ daycare-agent-system/
 │       ├── 29-export.js        ← Per-agent export + industry comparison
 │       ├── 30-session.js       ← Auto-save, session restore, shareable URL
 │       ├── 31-full-export.js   ← Full pipeline PDF export
-│       └── 32-phases.js        ← Phase selection + input validation
+│       ├── 32-phases.js        ← Phase selection + input validation + presets
+│       ├── 33-streaming.js     ← Streaming responses (claudeStream + claudeStreamJSON)
+│       ├── 34-history.js       ← Session history — last 5 runs panel
+│       └── 35-compare-zip.js   ← ZIP comparison mode (two markets side by side)
 ├── docs/
 │   ├── HOW-TO.md               ← Step-by-step user guide
 │   ├── architecture.md         ← Pipeline architecture + data flow
@@ -296,9 +332,9 @@ The build script concatenates all JS files and inlines the CSS into a single `pu
 | AI | Anthropic Claude, OpenAI GPT-4o, Google Gemini, OpenAI-compatible |
 | Charts | Chart.js 4.4.1 |
 | Fonts | Syne + Instrument Sans (Google Fonts) |
-| Map | Custom inline SVG (no tile service required) |
+| Map | Leaflet.js 1.9.4 + CartoDB Dark Matter tiles (free, no API key) |
 | Build | Node.js — `build.mjs` concatenation, zero npm deps in browser |
-| Storage | Browser localStorage (4h cache + 24h session) |
+| Storage | Browser localStorage (4h response cache · 24h session · 5-run history) |
 
 ---
 

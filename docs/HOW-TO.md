@@ -10,22 +10,26 @@
 2. [Choosing Your Inputs](#2-choosing-your-inputs)
 3. [Running the Pipeline](#3-running-the-pipeline)
 4. [Reading the Results](#4-reading-the-results)
-5. [Phase Selection — Run Only What You Need](#5-phase-selection--run-only-what-you-need)
+5. [Phase Selection & Quick Presets](#5-phase-selection--quick-presets)
 6. [Session Restore — Pick Up Where You Left Off](#6-session-restore--pick-up-where-you-left-off)
-7. [Shareable URL — Share Your Setup](#7-shareable-url--share-your-setup)
-8. [Full PDF Export](#8-full-pdf-export)
-9. [Per-Agent Export (PDF · Word · Excel · Slides)](#9-per-agent-export-pdf--word--excel--slides)
-10. [Drill-Down & Raw Data Inspection](#10-drill-down--raw-data-inspection)
-11. [Compliance — How to Apply for Each Requirement](#11-compliance--how-to-apply-for-each-requirement)
-12. [Industry Comparison](#12-industry-comparison)
-13. [Personalizing Your Report](#13-personalizing-your-report)
-14. [Demo Mode](#14-demo-mode)
-15. [Response Caching & Cache Management](#15-response-caching--cache-management)
-16. [Re-running Individual Agents](#16-re-running-individual-agents)
-17. [Switching AI Providers](#17-switching-ai-providers)
-18. [Understanding Data Quality & "N/A" Values](#18-understanding-data-quality--na-values)
-19. [Building from Source](#19-building-from-source)
-20. [Troubleshooting](#20-troubleshooting)
+7. [Session History — Recent Reports](#7-session-history--recent-reports)
+8. [Shareable URL — Share Your Setup](#8-shareable-url--share-your-setup)
+9. [ZIP Comparison Mode](#9-zip-comparison-mode)
+10. [Streaming Responses](#10-streaming-responses)
+11. [Full PDF Export](#11-full-pdf-export)
+12. [Per-Agent Export (PDF · Word · Excel · Slides)](#12-per-agent-export-pdf--word--excel--slides)
+13. [Drill-Down & Raw Data Inspection](#13-drill-down--raw-data-inspection)
+14. [Compliance — How to Apply for Each Requirement](#14-compliance--how-to-apply-for-each-requirement)
+15. [Industry Comparison](#15-industry-comparison)
+16. [Market Map — Leaflet Interactive Map](#16-market-map--leaflet-interactive-map)
+17. [Personalizing Your Report](#17-personalizing-your-report)
+18. [Demo Mode](#18-demo-mode)
+19. [Response Caching & Cache Management](#19-response-caching--cache-management)
+20. [Re-running Individual Agents](#20-re-running-individual-agents)
+21. [Switching AI Providers](#21-switching-ai-providers)
+22. [Understanding Data Quality & "N/A" Values](#22-understanding-data-quality--na-values)
+23. [Building from Source](#23-building-from-source)
+24. [Troubleshooting](#24-troubleshooting)
 
 ---
 
@@ -164,17 +168,30 @@ Click **{ } Raw** on any agent card to see the exact JSON object the AI returned
 
 ---
 
-## 5. Phase Selection — Run Only What You Need
+## 5. Phase Selection & Quick Presets
 
-The **⚙ Phases** button opens the phase selector panel. Use it to skip phases you've already run or don't need.
+The **⚙ Phases** button opens the phase selector panel. Use it to pick a preset scope or manually choose exactly which phases to run.
 
-### How to Use
+### Quick Presets
+
+Four one-click preset buttons appear at the top of the panel:
+
+| Preset | Phases | Est. Cost | Est. Time | Best For |
+|--------|--------|-----------|-----------|---------|
+| ⚡ **Quick Verdict** | 1–6 | ~$0.15 | ~2 min | Fast Go/No-Go before committing to a full run |
+| 🔬 **Foundation Only** | 1 | ~$0.06 | ~1 min | Demographics, compliance, and competitor snapshot only |
+| 💰 **Thru Financials** | 1–5 | ~$0.20 | ~3 min | Everything through the financial model |
+| 📋 **Full Report** | All 12 phases | ~$0.40 | ~8 min | Complete 17-agent business plan |
+
+Click any preset to automatically check/uncheck the right phases — then click **▶ Run Pipeline**.
+
+### Custom Phase Selection
 
 1. Click **⚙ Phases** — the panel expands below the controls
-2. Uncheck any phase you want to skip
+2. Check or uncheck individual phases
 3. Click **▶ Run Pipeline**
 
-Skipped phases use **cached R data** from a previous run — so downstream agents still receive context. For example, if you uncheck Phase 1 (Demographics) but run Phase 2 (Gap Analysis), Agent 2 will receive your previously cached Agent 1 data.
+Skipped phases use **cached R data** from a previous run — downstream agents still receive context. For example, if you uncheck Phase 1 (Demographics) but run Phase 2 (Gap Analysis), Agent 2 receives your previously cached Agent 1 data.
 
 ### Phase Reference
 
@@ -225,7 +242,39 @@ Click **✕ Discard** to delete the saved session and start fresh.
 
 ---
 
-## 7. Shareable URL — Share Your Setup
+## 7. Session History — Recent Reports
+
+The **🕐 Recent Reports** button opens a history panel showing your last **5 pipeline runs**, stored in your browser's localStorage.
+
+### What's Saved
+
+Each history entry records:
+- ZIP code and industry
+- Date and time of the run
+- How many agents completed
+- The Go / Cautious Go / No Go verdict with rationale
+- The overall opportunity score and top recommended city
+
+No full agent data is stored in history — only the summary metadata. Full agent data lives in the 24-hour session restore snapshot.
+
+### How to Use
+
+1. Click **🕐 Recent Reports** — the history panel expands below the controls
+2. Browse your recent runs — each shows the verdict badge, ZIP, industry, date, and a one-line rationale
+3. Click **↩ Restore Inputs** on any run to refill the ZIP, industry, radius, capacity, and budget fields exactly as they were
+4. Then click **▶ Run Pipeline** to generate a fresh analysis for that scenario
+
+### Managing History
+
+- **Clear History** — removes all saved history entries
+- History is stored per-browser (not synced to other devices)
+- After 5 runs, the oldest entry is automatically removed to make room
+
+> **Tip:** History entries are great for comparing results across different ZIPs or industries you've already evaluated — you can jump back to any scenario in seconds.
+
+---
+
+## 8. Shareable URL — Share Your Setup
 
 The **🔗 Copy Link** button creates a URL that encodes all your input settings:
 
@@ -246,7 +295,73 @@ The URL also updates automatically in the browser's address bar whenever you cha
 
 ---
 
-## 8. Full PDF Export
+## 9. ZIP Comparison Mode
+
+Compare two ZIP code markets side by side with a single AI call — no need to re-run all 17 agents.
+
+### How to Use
+
+1. Run the primary pipeline for your main ZIP code (or use a restored session)
+2. Find the **Compare ZIP** field in the compare bar below the progress bar
+3. Enter a second 5-digit US ZIP code
+4. Click **⚖ Compare ZIPs**
+
+A comparison panel expands showing:
+
+### Comparison Panel Contents
+
+- **Recommended Market** — the ZIP with the stronger opportunity and a one-sentence rationale
+- **Side-by-side metrics table:**
+  - Population (primary city)
+  - Children under 5 / primary demographic
+  - Median household income
+  - Income growth %
+  - Dual-income household %
+  - Competitor count
+  - Real estate cost
+  - Opportunity score (1–10)
+- **Strengths** and **Weaknesses** for each ZIP
+- **2–3 sentence recommendation** on which ZIP to prioritize and why
+- **Data sources** cited by the AI
+
+### How It Works
+
+The comparison AI call receives:
+- Your primary ZIP's existing results (verdict, opportunity score, top city, income, demographics)
+- Real-time research on the comparison ZIP
+- Your capacity, budget, and industry settings
+
+This makes it fast (~10–15 seconds) and much cheaper than running the full pipeline twice (~$0.03 vs ~$0.40).
+
+> **Tip:** Run Quick Verdict (phases 1–6) on your primary ZIP first, then use ZIP Comparison to evaluate 2–3 alternative markets before committing to the full 8-minute report.
+
+---
+
+## 10. Streaming Responses
+
+Agent 8 (Executive Summary) streams its response token-by-token directly into the prose panel.
+
+### What You'll See
+
+Instead of a spinner followed by a sudden full reveal, you'll see:
+1. A pulsing green dot and "Generating executive report…" header appears immediately
+2. Text streams in word by word — verdict, rationale, assessment, risks, next steps
+3. When the full response arrives, it's parsed and rendered as the normal structured output
+
+### Provider Support
+
+| Provider | Streaming |
+|----------|----------|
+| **Anthropic (Claude)** | ✅ Full SSE streaming |
+| **OpenAI** | ✅ Full SSE streaming |
+| **Google Gemini** | ⚠️ Falls back to standard call |
+| **OpenAI-Compatible** | ✅ If provider supports SSE |
+
+Streaming falls back silently to the standard call if SSE is not supported — you'll never see an error, just no live preview.
+
+---
+
+## 11. Full PDF Export
 
 The **📄 Full PDF** button generates a complete, print-ready business planning report with all 17 agents.
 
@@ -272,7 +387,7 @@ The **📄 Full PDF** button generates a complete, print-ready business planning
 
 ---
 
-## 9. Per-Agent Export (PDF · Word · Excel · Slides)
+## 12. Per-Agent Export (PDF · Word · Excel · Slides)
 
 Each agent card has a **⬇ Export** dropdown with four format options.
 
@@ -293,7 +408,7 @@ Each agent card has a **⬇ Export** dropdown with four format options.
 
 ---
 
-## 10. Drill-Down & Raw Data Inspection
+## 13. Drill-Down & Raw Data Inspection
 
 ### Expand Modal
 Click **↗ Expand** on any agent card to open a full-screen modal. The modal shows:
@@ -312,7 +427,7 @@ On any agent card, click **{ } Raw** to expand the raw JSON in a scrollable pane
 
 ---
 
-## 11. Compliance — How to Apply for Each Requirement
+## 14. Compliance — How to Apply for Each Requirement
 
 Agent 5 (Compliance) includes a dedicated **How to Apply** tab that goes beyond listing requirements — it tells you exactly how and where to apply for each one.
 
@@ -339,7 +454,7 @@ Each card includes:
 
 ---
 
-## 12. Industry Comparison
+## 15. Industry Comparison
 
 Compare two industries side-by-side for the same location.
 
@@ -354,7 +469,40 @@ This is useful when you're deciding between business types — e.g. should you o
 
 ---
 
-## 13. Personalizing Your Report
+## 16. Market Map — Leaflet Interactive Map
+
+Agent 11 (Market Map) renders a full interactive map powered by **Leaflet.js** with **CartoDB Dark Matter** tiles — real street-level geography that matches the app's dark theme. No API key is required.
+
+### Map Elements
+
+| Element | Meaning |
+|---------|---------|
+| Blue star marker (📍) | Your search center (entered ZIP code) |
+| Dashed circle | Your search radius boundary |
+| Colored circle markers | Cities — sized and colored by gap/opportunity score |
+| 🏢 square markers | Real estate listings and competitor locations |
+| Permanent labels | City names always visible on the map |
+
+### Color Scale (Circle Markers)
+
+- **Green** — high gap score (strong opportunity)
+- **Amber/Yellow** — medium gap score
+- **Red** — low gap score (saturated or weak demand)
+
+### Interacting with the Map
+
+- **Click any circle marker** — opens a popup with full stats: population, median income, children under 5, gap score, opportunity score, and a link to view real estate listings
+- **Scroll to zoom** — standard map zoom
+- **Click and drag** — pan the map
+- **Zoom controls** (top-left) — + / − buttons
+
+### After Session Restore
+
+The Leaflet map cannot be restored from saved HTML (it requires live JavaScript rendering). After restoring a session, click **↺ Re-run** on the Market Map agent card to regenerate it.
+
+---
+
+## 17. Personalizing Your Report
 
 Add your business details to personalize all exports and the printed report.
 
@@ -375,7 +523,7 @@ The profile header appears at the top of the page and is included in all PDF and
 
 ---
 
-## 14. Demo Mode
+## 18. Demo Mode
 
 Run the full pipeline with no API key to see what the system produces.
 
@@ -393,7 +541,7 @@ Demo Mode uses the hardcoded fallback data in `src/js/05-fallbacks.js`. It's use
 
 ---
 
-## 15. Response Caching & Cache Management
+## 19. Response Caching & Cache Management
 
 All API responses are cached automatically to avoid repeating identical calls.
 
@@ -412,18 +560,23 @@ Click **Clear Cache** to delete all cached API responses. The next pipeline run 
 
 ---
 
-## 16. Re-running Individual Agents
+## 20. Re-running Individual Agents
 
-Each agent card has a **↺ Re-run** button in the header. This re-runs just that one agent — useful for:
+Every **completed** agent card has a **↺ Re-run** button in the header (visible on green/done agents, not just red/error ones). This re-runs just that one agent — useful for:
 - Refreshing a chart after session restore
 - Getting a second opinion on a specific agent's output
+- Trying a different AI provider on one agent while keeping the rest
 - Fixing a failed agent without re-running the entire pipeline
 
 The re-run passes the same upstream context (R.a1, R.a2, etc.) that the original pipeline used. Only the target agent makes a new API call.
 
+> **Example workflows:**
+> - Run the full pipeline → see Agent 3 selected an undesirable city → click **↺ Re-run** on Agent 3 to get new site options → click **↺ Re-run** on Agents 7 and 8 to refresh financials and exec summary with the new location
+> - Run Quick Verdict (phases 1–6) → click **↺ Re-run** on Agent 8 to get a fresh executive summary after manually tweaking inputs
+
 ---
 
-## 17. Switching AI Providers
+## 21. Switching AI Providers
 
 ### Provider Selection
 
@@ -450,7 +603,7 @@ For local models:
 
 ---
 
-## 18. Understanding Data Quality & "N/A" Values
+## 22. Understanding Data Quality & "N/A" Values
 
 The system enforces a strict anti-hallucination policy across all 17 agents.
 
@@ -475,7 +628,7 @@ Every agent is instructed: **never fabricate, invent, or estimate specific data 
 
 ---
 
-## 19. Building from Source
+## 23. Building from Source
 
 The app is a single `public/index.html` file assembled from source files in `src/`.
 
@@ -509,7 +662,7 @@ See [architecture.md](architecture.md) for the full technical architecture.
 
 ---
 
-## 20. Troubleshooting
+## 24. Troubleshooting
 
 ### "Please enter your Anthropic API key"
 You haven't entered an API key. Either enter a key in the API Key field, or click **⚡ Demo Mode** to run without one.

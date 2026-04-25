@@ -86,9 +86,9 @@ User Input (ZIP · Industry · Radius · Capacity · Budget)
   │MARKET MAP│  │  GRANT   │  │COMPETITOR│  │ BUILD VS BUY │
   │ Agent 11 │  │  SEARCH  │  │DEEP-DIVE │  │   Agent 16   │
   │17-render │  │ Agent 12 │  │ Agent 13 │  │27-buildvsbuy │
-  │SVG Map   │  │18-render │  │19-render │  │Platform·Make │
-  │Directions│  │Federal·  │  │Profiles· │  │vs Buy matrix │
-  │          │  │State·    │  │Messaging │  │              │
+  │Leaflet.js│  │18-render │  │19-render │  │Platform·Make │
+  │Dark tiles│  │Federal·  │  │Profiles· │  │vs Buy matrix │
+  │Popups    │  │State·    │  │Messaging │  │              │
   └──────────┘  │Local     │  │Guide     │  └──────────────┘
                 └──────────┘  └──────────┘
                                    │
@@ -205,7 +205,7 @@ This single injection covers all 17 agents automatically. The `_nv()` and `_nvNu
 | `14-render-08.js` | Agent 8 render: Executive Summary (Go/No-Go verdict) |
 | `15-render-09.js` | Agent 9 render: Business Plan (overview · market · financials · ops · SBA · investor deck) |
 | `16-render-10.js` | Agent 10 render: Project Plan (Gantt · milestones · budget · risk · team · checklist) |
-| `17-render-11.js` | Agent 11 render: Market Map (SVG · legend · directions) |
+| `17-render-11.js` | Agent 11 render: Market Map (Leaflet.js · CartoDB Dark tiles · circle markers · popups · radius ring) |
 | `18-render-12.js` | Agent 12 render: Grant Search (federal · state · local) |
 | `19-render-13.js` | Agent 13 render: Competitor Deep-Dive (profiles · pain points · messaging) |
 | `20-render-14.js` | Agent 14 render: Code Review (issues · metrics · cost · fixes) |
@@ -220,7 +220,53 @@ This single injection covers all 17 agents automatically. The `_nv()` and `_nvNu
 | `29-export.js` | Per-agent export dropdown (PDF/Word/Excel/Slides); `runIndustryComparison()` |
 | `30-session.js` | Auto-save to localStorage, session restore banner, shareable URL params |
 | `31-full-export.js` | `fullPipelineExport()`: full 17-agent print-ready document with chart PNG capture |
-| `32-phases.js` | Phase checkboxes, `phaseShouldRun(n)`, input validation, `validateInputs()` |
+| `32-phases.js` | Phase checkboxes, `phaseShouldRun(n)`, input validation, `validateInputs()`, phase presets |
+| `33-streaming.js` | `claudeStream()` SSE reader; `claudeStreamJSON()` live-streaming variant for text-heavy agents |
+| `34-history.js` | Session history panel: last 5 runs in localStorage, restore inputs, verdict badges |
+| `35-compare-zip.js` | ZIP comparison mode: single AI call comparing two markets, structured metrics table |
+
+---
+
+## Streaming Architecture
+
+Agent 8 (Executive Summary) uses `claudeStreamJSON()` for live token streaming:
+
+```
+claudeStreamJSON(system, user, panelId)
+  │
+  ├─ Check cache → if hit, skip streaming, return cached JSON
+  │
+  ├─ Create .stream-live panel with pulsing dot header
+  │
+  ├─ Call claudeStream(system, user, onChunk)
+  │   ├─ Anthropic: fetch SSE, parse `data:` lines, extract text_delta
+  │   ├─ Other providers: fall back to claude() standard call
+  │   └─ Throttle onChunk to ≤30fps (33ms gap)
+  │
+  ├─ Stream text into panel (last 700 chars to keep DOM lean)
+  │
+  └─ On complete: parseJSON(accumulated) → return d
+       └─ On parse fail: fall back to claudeJSON() (non-streaming retry)
+```
+
+The `runPipeline` patch chain (multiple files each wrap `window.runPipeline` on DOMContentLoaded):
+
+```
+user clicks Run
+  → 34-history.js wrapper (saves run on completion)
+    → 32-phases.js wrapper (validates inputs)
+      → original runPipeline() in 22-pipeline.js
+```
+
+---
+
+## localStorage Keys
+
+| Key | TTL | Contents |
+|-----|-----|---------|
+| `biz_session_v1` | 24 hours | Full session: R object, rendered HTML, inputs |
+| `biz_history_v1` | Permanent (max 5 entries) | Lightweight run summaries (verdict, zip, date, scores) |
+| `biz_cache_v1_*` | 4 hours | Individual agent API responses, keyed by prompt hash |
 
 ---
 
@@ -230,7 +276,7 @@ This single injection covers all 17 agents automatically. The `_nv()` and `_nvNu
 
 ```bash
 node build.mjs
-# → public/index.html (~500KB, ~7400 lines)
+# → public/index.html (~530KB, ~8000 lines)
 ```
 
 ---
@@ -245,4 +291,6 @@ node build.mjs
 | Edge | 90+ | Fully supported |
 | IE 11 | — | Not supported |
 
-Required browser APIs: `fetch`, `ES2020`, `CSS custom properties`, `localStorage`, `URLSearchParams`, `navigator.clipboard`, `canvas.toDataURL`.
+Required browser APIs: `fetch` (with SSE/ReadableStream for streaming), `ES2020`, `CSS custom properties`, `localStorage`, `URLSearchParams`, `navigator.clipboard`, `canvas.toDataURL`.
+
+Leaflet.js 1.9.4 is loaded from `unpkg.com` CDN — requires internet access for the Market Map tile layer. All other features work fully offline (no CDN calls except Leaflet).
