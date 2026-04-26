@@ -13,6 +13,7 @@ async function runAgent9Parts(a1,a2,a3,a4,a5,a6,a7,a8) {
   const ctx7 = ctx(a7,['summary','scenarios','startup_breakdown','monthly_ops','by_city_financials']);
   const ctx8 = ctx(a8,['verdict','verdict_rationale','assessment','success_factors','risks','next_steps']);
 
+  if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(9);if(_d){R.a9=_d;try{renderAgent9(_d);}catch(e){}setDot(9,'done');showOut(9);return JSON.stringify(_d);}}
   // ── Part 1 of 4: Executive Summary + Company Overview ───
   setDot(9,'running'); $('9-ov-c').innerHTML = subProgress(1,4,'Executive Summary & Company Overview');
   const sys1 = `You are a senior business plan writer. Return JSON only. No extra text.`;

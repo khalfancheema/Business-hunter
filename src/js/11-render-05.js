@@ -15,7 +15,7 @@ Return ONLY:
     {
       "rank":1,"city":"Suwanee","submarket":"Suwanee Town Center / Peachtree Pkwy corridor",
       "overall_score":92,
-      "scores":{"demand":94,"competition":88,"demographics":96,"real_estate":82,"regulatory":90},
+      "scores":{"demand":94,"competition":88,"demographics":96,"real_estate":82,"regulatory":90,"walkability":45,"transit":22,"schools":78},
       "capacity_recommended":90,"target_infant_tuition":2050,"target_preschool_tuition":1650,
       "risk":"Low","timeline_months":14,
       "children_under5_nearby":3900,"competitors_within_2mi":2,
@@ -25,6 +25,14 @@ Return ONLY:
       "pros":["Fastest-growing ZIP in Gwinnett","Premium income demographics","Only 2 competitors within 2 miles","Strong town center foot traffic"],
       "cons":["Higher lease rates","Land becoming scarce","Premium build-out expectations"],
       "reasoning":"Ranked #1 because Census ACS 2022 shows 3,900 children under 5 within 2 miles (highest in search area) against only 2 licensed competitors with combined capacity of ~180. Median household income of $112,000 supports premium tuition. Suwanee is the fastest-growing ZIP in Gwinnett County (7.2% 5yr growth per Census). The Peachtree Pkwy corridor has 28,000+ daily traffic count and mixed-use zoning actively welcomes childcare tenants. Risk is Low because zoning is already permitted use and the city has a proactive business licensing office.",
+      "walk_score": 45,
+      "walk_score_label": "Car-Dependent",
+      "transit_score": 22,
+      "transit_description": "GRTA Xpress bus 1.2mi; no rail",
+      "nearest_school_name": "Roberts Elementary",
+      "nearest_school_rating": 9,
+      "nearest_school_distance_mi": 0.8,
+      "school_avg_rating_2mi": 8.2,
       "reasoning_sources":["US Census Bureau ACS 2022 (B01001, B19013)","Georgia CAPS licensing database","Google Maps competitor search","Gwinnett County GIS traffic data","Suwanee City business development office"]
     },
     {
@@ -95,6 +103,7 @@ Return ONLY:
   ]
 }`;
   try {
+    _setDemoKey(3);
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 3 fallback'); d=getFallback3(); }
     R.a3=d;
@@ -135,6 +144,12 @@ Return ONLY:
           <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Competitors 2mi</span><strong>${loc.competitors_within_2mi}</strong></div>
         </div>
         <div style="margin-bottom:8px">${prosHtml}${consHtml}</div>
+        ${(loc.walk_score!=null||loc.transit_score!=null||loc.nearest_school_rating!=null)?`
+        <div class="location-ext-scores">
+          ${loc.walk_score!=null?`<div class="loc-score-badge loc-score-walk"><div class="loc-score-badge-val">${loc.walk_score}</div><div class="loc-score-badge-lbl">Walk${loc.walk_score_label?'<br><span style="font-size:8px">'+loc.walk_score_label+'</span>':''}</div></div>`:''}
+          ${loc.transit_score!=null?`<div class="loc-score-badge loc-score-transit"><div class="loc-score-badge-val">${loc.transit_score}</div><div class="loc-score-badge-lbl">Transit</div></div>`:''}
+          ${loc.nearest_school_rating!=null?`<div class="loc-score-badge loc-score-school" title="${loc.nearest_school_name||''} (${loc.nearest_school_distance_mi||'?'}mi)"><div class="loc-score-badge-val">${loc.nearest_school_rating}/10</div><div class="loc-score-badge-lbl">School</div></div>`:''}
+        </div>`:''}
         ${reasoningHtml}
       </div>`;
     });

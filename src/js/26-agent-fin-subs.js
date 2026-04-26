@@ -8,6 +8,7 @@
 
 async function runAgent7(a3, a4, a5) {
   setDot(7, 'running');
+  if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(7);if(_d){R.a7=_d;try{renderAgent7(_d);}catch(e){}setDot(7,'done');showOut(7);return JSON.stringify(_d);}}
   const ind = industry();
   const base = `${ind.unit} · ${ind.capacity_label}: ${capacity()} · Budget $${parseInt(budget()).toLocaleString()} · ZIP ${zip()}`;
   const ctx3 = ctx(a3, ['summary', 'locations']);

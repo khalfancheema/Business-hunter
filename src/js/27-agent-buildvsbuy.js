@@ -45,6 +45,7 @@ Return ONLY:
   "buy_summary": "2-sentence summary of the acquisition landscape for this business type and market"
 }`;
 
+  _setDemoKey(16);
   const listingsData = await claudeJSON(sysA, usrA);
 
   // ── Sub-call B: Build Analysis ──────────────────────────

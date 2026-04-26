@@ -111,6 +111,7 @@ Return ONLY:
   ]
 }`;
   try {
+    _setDemoKey(4);
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 4 fallback'); d=getFallback4(); }
     R.a4=d;

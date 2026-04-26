@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev (build + serve)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 8080
+    },
+    {
+      "name": "start (python http.server)",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8080", "--directory", "public"],
+      "port": 8080
+    },
+    {
+      "name": "serve (npx serve)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "public", "-l", "8080"],
+      "port": 8080
+    }
+  ]
+}

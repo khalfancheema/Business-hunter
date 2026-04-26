@@ -262,6 +262,7 @@ Return ONLY:
 Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, phone numbers, agency names, and instructions specific to ZIP ${zip()} and the state/county. Search for the actual portal URLs.`;
 
   try {
+    _setDemoKey(5);
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 5 fallback'); d=getFallback5(); }
     R.a5=d;

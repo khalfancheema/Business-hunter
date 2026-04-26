@@ -8,6 +8,7 @@
     "serve": "npx serve public -l 8080",
     "dev": "node build.mjs && npx serve public -l 8080 --no-clipboard",
     "build": "node build.mjs",
+    "test": "node test-all.mjs",
     "lint": "node --input-type=module --eval \"import { readFileSync } from 'fs'; const h = readFileSync('public/index.html','utf8'); const s = h.match(/<script>([\\s\\S]*?)<\\/script>/g); console.log('Script blocks:', s?.length); console.log('OK');\"",
     "build-legacy": "node scripts/build.js"
   },

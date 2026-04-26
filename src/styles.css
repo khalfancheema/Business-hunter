@@ -614,3 +614,72 @@ select option{background:var(--surface2)}
 .leaflet-control-zoom a{background:var(--surface2)!important;color:var(--text)!important;border-color:var(--border)!important}
 .leaflet-control-zoom a:hover{background:var(--surface3)!important}
 .leaflet-bar{border:1px solid var(--border)!important}
+
+/* ══ NAMED RUNS PANEL ════════════════════════════════════ */
+.runs-panel-inner{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.runs-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;font-weight:700;color:var(--muted);font-family:'Syne',sans-serif}
+.runs-list{display:flex;flex-direction:column;gap:8px}
+.runs-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.runs-meta{flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px}
+.runs-name{font-size:13px;font-weight:700;color:var(--text);font-family:'Syne',sans-serif}
+.runs-detail{font-size:11px;color:var(--muted)}
+.runs-when{font-size:10px;color:var(--faint)}
+.runs-verdict-badge{padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;white-space:nowrap}
+.runs-actions{display:flex;gap:6px;align-items:center}
+.runs-btn{height:28px;padding:0 12px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif}
+.runs-btn:hover{border-color:var(--blue);color:var(--blue)}
+.runs-del-btn{height:28px;width:28px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--faint);font-size:12px;cursor:pointer;font-family:'Syne',sans-serif}
+.runs-del-btn:hover{border-color:var(--red);color:var(--red)}
+.runs-clear-btn{height:26px;padding:0 10px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--faint);font-size:11px;cursor:pointer}
+.runs-clear-btn:hover{border-color:var(--red);color:var(--red)}
+.runs-empty{text-align:center;padding:20px;color:var(--faint);font-size:13px}
+.runs-hint{margin-top:10px;padding:8px 12px;background:var(--surface3);border-radius:6px;font-size:11px;color:var(--faint)}
+
+/* ══ AGENT DAG PANEL ════════════════════════════════════ */
+.dag-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-top:10px}
+.dag-panel-header{font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'Syne',sans-serif}
+.dag-container{overflow-x:auto;padding:4px 0}
+.dag-container svg text{user-select:none}
+.dag-node rect{transition:stroke 0.3s}
+.dag-node:hover rect{stroke-opacity:0.8}
+
+/* ══ SCENARIO BUILDER ═══════════════════════════════════ */
+.scenario-builder{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-top:12px}
+.scenario-builder-title{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px}
+.scenario-builder-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.scenario-sliders{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.scenario-slider-row{display:flex;flex-direction:column;gap:4px}
+.scenario-slider-row label{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+.scenario-val{color:var(--blue);font-weight:700;font-family:'Syne',sans-serif;font-size:13px}
+.scenario-slider-row input[type=range]{accent-color:var(--blue);width:100%;height:4px;cursor:pointer}
+.scenario-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px}
+.scenario-kpi{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.scenario-kpi-val{font-size:18px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);line-height:1.1}
+.scenario-kpi-lbl{font-size:11px;color:var(--muted);margin:3px 0 2px}
+.scenario-kpi-sub{font-size:10px;color:var(--faint)}
+.scenario-bar-wrap{display:flex;flex-direction:column;gap:0}
+.scenario-bar{height:8px;border-radius:4px;transition:width 0.3s;min-width:4px}
+
+/* ══ LOCAL GUIDE PANEL ══════════════════════════════════ */
+.local-guide-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-top:10px}
+.local-guide-title{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:12px}
+.local-guide-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.local-guide-step{display:flex;gap:12px;align-items:flex-start;font-size:12px;color:var(--text);line-height:1.6}
+.lg-num{width:22px;height:22px;background:var(--blue-dim);border:1px solid var(--blue);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);flex-shrink:0;font-family:'Syne',sans-serif;margin-top:2px}
+.local-guide-step code{background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-family:monospace;font-size:11px;color:var(--blue)}
+.local-guide-note{padding:8px 12px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:6px;font-size:11px;color:var(--amber);line-height:1.5}
+
+/* ══ DATA FRESHNESS BADGES ══════════════════════════════ */
+.fresh-badge{display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:600;font-family:'Syne',sans-serif;margin-left:4px;vertical-align:middle;white-space:nowrap;cursor:default}
+.badge-fresh-verified{background:var(--green-dim);border:1px solid var(--green);color:var(--green)}
+.badge-fresh-estimated{background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber)}
+.badge-fresh-live{background:var(--blue-dim);border:1px solid var(--blue);color:var(--blue)}
+
+/* ══ WALK/TRANSIT/SCHOOL SCORE BADGES ══════════════════ */
+.location-ext-scores{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.loc-score-badge{display:inline-flex;flex-direction:column;align-items:center;padding:4px 8px;border-radius:6px;background:var(--surface3);border:1px solid var(--border);min-width:60px}
+.loc-score-badge-val{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;line-height:1}
+.loc-score-badge-lbl{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.04em}
+.loc-score-walk{border-color:var(--green);color:var(--green)}
+.loc-score-transit{border-color:var(--blue);color:var(--blue)}
+.loc-score-school{border-color:var(--purple);color:var(--purple)}

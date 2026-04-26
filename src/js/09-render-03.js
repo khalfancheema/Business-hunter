@@ -136,6 +136,7 @@ Use avg_monthly_infant and avg_monthly_preschool as the primary and secondary re
 Revenue model: ${ind.revenue_unit}.
 Be specific about which source each data point came from.`;
   try {
+    _setDemoKey(6);
     let d=await claudeJSON(sys,usr);
     // Fallback: if claudeJSON returns null after 3 retries, use baseline data
     if(!d) {

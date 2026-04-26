@@ -78,9 +78,11 @@ function togglePhasePanel() {
 // ── Input validation ──────────────────────────────────────────
 // Max capacity by industry; min budget by industry
 const _capMax = { daycare:300, gas_station:32, laundromat:100, car_wash:20,
-                  restaurant:500, gym:5000, indoor_play:2000, dry_cleaning:2000 };
+                  restaurant:500, gym:5000, indoor_play:2000, dry_cleaning:2000,
+                  senior_care:50, tutoring:200, urgent_care:20, coffee_shop:150, barbershop:30, coworking:500 };
 const _budMin = { daycare:150000, gas_station:500000, laundromat:100000, car_wash:300000,
-                  restaurant:100000, gym:150000, indoor_play:200000, dry_cleaning:100000 };
+                  restaurant:100000, gym:150000, indoor_play:200000, dry_cleaning:100000,
+                  senior_care:600000, tutoring:80000, urgent_care:400000, coffee_shop:100000, barbershop:60000, coworking:200000 };
 
 const _tipText = {
   zip:      'Must be a valid 5-digit US ZIP code (e.g. 30097)',

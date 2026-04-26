@@ -38,6 +38,16 @@
   <div id="customUrlRow" style="display:none;margin-bottom:8px">
     <input id="customUrlInput" placeholder="API endpoint URL (e.g. http://localhost:11434/v1/chat/completions)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px;width:100%">
   </div>
+  <div id="localGuidePanel" class="local-guide-panel" style="display:none">
+    <div class="local-guide-title">🆓 Run Locally for Free with Ollama</div>
+    <div class="local-guide-steps">
+      <div class="local-guide-step"><div class="lg-num">1</div><div><strong>Install Ollama</strong><br><code>curl -fsSL https://ollama.com/install.sh | sh</code><br><em style="color:var(--muted);font-size:11px">Mac: brew install ollama &nbsp;·&nbsp; Windows: download from ollama.com</em></div></div>
+      <div class="local-guide-step"><div class="lg-num">2</div><div><strong>Pull a model</strong><br><code>ollama pull llama3</code>&nbsp;&nbsp;&nbsp;<em style="color:var(--muted);font-size:11px">or: mistral, phi3, gemma2</em></div></div>
+      <div class="local-guide-step"><div class="lg-num">3</div><div><strong>Start the server</strong><br><code>ollama serve</code>&nbsp;&nbsp;&nbsp;<em style="color:var(--muted);font-size:11px">Runs at http://localhost:11434</em></div></div>
+      <div class="local-guide-step"><div class="lg-num">4</div><div><strong>Configure this app</strong><br>URL: <code>http://localhost:11434/v1/chat/completions</code><br>Model: <code>llama3</code> (or whichever you pulled)<br>API Key: <code>ollama</code> (any value works)</div></div>
+    </div>
+    <div class="local-guide-note">⚡ Llama 3 8B runs on a MacBook Pro M2 in ~8-12s per agent. Full pipeline takes ~5-10 min locally. JSON output quality may vary — enable demo mode first to preview expected output shapes.</div>
+  </div>
   <div style="display:flex;gap:8px">
     <input type="password" id="apiKey" placeholder="sk-ant-... / sk-... / AIza..." style="flex:1" autocomplete="off" />
   </div>
@@ -60,6 +70,12 @@
         <option value="gym">💪 Gym / Fitness Center</option>
         <option value="indoor_play">🎠 Indoor Play Area / FEC</option>
         <option value="dry_cleaning">👔 Dry Cleaning / Laundry</option>
+        <option value="senior_care">🏥 Senior Care / Assisted Living</option>
+        <option value="tutoring">📚 Tutoring / Learning Center</option>
+        <option value="urgent_care">🩺 Urgent Care Clinic</option>
+        <option value="coffee_shop">☕ Coffee Shop / Café</option>
+        <option value="barbershop">✂️ Barbershop / Salon</option>
+        <option value="coworking">🖥️ Co-Working Space</option>
       </select>
     </div>
     <div class="field">
@@ -94,6 +110,9 @@
     <button class="btn" id="copyLinkBtn" onclick="copyShareableLink()">🔗 Copy Link</button>
     <button class="btn" id="phasePanelBtn" onclick="togglePhasePanel()">⚙ Phases</button>
     <button class="btn" id="historyToggleBtn" onclick="toggleHistoryPanel()">🕐 Recent Reports</button>
+    <button class="btn" id="runsPanelBtn" onclick="toggleRunsPanel()">📂 Runs</button>
+    <button class="btn" id="saveRunBtn" onclick="promptSaveRun()" style="border-color:var(--green);color:var(--green)">💾 Save Run</button>
+    <button class="btn" id="dagPanelBtn" onclick="toggleDagPanel()">🔗 Pipeline Graph</button>
     <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖨 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
   </div>
@@ -127,6 +146,11 @@
       <label class="phase-check-row"><input type="checkbox" id="phase-cb-12" checked onchange="togglePhase(12,this)"><span class="phase-num">12</span><span>Sources &amp; Citations</span></label>
     </div>
   </div>
+  <div id="dagPanel" class="dag-panel" style="display:none">
+    <div class="dag-panel-header">Agent Dependency Graph — click any node to re-run that agent</div>
+    <div id="dagContainer" class="dag-container"></div>
+  </div>
+  <div id="runsPanel" style="display:none"></div>
   <div class="progress-wrap">
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     <div class="progress-text" id="progressText">Enter your API key and click Run</div>
@@ -145,6 +169,12 @@
         <option value="gym">💪 Gym / Fitness Center</option>
         <option value="indoor_play">🎠 Indoor Play Area / FEC</option>
         <option value="dry_cleaning">👔 Dry Cleaning / Laundry</option>
+        <option value="senior_care">🏥 Senior Care / Assisted Living</option>
+        <option value="tutoring">📚 Tutoring / Learning Center</option>
+        <option value="urgent_care">🩺 Urgent Care Clinic</option>
+        <option value="coffee_shop">☕ Coffee Shop / Café</option>
+        <option value="barbershop">✂️ Barbershop / Salon</option>
+        <option value="coworking">🖥️ Co-Working Space</option>
       </select>
     </div>
     <button class="compare-toggle-btn" onclick="runIndustryComparison()">⚖ Compare Industries</button>
@@ -351,7 +381,7 @@
         <button class="raw-toggle" onclick="showRaw(7)">{ } Raw</button>
       </div>
       <div id="raw-7" class="raw-data-wrap"></div>
-      <div class="panel active" id="7-s"><div class="prose" id="7-s-t"></div></div>
+      <div class="panel active" id="7-s"><div class="prose" id="7-s-t"></div><div id="7-sc-builder"></div></div>
       <div class="panel" id="7-sc"><div id="7-sc-c"></div></div>
       <div class="panel" id="7-c"><div class="chart-wrap tall"><canvas id="ch-7"></canvas></div></div>
       <div class="panel" id="7-t"><div class="tbl-wrap" id="7-t-c"></div></div>

@@ -91,6 +91,7 @@ Return ONLY:
 Important: Be honest. Flag every number or statistic the AI generated as an estimate that has no public data source. Mark those in unable_to_source. Only mark verifiable:true in sourced_claims if a real public dataset exists.`;
 
   try {
+    _setDemoKey(17);
     let d = await claudeJSON(sys, usr);
     if (!d) { d = _fallbackSources17(agentSummaries); }
 

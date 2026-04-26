@@ -95,6 +95,7 @@ Return ONLY:
 Use recommended_tuition_infant as the primary price point and recommended_tuition_preschool as the secondary price point for a ${ind.unit}. Revenue model: ${ind.revenue_unit}.
 For pricing, cross-reference NDCP county median rates to validate recommendations (premium operators typically price 10-20% above market median).`;
   try {
+    _setDemoKey(2);
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 2 fallback'); d=getFallback2(); }
     R.a2=d;

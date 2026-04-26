@@ -53,6 +53,11 @@ const JS_FILES = [
   'src/js/33-streaming.js',       // Streaming responses (claudeStream + claudeStreamJSON)
   'src/js/34-history.js',         // Session history — last 5 runs
   'src/js/35-compare-zip.js',     // ZIP comparison mode (two markets side by side)
+  'src/js/36-demo-data.js',       // Dedicated demo data (replaces fragile prompt parsing)
+  'src/js/37-runs.js',            // Persistent named pipeline runs
+  'src/js/38-dag.js',             // Agent dependency graph visualization
+  'src/js/39-scenario.js',        // Interactive financial scenario builder
+  'src/js/40-local-guide.js',     // Ollama/local setup guide + data freshness helpers
 ];
 
 const CSS_FILES = ['src/styles.css'];

@@ -89,9 +89,13 @@ function _escHtml(s) {
 async function claudeStreamJSON(system, user, streamPanelId) {
   // Demo mode: use normal path
   if (demoMode) {
+    await new Promise(r => setTimeout(r, 300));
+    if (typeof getDemoData === 'function') {
+      const d = getDemoData(8);
+      if (d) return d;
+    }
     const marker = user.search(/Return ONLY[:\s]/i);
     const src    = marker >= 0 ? user.slice(marker) : user;
-    await new Promise(r => setTimeout(r, 300));
     return parseJSON(src) || {};
   }
 

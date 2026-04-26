@@ -60,14 +60,21 @@ function parseJSON(text) {
 
 function killChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete charts[id]}}
 
+let _demoCJKey = null;
+function _setDemoKey(k) { _demoCJKey = k; }
+
 // Retry an agent call up to 2 times if JSON parse fails
 async function claudeJSON(system, user) {
   if (demoMode) {
     await new Promise(r => setTimeout(r, 400));
-    // After CR-001 ctx() calls embed partial JSON early in the prompt.
-    // The template response always follows "Return ONLY:" — parse from there.
+    // NEW: Try dedicated demo data first (deterministic, richly-shaped)
+    if (typeof getDemoData === 'function' && typeof _demoCJKey !== 'undefined' && _demoCJKey !== null) {
+      const d = getDemoData(_demoCJKey);
+      if (d) { _demoCJKey = null; return d; }
+    }
+    // Fallback: parse template from prompt (legacy)
     const marker = user.search(/Return ONLY[:\s]/i);
-    const src = marker >= 0 ? user.slice(marker) : user;
+    const src    = marker >= 0 ? user.slice(marker) : user;
     const d = parseJSON(src);
     if (d) return d;
     return {};

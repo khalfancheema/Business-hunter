@@ -133,6 +133,7 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
 }`;
 
   try {
+    _setDemoKey(1);
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 1 fallback'); d=getFallback1(); }
     R.a1=d;
