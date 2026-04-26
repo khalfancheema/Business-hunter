@@ -207,7 +207,7 @@
   <div class="agent-card" id="card-1">
     <div class="agent-head">
       <div class="agent-ico">📊</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Demographics</div><div class="agent-role">Census · GIS · Population · Income</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Demographics</div><div id="role-1" class="agent-role">Census · GIS · Population · Income</div></div>
       <span id="timer-1" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-1" onclick="reRunAgent(1)" data-tip="Re-run Demographics using current upstream context. Use when it errored or to get a fresh result without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-1"></div>
@@ -232,7 +232,7 @@
   <div class="agent-card" id="card-5">
     <div class="agent-head">
       <div class="agent-ico">⚖️</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Compliance</div><div class="agent-role">Regulatory · Zoning · Licensing · Permits</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Compliance</div><div id="role-5" class="agent-role">Regulatory · Zoning · Licensing · Permits</div></div>
       <span id="timer-5" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-5" onclick="reRunAgent(5)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-5"></div>
@@ -257,7 +257,7 @@
   <div class="agent-card" id="card-6">
     <div class="agent-head">
       <div class="agent-ico">🔍</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Competitive Intelligence</div><div class="agent-role">Market Research · Competitor Mapping</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Competitive Intelligence</div><div id="role-6" class="agent-role">Market Research · Competitor Mapping</div></div>
       <span id="timer-6" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-6" onclick="reRunAgent(6)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-6"></div>
@@ -283,7 +283,7 @@
   <div class="agent-card" id="card-2">
     <div class="agent-head">
       <div class="agent-ico">📈</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Gap Analysis</div><div class="agent-role">Supply vs Demand · City Rankings · Opportunity Scoring</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Gap Analysis</div><div id="role-2" class="agent-role">Supply vs Demand · City Rankings · Opportunity Scoring</div></div>
       <span id="timer-2" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-2" onclick="reRunAgent(2)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-2"></div>
@@ -311,7 +311,7 @@
   <div class="agent-card" id="card-3">
     <div class="agent-head">
       <div class="agent-ico">📍</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Site Selection</div><div class="agent-role">Location Scoring · City Comparison · Radar Charts</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Site Selection</div><div id="role-3" class="agent-role">Location Scoring · City Comparison · Radar Charts</div></div>
       <span id="timer-3" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-3" onclick="reRunAgent(3)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-3"></div>
@@ -339,7 +339,7 @@
   <div class="agent-card" id="card-4">
     <div class="agent-head">
       <div class="agent-ico">🏢</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Real Estate</div><div class="agent-role">Live Listings · Direct Links · Broker Contacts · By City</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Real Estate</div><div id="role-4" class="agent-role">Live Listings · Direct Links · Broker Contacts · By City</div></div>
       <span id="timer-4" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-4" onclick="reRunAgent(4)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-4"></div>
@@ -367,7 +367,7 @@
   <div class="agent-card" id="card-7">
     <div class="agent-head">
       <div class="agent-ico">💰</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Financial Feasibility</div><div class="agent-role">3-Scenario Model · P&L Projection · Break-Even by City</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Financial Feasibility</div><div id="role-7" class="agent-role">3-Scenario Model · P&L Projection · Break-Even by City</div></div>
       <span id="timer-7" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-7" onclick="reRunAgent(7)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-7"></div>
@@ -414,7 +414,7 @@
   <div class="agent-card" id="card-9">
     <div class="agent-head">
       <div class="agent-ico">🏦</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Business Plan</div><div class="agent-role">SBA 7(a) Loan Package · Investor Deck · Financial Projections</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Business Plan</div><div id="role-9" class="agent-role">SBA 7(a) Loan Package · Investor Deck · Financial Projections</div></div>
       <span id="timer-9" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-9" onclick="reRunAgent(9)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-9"></div>
@@ -503,7 +503,7 @@
   <div class="agent-card" id="card-12">
     <div class="agent-head">
       <div class="agent-ico">💵</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div id="role-12" class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
       <span id="timer-12" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-12"></div>
@@ -511,8 +511,8 @@
     <div class="agent-out" id="out-12">
       <div class="tabs">
         <div class="tab active" onclick="tab('12','sum')">Summary</div>
-        <div class="tab" onclick="tab('12','caps')">GA CAPS</div>
-        <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
+        <div id="tab-12-grant1" class="tab" onclick="tab('12','caps')">GA CAPS</div>
+        <div id="tab-12-grant2" class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
         <div class="tab" onclick="tab('12','local')">Local Incentives</div>
         <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
         <button class="raw-toggle" onclick="showRaw(12)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
@@ -530,7 +530,7 @@
   <div class="agent-card" id="card-13">
     <div class="agent-head">
       <div class="agent-ico">🎯</div>
-      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
+      <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div id="role-13" class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
       <span id="timer-13" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
       <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-13"></div>

@@ -147,6 +147,26 @@ const INDUSTRIES = {
   coworking: { label:'Co-Working Space', emoji:'🖥️', unit:'co-working space', units:'co-working spaces', capacity_label:'Desk Capacity', capacity_default:80, budget_default:380000, regulatory:'Local zoning (office use), building occupancy certificate, ADA, fire code', regulatory_url:'local municipality', tiers_label:'Membership Tiers', tiers:['Hot Desk + Day Passes','Dedicated Desk + Private Offices','Full-Service (all tiers + event space)'], compliance:'commercial lease zoning for office use, certificate of occupancy, ADA accessibility, fire code and egress, network/data cabling permits, business license, food service permit if café included', grants:'SBA 7(a) loans, local economic development incentives, USDA Rural Development (if rural), EDA community development grants, innovation hub grants from state EDAs', competitors:'WeWork, Regus/IWG, Industrious, Spaces, local independent co-working operators, shared office suites', financials:'hot desk daily/monthly, dedicated desk monthly, private office monthly, day pass, virtual office service, conference room hourly, event rental, corporate team memberships', staffing:'community manager, front desk/host, IT/network support, maintenance, optional café staff', real_estate:'5,000–20,000 sqft, Class B or A office or adaptive reuse, open floor plan, private phone/office pods, conference rooms, kitchen, lounge, high-speed fiber, 24/7 access control, ADA, parking', revenue_unit:'monthly recurring membership revenue', price_label_primary:'Desk/mo', price_label_secondary:'Private Office/mo' },
 };
 
+// ── PER-INDUSTRY UI TEXT ─────────────────────────────────────
+// Drives dynamic agent card subtitles and Agent 12 grant tab labels
+// when the industry selector changes.
+const IND_UI = {
+  daycare:     { dem:'Children Under 5 · Family Income · ACS',         comp:'Primrose · KinderCare · Bright Horizons',      fin:'Monthly Tuition · CACFP Reimbursement · Staff Ratios',  grant1:'GA CAPS',          grant2:'USDA CACFP'         },
+  gas_station: { dem:'Traffic Counts (AADT) · Vehicle Ownership',      comp:'Shell · Circle K · QuikTrip · RaceTrac',       fin:'Fuel Margin/gal · C-Store Margin · Daily Volume',       grant1:'EPA Brownfields',  grant2:'USDA Rural Biz'    },
+  laundromat:  { dem:'Renter Households · Pop Density · Income',       comp:'Speed Queen · WaveMax · Local Coin-Ops',       fin:'Revenue/Machine/Day · Utility Cost · WDF Service',      grant1:'SBA 7(a)',         grant2:'Utility Rebates'   },
+  car_wash:    { dem:'Vehicle Ownership · Traffic (AADT) · Income',   comp:"Mister Car Wash · Tommy's · Zips Car Wash",    fin:'Cars/Hour/Bay · Avg Ticket · Monthly Memberships',      grant1:'EPA WaterSense',   grant2:'USDA Rural Biz'    },
+  restaurant:  { dem:'Daytime Population · Foot Traffic · Income',     comp:'Local Independents · Fast-Casual Chains',      fin:'Covers/Day · Avg Check · Food Cost % · Labor %',        grant1:'SBA Restaurant',   grant2:'USDA Rural Biz'    },
+  gym:         { dem:'Adults 18–54 · Health Spend · Household Income', comp:'Planet Fitness · Anytime Fitness · YMCA',      fin:'Monthly Members · PT Packages · Class Revenue',         grant1:'SBA 7(a)',         grant2:'New Markets Tax'   },
+  indoor_play: { dem:'Children 3–12 · Family Income · Tourism',       comp:'Sky Zone · Urban Air · Altitude · Pump It Up', fin:'Admissions/Day · Party Packages · Memberships',         grant1:'SBA 7(a)',         grant2:'Tourism Dev Grants' },
+  dry_cleaning:{ dem:'Commuter Density · Household Income · ACS',      comp:'Martinizing · CD One Price · Tide Cleaners',   fin:'Revenue/Garment · Alterations · Commercial Contracts',  grant1:'EPA Brownfields',  grant2:'SBA 7(a)'          },
+  senior_care: { dem:'Population 65+ · Medicare Enrollment · Income',  comp:'Brookdale · Sunrise · Atria · Local ALFs',     fin:'Monthly Fee/Bed · Private Pay vs Medicaid · Occupancy', grant1:'Medicaid/Medicare', grant2:'HUD 232 / USDA'   },
+  tutoring:    { dem:'School-Age Children · Education Level · Income', comp:'Kumon · Sylvan · Mathnasium · Huntington',     fin:'Hourly Session Rate · Monthly Packages · Test Prep',    grant1:'Title I Tutoring', grant2:'State Programs'    },
+  urgent_care: { dem:'Population · Insurance Coverage · Health Gaps',  comp:'AFC Urgent · CityMD · FastMed · MedExpress',  fin:'Rev/Patient Visit · Payer Mix · Ancillary Revenue',     grant1:'HRSA / FQHC',     grant2:'Rural Health Grants' },
+  coffee_shop: { dem:'Foot Traffic · Daytime Population · Income',     comp:'Starbucks · Dunkin · Dutch Bros · Local Cafés', fin:'Avg Ticket · Daily Throughput · Revenue/Sq Ft',         grant1:'SBA Microloan',    grant2:'CDBG Grants'       },
+  barbershop:  { dem:'Population Density · Household Income · Spend',  comp:"Sport Clips · Great Clips · Floyd's 99",       fin:'Rev/Chair/Day · Service Mix · Retail Products',         grant1:'SBA Microloan',    grant2:'Minority Biz Dev'  },
+  coworking:   { dem:'Remote Workers · Business Density · Income',     comp:'WeWork · Regus · Industrious · Spaces',        fin:'Monthly Desk Rev · Private Offices · Day Passes',       grant1:'EDA / SBA 7(a)',  grant2:'Innovation Hub'    },
+};
+
 // ── MULTI-PROVIDER CONFIG ────────────────────────────────────
 const PROVIDERS = {
   anthropic: {
