@@ -101,20 +101,20 @@
       <input type="number" id="budget" value="600000" min="50000" step="50000" style="width:120px" />
       <div id="tip-budget" class="input-tip" style="display:none"></div>
     </div>
-    <button class="btn primary" id="runBtn" onclick="runPipeline()">▶ Run Pipeline</button>
-    <button id="stopBtn" onclick="stopRequested=true;this.textContent='Stopping…';this.disabled=true" style="display:none;padding:10px 16px;background:var(--red-dim);border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer">⬛ Stop</button>
-    <button id="clearCacheBtn" onclick="clearAllCache();this.textContent='✓ Cleared';setTimeout(()=>this.textContent='Clear Cache',1500)" style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">Clear Cache</button>
-    <button class="btn" id="resetBtn" onclick="resetAll()" style="display:none">↺ Reset</button>
-    <button class="btn" id="exportBtn" onclick="exportResults()" style="border-color:var(--green);color:var(--green)">⬇ Export JSON</button>
-    <button class="btn" id="fullExportBtn" onclick="fullPipelineExport()" style="border-color:var(--blue);color:var(--blue)">📄 Full PDF</button>
-    <button class="btn" id="copyLinkBtn" onclick="copyShareableLink()">🔗 Copy Link</button>
-    <button class="btn" id="phasePanelBtn" onclick="togglePhasePanel()">⚙ Phases</button>
-    <button class="btn" id="historyToggleBtn" onclick="toggleHistoryPanel()">🕐 Recent Reports</button>
-    <button class="btn" id="runsPanelBtn" onclick="toggleRunsPanel()">📂 Runs</button>
-    <button class="btn" id="saveRunBtn" onclick="promptSaveRun()" style="border-color:var(--green);color:var(--green)">💾 Save Run</button>
-    <button class="btn" id="dagPanelBtn" onclick="toggleDagPanel()">🔗 Pipeline Graph</button>
-    <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖨 Print Report</button>
-    <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
+    <button class="btn primary" id="runBtn" onclick="runPipeline()" data-tip="Start the full 17-agent pipeline. Enter your API key and inputs first. All phases run in sequence.">▶ Run Pipeline</button>
+    <button id="stopBtn" onclick="stopRequested=true;this.textContent='Stopping…';this.disabled=true" style="display:none;padding:10px 16px;background:var(--red-dim);border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer" data-tip="Halt the pipeline after the current agent finishes. All results so far are preserved.">⬛ Stop</button>
+    <button id="clearCacheBtn" onclick="clearAllCache();this.textContent='✓ Cleared';setTimeout(()=>this.textContent='Clear Cache',1500)" style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer" data-tip="Delete cached API responses (4-hour TTL). Use when you want fresh data for the same ZIP and industry — not needed for new inputs.">Clear Cache</button>
+    <button class="btn" id="resetBtn" onclick="resetAll()" style="display:none" data-tip="Clear all agent outputs and return to idle. Your inputs and API key are kept.">↺ Reset</button>
+    <button class="btn" id="exportBtn" onclick="exportResults()" style="border-color:var(--green);color:var(--green)" data-tip="Download all 17 agent results as a single JSON file. Use for offline analysis, sharing raw data, or custom processing.">⬇ Export JSON</button>
+    <button class="btn" id="fullExportBtn" onclick="fullPipelineExport()" style="border-color:var(--blue);color:var(--blue)" data-tip="Generate a print-ready document with all 17 agents, cover page, and table of contents. Charts are captured as PNG images.">📄 Full PDF</button>
+    <button class="btn" id="copyLinkBtn" onclick="copyShareableLink()" data-tip="Copy a shareable URL with your inputs encoded. Anyone with the link loads the same ZIP, industry, radius, capacity, and budget.">🔗 Copy Link</button>
+    <button class="btn" id="phasePanelBtn" onclick="togglePhasePanel()" data-tip="Choose which pipeline phases to run. Skip phases to reuse cached results and save time and API cost.">⚙ Phases</button>
+    <button class="btn" id="historyToggleBtn" onclick="toggleHistoryPanel()" data-tip="View your last 5 pipeline runs with Go/No-Go verdict badges. Click any run to restore its inputs.">🕐 Recent Reports</button>
+    <button class="btn" id="runsPanelBtn" onclick="toggleRunsPanel()" data-tip="Browse, restore, or delete saved named pipeline runs. Restore any full run instantly — no re-running needed.">📂 Runs</button>
+    <button class="btn" id="saveRunBtn" onclick="promptSaveRun()" style="border-color:var(--green);color:var(--green)" data-tip="Save this completed run by name (e.g. 'Atlanta Q1 Childcare'). Captures all agent outputs so you can recall them later without re-running.">💾 Save Run</button>
+    <button class="btn" id="dagPanelBtn" onclick="toggleDagPanel()" data-tip="Open the Agent Dependency Graph — a live SVG showing all 17 agents and their dependencies. Node colors update in real time. Click any node to re-run that agent.">🔗 Pipeline Graph</button>
+    <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)" data-tip="Print a formatted executive summary with key sections. Use Full PDF for the complete 17-agent document.">🖨 Print Report</button>
+    <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)" data-tip="Run the pipeline with built-in sample data — no API key required. Use to preview output shapes and features before a real run.">⚡ Demo Mode</button>
   </div>
 
   <!-- Phase selector panel (collapsed by default) -->
@@ -122,15 +122,15 @@
     <div class="phase-panel-header">
       <span>Select which phases to run — uncheck to skip and use cached data instead</span>
       <div class="phase-panel-actions">
-        <button class="phase-quick-btn" onclick="phaseSelectAll(event)">All</button>
-        <button class="phase-quick-btn" onclick="phaseSelectNone(event)">None</button>
+        <button class="phase-quick-btn" onclick="phaseSelectAll(event)" data-tip="Enable all pipeline phases.">All</button>
+        <button class="phase-quick-btn" onclick="phaseSelectNone(event)" data-tip="Disable all pipeline phases. Then check only the ones you want.">None</button>
       </div>
     </div>
     <div class="phase-presets">
-      <button id="preset-quick"      class="phase-preset-btn" onclick="setPhasePreset('quick')">⚡ Quick Verdict <span class="preset-meta">~$0.15 · ~2 min</span></button>
-      <button id="preset-foundation" class="phase-preset-btn" onclick="setPhasePreset('foundation')">🔬 Foundation Only <span class="preset-meta">~$0.06 · ~1 min</span></button>
-      <button id="preset-financial"  class="phase-preset-btn" onclick="setPhasePreset('financial')">💰 Thru Financials <span class="preset-meta">~$0.20 · ~3 min</span></button>
-      <button id="preset-full"       class="phase-preset-btn active" onclick="setPhasePreset('full')">📋 Full Report <span class="preset-meta">~$0.40 · ~8 min</span></button>
+      <button id="preset-quick"      class="phase-preset-btn" onclick="setPhasePreset('quick')"      data-tip="Phases 1–6: Foundation through Executive Summary. Best for a quick Go/No-Go decision before committing to a full run.">⚡ Quick Verdict <span class="preset-meta">~$0.15 · ~2 min</span></button>
+      <button id="preset-foundation" class="phase-preset-btn" onclick="setPhasePreset('foundation')" data-tip="Phase 1 only: Demographics, Compliance, and Competitive Intel. Use for a fast market snapshot with minimal cost.">🔬 Foundation Only <span class="preset-meta">~$0.06 · ~1 min</span></button>
+      <button id="preset-financial"  class="phase-preset-btn" onclick="setPhasePreset('financial')"  data-tip="Phases 1–5: covers all quantitative analysis through Financial Feasibility. Best before drafting a business plan.">💰 Thru Financials <span class="preset-meta">~$0.20 · ~3 min</span></button>
+      <button id="preset-full"       class="phase-preset-btn active" onclick="setPhasePreset('full')" data-tip="All 12 phases, all 17 agents. Complete business planning package — SBA plan, project plan, grants, competitor deep-dive, and citations.">📋 Full Report <span class="preset-meta">~$0.40 · ~8 min</span></button>
     </div>
     <div class="phase-checks">
       <label class="phase-check-row"><input type="checkbox" id="phase-cb-1" checked onchange="togglePhase(1,this)"><span class="phase-num">1</span><span>Foundation Research <em>(Demographics · Compliance · Competitive Intel)</em></span></label>
@@ -177,12 +177,12 @@
         <option value="coworking">🖥️ Co-Working Space</option>
       </select>
     </div>
-    <button class="compare-toggle-btn" onclick="runIndustryComparison()">⚖ Compare Industries</button>
+    <button class="compare-toggle-btn" onclick="runIndustryComparison()" data-tip="Run an AI side-by-side of two industries for the same ZIP and radius. Select the second industry in the dropdown first.">⚖ Compare Industries</button>
     <div class="field" style="margin-left:auto">
       <label>Compare ZIP</label>
       <input type="text" id="compareZipInput" placeholder="e.g. 30022" maxlength="5" style="width:95px" />
     </div>
-    <button id="compareZipBtn" class="compare-toggle-btn" onclick="runZipComparison()" style="border-color:var(--teal);color:var(--teal)">⚖ Compare ZIPs</button>
+    <button id="compareZipBtn" class="compare-toggle-btn" onclick="runZipComparison()" style="border-color:var(--teal);color:var(--teal)" data-tip="Compare two ZIP codes for the same industry. Enter the second ZIP in the field to the left, then click. Uses context from your existing run.">⚖ Compare ZIPs</button>
   </div>
   <div id="comparePanel" class="compare-panel"></div>
   <div id="zipComparePanel" style="display:none;margin-top:12px"></div>
@@ -209,7 +209,7 @@
       <div class="agent-ico">📊</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Demographics</div><div class="agent-role">Census · GIS · Population · Income</div></div>
       <span id="timer-1" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-1" onclick="reRunAgent(1)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-1" onclick="reRunAgent(1)" data-tip="Re-run Demographics using current upstream context. Use when it errored or to get a fresh result without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-1"></div>
     </div>
     <div class="agent-out" id="out-1">
@@ -218,7 +218,7 @@
         <div class="tab" onclick="tab('1','h')">Heatmap</div>
         <div class="tab" onclick="tab('1','c')">Chart</div>
         <div class="tab" onclick="tab('1','t')">City Table</div>
-        <button class="raw-toggle" onclick="showRaw(1)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(1)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-1" class="raw-data-wrap"></div>
       <div class="panel active" id="1-s"><div class="prose" id="1-s-t"></div></div>
@@ -234,7 +234,7 @@
       <div class="agent-ico">⚖️</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Compliance</div><div class="agent-role">Regulatory · Zoning · Licensing · Permits</div></div>
       <span id="timer-5" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-5" onclick="reRunAgent(5)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-5" onclick="reRunAgent(5)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-5"></div>
     </div>
     <div class="agent-out" id="out-5">
@@ -243,7 +243,7 @@
         <div class="tab" onclick="tab('5','t')">Requirements</div>
         <div class="tab" onclick="tab('5','a')">How to Apply</div>
         <div class="tab" onclick="tab('5','c')">Timeline</div>
-        <button class="raw-toggle" onclick="showRaw(5)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(5)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-5" class="raw-data-wrap"></div>
       <div class="panel active" id="5-s"><div class="prose" id="5-s-t"></div></div>
@@ -259,7 +259,7 @@
       <div class="agent-ico">🔍</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Competitive Intelligence</div><div class="agent-role">Market Research · Competitor Mapping</div></div>
       <span id="timer-6" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-6" onclick="reRunAgent(6)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-6" onclick="reRunAgent(6)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-6"></div>
     </div>
     <div class="agent-out" id="out-6">
@@ -267,7 +267,7 @@
         <div class="tab active" onclick="tab('6','s')">Summary</div>
         <div class="tab" onclick="tab('6','c')">Market Chart</div>
         <div class="tab" onclick="tab('6','t')">By City</div>
-        <button class="raw-toggle" onclick="showRaw(6)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(6)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-6" class="raw-data-wrap"></div>
       <div class="panel active" id="6-s"><div class="prose" id="6-s-t"></div></div>
@@ -285,7 +285,7 @@
       <div class="agent-ico">📈</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Gap Analysis</div><div class="agent-role">Supply vs Demand · City Rankings · Opportunity Scoring</div></div>
       <span id="timer-2" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-2" onclick="reRunAgent(2)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-2" onclick="reRunAgent(2)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-2"></div>
     </div>
     <div class="agent-out" id="out-2">
@@ -294,7 +294,7 @@
         <div class="tab" onclick="tab('2','h')">Heatmap</div>
         <div class="tab" onclick="tab('2','r')">City Rankings</div>
         <div class="tab" onclick="tab('2','c')">Gap Chart</div>
-        <button class="raw-toggle" onclick="showRaw(2)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(2)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-2" class="raw-data-wrap"></div>
       <div class="panel active" id="2-s"><div class="prose" id="2-s-t"></div></div>
@@ -313,7 +313,7 @@
       <div class="agent-ico">📍</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Site Selection</div><div class="agent-role">Location Scoring · City Comparison · Radar Charts</div></div>
       <span id="timer-3" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-3" onclick="reRunAgent(3)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-3" onclick="reRunAgent(3)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-3"></div>
     </div>
     <div class="agent-out" id="out-3">
@@ -322,7 +322,7 @@
         <div class="tab" onclick="tab('3','r')">5 Options Ranked</div>
         <div class="tab" onclick="tab('3','c')">Score Chart</div>
         <div class="tab" onclick="tab('3','t')">Comparison Table</div>
-        <button class="raw-toggle" onclick="showRaw(3)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(3)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-3" class="raw-data-wrap"></div>
       <div class="panel active" id="3-s"><div class="prose" id="3-s-t"></div></div>
@@ -341,7 +341,7 @@
       <div class="agent-ico">🏢</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Real Estate</div><div class="agent-role">Live Listings · Direct Links · Broker Contacts · By City</div></div>
       <span id="timer-4" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-4" onclick="reRunAgent(4)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-4" onclick="reRunAgent(4)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-4"></div>
     </div>
     <div class="agent-out" id="out-4">
@@ -350,7 +350,7 @@
         <div class="tab" onclick="tab('4','l')">Live Listings</div>
         <div class="tab" onclick="tab('4','t')">By City Table</div>
         <div class="tab" onclick="tab('4','c')">Cost Chart</div>
-        <button class="raw-toggle" onclick="showRaw(4)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(4)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-4" class="raw-data-wrap"></div>
       <div class="panel active" id="4-s"><div class="prose" id="4-s-t"></div></div>
@@ -369,7 +369,7 @@
       <div class="agent-ico">💰</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Financial Feasibility</div><div class="agent-role">3-Scenario Model · P&L Projection · Break-Even by City</div></div>
       <span id="timer-7" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-7" onclick="reRunAgent(7)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-7" onclick="reRunAgent(7)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-7"></div>
     </div>
     <div class="agent-out" id="out-7">
@@ -378,7 +378,7 @@
         <div class="tab" onclick="tab('7','sc')">Scenarios</div>
         <div class="tab" onclick="tab('7','c')">P&amp;L Chart</div>
         <div class="tab" onclick="tab('7','t')">Cost by City</div>
-        <button class="raw-toggle" onclick="showRaw(7)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(7)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-7" class="raw-data-wrap"></div>
       <div class="panel active" id="7-s"><div class="prose" id="7-s-t"></div><div id="7-sc-builder"></div></div>
@@ -397,11 +397,11 @@
       <div class="agent-ico">📋</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Executive Summary</div><div class="agent-role">Go/No-Go Decision · Risk Matrix · Action Items</div></div>
       <span id="timer-8" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-8" onclick="reRunAgent(8)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-8" onclick="reRunAgent(8)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-8"></div>
     </div>
     <div class="agent-out" id="out-8">
-      <div style="margin-bottom:8px"><button class="raw-toggle" onclick="showRaw(8)">{ } Raw</button></div>
+      <div style="margin-bottom:8px"><button class="raw-toggle" onclick="showRaw(8)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button></div>
       <div id="raw-8" class="raw-data-wrap"></div>
       <div class="prose" id="8-s-t"></div>
     </div>
@@ -416,7 +416,7 @@
       <div class="agent-ico">🏦</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Business Plan</div><div class="agent-role">SBA 7(a) Loan Package · Investor Deck · Financial Projections</div></div>
       <span id="timer-9" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-9" onclick="reRunAgent(9)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-9" onclick="reRunAgent(9)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-9"></div>
     </div>
     <div class="agent-out" id="out-9">
@@ -427,7 +427,7 @@
         <div class="tab" onclick="tab('9','ops')">Operations</div>
         <div class="tab" onclick="tab('9','sba')">SBA Package</div>
         <div class="tab" onclick="tab('9','inv')">Investor Deck</div>
-        <button class="raw-toggle" onclick="showRaw(9)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(9)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-9" class="raw-data-wrap"></div>
       <div class="panel active" id="9-ov"><div id="9-ov-c"></div></div>
@@ -448,7 +448,7 @@
       <div class="agent-ico">🗂️</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Project Plan</div><div class="agent-role">18-Month Gantt · Milestones · Budget Tracker · Risk Register</div></div>
       <span id="timer-10" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-10" onclick="reRunAgent(10)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-10" onclick="reRunAgent(10)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-10"></div>
     </div>
     <div class="agent-out" id="out-10">
@@ -459,7 +459,7 @@
         <div class="tab" onclick="tab('10','risk')">Risk Register</div>
         <div class="tab" onclick="tab('10','team')">Team &amp; Vendors</div>
         <div class="tab" onclick="tab('10','check')">Checklist</div>
-        <button class="raw-toggle" onclick="showRaw(10)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(10)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-10" class="raw-data-wrap"></div>
       <div class="panel active" id="10-gantt"><div id="10-gantt-c"></div></div>
@@ -482,7 +482,7 @@
       <div class="agent-ico">🗺️</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Market Map</div><div class="agent-role">Interactive City Map · Gap Scores · Demographics · Real Estate Pins</div></div>
       <span id="timer-11" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-11"></div>
     </div>
     <div class="agent-out" id="out-11">
@@ -490,7 +490,7 @@
         <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
         <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
         <div class="tab" onclick="tab('11','dir')">Directions</div>
-        <button class="raw-toggle" onclick="showRaw(11)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(11)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-11" class="raw-data-wrap"></div>
       <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
@@ -505,7 +505,7 @@
       <div class="agent-ico">💵</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Grant &amp; Funding Search</div><div class="agent-role">Industry Subsidies · Federal Programs · Local Incentives · SBA Grants</div></div>
       <span id="timer-12" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-12"></div>
     </div>
     <div class="agent-out" id="out-12">
@@ -515,7 +515,7 @@
         <div class="tab" onclick="tab('12','usda')">USDA &amp; Federal</div>
         <div class="tab" onclick="tab('12','local')">Local Incentives</div>
         <div class="tab" onclick="tab('12','tbl')">Full Grant Table</div>
-        <button class="raw-toggle" onclick="showRaw(12)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(12)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-12" class="raw-data-wrap"></div>
       <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
@@ -532,7 +532,7 @@
       <div class="agent-ico">🎯</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Competitor Deep-Dive</div><div class="agent-role">Google/Yelp Reviews · Complaint Patterns · Differentiation Strategy</div></div>
       <span id="timer-13" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-13"></div>
     </div>
     <div class="agent-out" id="out-13">
@@ -542,7 +542,7 @@
         <div class="tab" onclick="tab('13','pain')">Pain Points</div>
         <div class="tab" onclick="tab('13','diff')">Differentiation Plan</div>
         <div class="tab" onclick="tab('13','msg')">Messaging Guide</div>
-        <button class="raw-toggle" onclick="showRaw(13)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(13)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-13" class="raw-data-wrap"></div>
       <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
@@ -559,7 +559,7 @@
       <div class="agent-ico">🏗️</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Build vs Buy</div><div class="agent-role">Property Listings · Match Scores · Decision Matrix · Recommendation</div></div>
       <span id="timer-16" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-16" onclick="reRunAgent(16)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-16" onclick="reRunAgent(16)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-16"></div>
     </div>
     <div class="agent-out" id="out-16">
@@ -569,7 +569,7 @@
         <div class="tab" onclick="tab('16','comp')">Build vs Buy</div>
         <div class="tab" onclick="tab('16','matrix')">Decision Matrix</div>
         <div class="tab" onclick="tab('16','steps')">Next Steps</div>
-        <button class="raw-toggle" onclick="showRaw(16)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(16)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-16" class="raw-data-wrap"></div>
       <div class="panel active" id="16-sum"><div id="16-sum-c"></div></div>
@@ -592,7 +592,7 @@
       <div class="agent-ico">🔬</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Code Review</div><div class="agent-role">Correctness · Performance · Token Efficiency · API Cost</div></div>
       <span id="timer-14" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-14"></div>
     </div>
     <div class="agent-out" id="out-14">
@@ -602,7 +602,7 @@
         <div class="tab" onclick="tab('14','perf')">Performance</div>
         <div class="tab" onclick="tab('14','cost')">Cost Analysis</div>
         <div class="tab" onclick="tab('14','fixes')">Recommended Fixes</div>
-        <button class="raw-toggle" onclick="showRaw(14)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(14)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-14" class="raw-data-wrap"></div>
       <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
@@ -619,7 +619,7 @@
       <div class="agent-ico">✅</div>
       <div style="flex:1;min-width:0"><div class="agent-name">QA &amp; Testing</div><div class="agent-role">Functional Tests · Data Accuracy · UX · Output Validation</div></div>
       <span id="timer-15" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-15"></div>
     </div>
     <div class="agent-out" id="out-15">
@@ -629,7 +629,7 @@
         <div class="tab" onclick="tab('15','data')">Data Validation</div>
         <div class="tab" onclick="tab('15','ux')">UX Audit</div>
         <div class="tab" onclick="tab('15','score')">Health Score</div>
-        <button class="raw-toggle" onclick="showRaw(15)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(15)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-15" class="raw-data-wrap"></div>
       <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
@@ -650,7 +650,7 @@
       <div class="agent-ico">📚</div>
       <div style="flex:1;min-width:0"><div class="agent-name">Sources &amp; Citations</div><div class="agent-role">All Data Sources · Sourced Claims · Unable to Source · Integrity Audit</div></div>
       <span id="timer-17" style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:6px"></span>
-      <button class="rerun-btn" id="rerun-17" onclick="reRunAgent(17)">↺ Re-run</button>
+      <button class="rerun-btn" id="rerun-17" onclick="reRunAgent(17)" data-tip="Re-run this agent using current upstream context. Use when it errored or to refresh a single step without re-running the full pipeline." data-tip-pos="left">↺ Re-run</button>
       <div class="agent-dot" id="dot-17"></div>
     </div>
     <div class="agent-out" id="out-17">
@@ -659,7 +659,7 @@
         <div class="tab" onclick="tab('17','sources')">All Sources</div>
         <div class="tab" onclick="tab('17','claims')">Sourced Claims</div>
         <div class="tab" onclick="tab('17','unsourced')">Unable to Source</div>
-        <button class="raw-toggle" onclick="showRaw(17)">{ } Raw</button>
+        <button class="raw-toggle" onclick="showRaw(17)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
       </div>
       <div id="raw-17" class="raw-data-wrap"></div>
       <div class="panel active" id="17-sum"><div id="17-sum-c"></div></div>
@@ -673,7 +673,7 @@
 <div class="final-box" id="finalBox">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
     <h2 style="margin:0;padding:0;border:none">Executive Report</h2>
-    <button onclick="toggleProfileForm()" id="profileFormToggle" style="font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-family:'Instrument Sans',sans-serif">✏️ Personalize Report</button>
+    <button onclick="toggleProfileForm()" id="profileFormToggle" style="font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-family:'Instrument Sans',sans-serif" data-tip="Add your business name, founder, target opening date, and notes. Appears in the report header and all export formats." data-tip-pos="left">✏️ Personalize Report</button>
   </div>
 
   <!-- Personalized header (visible after applyProfile) -->
@@ -726,8 +726,8 @@
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
-      <button onclick="applyProfile()" style="padding:9px 20px;background:var(--blue);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer">✓ Update Report</button>
-      <button onclick="clearProfile()" style="padding:9px 14px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">Clear</button>
+      <button onclick="applyProfile()" style="padding:9px 20px;background:var(--blue);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer" data-tip="Apply your profile details to the report header and all export formats. Saved to localStorage.">✓ Update Report</button>
+      <button onclick="clearProfile()" style="padding:9px 14px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer" data-tip="Remove all profile details from the report and clear saved profile data.">Clear</button>
       <span id="pf-saved" style="font-size:12px;color:var(--green);display:none">Saved ✓</span>
     </div>
   </div>
@@ -746,9 +746,9 @@
         <span id="modalAgentNum">Agent N</span>
       </div>
       <div class="agent-modal-actions">
-        <button class="modal-action-btn save"  id="modalSaveBtn"  onclick="saveAgentJSON()">⬇ Save JSON</button>
-        <button class="modal-action-btn print" id="modalPrintBtn" onclick="printAgentData()">🖨 Print</button>
-        <button class="modal-close-btn" onclick="closeAgentModal()" title="Close (Esc)">✕</button>
+        <button class="modal-action-btn save"  id="modalSaveBtn"  onclick="saveAgentJSON()" data-tip="Download this agent's full data as a JSON file.">⬇ Save JSON</button>
+        <button class="modal-action-btn print" id="modalPrintBtn" onclick="printAgentData()" data-tip="Print this agent's expanded data view.">🖨 Print</button>
+        <button class="modal-close-btn" onclick="closeAgentModal()" data-tip="Close this panel (Esc)">✕</button>
       </div>
     </div>
     <div class="agent-modal-body" id="modalAgentBody"></div>

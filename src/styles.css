@@ -683,3 +683,51 @@ select option{background:var(--surface2)}
 .loc-score-walk{border-color:var(--green);color:var(--green)}
 .loc-score-transit{border-color:var(--blue);color:var(--blue)}
 .loc-score-school{border-color:var(--purple);color:var(--purple)}
+
+/* ── Tooltips ──────────────────────────────────────────────────────────── */
+[data-tip]{position:relative}
+[data-tip]::after{
+  content:attr(data-tip);
+  position:absolute;
+  bottom:calc(100% + 10px);
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--surface3);
+  border:1px solid var(--border2);
+  color:var(--text);
+  font-size:11px;
+  font-family:'Instrument Sans',sans-serif;
+  line-height:1.5;
+  padding:7px 11px;
+  border-radius:8px;
+  width:max-content;
+  max-width:230px;
+  white-space:normal;
+  text-align:center;
+  z-index:9999;
+  pointer-events:none;
+  box-shadow:0 6px 24px rgba(0,0,0,0.55);
+  opacity:0;
+  transition:opacity 0.14s ease;
+}
+[data-tip]:hover::after{opacity:1}
+[data-tip]::before{
+  content:'';
+  position:absolute;
+  bottom:calc(100% + 4px);
+  left:50%;
+  transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:var(--border2);
+  z-index:9999;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.14s ease;
+}
+[data-tip]:hover::before{opacity:1}
+/* Right-edge variant — tooltip opens leftward */
+[data-tip][data-tip-pos="left"]::after{left:auto;right:0;transform:none}
+[data-tip][data-tip-pos="left"]::before{left:auto;right:14px;transform:none}
+/* Down variant — tooltip opens below */
+[data-tip][data-tip-pos="down"]::after{top:calc(100% + 10px);bottom:auto}
+[data-tip][data-tip-pos="down"]::before{top:calc(100% + 4px);bottom:auto;border-top-color:transparent;border-bottom-color:var(--border2)}

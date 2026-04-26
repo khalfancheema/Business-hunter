@@ -54,7 +54,7 @@ function renderQA(d) {
   const sevColors={high:'b-red',medium:'b-amber',low:'b-blue'};
   let ux='';
   (d.ux_audit||[]).forEach(item=>{
-    ux+=`<div class="ux-item"><div class="ux-item-header"><span class="ux-item-category">${item.category}</span><span class="badge ${sevColors[item.severity]||'b-blue'}">${item.severity.toUpperCase()}</span></div><div class="ux-item-title">${item.title}</div><div class="ux-item-detail">${item.detail}</div><div class="cr-fix" style="margin-top:8px">💡 ${item.recommendation}</div></div>`;
+    ux+=`<div class="ux-item"><div class="ux-item-header"><span class="ux-item-category">${item.category||''}</span><span class="badge ${sevColors[item.severity]||'b-blue'}">${(item.severity||'info').toUpperCase()}</span></div><div class="ux-item-title">${item.title||''}</div><div class="ux-item-detail">${item.detail||''}</div><div class="cr-fix" style="margin-top:8px">💡 ${item.recommendation||''}</div></div>`;
   });
   $('15-ux-c').innerHTML=ux;
   const hs=d.health_score;

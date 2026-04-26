@@ -35,7 +35,7 @@ function renderCodeReview(d) {
   let issues='';
   sorted.forEach(i=>{
     const bc=i.severity==='critical'?'b-red':i.severity==='high'?'b-amber':i.severity==='medium'?'b-blue':'b-green';
-    issues+=`<div class="cr-issue ${i.severity}"><div class="cr-issue-icon">${sevIcons[i.severity]||'⚪'}</div><div><div class="cr-issue-title">${i.id} — ${i.title}</div><div class="cr-issue-detail">${i.detail}</div><div class="cr-issue-location">📍 ${i.location} | ${i.category}</div><div class="cr-fix">✅ Fix: ${i.fix}</div></div><span class="badge ${bc}">${i.severity.toUpperCase()}</span></div>`;
+    issues+=`<div class="cr-issue ${i.severity||''}"><div class="cr-issue-icon">${sevIcons[i.severity]||'⚪'}</div><div><div class="cr-issue-title">${i.id||''} — ${i.title||''}</div><div class="cr-issue-detail">${i.detail||''}</div><div class="cr-issue-location">📍 ${i.location||''} | ${i.category||''}</div><div class="cr-fix">✅ Fix: ${i.fix||''}</div></div><span class="badge ${bc}">${(i.severity||'info').toUpperCase()}</span></div>`;
   });
   $('14-issues-c').innerHTML=issues;
   let perf='';
