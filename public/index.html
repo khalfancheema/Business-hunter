@@ -1908,6 +1908,17 @@ function _nv(val, formatter, fallback) {
   return formatter ? formatter(val) : String(val);
 }
 
+// _toArr — safely coerce any value to an array.
+// Handles: null/undefined → [], plain object → Object.values(), string → [],
+// already an array → as-is. Prevents "forEach/filter is not a function" when
+// the AI returns an object instead of an array.
+function _toArr(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'object') return Object.values(val);
+  return [];
+}
+
 // _nvNum — like _nv but treats 0 as missing (use for counts/prices where 0 means "not found")
 function _nvNum(val, formatter, fallback) {
   if (fallback === undefined) fallback = 'N/A';
@@ -4742,7 +4753,7 @@ function renderCodeReview(d) {
   });
   $('14-issues-c').innerHTML=issues;
   let perf='';
-  (d.performance_metrics||[]).forEach(m=>{
+  _toArr(d.performance_metrics).forEach(m=>{
     const col=m.score>=80?'var(--green)':m.score>=60?'var(--amber)':'var(--red)';
     perf+=`<div class="perf-metric"><div class="perf-metric-label">${m.metric}</div><div style="flex:1"><div class="perf-metric-bar"><div class="perf-metric-fill" style="width:${m.score}%;background:${col}"></div></div><div style="font-size:10px;color:var(--faint);margin-top:3px">${m.notes}</div></div><div class="perf-metric-val" style="color:${col}">${m.score}/100</div></div><div style="display:flex;gap:12px;margin:-2px 0 8px 202px;font-size:11px"><span style="color:var(--muted)">Now: <strong style="color:var(--text)">${m.current}</strong></span><span style="color:var(--green)">→ ${m.optimized}</span></div>`;
   });
@@ -4800,10 +4811,11 @@ function renderQA(d) {
   $('15-sum-t').textContent=d.summary+`\n\nOverall Pass Rate: ${d.overall_pass_rate}%`;
   const statusIcon={pass:'✅',fail:'❌',warn:'⚠️',skip:'⏭️'};
   let tests='';
-  (d.test_suites||[]).forEach(suite=>{
-    const passed=(suite.tests||[]).filter(t=>t.status==='pass').length;
-    tests+=`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between"><span>${suite.suite}</span><span style="color:${passed===(suite.tests||[]).length?'var(--green)':'var(--amber)'}">${passed}/${(suite.tests||[]).length} passed</span></div>`;
-    (suite.tests||[]).forEach(t=>{
+  _toArr(d.test_suites).forEach(suite=>{
+    const suiteTests=_toArr(suite.tests);
+    const passed=suiteTests.filter(t=>t.status==='pass').length;
+    tests+=`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between"><span>${suite.suite}</span><span style="color:${passed===suiteTests.length?'var(--green)':'var(--amber)'}">${passed}/${suiteTests.length} passed</span></div>`;
+    suiteTests.forEach(t=>{
       tests+=`<div class="qa-test ${t.status}"><div class="qa-test-status">${statusIcon[t.status]||'⚪'}</div><div class="qa-test-body"><div class="qa-test-name">${t.id} — ${t.name}</div><div class="qa-test-detail">${t.detail}</div><div class="qa-test-expected">Expected: ${t.expected}</div></div></div>`;
     });
     tests+=`</div>`;

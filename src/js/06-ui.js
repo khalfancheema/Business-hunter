@@ -23,6 +23,17 @@ function _nv(val, formatter, fallback) {
   return formatter ? formatter(val) : String(val);
 }
 
+// _toArr — safely coerce any value to an array.
+// Handles: null/undefined → [], plain object → Object.values(), string → [],
+// already an array → as-is. Prevents "forEach/filter is not a function" when
+// the AI returns an object instead of an array.
+function _toArr(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'object') return Object.values(val);
+  return [];
+}
+
 // _nvNum — like _nv but treats 0 as missing (use for counts/prices where 0 means "not found")
 function _nvNum(val, formatter, fallback) {
   if (fallback === undefined) fallback = 'N/A';

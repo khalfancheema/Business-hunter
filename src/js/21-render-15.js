@@ -26,10 +26,11 @@ function renderQA(d) {
   $('15-sum-t').textContent=d.summary+`\n\nOverall Pass Rate: ${d.overall_pass_rate}%`;
   const statusIcon={pass:'✅',fail:'❌',warn:'⚠️',skip:'⏭️'};
   let tests='';
-  (d.test_suites||[]).forEach(suite=>{
-    const passed=(suite.tests||[]).filter(t=>t.status==='pass').length;
-    tests+=`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between"><span>${suite.suite}</span><span style="color:${passed===(suite.tests||[]).length?'var(--green)':'var(--amber)'}">${passed}/${(suite.tests||[]).length} passed</span></div>`;
-    (suite.tests||[]).forEach(t=>{
+  _toArr(d.test_suites).forEach(suite=>{
+    const suiteTests=_toArr(suite.tests);
+    const passed=suiteTests.filter(t=>t.status==='pass').length;
+    tests+=`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between"><span>${suite.suite}</span><span style="color:${passed===suiteTests.length?'var(--green)':'var(--amber)'}">${passed}/${suiteTests.length} passed</span></div>`;
+    suiteTests.forEach(t=>{
       tests+=`<div class="qa-test ${t.status}"><div class="qa-test-status">${statusIcon[t.status]||'⚪'}</div><div class="qa-test-body"><div class="qa-test-name">${t.id} — ${t.name}</div><div class="qa-test-detail">${t.detail}</div><div class="qa-test-expected">Expected: ${t.expected}</div></div></div>`;
     });
     tests+=`</div>`;

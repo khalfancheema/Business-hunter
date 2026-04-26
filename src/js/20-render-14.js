@@ -39,7 +39,7 @@ function renderCodeReview(d) {
   });
   $('14-issues-c').innerHTML=issues;
   let perf='';
-  (d.performance_metrics||[]).forEach(m=>{
+  _toArr(d.performance_metrics).forEach(m=>{
     const col=m.score>=80?'var(--green)':m.score>=60?'var(--amber)':'var(--red)';
     perf+=`<div class="perf-metric"><div class="perf-metric-label">${m.metric}</div><div style="flex:1"><div class="perf-metric-bar"><div class="perf-metric-fill" style="width:${m.score}%;background:${col}"></div></div><div style="font-size:10px;color:var(--faint);margin-top:3px">${m.notes}</div></div><div class="perf-metric-val" style="color:${col}">${m.score}/100</div></div><div style="display:flex;gap:12px;margin:-2px 0 8px 202px;font-size:11px"><span style="color:var(--muted)">Now: <strong style="color:var(--text)">${m.current}</strong></span><span style="color:var(--green)">→ ${m.optimized}</span></div>`;
   });
