@@ -57,7 +57,7 @@ function buildMap(d) {
     return;
   }
 
-  const center = [d.center.lat || 34.0, d.center.lng || -84.1];
+  const center = [d.center?.lat || 34.0, d.center?.lng || -84.1];
 
   const map = L.map('leafletMapEl', {
     center,
