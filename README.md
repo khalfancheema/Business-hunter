@@ -1,6 +1,6 @@
 # 🏢 Business Planning Agent System
 
-> A **17-agent AI pipeline** that performs end-to-end business planning across **8 industries** — demographics research, regulatory compliance, competitive intelligence, gap analysis, site selection, live real estate search, financial modeling, SBA business plan generation, project planning, market mapping, grant discovery, competitor deep-dive, code review, QA validation, build vs buy analysis, and source verification — all in a **single browser HTML file**.
+> A **17-agent AI pipeline** that performs end-to-end business planning across **14 industries** — demographics research, regulatory compliance, competitive intelligence, gap analysis, site selection, live real estate search, financial modeling, SBA business plan generation, project planning, market mapping, grant discovery, competitor deep-dive, code review, QA validation, build vs buy analysis, and source verification — all in a **single browser HTML file**.
 
 ---
 
@@ -43,6 +43,12 @@ Enter any model override in the **Model** field to use a specific version (e.g. 
 | 💪 **Gym / Fitness Center** | Members | Membership tiers, PT revenue, NASM/ACE certification, equipment capex |
 | 🎠 **Indoor Play Area / FEC** | Daily visitors | CPSC/ASTM safety, birthday party packages, membership + admission mix |
 | 👔 **Dry Cleaning / Laundry** | Garments/day | EPA PERC compliance, green-cleaning transition, pickup/delivery model |
+| 🏥 **Senior Care / Assisted Living** | Resident beds | CMS/DHS licensing, staffing ratios, Medicare/Medicaid reimbursement |
+| 📚 **Tutoring / Learning Center** | Student seats | Business license, franchise vs independent, curriculum mix |
+| 🩺 **Urgent Care Clinic** | Exam rooms | CLIA waiver, DEA registration, state medical board, payer mix |
+| ☕ **Coffee Shop / Café** | Seating capacity | GA DPH food service permit, drive-thru vs dine-in, loyalty model |
+| ✂️ **Barbershop / Salon** | Styling stations | State cosmetology board, booth-rental vs employee model |
+| 🖥️ **Coworking Space** | Desk capacity | Office zoning, COO, membership tiers, amenity mix |
 
 All prompts, financial models, compliance checklists, and output labels adapt automatically when you switch industry.
 
@@ -110,11 +116,11 @@ All prompts, financial models, compliance checklists, and output labels adapt au
 |---|-------|----------------------|
 | **1** | **Demographics** | Summary · Heatmap · Chart · City Table |
 | **2** | **Gap Analysis** | Analysis · Heatmap · City Rankings · Gap Chart |
-| **3** | **Site Selection** | Strategy · 6 Ranked Options (with reasoning) · Radar Chart · Comparison Table |
+| **3** | **Site Selection** | Strategy · 6 Ranked Options (with reasoning + Walk/Transit/School scores) · Radar Chart · Comparison Table |
 | **4** | **Real Estate** | Summary · Live Listings (with URLs) · By City · Cost Chart |
 | **5** | **Compliance** | Summary · Requirements Table · **How to Apply** · Timeline |
 | **6** | **Competitive Intel** | Summary · Market Chart · City Deep-Dive (NAEYC · QRIS · Winnie) |
-| **7** | **Financial Feasibility** | Summary · 3 Scenarios · P&L Chart · By-City Comparison |
+| **7** | **Financial Feasibility** | Summary · 3 Scenarios · P&L Chart · By-City Comparison · **Interactive Scenario Builder** |
 | **8** | **Executive Summary** | Go/No-Go verdict + rationale + risk matrix + next steps |
 | **9** | **Business Plan** | Overview · Market · Financials · Operations · SBA Package · Investor Deck |
 | **10** | **Project Plan** | Gantt · Milestones · Budget Tracker · Risk Register · Team & Vendors · Launch Checklist |
@@ -144,6 +150,9 @@ Every agent card has:
 | **↺ Reset** | Clears all results and resets to idle |
 | **⚡ Demo Mode** | Runs full pipeline with built-in sample data — no API key needed |
 | **⚙ Phases** | Opens phase selector — uncheck phases to skip them and use cached data |
+| **🔗 Pipeline Graph** | Opens the Agent Dependency Graph — live SVG DAG showing agent status in real time |
+| **📂 Runs** | Opens the Named Runs panel — browse, restore, or delete saved pipeline runs |
+| **💾 Save Run** | Saves the current completed pipeline as a named run with full output snapshot |
 
 ### 💾 Session & Sharing
 | Button | Action |
@@ -151,6 +160,7 @@ Every agent card has:
 | **🔗 Copy Link** | Copies a shareable URL with all inputs encoded (`?zip=&industry=&radius=&capacity=&budget=`) |
 | **Session Restore Banner** | Appears on page load if a previous session exists (24-hour TTL) — click **↩ Restore** to reload all agent outputs without re-running |
 | **🕐 Recent Reports** | Opens the session history panel showing your last 5 pipeline runs with verdict badges — click any run to restore its inputs |
+| **📂 Named Runs** | Save up to 10 fully-named pipeline runs with all agent HTML snapshots — restore any run by name, anytime |
 
 ### 📄 Export
 | Button | Action |
@@ -223,6 +233,61 @@ Agent 11's Market Map uses **Leaflet.js** with CartoDB Dark Matter tiles — rea
 - Click the **✏️ Personalize Report** section to add your business name, founder, target opening date, equity, email, and notes
 - This information appears in the profile header and is included in all export formats
 - Profile is saved in localStorage and persists across sessions
+
+### 🗺️ Walk Score / Transit / School Proximity (Agent 3)
+Each of the 6 ranked site locations in Agent 3 now includes walkability, transit, and school proximity scoring:
+- **Walk Score** (0–100) with label (Walker's Paradise / Very Walkable / etc.)
+- **Transit Score** with description of available transit options
+- **Nearest school** — name, distance (mi), and star rating
+- **Average school rating** within 2 miles
+
+Displayed as color-coded badges on each location card alongside the existing scoring dimensions.
+
+### 📊 Interactive Financial Scenario Builder (Agent 7)
+After Agent 7 completes, a live scenario builder is injected directly below the financials. Drag sliders to adjust:
+- **Occupancy %** — % of capacity enrolled / booked
+- **Monthly Revenue per Unit** — tuition, membership, rate, etc.
+- **Monthly Rent / Lease**
+
+The builder recalculates in real time:
+- Monthly Revenue · Monthly Expenses · Monthly Net
+- Annual Net Income · Break-Even timeline (months)
+- Visual expense vs revenue bar comparison
+
+No API call required — all math runs locally in the browser.
+
+### 🔗 Agent Dependency Graph (DAG)
+Click **🔗 Pipeline Graph** in the toolbar to open a live SVG visualization of all 17 agents and their dependencies:
+- Nodes colored by live status: **idle** (gray) · **running** (blue pulse) · **done** (green) · **error** (red)
+- Bezier curve edges show which agents feed into which
+- Auto-refreshes every 800ms while the pipeline is running
+- Click any node to re-run that single agent
+
+### 💾 Persistent Named Pipeline Runs
+Save up to 10 complete pipeline runs by name (e.g. "Atlanta Q1 Childcare", "Phoenix Gas Station"):
+- **💾 Save Run** — prompts for a name and saves full R object + all rendered HTML panels + inputs
+- **📂 Runs** — opens a panel listing all saved runs with date, ZIP, industry, and verdict badge
+- Click any saved run to instantly restore all inputs and agent outputs — no re-run needed
+- Per-run delete button to manage storage
+
+Stored in `biz_named_runs_v1` localStorage key (separate from the auto-save session).
+
+### 🏷️ Data Freshness Indicators
+Key data points throughout the app are annotated with freshness badges:
+- 🟢 **Verified** — sourced from a live or recently-confirmed API
+- 🟡 **Estimated** — modeled or interpolated from recent data
+- 🔵 **Live** — streamed or fetched in real time during this run
+
+Rendered by `_freshBadge(year, confidence)` and applied automatically to elements with `data-note` attributes.
+
+### 🦙 Ollama / Local LLM Setup Guide
+Select **OpenAI-Compatible** as your provider and a step-by-step Ollama setup guide appears inline:
+1. Install Ollama (`brew install ollama` / Windows installer)
+2. Pull a model (`ollama pull llama3`)
+3. Start the server (`ollama serve`)
+4. Set the base URL to `http://localhost:11434/v1` and enter any model name
+
+Works with LM Studio, Jan, Together AI, and any OpenAI-compatible endpoint.
 
 ---
 
@@ -298,7 +363,15 @@ daycare-agent-system/
 │       ├── 32-phases.js        ← Phase selection + input validation + presets
 │       ├── 33-streaming.js     ← Streaming responses (claudeStream + claudeStreamJSON)
 │       ├── 34-history.js       ← Session history — last 5 runs panel
-│       └── 35-compare-zip.js   ← ZIP comparison mode (two markets side by side)
+│       ├── 35-compare-zip.js   ← ZIP comparison mode (two markets side by side)
+│       ├── 36-demo-data.js     ← Rich demo data for all 17 agents × 14 industries
+│       ├── 37-runs.js          ← Persistent named pipeline runs (save/restore/delete)
+│       ├── 38-dag.js           ← Agent dependency graph (SVG DAG, live status)
+│       ├── 39-scenario.js      ← Interactive financial scenario builder (Agent 7)
+│       └── 40-local-guide.js   ← Ollama/local LLM guide + data freshness badges
+├── test-all.mjs                ← 180-assertion test suite (Node.js, zero deps)
+├── .claude/
+│   └── launch.json             ← Dev server configurations for preview_start
 ├── docs/
 │   ├── HOW-TO.md               ← Step-by-step user guide
 │   ├── architecture.md         ← Pipeline architecture + data flow
@@ -311,17 +384,21 @@ daycare-agent-system/
 ### Building from Source
 
 ```bash
-# Install (only needed once — just Node.js, no npm packages for the app itself)
+# Build (no npm install needed — zero dependencies)
 node build.mjs
-
-# Or with npm
+# or
 npm run build
 
-# Dev server (optional)
-npm run serve      # → http://localhost:8080
+# Dev server options
+npm run serve      # npx serve public → http://localhost:8080
+npm run start      # python3 http.server → http://localhost:8080
+npm run dev        # build + serve in one step
+
+# Run tests
+npm test           # 180 assertions, Node.js 18+
 ```
 
-The build script concatenates all JS files and inlines the CSS into a single `public/index.html`. No bundler, no transpilation — just concatenation.
+The build script concatenates all 40 JS files and inlines the CSS into a single `public/index.html`. No bundler, no transpilation — just concatenation.
 
 ---
 
@@ -334,7 +411,8 @@ The build script concatenates all JS files and inlines the CSS into a single `pu
 | Fonts | Syne + Instrument Sans (Google Fonts) |
 | Map | Leaflet.js 1.9.4 + CartoDB Dark Matter tiles (free, no API key) |
 | Build | Node.js — `build.mjs` concatenation, zero npm deps in browser |
-| Storage | Browser localStorage (4h response cache · 24h session · 5-run history) |
+| Storage | Browser localStorage (4h response cache · 24h session · 5-run history · 10 named runs) |
+| Testing | `test-all.mjs` — 180 assertions, Node.js 18+, zero dependencies |
 
 ---
 
@@ -355,4 +433,4 @@ MIT — use freely, modify as needed.
 
 ---
 
-*Built with Claude Sonnet 4.6 · Chart.js · Syne & Instrument Sans*
+*Built with Claude Sonnet 4.6 · Chart.js · Leaflet.js · Syne & Instrument Sans*
