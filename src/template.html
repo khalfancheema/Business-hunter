@@ -487,7 +487,7 @@
     </div>
     <div class="agent-out" id="out-11">
       <div class="tabs">
-        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
+        <div class="tab active" onclick="tab('11','map');setTimeout(()=>window._leafletMap&&window._leafletMap.invalidateSize(),50)">Interactive Map</div>
         <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
         <div class="tab" onclick="tab('11','dir')">Directions</div>
         <button class="raw-toggle" onclick="showRaw(11)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>

@@ -56,14 +56,14 @@ Return ONLY:
   ]
 }`;
 
-  const revModel = await claudeJSON(sysA, usrA);
+  const revModel = await claudeJSON(sysA, usrA) || {};
 
   // ── Sub-call B: Cost Model ──────────────────────────────
   $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/2: Cost Model…');
 
   const sysB = `You are a financial analyst specializing in ${ind.unit} cost structures. Return JSON only.`;
   const usrB = `Build a detailed cost model for a ${base}.
-SELECTED SITE: ${JSON.stringify((revModel || {}).selected_site || {})}
+SELECTED SITE: ${JSON.stringify(revModel.selected_site || {})}
 REGULATORY: ${ctx5}
 
 Return ONLY:
@@ -98,7 +98,7 @@ Return ONLY:
   "total_variable_at_base": 0
 }`;
 
-  const costModel = await claudeJSON(sysB, usrB);
+  const costModel = await claudeJSON(sysB, usrB) || {};
 
   // ── Main Consolidating Call ─────────────────────────────
   $('7-sc-c').innerHTML = subProgress(3, 3, 'Consolidating…');
@@ -106,8 +106,8 @@ Return ONLY:
   const sysMain = `You are a ${ind.unit} financial analyst. Respond JSON only with realistic numbers.`;
   const usrMain = `Consolidate these revenue and cost models into a full financial feasibility analysis for a ${base}.
 
-REVENUE MODEL: ${JSON.stringify(revModel || {})}
-COST MODEL: ${JSON.stringify(costModel || {})}
+REVENUE MODEL: ${JSON.stringify(revModel)}
+COST MODEL: ${JSON.stringify(costModel)}
 
 Return ONLY:
 {
@@ -167,12 +167,12 @@ Return ONLY:
     if (!main) { console.warn('Agent 7 consolidation fallback'); main = getFallback7(); }
 
     // Merge sub-model arrays into result so renderAgent7 can use them
-    main.one_time_startup_costs  = (costModel || {}).one_time_startup_costs  || main.one_time_startup_costs  || [];
-    main.fixed_monthly_costs     = (costModel || {}).fixed_monthly_costs     || main.fixed_monthly_costs     || [];
-    main.variable_monthly_costs  = (costModel || {}).variable_monthly_costs  || main.variable_monthly_costs  || [];
-    main.selected_site           = (revModel  || {}).selected_site           || null;
-    main.revenue_streams         = (revModel  || {}).revenue_streams         || [];
-    main.revenue_assumptions     = (revModel  || {}).revenue_assumptions     || [];
+    main.one_time_startup_costs  = costModel.one_time_startup_costs  || main.one_time_startup_costs  || [];
+    main.fixed_monthly_costs     = costModel.fixed_monthly_costs     || main.fixed_monthly_costs     || [];
+    main.variable_monthly_costs  = costModel.variable_monthly_costs  || main.variable_monthly_costs  || [];
+    main.selected_site           = revModel.selected_site            || null;
+    main.revenue_streams         = revModel.revenue_streams          || [];
+    main.revenue_assumptions     = revModel.revenue_assumptions      || [];
 
     R.a7 = main;
     renderAgent7(main);

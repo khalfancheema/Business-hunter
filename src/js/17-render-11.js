@@ -3,7 +3,7 @@ async function runAgent11(a1,a2,a4) {
   const ind=industry();
   const sys=`You are a geographic data analyst. Respond with JSON only.`;
   const usr=`Build geographic mapping data for cities within ${radius()} miles of ZIP ${zip()} for a ${ind.unit} site analysis.
-DEMOGRAPHICS: ${ctx(a1,['summary','cities'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
 REAL ESTATE: ${ctx(a4,['summary','listings','by_city_summary'])}
 Return ONLY:

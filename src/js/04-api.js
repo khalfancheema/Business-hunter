@@ -140,14 +140,15 @@ function onProviderChange() {
 }
 
 // ── CONTEXT EXTRACTOR ──────────────────────────────────────
-function ctx(jsonStr, fields) {
+function ctx(jsonStr, fields, maxLen) {
   try {
     const d = typeof jsonStr==='string' ? JSON.parse(jsonStr) : jsonStr;
-    if(!d) return (jsonStr||'').substring(0,400);
+    if(!d) return (jsonStr||'').substring(0, maxLen||600);
     const out = {};
     fields.forEach(f => { if(d[f]!==undefined) out[f]=d[f]; });
-    return JSON.stringify(out);
-  } catch(e) { return (jsonStr||'').substring(0,400); }
+    const s = JSON.stringify(out);
+    return maxLen ? s.substring(0, maxLen) : s;
+  } catch(e) { return (jsonStr||'').substring(0, maxLen||600); }
 }
 
 // ── FALLBACK DATA ───────────────────────────────────────────

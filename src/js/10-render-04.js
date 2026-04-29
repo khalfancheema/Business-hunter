@@ -37,7 +37,7 @@ PRICING DATA:
 22. Child Care Aware of America — annual "Price of Care" state report
 23. State subsidy rate schedules (CCDF) — sets market floor pricing
 
-DEMOGRAPHICS: ${ctx(a1,['summary','cities','metro_overview','labor_market_summary'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities','metro_overview','labor_market_summary'],1000)}
 REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
 COMPETITORS: ${ctx(a6,['summary','cities','total_licensed_estimated','data_sources'])}
 

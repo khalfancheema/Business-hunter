@@ -49,7 +49,7 @@ Return ONLY:
   $('9-mkt-c').innerHTML = subProgress(2,4,'Market Analysis & Competitive Positioning');
   const sys2 = `You are a market research analyst. Return JSON only.`;
   const usr2 = `Write Part 2 — market analysis — for a ${base}.
-DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
 COMPETITORS: ${ctx(a6,['summary','cities','top_chains'])}
 SITE: ${ctx3}

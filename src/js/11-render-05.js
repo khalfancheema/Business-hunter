@@ -4,7 +4,7 @@ async function runAgent3(a1,a2,a5) {
   const sys=`You are a ${ind.unit} site selection consultant with deep knowledge of demographics, zoning, and real estate. You cite specific data sources. Respond JSON only.`;
   const usr=`Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
-DEMOGRAPHICS: ${ctx(a1,['summary','cities'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
 REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
 

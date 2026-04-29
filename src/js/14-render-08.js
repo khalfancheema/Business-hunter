@@ -5,7 +5,7 @@ async function runAgent8(a1,a2,a3,a4,a5,a6,a7) {
   const usr=`Write a final executive report for opening a ${ind.unit} (${ind.capacity_label}: ${capacity()}, $${parseInt(budget()).toLocaleString()} budget) near ZIP ${zip()}.
 
 KEY FINDINGS:
-- Demographics: ${ctx(a1,['summary','cities'])}
+- Demographics: ${ctx(a1,['summary','cities'],1000)}
 - Gap Analysis: ${ctx(a2,['summary','overall_opportunity_score','cities'])}
 - Top Location: ${ctx(a3,['summary','locations'])}
 - Real Estate: ${ctx(a4,['summary','by_city_summary'])}

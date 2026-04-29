@@ -1222,7 +1222,7 @@ select option{background:var(--surface2)}
     </div>
     <div class="agent-out" id="out-11">
       <div class="tabs">
-        <div class="tab active" onclick="tab('11','map')">Interactive Map</div>
+        <div class="tab active" onclick="tab('11','map');setTimeout(()=>window._leafletMap&&window._leafletMap.invalidateSize(),50)">Interactive Map</div>
         <div class="tab" onclick="tab('11','leg')">Legend &amp; Scores</div>
         <div class="tab" onclick="tab('11','dir')">Directions</div>
         <button class="raw-toggle" onclick="showRaw(11)" data-tip="Toggle the raw JSON output. Inspect the exact data driving this agent's display." data-tip-pos="left">{ } Raw</button>
@@ -1945,14 +1945,15 @@ function onProviderChange() {
 }
 
 // ── CONTEXT EXTRACTOR ──────────────────────────────────────
-function ctx(jsonStr, fields) {
+function ctx(jsonStr, fields, maxLen) {
   try {
     const d = typeof jsonStr==='string' ? JSON.parse(jsonStr) : jsonStr;
-    if(!d) return (jsonStr||'').substring(0,400);
+    if(!d) return (jsonStr||'').substring(0, maxLen||600);
     const out = {};
     fields.forEach(f => { if(d[f]!==undefined) out[f]=d[f]; });
-    return JSON.stringify(out);
-  } catch(e) { return (jsonStr||'').substring(0,400); }
+    const s = JSON.stringify(out);
+    return maxLen ? s.substring(0, maxLen) : s;
+  } catch(e) { return (jsonStr||'').substring(0, maxLen||600); }
 }
 
 // ── FALLBACK DATA ───────────────────────────────────────────
@@ -3004,7 +3005,7 @@ PRICING DATA:
 22. Child Care Aware of America — annual "Price of Care" state report
 23. State subsidy rate schedules (CCDF) — sets market floor pricing
 
-DEMOGRAPHICS: ${ctx(a1,['summary','cities','metro_overview','labor_market_summary'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities','metro_overview','labor_market_summary'],1000)}
 REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
 COMPETITORS: ${ctx(a6,['summary','cities','total_licensed_estimated','data_sources'])}
 
@@ -3197,7 +3198,7 @@ async function runAgent3(a1,a2,a5) {
   const sys=`You are a ${ind.unit} site selection consultant with deep knowledge of demographics, zoning, and real estate. You cite specific data sources. Respond JSON only.`;
   const usr=`Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
-DEMOGRAPHICS: ${ctx(a1,['summary','cities'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
 REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
 
@@ -3744,7 +3745,7 @@ async function runAgent8(a1,a2,a3,a4,a5,a6,a7) {
   const usr=`Write a final executive report for opening a ${ind.unit} (${ind.capacity_label}: ${capacity()}, $${parseInt(budget()).toLocaleString()} budget) near ZIP ${zip()}.
 
 KEY FINDINGS:
-- Demographics: ${ctx(a1,['summary','cities'])}
+- Demographics: ${ctx(a1,['summary','cities'],1000)}
 - Gap Analysis: ${ctx(a2,['summary','overall_opportunity_score','cities'])}
 - Top Location: ${ctx(a3,['summary','locations'])}
 - Real Estate: ${ctx(a4,['summary','by_city_summary'])}
@@ -4408,7 +4409,7 @@ async function runAgent11(a1,a2,a4) {
   const ind=industry();
   const sys=`You are a geographic data analyst. Respond with JSON only.`;
   const usr=`Build geographic mapping data for cities within ${radius()} miles of ZIP ${zip()} for a ${ind.unit} site analysis.
-DEMOGRAPHICS: ${ctx(a1,['summary','cities'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
 REAL ESTATE: ${ctx(a4,['summary','listings','by_city_summary'])}
 Return ONLY:
@@ -5582,7 +5583,7 @@ Return ONLY:
   $('9-mkt-c').innerHTML = subProgress(2,4,'Market Analysis & Competitive Positioning');
   const sys2 = `You are a market research analyst. Return JSON only.`;
   const usr2 = `Write Part 2 — market analysis — for a ${base}.
-DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'])}
+DEMOGRAPHICS: ${ctx(a1,['summary','cities','overall_opportunity_score'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
 COMPETITORS: ${ctx(a6,['summary','cities','top_chains'])}
 SITE: ${ctx3}
@@ -5919,14 +5920,14 @@ Return ONLY:
   ]
 }`;
 
-  const revModel = await claudeJSON(sysA, usrA);
+  const revModel = await claudeJSON(sysA, usrA) || {};
 
   // ── Sub-call B: Cost Model ──────────────────────────────
   $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/2: Cost Model…');
 
   const sysB = `You are a financial analyst specializing in ${ind.unit} cost structures. Return JSON only.`;
   const usrB = `Build a detailed cost model for a ${base}.
-SELECTED SITE: ${JSON.stringify((revModel || {}).selected_site || {})}
+SELECTED SITE: ${JSON.stringify(revModel.selected_site || {})}
 REGULATORY: ${ctx5}
 
 Return ONLY:
@@ -5961,7 +5962,7 @@ Return ONLY:
   "total_variable_at_base": 0
 }`;
 
-  const costModel = await claudeJSON(sysB, usrB);
+  const costModel = await claudeJSON(sysB, usrB) || {};
 
   // ── Main Consolidating Call ─────────────────────────────
   $('7-sc-c').innerHTML = subProgress(3, 3, 'Consolidating…');
@@ -5969,8 +5970,8 @@ Return ONLY:
   const sysMain = `You are a ${ind.unit} financial analyst. Respond JSON only with realistic numbers.`;
   const usrMain = `Consolidate these revenue and cost models into a full financial feasibility analysis for a ${base}.
 
-REVENUE MODEL: ${JSON.stringify(revModel || {})}
-COST MODEL: ${JSON.stringify(costModel || {})}
+REVENUE MODEL: ${JSON.stringify(revModel)}
+COST MODEL: ${JSON.stringify(costModel)}
 
 Return ONLY:
 {
@@ -6030,12 +6031,12 @@ Return ONLY:
     if (!main) { console.warn('Agent 7 consolidation fallback'); main = getFallback7(); }
 
     // Merge sub-model arrays into result so renderAgent7 can use them
-    main.one_time_startup_costs  = (costModel || {}).one_time_startup_costs  || main.one_time_startup_costs  || [];
-    main.fixed_monthly_costs     = (costModel || {}).fixed_monthly_costs     || main.fixed_monthly_costs     || [];
-    main.variable_monthly_costs  = (costModel || {}).variable_monthly_costs  || main.variable_monthly_costs  || [];
-    main.selected_site           = (revModel  || {}).selected_site           || null;
-    main.revenue_streams         = (revModel  || {}).revenue_streams         || [];
-    main.revenue_assumptions     = (revModel  || {}).revenue_assumptions     || [];
+    main.one_time_startup_costs  = costModel.one_time_startup_costs  || main.one_time_startup_costs  || [];
+    main.fixed_monthly_costs     = costModel.fixed_monthly_costs     || main.fixed_monthly_costs     || [];
+    main.variable_monthly_costs  = costModel.variable_monthly_costs  || main.variable_monthly_costs  || [];
+    main.selected_site           = revModel.selected_site            || null;
+    main.revenue_streams         = revModel.revenue_streams          || [];
+    main.revenue_assumptions     = revModel.revenue_assumptions      || [];
 
     R.a7 = main;
     renderAgent7(main);
