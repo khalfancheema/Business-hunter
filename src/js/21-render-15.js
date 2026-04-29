@@ -63,9 +63,10 @@ function renderQA(d) {
   const offset=circ*(1-(hs.overall||0)/100);
   const sc=hs.overall>=85?'#3dd68c':hs.overall>=70?'#f5a623':'#ff5f5f';
   let score=`<div class="health-score-wrap"><div class="health-score-ring"><svg width="140" height="140" viewBox="0 0 140 140"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="10"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${sc}" stroke-width="10" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"/></svg><div class="health-score-num"><span>${hs.overall||0}</span><small>/100</small></div></div><div class="health-score-label" style="color:${sc}">${(hs.overall||0)>=85?'Healthy':'Needs Attention'}</div><div class="health-score-sub">${d.overall_pass_rate}% pass rate · ${d.data_validation.fields_checked} fields validated</div></div><div class="health-dims">`;
-  (hs.dimensions||[]).forEach(dim=>{
+  _toArr(hs.dimensions).forEach(dim=>{
+    if(!dim) return;
     const dc=dim.score>=85?'var(--green)':dim.score>=70?'var(--amber)':'var(--red)';
-    score+=`<div class="health-dim"><div class="health-dim-label">${dim.label}</div><div class="health-dim-score" style="color:${dc}">${dim.score}</div><div class="health-dim-bar"><div class="health-dim-fill" style="width:${dim.score}%;background:${dc}"></div></div><div style="font-size:10px;color:var(--faint);margin-top:4px">${dim.notes}</div></div>`;
+    score+=`<div class="health-dim"><div class="health-dim-label">${dim.label||''}</div><div class="health-dim-score" style="color:${dc}">${dim.score||0}</div><div class="health-dim-bar"><div class="health-dim-fill" style="width:${dim.score||0}%;background:${dc}"></div></div><div style="font-size:10px;color:var(--faint);margin-top:4px">${dim.notes||''}</div></div>`;
   });
   score+=`</div>`;
   $('15-score-c').innerHTML=score;

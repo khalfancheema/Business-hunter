@@ -98,16 +98,21 @@ Return ONLY:
     // Scenarios
     const ind7=industry();
     let sc=`<div class="scenario-grid">`;
-    (d.scenarios||[]).forEach(s=>{
+    _toArr(d.scenarios).forEach(s=>{
+      if(!s) return;
+      const sColor=s.color||'var(--text)';
+      const sNet=s.monthly_net||0;
+      const sRev=s.monthly_revenue||0;
+      const sAnn=s.annual_net||0;
       sc+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
-        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">${s.name}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${s.label} · ${s.enrolled} enrolled</div>
-        <div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:${s.color};margin-bottom:10px">$${s.monthly_net>=0?'+':''}${s.monthly_net.toLocaleString()}<span style="font-size:12px">/mo</span></div>
+        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">${s.name||''}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${s.label||''} · ${s.enrolled||0} enrolled</div>
+        <div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:${sColor};margin-bottom:10px">$${sNet>=0?'+':''}${sNet.toLocaleString()}<span style="font-size:12px">/mo</span></div>
         <div style="display:grid;gap:4px;font-size:11px">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Monthly revenue</span><strong>$${s.monthly_revenue.toLocaleString()}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Break-even</span><strong>${s.breakeven_months} months</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">3yr ROI</span><strong style="color:${s.color}">${s.roi_3yr>0?'+':''}${s.roi_3yr}%</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Annual net</span><strong style="color:${s.color}">$${s.annual_net>=0?'+':''}${s.annual_net.toLocaleString()}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Monthly revenue</span><strong>$${sRev.toLocaleString()}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Break-even</span><strong>${s.breakeven_months||'—'} months</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">3yr ROI</span><strong style="color:${sColor}">${(s.roi_3yr||0)>0?'+':''}${s.roi_3yr||0}%</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Annual net</span><strong style="color:${sColor}">$${sAnn>=0?'+':''}${sAnn.toLocaleString()}</strong></div>
         </div>
       </div>`;
     });
