@@ -1,0 +1,165 @@
+// ── V2 STATE MACHINE ──────────────────────────────────────────────────────
+const V2 = {
+  screen: 'landing',
+  wizard: { step: 0, data: {} },
+  run: null,          // current run result
+  portfolio: [],      // saved runs
+  selectedProvider: 'anthropic',
+};
+
+const V2_SCREENS = ['landing','wizard','copilot','dashboard','portfolio'];
+
+const V2_AGENTS = [
+  { id:1,  name:'Demographics',       ico:'📊' },
+  { id:2,  name:'Gap Analysis',       ico:'📈' },
+  { id:3,  name:'Site Selection',     ico:'📍' },
+  { id:4,  name:'Real Estate',        ico:'🏢' },
+  { id:5,  name:'Compliance',         ico:'⚖️' },
+  { id:6,  name:'Competitive Intel',  ico:'🔍' },
+  { id:7,  name:'Financials',         ico:'💰' },
+  { id:8,  name:'Executive Summary',  ico:'📋' },
+  { id:9,  name:'Business Plan',      ico:'🏦' },
+  { id:10, name:'Project Plan',       ico:'🗂️' },
+  { id:11, name:'Market Map',         ico:'🗺️' },
+  { id:12, name:'Grant Search',       ico:'💵' },
+  { id:13, name:'Competitor Deep',    ico:'🎯' },
+  { id:14, name:'Code Review',        ico:'🔬' },
+  { id:15, name:'QA Testing',         ico:'✅' },
+  { id:16, name:'Build vs Buy',       ico:'🏗️' },
+  { id:17, name:'Sources',            ico:'📚' },
+];
+
+const V2_PROVIDERS = {
+  anthropic:    { name:'Anthropic Claude',   model:'claude-sonnet-4-6',  ico:'🟣' },
+  openai:       { name:'OpenAI GPT-4o',      model:'gpt-4o',             ico:'🟢' },
+  gemini:       { name:'Google Gemini',      model:'gemini-1.5-pro',     ico:'🔵' },
+  openai_compat:{ name:'Local / Custom',     model:'llama3',             ico:'⚪' },
+};
+
+function v2GoTo(screen) {
+  V2.screen = screen;
+  V2_SCREENS.forEach(s => {
+    const el = document.getElementById('screen-' + s);
+    if (el) el.classList.toggle('active', s === screen);
+  });
+  // Portfolio screen: re-render
+  if (screen === 'portfolio') v2RenderPortfolio();
+  // Dashboard: make sure content is rendered
+  if (screen === 'dashboard' && V2.run) v2RenderDashboard(V2.run);
+}
+
+function v2Toast(msg, ms = 2800) {
+  const el = document.getElementById('v2-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(v2Toast._t);
+  v2Toast._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function v2ShowDetail() {
+  document.getElementById('v2-overlay').classList.add('hidden');
+  document.getElementById('v2-detail-bar').classList.add('show');
+  window.scrollTo(0,0);
+}
+
+function v2HideDetail() {
+  document.getElementById('v2-overlay').classList.remove('hidden');
+  document.getElementById('v2-detail-bar').classList.remove('show');
+}
+
+function v2StopPipeline() {
+  stopRequested = true;
+  const btn = document.getElementById('v2-copilot-stop');
+  if (btn) { btn.textContent = 'Stopping…'; btn.disabled = true; }
+}
+
+function v2ShowApiKey() {
+  document.getElementById('v2-apikey-modal').classList.add('open');
+  v2RenderProviderGrid();
+  const saved = localStorage.getItem('v2_apikey') || '';
+  const el = document.getElementById('v2-api-key-input');
+  if (el) el.value = saved;
+  const mi = document.getElementById('v2-model-input');
+  if (mi) mi.value = localStorage.getItem('v2_model') || '';
+}
+
+function v2CloseApiKey() {
+  document.getElementById('v2-apikey-modal').classList.remove('open');
+}
+
+function v2SaveApiKey() {
+  const k = document.getElementById('v2-api-key-input').value.trim();
+  const m = document.getElementById('v2-model-input').value.trim();
+  const cu = document.getElementById('v2-custom-url-input').value.trim();
+  if (k) localStorage.setItem('v2_apikey', k);
+  if (m) localStorage.setItem('v2_model', m);
+  if (cu) localStorage.setItem('v2_custom_url', cu);
+  // Sync to v1 DOM
+  v2SyncToV1Dom();
+  v2CloseApiKey();
+  v2Toast('✓ API key saved');
+}
+
+function v2SyncToV1Dom() {
+  const k  = document.getElementById('v2-api-key-input')?.value.trim() || localStorage.getItem('v2_apikey') || '';
+  const m  = document.getElementById('v2-model-input')?.value.trim() || localStorage.getItem('v2_model') || '';
+  const cu = document.getElementById('v2-custom-url-input')?.value.trim() || localStorage.getItem('v2_custom_url') || '';
+  const p  = V2.selectedProvider || localStorage.getItem('v2_provider') || 'anthropic';
+
+  const apiKeyEl  = document.getElementById('apiKey');
+  const provEl    = document.getElementById('providerSelect');
+  const modelEl   = document.getElementById('modelInput');
+  const customEl  = document.getElementById('customUrlInput');
+
+  if (apiKeyEl) apiKeyEl.value  = k;
+  if (provEl)   provEl.value    = p;
+  if (modelEl)  modelEl.value   = m;
+  if (customEl) customEl.value  = cu;
+  if (typeof onProviderChange === 'function') onProviderChange();
+}
+
+function v2RenderProviderGrid() {
+  const grid = document.getElementById('v2-provider-grid');
+  if (!grid) return;
+  const sel = V2.selectedProvider || localStorage.getItem('v2_provider') || 'anthropic';
+  grid.innerHTML = Object.entries(V2_PROVIDERS).map(([key, p]) => `
+    <div class="v2-provider-item${key===sel?' selected':''}" onclick="v2SelectProvider('${key}')">
+      <div class="v2-provider-name">${p.ico} ${p.name}</div>
+      <div class="v2-provider-model">${p.model}</div>
+    </div>
+  `).join('');
+  const customRow = document.getElementById('v2-custom-url-row');
+  if (customRow) customRow.style.display = sel === 'openai_compat' ? 'block' : 'none';
+  const savedUrl = localStorage.getItem('v2_custom_url') || '';
+  const cu = document.getElementById('v2-custom-url-input');
+  if (cu) cu.value = savedUrl;
+}
+
+function v2SelectProvider(key) {
+  V2.selectedProvider = key;
+  localStorage.setItem('v2_provider', key);
+  v2RenderProviderGrid();
+}
+
+function v2LoadPortfolio() {
+  try { V2.portfolio = JSON.parse(localStorage.getItem('v2_portfolio') || '[]'); } catch { V2.portfolio = []; }
+}
+
+function v2SavePortfolio() {
+  try { localStorage.setItem('v2_portfolio', JSON.stringify(V2.portfolio)); } catch {}
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  v2LoadPortfolio();
+  V2.selectedProvider = localStorage.getItem('v2_provider') || 'anthropic';
+  // Sync saved key to v1 DOM silently
+  v2SyncToV1Dom();
+  // Render landing demo card
+  v2RenderLandingDemo();
+  // Render wizard initial state
+  v2InitWizard();
+  // Render copilot agent list
+  v2InitCopilotSidebar();
+});
