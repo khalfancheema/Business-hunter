@@ -152,14 +152,20 @@ function v2SavePortfolio() {
 
 // Init
 window.addEventListener('DOMContentLoaded', () => {
-  v2LoadPortfolio();
-  V2.selectedProvider = localStorage.getItem('v2_provider') || 'anthropic';
-  // Sync saved key to v1 DOM silently
-  v2SyncToV1Dom();
-  // Render landing demo card
-  v2RenderLandingDemo();
-  // Render wizard initial state
-  v2InitWizard();
-  // Render copilot agent list
-  v2InitCopilotSidebar();
+  try {
+    v2LoadPortfolio();
+    V2.selectedProvider = localStorage.getItem('v2_provider') || 'anthropic';
+    v2SyncToV1Dom();
+    v2RenderLandingDemo();
+    v2InitWizard();
+    v2InitCopilotSidebar();
+  } catch(e) {
+    console.error('[v2 init error]', e);
+    // Show visible error so the user can report it
+    const overlay = document.getElementById('v2-overlay');
+    if (overlay) overlay.insertAdjacentHTML('afterbegin',
+      `<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ef4444;color:#fff;padding:14px 24px;font-size:13px;font-family:monospace">
+        v2 init error: ${e.message} — check browser console (F12) for details
+      </div>`);
+  }
 });

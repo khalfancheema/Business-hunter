@@ -58,14 +58,14 @@ function v2HookPipeline() {
   // Patch setDot to also update v2 sidebar
   const origSetDot = window.setDot;
   window.setDot = function(n, state) {
-    origSetDot(n, state);
+    if (typeof origSetDot === 'function') origSetDot(n, state);
     v2UpdateAgentRow(n, state);
   };
 
   // Patch setProgress to update v2 progress bar
   const origSetProgress = window.setProgress;
   window.setProgress = function(p, t) {
-    origSetProgress(p, t);
+    if (typeof origSetProgress === 'function') origSetProgress(p, t);
     const fill = document.getElementById('v2-progress-fill');
     const lbl  = document.getElementById('v2-progress-label');
     if (fill) fill.style.width = p + '%';
@@ -75,7 +75,7 @@ function v2HookPipeline() {
   // Patch showOut to intercept agent completion
   const origShowOut = window.showOut;
   window.showOut = function(id) {
-    origShowOut(id);
+    if (typeof origShowOut === 'function') origShowOut(id);
     v2OnAgentComplete(id);
   };
 }

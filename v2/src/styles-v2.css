@@ -46,7 +46,7 @@
 .v2-nav {
   position: sticky; top: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 32px; height: 60px;
+  padding: 0 32px; height: 60px; width: 100%;
   background: rgba(7,7,15,0.85);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--v2-border);
@@ -525,3 +525,11 @@
   .v2-metrics-row { grid-template-columns: 1fr; }
   .v2-dash-tabs { flex-wrap: wrap; }
 }
+
+/* ── V1 OVERRIDE PATCHES ──────────────────────────────────────────── */
+/* Override v1's h1,h2,h3{font-family:'Syne'} inside v2 overlay */
+#v2-overlay h1, #v2-overlay h2, #v2-overlay h3 {
+  font-family: var(--v2-font);
+}
+/* Prevent v1-shell from causing horizontal scrollbar */
+html, body { overflow-x: hidden; }
