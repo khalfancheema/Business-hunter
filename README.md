@@ -211,6 +211,24 @@ Errors appear inline as red tips under each field. The pipeline will not launch 
 - **Response caching** — results cached in memory + localStorage (4-hour TTL); re-running the same ZIP + industry skips API calls
 - **Error recovery** — every agent has fallback data; a partial failure does not crash the pipeline
 - **Multi-source prompts** — Agent 1 searches 15 federal data sources (Census ACS, BLS QCEW, FRED, FHWA AADT, NCES, etc.); Agent 6 searches 20 competitive databases
+- **Array coercion** — `_toArr()` helper safely coerces any AI-returned value (array, object, or null) into an array before rendering, preventing `forEach is not a function` crashes when the model returns an object instead of a list
+- **Optional-chaining guards** — all nested property accesses on AI output use optional chaining (`?.`) so missing fields render as empty strings rather than crashing the renderer
+- **Sub-agent null-coalesce** — Financial Feasibility sub-agent results (Revenue Model, Cost Model) are null-coalesced to `{}` before merging, so a partial API failure doesn't crash the consolidation step
+
+### 🏭 Dynamic Agent UI per Industry
+Every agent card subtitle updates automatically when you switch industry — no need to re-run:
+- **Agent 1** subtitle reflects the demographic focus (e.g. "Children Under 5 · Family Income" for Daycare, "Traffic Counts (AADT) · Vehicle Ownership" for Gas Station)
+- **Agent 5** shows the primary regulatory body for that industry
+- **Agent 6** lists the top competitors for that vertical
+- **Agent 7** shows the revenue model (tuition, fuel margin, membership, etc.)
+- **Agent 12** grant tab labels switch to the primary and secondary grant programs for that industry (e.g. "GA CAPS · USDA CACFP" for Daycare, "EPA Brownfields · USDA Rural Biz" for Gas Station)
+- Agents 2, 3, 4, 9, 13 all update to use industry-specific units, labels, and competitor names
+
+### 💬 Button Tooltips
+Every button and control in the UI has a descriptive tooltip that appears on hover:
+- Explains **what** the button does, **when** to use it, and **why** it matters
+- Covers all pipeline controls, export buttons, session controls, and per-agent actions
+- Helps new users discover features without reading documentation
 
 ### 🔍 Drill-Down & Inspection
 - Click **↗ Expand** on any agent card to open a full-screen modal
