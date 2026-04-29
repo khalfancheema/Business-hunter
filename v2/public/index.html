@@ -1364,7 +1364,15 @@ html, body { overflow-x: hidden; }
 <div id="zipComparePanel" style="display:none"></div>
 <div id="historyPanel" style="display:none"></div>
 <div id="orchStatus" style="display:none"></div>
-<div class="final-box" id="finalBox" style="display:none"></div>
+<div class="final-box" id="finalBox" style="display:none">
+  <div id="verdictEl"></div>
+  <div class="final-grid">
+    <div class="final-section full"><div class="final-prose" id="f-assess"></div></div>
+    <div class="final-section"><div class="final-prose" id="f-success"></div></div>
+    <div class="final-section"><div class="final-prose" id="f-risks"></div></div>
+    <div class="final-section full"><div class="step-list" id="f-steps"></div></div>
+  </div>
+</div>
 <div id="profileHeader" style="display:none"></div>
 <div id="profileFormToggle" style="display:none"></div>
 <div id="profileForm" style="display:none">
@@ -1372,6 +1380,36 @@ html, body { overflow-x: hidden; }
   <input id="pf-location" /><input id="pf-equity" /><input id="pf-email" />
   <textarea id="pf-notes"></textarea><div id="pf-saved"></div>
 </div>
+<!-- Agent modal overlay (needed by openAgentModal / closeAgentModal) -->
+<div id="agentModalOverlay" style="display:none">
+  <div class="agent-modal">
+    <div class="agent-modal-header">
+      <div class="agent-modal-ico" id="modalAgentIco">🤖</div>
+      <div class="agent-modal-title">
+        <strong id="modalAgentName">Agent</strong>
+        <span id="modalAgentNum">Agent N</span>
+      </div>
+      <div class="agent-modal-actions">
+        <button id="modalSaveBtn" onclick="saveAgentJSON()">⬇ Save JSON</button>
+        <button id="modalPrintBtn" onclick="printAgentData()">🖨 Print</button>
+        <button onclick="closeAgentModal()">✕</button>
+      </div>
+    </div>
+    <div class="agent-modal-body" id="modalAgentBody"></div>
+  </div>
+</div>
+<!-- Scenario builder stubs (created dynamically by v1 but accessed by id) -->
+<div id="sb-occ-val" style="display:none"></div>
+<input type="range" id="sb-occ" style="display:none" />
+<div id="sb-t1-val" style="display:none"></div>
+<input type="range" id="sb-t1" style="display:none" />
+<div id="sb-rent-val" style="display:none"></div>
+<input type="range" id="sb-rent" style="display:none" />
+<div id="sb-output" style="display:none"></div>
+<!-- ZIP compare button stub -->
+<button id="compareZipBtn" style="display:none" onclick="runZipComparison()"></button>
+<input type="text" id="zipInput" style="display:none" />
+<div id="compCityOverlay" style="display:none"></div>
 
 <!-- Agent 1 -->
 <div class="agent-card" id="card-1"><div class="agent-head"><div class="agent-dot" id="dot-1"></div></div>
