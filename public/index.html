@@ -4490,7 +4490,7 @@ function buildMap(d) {
   const homeIcon = L.divIcon({ html: homeHtml, className: '', iconSize: [28,28], iconAnchor: [14,14], popupAnchor: [0,-16] });
   L.marker(center, { icon: homeIcon, zIndexOffset: 1000 })
     .addTo(map)
-    .bindPopup(`<strong>${d.center.label || 'ZIP ' + zip()}</strong><br>Your search center`);
+    .bindPopup(`<strong>${d.center?.label || 'ZIP ' + zip()}</strong><br>Your search center`);
 
   // ── Radius circle ─────────────────────────────────────────
   const radiusMiles = parseFloat(radius()) || 40;
