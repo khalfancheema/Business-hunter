@@ -2,8 +2,8 @@
 const V2 = {
   screen: 'landing',
   wizard: { step: 0, data: {} },
-  run: null,          // current run result
-  portfolio: [],      // saved runs
+  run: null,
+  portfolio: [],
   selectedProvider: 'anthropic',
 };
 
@@ -37,14 +37,26 @@ const V2_PROVIDERS = {
 };
 
 function v2GoTo(screen) {
+  // Handle Traditional View — uses CSS class on body instead of a v2 screen
+  if (screen === 'traditional') {
+    document.body.classList.add('v2-traditional');
+    // Scroll the v1 content into view
+    const shell = document.getElementById('v1-shell');
+    if (shell) shell.scrollIntoView({ behavior: 'instant', block: 'start' });
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Leaving traditional view
+  document.body.classList.remove('v2-traditional');
+
   V2.screen = screen;
   V2_SCREENS.forEach(s => {
     const el = document.getElementById('screen-' + s);
     if (el) el.classList.toggle('active', s === screen);
   });
-  // Portfolio screen: re-render
+
   if (screen === 'portfolio') v2RenderPortfolio();
-  // Dashboard: make sure content is rendered
   if (screen === 'dashboard' && V2.run) v2RenderDashboard(V2.run);
 }
 
@@ -57,16 +69,9 @@ function v2Toast(msg, ms = 2800) {
   v2Toast._t = setTimeout(() => el.classList.remove('show'), ms);
 }
 
-function v2ShowDetail() {
-  document.getElementById('v2-overlay').classList.add('hidden');
-  document.getElementById('v2-detail-bar').classList.add('show');
-  window.scrollTo(0,0);
-}
-
-function v2HideDetail() {
-  document.getElementById('v2-overlay').classList.remove('hidden');
-  document.getElementById('v2-detail-bar').classList.remove('show');
-}
+// Legacy aliases kept for backward-compat (investor/execution modals call these)
+function v2ShowDetail()  { v2GoTo('traditional'); }
+function v2HideDetail()  { v2GoTo('dashboard'); }
 
 function v2StopPipeline() {
   stopRequested = true;
@@ -89,13 +94,12 @@ function v2CloseApiKey() {
 }
 
 function v2SaveApiKey() {
-  const k = document.getElementById('v2-api-key-input').value.trim();
-  const m = document.getElementById('v2-model-input').value.trim();
+  const k  = document.getElementById('v2-api-key-input').value.trim();
+  const m  = document.getElementById('v2-model-input').value.trim();
   const cu = document.getElementById('v2-custom-url-input').value.trim();
-  if (k) localStorage.setItem('v2_apikey', k);
-  if (m) localStorage.setItem('v2_model', m);
+  if (k)  localStorage.setItem('v2_apikey', k);
+  if (m)  localStorage.setItem('v2_model', m);
   if (cu) localStorage.setItem('v2_custom_url', cu);
-  // Sync to v1 DOM
   v2SyncToV1Dom();
   v2CloseApiKey();
   v2Toast('✓ API key saved');
@@ -107,15 +111,15 @@ function v2SyncToV1Dom() {
   const cu = document.getElementById('v2-custom-url-input')?.value.trim() || localStorage.getItem('v2_custom_url') || '';
   const p  = V2.selectedProvider || localStorage.getItem('v2_provider') || 'anthropic';
 
-  const apiKeyEl  = document.getElementById('apiKey');
-  const provEl    = document.getElementById('providerSelect');
-  const modelEl   = document.getElementById('modelInput');
-  const customEl  = document.getElementById('customUrlInput');
+  const apiKeyEl = document.getElementById('apiKey');
+  const provEl   = document.getElementById('providerSelect');
+  const modelEl  = document.getElementById('modelInput');
+  const customEl = document.getElementById('customUrlInput');
 
-  if (apiKeyEl) apiKeyEl.value  = k;
-  if (provEl)   provEl.value    = p;
-  if (modelEl)  modelEl.value   = m;
-  if (customEl) customEl.value  = cu;
+  if (apiKeyEl) apiKeyEl.value = k;
+  if (provEl)   provEl.value   = p;
+  if (modelEl)  modelEl.value  = m;
+  if (customEl) customEl.value = cu;
   if (typeof onProviderChange === 'function') onProviderChange();
 }
 
@@ -161,7 +165,6 @@ window.addEventListener('DOMContentLoaded', () => {
     v2InitCopilotSidebar();
   } catch(e) {
     console.error('[v2 init error]', e);
-    // Show visible error so the user can report it
     const overlay = document.getElementById('v2-overlay');
     if (overlay) overlay.insertAdjacentHTML('afterbegin',
       `<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ef4444;color:#fff;padding:14px 24px;font-size:13px;font-family:monospace">

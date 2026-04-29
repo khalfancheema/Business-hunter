@@ -1271,12 +1271,140 @@ select option{background:var(--surface2)}
   .v2-dash-tabs { flex-wrap: wrap; }
 }
 
-/* ── V1 OVERRIDE PATCHES ──────────────────────────────────────────── */
-/* Override v1's h1,h2,h3{font-family:'Syne'} inside v2 overlay */
-#v2-overlay h1, #v2-overlay h2, #v2-overlay h3 {
+/* ── TRADITIONAL VIEW ─────────────────────────────────────────────────── */
+body.v2-traditional #v2-overlay { display: none !important; }
+body.v2-traditional #v1-shell {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-top: 68px;
+}
+body.v2-traditional #v2-trad-bar { display: flex !important; }
+
+#v2-trad-bar {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9100;
+  background: rgba(7,7,15,0.96); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--v2-border2);
+  padding: 0 24px; height: 60px;
+  align-items: center; justify-content: space-between; gap: 12px;
   font-family: var(--v2-font);
 }
-/* Prevent v1-shell from causing horizontal scrollbar */
+.v2-trad-bar-left { display: flex; align-items: center; gap: 14px; }
+.v2-trad-bar-label {
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  background: rgba(99,102,241,0.15); color: var(--v2-a1);
+  border: 1px solid rgba(99,102,241,0.3);
+}
+.v2-trad-bar-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ── DASHBOARD — EXTENDED SECTIONS ───────────────────────────────────── */
+.v2-exec-verdict-box {
+  background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25);
+  border-radius: 14px; padding: 20px 24px; margin-bottom: 24px;
+}
+.v2-exec-verdict-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--v2-a1); margin-bottom: 10px;
+}
+.v2-exec-verdict-text { font-size: 15px; color: var(--v2-t1); line-height: 1.65; font-weight: 500; }
+.v2-exec-section { margin-bottom: 28px; }
+.v2-exec-section-title {
+  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--v2-t2); margin-bottom: 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--v2-border);
+}
+
+.v2-sf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 10px; }
+.v2-sf-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--v2-s3); border: 1px solid var(--v2-border);
+  border-radius: 10px; padding: 12px 14px;
+}
+.v2-sf-num {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(99,102,241,0.2); color: var(--v2-a1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+}
+.v2-sf-text { font-size: 13px; color: var(--v2-t1); line-height: 1.5; }
+
+.v2-fin-summary {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+  gap: 14px; margin-bottom: 24px;
+}
+.v2-fin-stat { background: var(--v2-s3); border: 1px solid var(--v2-border); border-radius: 12px; padding: 18px; text-align: center; }
+.v2-fin-stat-val { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+.v2-fin-stat-lbl { font-size: 12px; color: var(--v2-t2); margin-top: 4px; }
+
+.v2-cost-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 8px; }
+.v2-cost-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--v2-s3); border-radius: 8px; padding: 10px 14px; font-size: 13px;
+}
+.v2-cost-name { color: var(--v2-t2); }
+.v2-cost-val  { font-weight: 700; color: var(--v2-t1); }
+
+.v2-assumption {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 13px; color: var(--v2-t2); padding: 8px 0;
+  border-bottom: 1px solid var(--v2-border);
+}
+.v2-assumption:last-child { border-bottom: none; }
+.v2-assumption-dot { color: var(--v2-a1); flex-shrink: 0; font-weight: 700; }
+
+.v2-site-grid { display: flex; flex-direction: column; gap: 10px; }
+.v2-site-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--v2-s3); border: 1px solid var(--v2-border);
+  border-radius: 12px; padding: 14px 16px;
+}
+.v2-site-rank { font-size: 22px; font-weight: 900; color: var(--v2-a1); min-width: 36px; text-align: center; flex-shrink: 0; }
+.v2-site-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.v2-site-city { font-size: 12px; color: var(--v2-t2); margin-bottom: 6px; }
+.v2-site-meta { font-size: 12px; color: var(--v2-t3); }
+.v2-site-info { flex: 1; }
+
+.v2-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--v2-border); }
+.v2-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.v2-table th {
+  padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--v2-t2);
+  background: var(--v2-s3); border-bottom: 1px solid var(--v2-border);
+}
+.v2-table td {
+  padding: 11px 14px; color: var(--v2-t1); border-bottom: 1px solid var(--v2-border);
+  vertical-align: middle;
+}
+.v2-table tbody tr:last-child td { border-bottom: none; }
+.v2-table tbody tr:hover td { background: var(--v2-s3); }
+
+.v2-agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 12px; }
+.v2-agent-card {
+  background: var(--v2-s3); border: 1px solid var(--v2-border);
+  border-radius: 12px; padding: 14px 16px; cursor: pointer;
+  transition: all .2s; display: flex; flex-direction: column; gap: 8px;
+}
+.v2-agent-card:hover { border-color: var(--v2-a1); transform: translateY(-2px); }
+.v2-agent-card.done    { border-color: rgba(34,197,94,.25); }
+.v2-agent-card.error   { border-color: rgba(239,68,68,.25); }
+.v2-agent-card.running { border-color: rgba(99,102,241,.4); }
+.v2-agent-card-head    { display: flex; align-items: flex-start; gap: 10px; }
+.v2-agent-card-ico     { font-size: 22px; flex-shrink: 0; }
+.v2-agent-card-name    { font-size: 13px; font-weight: 700; }
+.v2-agent-card-num     { font-size: 11px; color: var(--v2-t3); margin-top: 1px; }
+.v2-agent-card-status  { text-align: right; }
+.v2-agent-card-summary { font-size: 12px; color: var(--v2-t2); line-height: 1.5; }
+.v2-agent-card-cta { font-size: 11px; font-weight: 600; color: var(--v2-a1); padding-top: 6px; border-top: 1px solid var(--v2-border); }
+
+.v2-empty-panel { text-align: center; padding: 60px 24px; color: var(--v2-t2); background: var(--v2-s2); border: 1px solid var(--v2-border); border-radius: 14px; }
+
+/* ── V1 OVERRIDE PATCHES ──────────────────────────────────────────── */
+#v2-overlay h1, #v2-overlay h2, #v2-overlay h3 { font-family: var(--v2-font); }
 html, body { overflow-x: hidden; }
 
 </style>
@@ -1714,11 +1842,10 @@ html, body { overflow-x: hidden; }
       <div class="v2-nav-links">
         <span class="v2-nav-link" onclick="v2GoTo('portfolio')">Portfolio</span>
         <span class="v2-nav-link active">Dashboard</span>
+        <span class="v2-nav-link" onclick="v2GoTo('traditional')">Traditional View</span>
       </div>
       <div class="v2-nav-right">
-        <button class="v2-btn ghost sm" onclick="v2ShowDetail()">📊 Full Analysis</button>
-        <button class="v2-btn ghost sm" onclick="v2ShowExecution()">🗓 Execution Plan</button>
-        <button class="v2-btn sm" onclick="v2ShowInvestor()">📑 Investor Package</button>
+        <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
         <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">+ New Analysis</button>
       </div>
     </nav>
@@ -1731,8 +1858,11 @@ html, body { overflow-x: hidden; }
       <div class="v2-nav-logo" onclick="v2GoTo('landing')">Business Hunter</div>
       <div class="v2-nav-links">
         <span class="v2-nav-link active">Portfolio</span>
+        <span class="v2-nav-link" onclick="v2GoTo('dashboard')">Dashboard</span>
+        <span class="v2-nav-link" onclick="v2GoTo('traditional')">Traditional View</span>
       </div>
       <div class="v2-nav-right">
+        <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
         <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">+ New Analysis</button>
       </div>
     </nav>
@@ -1741,10 +1871,14 @@ html, body { overflow-x: hidden; }
 
 </div><!-- #v2-overlay -->
 
-<!-- ── Detail bar (shown when v1 view is open) ─────────────── -->
-<div id="v2-detail-bar">
-  <h3>📊 Full Agent Analysis</h3>
-  <div class="v2-detail-actions">
+<!-- ── Traditional View Bar (shown when body.v2-traditional) ── -->
+<div id="v2-trad-bar">
+  <div class="v2-trad-bar-left">
+    <div class="v2-nav-logo" style="-webkit-text-fill-color:initial;color:#f1f5f9">Business Hunter</div>
+    <span class="v2-trad-bar-label">Traditional View</span>
+  </div>
+  <div class="v2-trad-bar-actions">
+    <button class="v2-btn ghost sm" onclick="printReport()">🖨 Print Report</button>
     <button class="v2-btn ghost sm" onclick="fullPipelineExport()">📄 Full PDF</button>
     <button class="v2-btn ghost sm" onclick="exportResults()">⬇ Export JSON</button>
     <button class="v2-btn primary sm" onclick="v2HideDetail()">← Back to Dashboard</button>
@@ -9727,8 +9861,8 @@ function _autoFreshBadges(containerId) {
 const V2 = {
   screen: 'landing',
   wizard: { step: 0, data: {} },
-  run: null,          // current run result
-  portfolio: [],      // saved runs
+  run: null,
+  portfolio: [],
   selectedProvider: 'anthropic',
 };
 
@@ -9762,14 +9896,26 @@ const V2_PROVIDERS = {
 };
 
 function v2GoTo(screen) {
+  // Handle Traditional View — uses CSS class on body instead of a v2 screen
+  if (screen === 'traditional') {
+    document.body.classList.add('v2-traditional');
+    // Scroll the v1 content into view
+    const shell = document.getElementById('v1-shell');
+    if (shell) shell.scrollIntoView({ behavior: 'instant', block: 'start' });
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Leaving traditional view
+  document.body.classList.remove('v2-traditional');
+
   V2.screen = screen;
   V2_SCREENS.forEach(s => {
     const el = document.getElementById('screen-' + s);
     if (el) el.classList.toggle('active', s === screen);
   });
-  // Portfolio screen: re-render
+
   if (screen === 'portfolio') v2RenderPortfolio();
-  // Dashboard: make sure content is rendered
   if (screen === 'dashboard' && V2.run) v2RenderDashboard(V2.run);
 }
 
@@ -9782,16 +9928,9 @@ function v2Toast(msg, ms = 2800) {
   v2Toast._t = setTimeout(() => el.classList.remove('show'), ms);
 }
 
-function v2ShowDetail() {
-  document.getElementById('v2-overlay').classList.add('hidden');
-  document.getElementById('v2-detail-bar').classList.add('show');
-  window.scrollTo(0,0);
-}
-
-function v2HideDetail() {
-  document.getElementById('v2-overlay').classList.remove('hidden');
-  document.getElementById('v2-detail-bar').classList.remove('show');
-}
+// Legacy aliases kept for backward-compat (investor/execution modals call these)
+function v2ShowDetail()  { v2GoTo('traditional'); }
+function v2HideDetail()  { v2GoTo('dashboard'); }
 
 function v2StopPipeline() {
   stopRequested = true;
@@ -9814,13 +9953,12 @@ function v2CloseApiKey() {
 }
 
 function v2SaveApiKey() {
-  const k = document.getElementById('v2-api-key-input').value.trim();
-  const m = document.getElementById('v2-model-input').value.trim();
+  const k  = document.getElementById('v2-api-key-input').value.trim();
+  const m  = document.getElementById('v2-model-input').value.trim();
   const cu = document.getElementById('v2-custom-url-input').value.trim();
-  if (k) localStorage.setItem('v2_apikey', k);
-  if (m) localStorage.setItem('v2_model', m);
+  if (k)  localStorage.setItem('v2_apikey', k);
+  if (m)  localStorage.setItem('v2_model', m);
   if (cu) localStorage.setItem('v2_custom_url', cu);
-  // Sync to v1 DOM
   v2SyncToV1Dom();
   v2CloseApiKey();
   v2Toast('✓ API key saved');
@@ -9832,15 +9970,15 @@ function v2SyncToV1Dom() {
   const cu = document.getElementById('v2-custom-url-input')?.value.trim() || localStorage.getItem('v2_custom_url') || '';
   const p  = V2.selectedProvider || localStorage.getItem('v2_provider') || 'anthropic';
 
-  const apiKeyEl  = document.getElementById('apiKey');
-  const provEl    = document.getElementById('providerSelect');
-  const modelEl   = document.getElementById('modelInput');
-  const customEl  = document.getElementById('customUrlInput');
+  const apiKeyEl = document.getElementById('apiKey');
+  const provEl   = document.getElementById('providerSelect');
+  const modelEl  = document.getElementById('modelInput');
+  const customEl = document.getElementById('customUrlInput');
 
-  if (apiKeyEl) apiKeyEl.value  = k;
-  if (provEl)   provEl.value    = p;
-  if (modelEl)  modelEl.value   = m;
-  if (customEl) customEl.value  = cu;
+  if (apiKeyEl) apiKeyEl.value = k;
+  if (provEl)   provEl.value   = p;
+  if (modelEl)  modelEl.value  = m;
+  if (customEl) customEl.value = cu;
   if (typeof onProviderChange === 'function') onProviderChange();
 }
 
@@ -9886,7 +10024,6 @@ window.addEventListener('DOMContentLoaded', () => {
     v2InitCopilotSidebar();
   } catch(e) {
     console.error('[v2 init error]', e);
-    // Show visible error so the user can report it
     const overlay = document.getElementById('v2-overlay');
     if (overlay) overlay.insertAdjacentHTML('afterbegin',
       `<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ef4444;color:#fff;padding:14px 24px;font-size:13px;font-family:monospace">
@@ -10351,7 +10488,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ── V2 VIABILITY SCORE ────────────────────────────────────────────────────
+// ── V2 VIABILITY SCORE & DATA EXTRACTION ─────────────────────────────────
 function v2CalcScore() {
   if (typeof R === 'undefined') return 0;
 
@@ -10370,8 +10507,6 @@ function v2CalcScore() {
     const scenarios = _toArr(R.a7.scenarios);
     const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[1] || {};
     const net  = base.monthly_net || 0;
-    const roi  = base.roi_3yr || 0;
-    // Positive net = good; break-even < 24mo is ideal
     const be   = base.breakeven_months || 36;
     const finScore = Math.max(0, Math.min(25, (net > 0 ? 15 : 5) + (be < 18 ? 10 : be < 24 ? 6 : be < 36 ? 3 : 0)));
     score  += finScore;
@@ -10396,7 +10531,6 @@ function v2CalcScore() {
     const avgComp = cities.length
       ? cities.reduce((s,c)=>s+(c.competitor_count||c.total_competitors||5),0)/cities.length
       : 5;
-    // Fewer competitors → better opportunity (up to 15 pts)
     const compScore = Math.max(0, Math.min(15, 15 - avgComp));
     score  += compScore;
     weight += 15;
@@ -10416,29 +10550,17 @@ function v2CalcScore() {
 
 function v2ScoreVerdict(score) {
   if (score >= 70) return {
-    label: '✓ GO',
-    badge: 'green',
-    color: 'var(--v2-green)',
-    colorClass: 'go',
-    icon: '🟢',
+    label: '✓ GO', badge: 'green', color: 'var(--v2-green)', colorClass: 'go', icon: '🟢',
     title: 'Strong Opportunity',
     summary: 'Market data supports moving forward. Solid demand, manageable competition, and favorable financials align with your goals.',
   };
   if (score >= 45) return {
-    label: '⚠ CAUTIOUS GO',
-    badge: 'amber',
-    color: 'var(--v2-amber)',
-    colorClass: 'caution',
-    icon: '🟡',
+    label: '⚠ CAUTIOUS GO', badge: 'amber', color: 'var(--v2-amber)', colorClass: 'caution', icon: '🟡',
     title: 'Proceed with Caution',
     summary: 'Opportunity exists but notable risks require mitigation. Review the financial model and competitive landscape before committing.',
   };
   return {
-    label: '✗ NO-GO',
-    badge: 'red',
-    color: 'var(--v2-red)',
-    colorClass: 'no',
-    icon: '🔴',
+    label: '✗ NO-GO', badge: 'red', color: 'var(--v2-red)', colorClass: 'no', icon: '🔴',
     title: 'High Risk — Do Not Proceed',
     summary: 'Current market conditions, financial projections, or competitive density make this a risky investment at this time.',
   };
@@ -10448,7 +10570,6 @@ function v2GetKPIs() {
   const kpis = [];
   if (typeof R === 'undefined') return kpis;
 
-  // Break-even
   if (R.a7) {
     const sc = _toArr(R.a7.scenarios);
     const base = sc.find(s=>(s.name||'').toLowerCase().includes('base'))||sc[1]||{};
@@ -10456,17 +10577,17 @@ function v2GetKPIs() {
     if (base.monthly_revenue)  kpis.push({ ico:'💵', val:`$${Math.round(base.monthly_revenue/1000)}K/mo`, lbl:'Base Revenue' });
     if (base.roi_3yr!=null)    kpis.push({ ico:'📈', val:`${base.roi_3yr>0?'+':''}${base.roi_3yr}%`, lbl:'3yr ROI' });
   }
-  if (R.a7?.total_startup_cost)
-    kpis.push({ ico:'💰', val:`$${Math.round(R.a7.total_startup_cost/1000)}K`, lbl:'Startup Cost' });
+  const startupCost = R.a7?.total_startup_cost || R.a7?.startup_cost ||
+    _toArr(R.a7?.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||b.cost||0),0);
+  if (startupCost)
+    kpis.push({ ico:'💰', val:`$${Math.round(startupCost/1000)}K`, lbl:'Startup Cost' });
 
-  // Top gap city
   if (R.a2?.cities?.length) {
     const top = [...R.a2.cities].sort((a,b)=>(b.gap_score||0)-(a.gap_score||0))[0];
     if (top) kpis.push({ ico:'🏆', val:top.city||'—', lbl:'Top City' });
     kpis.push({ ico:'🎯', val:`${top?.gap_score||0}/10`, lbl:'Gap Score' });
   }
 
-  // Compliance timeline
   if (R.a5?.total_timeline_months)
     kpis.push({ ico:'⏱', val:`${R.a5.total_timeline_months} mo`, lbl:'Permit Timeline' });
 
@@ -10476,7 +10597,7 @@ function v2GetKPIs() {
 function v2GetRisks() {
   if (typeof R === 'undefined' || !R.a8) return [];
   const raw = R.a8.risks || R.a8.risk_factors || R.a8.key_risks || [];
-  return _toArr(raw).slice(0, 6).map(r => ({
+  return _toArr(raw).slice(0, 8).map(r => ({
     title:    typeof r === 'string' ? r : (r.risk || r.title || r.name || ''),
     desc:     typeof r === 'string' ? '' : (r.mitigation || r.description || r.detail || ''),
     severity: typeof r === 'string' ? 'medium' : (r.severity || r.level || 'medium'),
@@ -10486,13 +10607,143 @@ function v2GetRisks() {
 function v2GetInsights() {
   const insights = [];
   if (typeof R === 'undefined') return insights;
+  if (R.a1?.summary) insights.push({ ico:'📊', title:'Demographics', body: _truncate(R.a1.summary, 200) });
+  if (R.a5?.summary) insights.push({ ico:'⚖️', title:'Compliance', body: _truncate(R.a5.summary, 200) });
+  if (R.a6?.summary) insights.push({ ico:'🔍', title:'Competition', body: _truncate(R.a6.summary, 200) });
+  if (R.a12?.summary) insights.push({ ico:'💵', title:'Grants Available', body: _truncate(R.a12.summary, 200) });
+  return insights;
+}
 
-  if (R.a1?.summary) insights.push({ ico:'📊', title:'Demographics', body: _truncate(R.a1.summary, 160) });
-  if (R.a5?.summary) insights.push({ ico:'⚖️', title:'Compliance', body: _truncate(R.a5.summary, 160) });
-  if (R.a6?.summary) insights.push({ ico:'🔍', title:'Competition', body: _truncate(R.a6.summary, 160) });
-  if (R.a12?.summary) insights.push({ ico:'💵', title:'Grants Available', body: _truncate(R.a12.summary, 160) });
+function v2GetAssessment() {
+  if (typeof R === 'undefined' || !R.a8) return null;
+  return {
+    verdict:       R.a8.verdict || R.a8.recommendation || '',
+    rationale:     R.a8.verdict_rationale || R.a8.rationale || '',
+    assessment:    R.a8.assessment || R.a8.summary || '',
+    successFactors:_toArr(R.a8.success_factors || R.a8.strengths || []).slice(0, 8),
+    nextStepsAI:   _toArr(R.a8.next_steps || R.a8.action_items || []).slice(0, 8),
+  };
+}
 
-  return insights.slice(0, 4);
+function v2GetFinancialsDetail() {
+  if (typeof R === 'undefined' || !R.a7) return null;
+  const scenarios = _toArr(R.a7.scenarios || []);
+  const breakdown = _toArr(R.a7.startup_breakdown || R.a7.cost_breakdown || []).slice(0, 10);
+
+  // Derive startup cost: explicit field OR sum breakdown OR fall back to scenario
+  let startup = R.a7.total_startup_cost || R.a7.startup_cost || 0;
+  if (!startup && breakdown.length) {
+    startup = breakdown.reduce((s, b) => s + (b.amount || b.cost || b.value || 0), 0);
+  }
+
+  // Derive monthly expenses: explicit field OR from first scenario OR from monthly_ops
+  const monthlyOps = R.a7.monthly_ops;
+  let monthly_expenses = R.a7.monthly_expenses || R.a7.fixed_costs || R.a7.monthly_fixed_costs || 0;
+  if (!monthly_expenses) {
+    if (scenarios.length) {
+      const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[1] || scenarios[0] || {};
+      monthly_expenses = base.monthly_expenses || base.operating_costs || 0;
+    }
+    if (!monthly_expenses && monthlyOps) {
+      const opsArr = Array.isArray(monthlyOps) ? monthlyOps : Object.values(monthlyOps);
+      if (opsArr.length) {
+        const first = opsArr[0];
+        monthly_expenses = typeof first === 'object'
+          ? (first.total || first.amount || first.expenses || 0)
+          : (typeof first === 'number' ? first : 0);
+      }
+    }
+  }
+
+  return {
+    startup,
+    monthly_expenses,
+    scenarios,
+    funding:     _toArr(R.a7.funding_sources || R.a7.funding || []).slice(0, 6),
+    assumptions: _toArr(R.a7.key_assumptions || []).slice(0, 6),
+    startup_breakdown: breakdown,
+  };
+}
+
+function v2GetGrantsDetail() {
+  if (typeof R === 'undefined' || !R.a12) return [];
+  // Support both generic and demo-specific data shapes
+  const raw = _toArr(
+    R.a12.grants || R.a12.programs || R.a12.opportunities ||
+    R.a12.all_grants_table || R.a12.grant_list || []
+  );
+  return raw.slice(0, 12).map(g => ({
+    name:        g.name || g.program || g.title || '',
+    amount:      g.amount || g.max_award || g.funding || g.amount_est || '',
+    deadline:    g.deadline || g.due_date || '',
+    eligibility: g.eligibility || g.requirements || g.action_required || '',
+    type:        g.type || g.category || g.source || 'Program',
+    probability: g.probability || '',
+  })).filter(g => g.name);
+}
+
+function v2GetMarketData() {
+  if (typeof R === 'undefined') return { gap: null, sites: [], realEstate: [] };
+  const gap = R.a2 ? {
+    summary:     R.a2.summary || '',
+    total_pop:   R.a2.total_population || 0,
+    demand:      R.a2.demand_units || R.a2.unserved_demand || 0,
+    cities:      _toArr(R.a2.cities || []).sort((a,b)=>(b.gap_score||0)-(a.gap_score||0)).slice(0, 8),
+  } : null;
+  const sites      = R.a3 ? _toArr(R.a3.sites || R.a3.locations || R.a3.top_sites || []).slice(0, 6) : [];
+  const realEstate = R.a4 ? _toArr(R.a4.listings || R.a4.properties || []).slice(0, 4) : [];
+  return { gap, sites, realEstate };
+}
+
+function v2GetCompetitorData() {
+  if (typeof R === 'undefined') return { comp6: null, comp13: null };
+  const comp6 = R.a6 ? {
+    summary:    R.a6.summary || '',
+    cities:     _toArr(R.a6.cities || R.a6.by_city || []).slice(0, 6),
+    avg_rating: R.a6.avg_rating || 0,
+    total:      R.a6.total_competitors || 0,
+  } : null;
+
+  const comp13 = R.a13 ? (() => {
+    // pain points: generic or demo-specific shape
+    const rawPain = _toArr(
+      R.a13.pain_points || R.a13.competitor_weaknesses ||
+      R.a13.pain_point_analysis || []
+    ).slice(0, 5).map(p =>
+      typeof p === 'string' ? p : (p.pain || p.issue || p.problem || p.title || '')
+    ).filter(Boolean);
+
+    // differentiators: may be array or keyed object
+    let rawDiff = R.a13.differentiators || R.a13.your_advantages || R.a13.differentiation_strategy || [];
+    if (!Array.isArray(rawDiff) && typeof rawDiff === 'object') {
+      rawDiff = Object.values(rawDiff);
+    }
+    const diffs = _toArr(rawDiff).slice(0, 5).map(d =>
+      typeof d === 'string' ? d : (d.pillar || d.advantage || d.differentiator || d.title || d.description || '')
+    ).filter(Boolean);
+
+    return {
+      summary:         R.a13.summary || '',
+      pain_points:     rawPain,
+      differentiators: diffs,
+    };
+  })() : null;
+
+  return { comp6, comp13 };
+}
+
+function v2GetActionPlan() {
+  if (typeof R === 'undefined') return { steps: [], phases: [] };
+  const steps  = _toArr(R.a8?.next_steps || R.a8?.action_items || []).slice(0, 10);
+  const phases = _toArr(R.a10?.milestones || R.a10?.phases || []).slice(0, 5);
+  return { steps, phases };
+}
+
+function v2GetAgentSummary(id) {
+  if (typeof R === 'undefined') return '';
+  const d = R[`a${id}`];
+  if (!d) return '';
+  return _truncate(d.summary || d.assessment || d.overview || '', 180);
 }
 
 function _truncate(str, n) {
@@ -10509,47 +10760,37 @@ function v2RenderDashboard(run) {
   const score   = run.score || v2CalcScore();
   const verdict = v2ScoreVerdict(score);
   const kpis    = v2GetKPIs();
-  const risks   = v2GetRisks();
-  const insights= v2GetInsights();
-
-  const ind  = V2_INDUSTRIES.find(i=>i.val===run.industry)||{emoji:'🏢',label:'Business'};
-  const circ = 2 * Math.PI * 58;
-  const offset = circ * (1 - score / 100);
+  const ind     = V2_INDUSTRIES.find(i=>i.val===run.industry)||{emoji:'🏢',label:'Business'};
+  const circ    = 2 * Math.PI * 54;
+  const offset  = circ * (1 - score / 100);
   const ringColor = score >= 70 ? '#22c55e' : score >= 45 ? '#f59e0b' : '#ef4444';
 
-  // Score ring SVG
   const ring = `
-    <svg width="140" height="140" viewBox="0 0 140 140">
-      <circle class="v2-score-ring-bg" cx="70" cy="70" r="58" />
-      <circle class="v2-score-ring-fill" cx="70" cy="70" r="58"
-        stroke="${ringColor}"
-        stroke-dasharray="${circ.toFixed(1)}"
-        stroke-dashoffset="${offset.toFixed(1)}"
-        style="transform:rotate(-90deg);transform-origin:center"
-      />
+    <svg width="130" height="130" viewBox="0 0 130 130" style="display:block">
+      <circle class="v2-score-ring-bg" cx="65" cy="65" r="54"/>
+      <circle class="v2-score-ring-fill" cx="65" cy="65" r="54"
+        stroke="${ringColor}" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+        style="transform:rotate(-90deg);transform-origin:center"/>
     </svg>
     <div class="v2-score-num">
       <span class="big" style="color:${ringColor}">${score}</span>
       <span class="small">/100</span>
-    </div>
-  `;
+    </div>`;
 
   wrap.innerHTML = `
-    <!-- Header -->
     <div class="v2-dash-header">
       <div>
         <div class="v2-dash-title">${ind.emoji} ${ind.label} Analysis</div>
-        <div class="v2-dash-meta">ZIP ${run.zip} · ${run.radius} mi radius · $${parseInt(run.budget).toLocaleString()} budget · ${new Date(run.ts||Date.now()).toLocaleDateString()}</div>
+        <div class="v2-dash-meta">ZIP ${run.zip} · ${run.radius} mi radius · $${parseInt(run.budget||0).toLocaleString()} budget · ${new Date(run.ts||Date.now()).toLocaleDateString()}</div>
       </div>
       <div class="v2-dash-actions">
-        <button class="v2-btn ghost sm" onclick="v2ShowDetail()">📊 Full Analysis</button>
         <button class="v2-btn ghost sm" onclick="v2ShowExecution()">🗓 Execution Plan</button>
-        <button class="v2-btn sm" onclick="v2ShowInvestor()">📑 Investor Package</button>
-        <button class="v2-btn primary sm" onclick="v2SaveCurrentRun()">💾 Save to Portfolio</button>
+        <button class="v2-btn ghost sm" onclick="v2ShowInvestor()">📑 Investor Pack</button>
+        <button class="v2-btn ghost sm" onclick="v2GoTo('traditional')">🔬 Traditional View</button>
+        <button class="v2-btn primary sm" onclick="v2SaveCurrentRun()">💾 Save</button>
       </div>
     </div>
 
-    <!-- Verdict banner -->
     <div class="v2-verdict-banner ${verdict.colorClass}">
       <div class="v2-verdict-icon">${verdict.icon}</div>
       <div class="v2-verdict-text">
@@ -10557,16 +10798,15 @@ function v2RenderDashboard(run) {
         <p>${verdict.summary}</p>
       </div>
       <div class="v2-verdict-cta">
-        <span class="v2-badge ${verdict.colorClass === 'go' ? 'green' : verdict.colorClass === 'caution' ? 'amber' : 'red'}" style="font-size:13px;padding:6px 14px">${verdict.label}</span>
+        <span class="v2-badge ${verdict.colorClass==='go'?'green':verdict.colorClass==='caution'?'amber':'red'}" style="font-size:13px;padding:6px 14px">${verdict.label}</span>
       </div>
     </div>
 
-    <!-- Score + KPIs -->
     <div class="v2-metrics-row">
       <div class="v2-card glow v2-score-card">
         <div class="v2-score-ring-wrap">${ring}</div>
         <div class="v2-score-verdict" style="color:${ringColor}">${verdict.title}</div>
-        <div class="v2-score-reason">Based on gap analysis, financials, compliance, and competitive landscape</div>
+        <div class="v2-score-reason">Gap · Financials · Compliance · Competition</div>
       </div>
       <div class="v2-card" style="padding:20px">
         <div class="v2-label" style="margin-bottom:14px">Key Metrics</div>
@@ -10577,102 +10817,497 @@ function v2RenderDashboard(run) {
               <div class="v2-kpi-val">${k.val}</div>
               <div class="v2-kpi-lbl">${k.lbl}</div>
             </div>`).join('')}
-          ${kpis.length === 0 ? '<div style="color:var(--v2-t3);font-size:13px;padding:12px">Run the pipeline to see metrics</div>' : ''}
+          ${!kpis.length?'<div style="color:var(--v2-t3);font-size:13px;padding:12px">Run the pipeline to see metrics</div>':''}
         </div>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="v2-dash-tabs">
-      <div class="v2-dash-tab active" onclick="v2DashTab('insights',this)">💡 Insights</div>
-      <div class="v2-dash-tab" onclick="v2DashTab('risks',this)">⚠ Risks</div>
-      <div class="v2-dash-tab" onclick="v2DashTab('nextsteps',this)">✅ Next Steps</div>
-      <div class="v2-dash-tab" onclick="v2DashTab('agents',this)">📊 All Agents</div>
+    <div class="v2-dash-tabs" id="v2-dash-tabs">
+      <div class="v2-dash-tab active" onclick="v2DashTab('executive',this)">📋 Executive</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('financials',this)">💰 Financials</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('market',this)">🗺️ Market</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('competition',this)">🔍 Competition</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('risks',this)">⚠️ Risks</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('plan',this)">✅ Action Plan</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('grants',this)">💵 Grants</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('agents',this)">🤖 All Agents</div>
     </div>
 
-    <!-- Insights panel -->
-    <div class="v2-dash-panel active" id="v2-panel-insights">
-      ${insights.length ? `<div class="v2-insights">${insights.map(i=>`
-        <div class="v2-insight">
-          <div class="v2-insight-ico">${i.ico}</div>
-          <div>
-            <div class="v2-insight-title">${i.title}</div>
-            <div class="v2-insight-body">${i.body}</div>
-          </div>
-        </div>`).join('')}</div>`
-      : '<div class="v2-prose" style="padding:20px">Complete the pipeline to see AI insights.</div>'}
-    </div>
-
-    <!-- Risks panel -->
-    <div class="v2-dash-panel" id="v2-panel-risks">
-      ${risks.length ? `<div class="v2-risk-grid">${risks.map(r=>`
-        <div class="v2-risk-item">
-          <div class="v2-risk-header">
-            <span class="v2-risk-badge ${r.severity}">${r.severity.toUpperCase()}</span>
-            <span class="v2-risk-title">${r.title}</span>
-          </div>
-          <div class="v2-risk-desc">${r.desc||'Identified by executive summary agent'}</div>
-        </div>`).join('')}</div>`
-      : `<div class="v2-risk-grid">
-          <div class="v2-risk-item"><div class="v2-risk-header"><span class="v2-risk-badge medium">MEDIUM</span><span class="v2-risk-title">Market saturation risk</span></div><div class="v2-risk-desc">Complete the pipeline to see AI-generated risk analysis.</div></div>
-        </div>`}
-    </div>
-
-    <!-- Next steps panel -->
-    <div class="v2-dash-panel" id="v2-panel-nextsteps">
-      ${v2RenderNextSteps()}
-    </div>
-
-    <!-- All agents panel -->
-    <div class="v2-dash-panel" id="v2-panel-agents">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
-        ${V2_AGENTS.map(a=>{
-          const row = document.getElementById(`v2-ar-${a.id}`);
-          const isDone  = row?.classList.contains('done');
-          const isError = row?.classList.contains('error');
-          const st = isDone ? 'done' : isError ? 'error' : 'idle';
-          const stColor = st==='done' ? 'var(--v2-green)' : st==='error' ? 'var(--v2-red)' : 'var(--v2-t3)';
-          const stLabel = st==='done' ? '✓ Done' : st==='error' ? '✗ Error' : '— Not run';
-          return `<div class="v2-kpi" style="display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer" onclick="v2ShowDetail()">
-            <span style="font-size:20px">${a.ico}</span>
-            <div style="flex:1">
-              <div style="font-size:13px;font-weight:600">${a.name}</div>
-              <div style="font-size:11px;color:${stColor};margin-top:2px">${stLabel}</div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
+    <div class="v2-dash-panel active" id="v2-panel-executive">${v2RenderExecutive()}</div>
+    <div class="v2-dash-panel" id="v2-panel-financials">${v2RenderFinancials()}</div>
+    <div class="v2-dash-panel" id="v2-panel-market">${v2RenderMarket()}</div>
+    <div class="v2-dash-panel" id="v2-panel-competition">${v2RenderCompetition()}</div>
+    <div class="v2-dash-panel" id="v2-panel-risks">${v2RenderRisks()}</div>
+    <div class="v2-dash-panel" id="v2-panel-plan">${v2RenderActionPlan()}</div>
+    <div class="v2-dash-panel" id="v2-panel-grants">${v2RenderGrants()}</div>
+    <div class="v2-dash-panel" id="v2-panel-agents">${v2RenderAgents()}</div>
   `;
 }
 
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────
 function v2DashTab(id, el) {
-  document.querySelectorAll('.v2-dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#v2-dash-tabs .v2-dash-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.v2-dash-panel').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
   const panel = document.getElementById(`v2-panel-${id}`);
   if (panel) panel.classList.add('active');
 }
 
-function v2RenderNextSteps() {
-  const steps = [
-    { ico:'🔑', title:'Secure Your Funding',      desc:'Apply for an SBA 7(a) loan and present your investor deck. The full business plan is ready in the Analysis view.' },
-    { ico:'📍', title:'Lock In Your Location',     desc:'Contact the top-ranked sites from Agent 3. Use the market map to compare neighborhoods before signing.' },
-    { ico:'⚖️',  title:'File for Permits',         desc:'Begin the licensing process immediately — permit timelines are your critical path. See compliance checklist.' },
-    { ico:'👥', title:'Build Your Team',           desc:'Start recruiting key hires now. Your project plan (Agent 10) has the full hiring roadmap and timeline.' },
-    { ico:'📣', title:'Pre-Launch Marketing',      desc:'Build your waitlist and brand presence 3–4 months before opening. Use the differentiation plan from Agent 13.' },
-    { ico:'📊', title:'Track Your Progress',       desc:'Save this analysis to your portfolio and re-run it in 60 days to check if market conditions have changed.' },
-  ];
-  return `<div class="v2-insights">${steps.map(s=>`
-    <div class="v2-insight">
-      <div class="v2-insight-ico">${s.ico}</div>
-      <div>
-        <div class="v2-insight-title">${s.title}</div>
-        <div class="v2-insight-body">${s.desc}</div>
+// ── EXECUTIVE SUMMARY ─────────────────────────────────────────────────────
+function v2RenderExecutive() {
+  const a = v2GetAssessment();
+  const insights = v2GetInsights();
+
+  if (!a) return `
+    <div class="v2-empty-panel">
+      <div style="font-size:40px;margin-bottom:12px">📋</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">No executive summary yet</div>
+      <div class="v2-prose">Run the full pipeline to generate the AI executive analysis.</div>
+    </div>`;
+
+  const sf = a.successFactors;
+
+  return `
+    ${a.rationale ? `
+    <div class="v2-exec-verdict-box">
+      <div class="v2-exec-verdict-label">AI Verdict Rationale</div>
+      <div class="v2-exec-verdict-text">${a.rationale}</div>
+    </div>` : ''}
+
+    ${a.assessment ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">📊 Overall Assessment</div>
+      <div class="v2-prose">${a.assessment}</div>
+    </div>` : ''}
+
+    ${sf.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">✅ Success Factors</div>
+      <div class="v2-sf-grid">
+        ${sf.map((f,i)=>`
+          <div class="v2-sf-item">
+            <div class="v2-sf-num">${i+1}</div>
+            <div class="v2-sf-text">${typeof f==='string'?f:(f.factor||f.title||f.name||String(f))}</div>
+          </div>`).join('')}
       </div>
-    </div>`).join('')}</div>`;
+    </div>` : ''}
+
+    ${insights.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">💡 Market Intelligence Highlights</div>
+      <div class="v2-insights">
+        ${insights.map(i=>`
+          <div class="v2-insight">
+            <div class="v2-insight-ico">${i.ico}</div>
+            <div>
+              <div class="v2-insight-title">${i.title}</div>
+              <div class="v2-insight-body">${i.body}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
 }
 
+// ── FINANCIALS ────────────────────────────────────────────────────────────
+function v2RenderFinancials() {
+  const f = v2GetFinancialsDetail();
+
+  if (!f) return `<div class="v2-empty-panel"><div style="font-size:40px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">No financial data yet</div><div class="v2-prose">Run Agent 7 to generate financial models.</div></div>`;
+
+  const fmtUSD = v => v ? `$${Number(v).toLocaleString()}` : '—';
+
+  return `
+    <div class="v2-fin-summary">
+      <div class="v2-fin-stat">
+        <div class="v2-fin-stat-val">${fmtUSD(f.startup)}</div>
+        <div class="v2-fin-stat-lbl">Total Startup Cost</div>
+      </div>
+      <div class="v2-fin-stat">
+        <div class="v2-fin-stat-val">${fmtUSD(f.monthly_expenses)}</div>
+        <div class="v2-fin-stat-lbl">Monthly Fixed Costs</div>
+      </div>
+      <div class="v2-fin-stat">
+        <div class="v2-fin-stat-val">${f.scenarios.length || 3}</div>
+        <div class="v2-fin-stat-lbl">Scenarios Modeled</div>
+      </div>
+    </div>
+
+    ${f.scenarios.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">📊 3-Scenario Financial Model</div>
+      <div class="v2-table-wrap">
+        <table class="v2-table">
+          <thead><tr>
+            <th>Scenario</th><th>Occupancy</th><th>Monthly Revenue</th>
+            <th>Monthly Net</th><th>Break-Even</th><th>3yr ROI</th>
+          </tr></thead>
+          <tbody>
+            ${f.scenarios.map(s => {
+              const net = s.monthly_net || 0;
+              const color = net > 0 ? 'var(--v2-green)' : 'var(--v2-red)';
+              return `<tr>
+                <td><strong>${s.name||'Scenario'}</strong></td>
+                <td>${s.occupancy_rate||s.occupancy||'—'}${typeof (s.occupancy_rate||s.occupancy)==='number'?'%':''}</td>
+                <td>${fmtUSD(s.monthly_revenue)}</td>
+                <td style="color:${color};font-weight:700">${fmtUSD(s.monthly_net)}</td>
+                <td>${s.breakeven_months ? s.breakeven_months+' mo' : '—'}</td>
+                <td>${s.roi_3yr!=null ? (s.roi_3yr>0?'+':'')+s.roi_3yr+'%' : '—'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+
+    ${f.startup_breakdown.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">💸 Startup Cost Breakdown</div>
+      <div class="v2-cost-grid">
+        ${f.startup_breakdown.map(item=>`
+          <div class="v2-cost-item">
+            <div class="v2-cost-name">${typeof item==='string'?item:(item.item||item.category||item.name||'')}</div>
+            <div class="v2-cost-val">${typeof item==='object'?fmtUSD(item.cost||item.amount||item.value||0):'—'}</div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${f.funding.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">🏦 Recommended Funding Sources</div>
+      <div class="v2-insights">
+        ${f.funding.map(s=>`
+          <div class="v2-insight">
+            <div class="v2-insight-ico">🏦</div>
+            <div>
+              <div class="v2-insight-title">${typeof s==='string'?s:(s.source||s.name||s.type||'')}</div>
+              <div class="v2-insight-body">${typeof s==='object'?(s.amount?'Amount: '+fmtUSD(s.amount)+' · ':'')+( s.notes||s.description||s.terms||''):''}
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${f.assumptions.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">📌 Key Assumptions</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${f.assumptions.map(a=>`
+          <div class="v2-assumption">
+            <span class="v2-assumption-dot">→</span>
+            <span>${typeof a==='string'?a:(a.assumption||a.text||a.note||'')}</span>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
+}
+
+// ── MARKET ────────────────────────────────────────────────────────────────
+function v2RenderMarket() {
+  const { gap, sites, realEstate } = v2GetMarketData();
+
+  if (!gap && !sites.length) return `<div class="v2-empty-panel"><div style="font-size:40px;margin-bottom:12px">🗺️</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">No market data yet</div><div class="v2-prose">Run Agents 2, 3, and 4 for gap analysis, site scoring, and real estate.</div></div>`;
+
+  return `
+    ${gap ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">📊 Demand Gap Analysis by City</div>
+      ${gap.summary ? `<div class="v2-prose" style="margin-bottom:16px">${gap.summary}</div>` : ''}
+      <div class="v2-table-wrap">
+        <table class="v2-table">
+          <thead><tr>
+            <th>City</th><th>Population</th><th>Existing Supply</th>
+            <th>Estimated Demand</th><th>Gap Score</th><th>Verdict</th>
+          </tr></thead>
+          <tbody>
+            ${gap.cities.map(c => {
+              const gs = c.gap_score || 0;
+              const vColor = gs >= 7 ? 'var(--v2-green)' : gs >= 4 ? 'var(--v2-amber)' : 'var(--v2-red)';
+              const vLabel = gs >= 7 ? '🟢 High Opportunity' : gs >= 4 ? '🟡 Moderate' : '🔴 Saturated';
+              return `<tr>
+                <td><strong>${c.city||c.name||'—'}</strong></td>
+                <td>${c.population ? Number(c.population).toLocaleString() : '—'}</td>
+                <td>${c.existing_supply || c.competitor_count || '—'}</td>
+                <td>${c.estimated_demand || c.demand_units || '—'}</td>
+                <td><span style="font-weight:800;color:${vColor}">${gs}/10</span></td>
+                <td><span style="font-size:12px;color:${vColor}">${vLabel}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+
+    ${sites.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">📍 Top Site Rankings</div>
+      <div class="v2-site-grid">
+        ${sites.map((s,i)=>`
+          <div class="v2-site-card">
+            <div class="v2-site-rank">#${i+1}</div>
+            <div class="v2-site-info">
+              <div class="v2-site-name">${s.address||s.location||s.site||s.name||'Site '+(i+1)}</div>
+              <div class="v2-site-city">${s.city||s.area||''}</div>
+              <div class="v2-site-meta">
+                ${s.rent_monthly||s.monthly_rent ? '💰 $'+Number(s.rent_monthly||s.monthly_rent).toLocaleString()+'/mo · ' : ''}
+                ${s.sq_ft||s.sqft ? '📐 '+(s.sq_ft||s.sqft).toLocaleString()+' sq ft · ' : ''}
+                ${s.score || s.site_score ? '⭐ Score: '+(s.score||s.site_score)+'/10' : ''}
+              </div>
+              ${s.pros||s.advantages ? `<div class="v2-prose" style="font-size:12px;margin-top:6px">${_truncate(s.pros||s.advantages||'',120)}</div>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${realEstate.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">🏢 Live Real Estate Listings</div>
+      <div class="v2-table-wrap">
+        <table class="v2-table">
+          <thead><tr><th>Address</th><th>City</th><th>Sq Ft</th><th>Monthly Rent</th><th>Notes</th></tr></thead>
+          <tbody>
+            ${realEstate.map(p=>`<tr>
+              <td>${p.address||p.location||'—'}</td>
+              <td>${p.city||'—'}</td>
+              <td>${p.sq_ft ? Number(p.sq_ft).toLocaleString() : '—'}</td>
+              <td>${p.monthly_rent||p.rent ? '$'+Number(p.monthly_rent||p.rent).toLocaleString() : '—'}</td>
+              <td><span class="v2-prose" style="font-size:12px">${_truncate(p.notes||p.description||'',80)}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+// ── COMPETITION ───────────────────────────────────────────────────────────
+function v2RenderCompetition() {
+  const { comp6, comp13 } = v2GetCompetitorData();
+
+  if (!comp6 && !comp13) return `<div class="v2-empty-panel"><div style="font-size:40px;margin-bottom:12px">🔍</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">No competitive data yet</div><div class="v2-prose">Run Agents 6 and 13 for competitive intelligence.</div></div>`;
+
+  return `
+    ${comp6 ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">🗺️ Competitive Landscape by City</div>
+      ${comp6.summary ? `<div class="v2-prose" style="margin-bottom:16px">${comp6.summary}</div>` : ''}
+      ${comp6.cities.length ? `
+      <div class="v2-table-wrap">
+        <table class="v2-table">
+          <thead><tr><th>City</th><th>Competitors</th><th>Avg Rating</th><th>Density</th></tr></thead>
+          <tbody>
+            ${comp6.cities.map(c=>`<tr>
+              <td><strong>${c.city||c.name||'—'}</strong></td>
+              <td>${c.competitor_count||c.total_competitors||'—'}</td>
+              <td>${c.avg_rating ? '⭐ '+c.avg_rating : '—'}</td>
+              <td>${c.density||c.market_density||'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : ''}
+    </div>` : ''}
+
+    ${comp13 ? `
+    ${comp13.pain_points.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">😤 Competitor Pain Points (Your Opportunity)</div>
+      <div class="v2-sf-grid">
+        ${comp13.pain_points.map((p,i)=>`
+          <div class="v2-sf-item" style="border-color:rgba(239,68,68,.2)">
+            <div class="v2-sf-num" style="background:rgba(239,68,68,.15);color:var(--v2-red)">${i+1}</div>
+            <div class="v2-sf-text">${typeof p==='string'?p:(p.pain||p.issue||p.problem||String(p))}</div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${comp13.differentiators.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">⭐ Your Competitive Differentiators</div>
+      <div class="v2-sf-grid">
+        ${comp13.differentiators.map((d,i)=>`
+          <div class="v2-sf-item" style="border-color:rgba(34,197,94,.2)">
+            <div class="v2-sf-num" style="background:rgba(34,197,94,.15);color:var(--v2-green)">${i+1}</div>
+            <div class="v2-sf-text">${typeof d==='string'?d:(d.advantage||d.differentiator||String(d))}</div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}` : ''}
+  `;
+}
+
+// ── RISKS ─────────────────────────────────────────────────────────────────
+function v2RenderRisks() {
+  const risks = v2GetRisks();
+  if (!risks.length) return `<div class="v2-empty-panel"><div style="font-size:40px;margin-bottom:12px">⚠️</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">No risk analysis yet</div><div class="v2-prose">Run Agent 8 (Executive Summary) to generate risk matrix.</div></div>`;
+
+  return `
+    <div class="v2-risk-grid">
+      ${risks.map(r=>`
+        <div class="v2-risk-item">
+          <div class="v2-risk-header">
+            <span class="v2-risk-badge ${(r.severity||'medium').toLowerCase()}">${(r.severity||'MEDIUM').toUpperCase()}</span>
+            <span class="v2-risk-title">${r.title}</span>
+          </div>
+          ${r.desc?`<div class="v2-risk-desc"><strong>Mitigation:</strong> ${r.desc}</div>`:''}
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── ACTION PLAN ───────────────────────────────────────────────────────────
+function v2RenderActionPlan() {
+  const { steps, phases } = v2GetActionPlan();
+  const defaultSteps = [
+    { title:'Secure Funding',        desc:'Apply for SBA 7(a) loan and present your investor deck. See Investor Pack above.' },
+    { title:'Lock In Your Location', desc:'Contact the top-ranked sites from Agent 3. Use the Market tab to compare.' },
+    { title:'File for Permits',      desc:'Begin the licensing process immediately — permits are your critical path.' },
+    { title:'Build Your Team',       desc:'Start recruiting key hires. Your project plan has the full hiring roadmap.' },
+    { title:'Pre-Launch Marketing',  desc:'Build your waitlist 3–4 months before opening. Use competitor pain points.' },
+    { title:'Track Progress',        desc:'Save this analysis and re-run in 60 days to check market conditions.' },
+  ];
+  const displaySteps = steps.length ? steps : defaultSteps;
+
+  return `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">${steps.length?'🤖 AI-Generated Next Steps':'✅ Recommended Next Steps'}</div>
+      <div class="v2-insights">
+        ${displaySteps.map((s,i)=>`
+          <div class="v2-insight">
+            <div class="v2-sf-num" style="flex-shrink:0;align-self:flex-start">${i+1}</div>
+            <div>
+              ${typeof s==='string'
+                ? `<div class="v2-insight-body">${s}</div>`
+                : `<div class="v2-insight-title">${s.title||s.step||s.action||''}</div>
+                   <div class="v2-insight-body">${s.desc||s.description||s.detail||''}</div>`}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    ${phases.length ? `
+    <div class="v2-exec-section" style="margin-top:24px">
+      <div class="v2-exec-section-title">🗓 52-Week Execution Timeline</div>
+      <div class="v2-timeline">
+        ${phases.map((ph,i)=>`
+          <div class="v2-timeline-item">
+            <div class="v2-timeline-left">
+              <div class="v2-timeline-dot ${i===0?'current':''}"></div>
+              ${i<phases.length-1?'<div class="v2-timeline-line"></div>':''}
+            </div>
+            <div class="v2-timeline-content">
+              <div class="v2-timeline-phase">${ph.phase||ph.period||'Phase '+(i+1)}</div>
+              <div class="v2-timeline-title">${ph.name||ph.title||ph.milestone||'Milestone'}</div>
+              ${_toArr(ph.tasks||ph.items||ph.deliverables||[]).length?
+                `<div class="v2-timeline-items">${_toArr(ph.tasks||ph.items||ph.deliverables||[]).slice(0,4).map(t=>
+                  `<div class="v2-timeline-task">${typeof t==='string'?t:(t.task||t.name||t.item||'')}</div>`
+                ).join('')}</div>`:''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>` : `
+    <div class="v2-exec-section" style="margin-top:24px">
+      <div class="v2-exec-section-title">🗓 Standard 52-Week Launch Timeline</div>
+      <div class="v2-timeline">
+        ${[
+          {phase:'Weeks 1–4',   name:'Planning & Finance',     tasks:['Finalize business plan','Apply for SBA 7(a) loan','Engage attorney & accountant','Form LLC / corporate entity']},
+          {phase:'Weeks 5–12',  name:'Location & Permits',     tasks:['Sign lease on top-ranked site','Submit permit applications','Begin build-out design','Hire contractor']},
+          {phase:'Weeks 13–24', name:'Build-Out & Setup',      tasks:['Complete construction & renovation','Install equipment & technology','Recruit core team','Set up POS, software, insurance']},
+          {phase:'Weeks 25–36', name:'Pre-Launch & Marketing', tasks:['Staff training program','Build waitlist & social presence','Grand opening event planning','Soft launch']},
+          {phase:'Weeks 37–52', name:'Launch & Optimize',      tasks:['Grand opening','Weekly KPI reviews','Customer acquisition campaigns','Scale toward break-even']},
+        ].map((ph,i)=>`
+          <div class="v2-timeline-item">
+            <div class="v2-timeline-left">
+              <div class="v2-timeline-dot ${i===0?'current':''}"></div>
+              ${i<4?'<div class="v2-timeline-line"></div>':''}
+            </div>
+            <div class="v2-timeline-content">
+              <div class="v2-timeline-phase">${ph.phase}</div>
+              <div class="v2-timeline-title">${ph.name}</div>
+              <div class="v2-timeline-items">${ph.tasks.map(t=>`<div class="v2-timeline-task">${t}</div>`).join('')}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`}
+  `;
+}
+
+// ── GRANTS ────────────────────────────────────────────────────────────────
+function v2RenderGrants() {
+  const grants = v2GetGrantsDetail();
+  const sum = typeof R !== 'undefined' && R.a12?.summary;
+
+  if (!grants.length && !sum) return `<div class="v2-empty-panel"><div style="font-size:40px;margin-bottom:12px">💵</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">No grants data yet</div><div class="v2-prose">Run Agent 12 to search federal, state, and local grant programs.</div></div>`;
+
+  return `
+    ${sum ? `<div class="v2-exec-section"><div class="v2-exec-section-title">💵 Grant Overview</div><div class="v2-prose">${sum}</div></div>` : ''}
+    ${grants.length ? `
+    <div class="v2-exec-section">
+      <div class="v2-exec-section-title">📋 Available Grant Programs</div>
+      <div class="v2-table-wrap">
+        <table class="v2-table">
+          <thead><tr><th>Program</th><th>Type</th><th>Estimated Award</th><th>Deadline</th><th>Probability</th><th>Action Required</th></tr></thead>
+          <tbody>
+            ${grants.map(g=>`<tr>
+              <td><strong>${g.name}</strong></td>
+              <td><span class="v2-badge blue">${g.type}</span></td>
+              <td>${g.amount||'—'}</td>
+              <td>${g.deadline||'Rolling'}</td>
+              <td>${g.probability ? `<span class="v2-badge ${g.probability.toLowerCase().includes('high')?'green':g.probability.toLowerCase().includes('low')?'red':'amber'}">${g.probability}</span>` : '—'}</td>
+              <td><span class="v2-prose" style="font-size:12px">${_truncate(g.eligibility,100)}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+// ── ALL AGENTS ────────────────────────────────────────────────────────────
+function v2RenderAgents() {
+  return `
+    <div class="v2-agents-grid">
+      ${V2_AGENTS.map(a => {
+        const row     = document.getElementById(`v2-ar-${a.id}`);
+        const isDone  = row?.classList.contains('done');
+        const isError = row?.classList.contains('error');
+        const isRun   = row?.classList.contains('running');
+        const st      = isDone ? 'done' : isError ? 'error' : isRun ? 'running' : 'idle';
+        const stColor = st==='done' ? 'var(--v2-green)' : st==='error' ? 'var(--v2-red)' : st==='running' ? 'var(--v2-a1)' : 'var(--v2-t3)';
+        const stLabel = st==='done' ? '✓ Complete' : st==='error' ? '✗ Error' : st==='running' ? '⟳ Running' : '— Idle';
+        const summary = v2GetAgentSummary(a.id);
+        const timerEl = document.getElementById(`v2-at-${a.id}`);
+        const elapsed = timerEl?.textContent || '';
+        return `
+          <div class="v2-agent-card ${st}" onclick="v2OpenAgentDetail(${a.id})" title="Click to view ${a.name} output">
+            <div class="v2-agent-card-head">
+              <span class="v2-agent-card-ico">${a.ico}</span>
+              <div style="flex:1">
+                <div class="v2-agent-card-name">${a.name}</div>
+                <div class="v2-agent-card-num">Agent ${a.id}</div>
+              </div>
+              <div class="v2-agent-card-status" style="color:${stColor}">
+                <span style="display:block;font-size:11px;font-weight:700">${stLabel}</span>
+                ${elapsed?`<span style="display:block;font-size:10px;color:var(--v2-t3)">${elapsed}</span>`:''}
+              </div>
+            </div>
+            ${summary?`<div class="v2-agent-card-summary">${summary}</div>`:''}
+            ${isDone?`<div class="v2-agent-card-cta">View Output →</div>`:''}
+          </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:16px;text-align:center">
+      <button class="v2-btn ghost sm" onclick="v2GoTo('traditional')">🔬 Open Traditional View — See All Raw Agent Outputs</button>
+    </div>`;
+}
+
+// ── AGENT DETAIL ──────────────────────────────────────────────────────────
+function v2OpenAgentDetail(id) {
+  if (typeof openAgentModal === 'function') {
+    openAgentModal(id);
+  } else {
+    v2GoTo('traditional');
+  }
+}
+
+// ── SAVE RUN ──────────────────────────────────────────────────────────────
 function v2SaveCurrentRun() {
   if (!V2.run) { v2Toast('No analysis to save yet'); return; }
   const ind = V2_INDUSTRIES.find(i=>i.val===V2.run.industry)||{emoji:'🏢',label:'Business'};
@@ -10685,13 +11320,9 @@ function v2SaveCurrentRun() {
     zip: V2.run.zip,
     budget: V2.run.budget,
     capacity: V2.run.capacity,
-    score,
-    verdict: verdict.colorClass,
-    label: verdict.label,
-    indLabel: ind.label,
-    indEmoji: ind.emoji,
+    score, verdict: verdict.colorClass, label: verdict.label,
+    indLabel: ind.label, indEmoji: ind.emoji,
   };
-  // Upsert by id
   const idx = V2.portfolio.findIndex(p => p.id === entry.id);
   if (idx >= 0) V2.portfolio[idx] = entry; else V2.portfolio.unshift(entry);
   if (V2.portfolio.length > 20) V2.portfolio = V2.portfolio.slice(0, 20);

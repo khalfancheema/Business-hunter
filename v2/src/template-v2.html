@@ -443,11 +443,10 @@
       <div class="v2-nav-links">
         <span class="v2-nav-link" onclick="v2GoTo('portfolio')">Portfolio</span>
         <span class="v2-nav-link active">Dashboard</span>
+        <span class="v2-nav-link" onclick="v2GoTo('traditional')">Traditional View</span>
       </div>
       <div class="v2-nav-right">
-        <button class="v2-btn ghost sm" onclick="v2ShowDetail()">📊 Full Analysis</button>
-        <button class="v2-btn ghost sm" onclick="v2ShowExecution()">🗓 Execution Plan</button>
-        <button class="v2-btn sm" onclick="v2ShowInvestor()">📑 Investor Package</button>
+        <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
         <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">+ New Analysis</button>
       </div>
     </nav>
@@ -460,8 +459,11 @@
       <div class="v2-nav-logo" onclick="v2GoTo('landing')">Business Hunter</div>
       <div class="v2-nav-links">
         <span class="v2-nav-link active">Portfolio</span>
+        <span class="v2-nav-link" onclick="v2GoTo('dashboard')">Dashboard</span>
+        <span class="v2-nav-link" onclick="v2GoTo('traditional')">Traditional View</span>
       </div>
       <div class="v2-nav-right">
+        <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
         <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">+ New Analysis</button>
       </div>
     </nav>
@@ -470,10 +472,14 @@
 
 </div><!-- #v2-overlay -->
 
-<!-- ── Detail bar (shown when v1 view is open) ─────────────── -->
-<div id="v2-detail-bar">
-  <h3>📊 Full Agent Analysis</h3>
-  <div class="v2-detail-actions">
+<!-- ── Traditional View Bar (shown when body.v2-traditional) ── -->
+<div id="v2-trad-bar">
+  <div class="v2-trad-bar-left">
+    <div class="v2-nav-logo" style="-webkit-text-fill-color:initial;color:#f1f5f9">Business Hunter</div>
+    <span class="v2-trad-bar-label">Traditional View</span>
+  </div>
+  <div class="v2-trad-bar-actions">
+    <button class="v2-btn ghost sm" onclick="printReport()">🖨 Print Report</button>
     <button class="v2-btn ghost sm" onclick="fullPipelineExport()">📄 Full PDF</button>
     <button class="v2-btn ghost sm" onclick="exportResults()">⬇ Export JSON</button>
     <button class="v2-btn primary sm" onclick="v2HideDetail()">← Back to Dashboard</button>
