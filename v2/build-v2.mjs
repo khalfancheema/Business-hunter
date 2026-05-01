@@ -62,6 +62,7 @@ const V2_JS = [
   'v2/src/js/v2-12-drilldown.js',
   'v2/src/js/v2-13-enhancements.js',
   'v2/src/js/v2-14-missing.js',
+  'v2/src/js/v2-15-demo-showcase.js',
 ].map(f => join(ROOT, f));
 
 const CSS_FILES = [

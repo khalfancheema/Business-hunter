@@ -10099,6 +10099,15 @@ const DEMO_DATA = {
       { city:"Buford",         rank:4, demand_score:7.8, supply_score:5.5, gap_score:6.0, unserved_children:290, income_tier:"Mid",        recommended_tuition_infant:1750, recommended_tuition_preschool:1400, priority:"Good Opportunity", rationale:"Rapid growth — supply gap widening" },
       { city:"Flowery Branch", rank:5, demand_score:7.4, supply_score:4.8, gap_score:6.8, unserved_children:210, income_tier:"Mid",        recommended_tuition_infant:1700, recommended_tuition_preschool:1350, priority:"Good Opportunity", rationale:"Highest under-5 pct (7.9%) — underserved smaller market" },
     ],
+    demand_forecast: [
+      { year:2024, demand:4200, supply:2340, gap:1860, label:'2024' },
+      { year:2025, demand:4580, supply:2520, gap:2060, label:'2025' },
+      { year:2026, demand:4990, supply:2700, gap:2290, label:'2026' },
+      { year:2027, demand:5450, supply:2890, gap:2560, label:'2027' },
+      { year:2028, demand:5940, supply:3080, gap:2860, label:'2028' },
+    ],
+    subsidy_eligible_pct: 28,
+    median_wait_weeks: 9,
     age_gaps: [
       { age:"Infant (0–12 mo)",   demand_idx:88, supply_idx:35, gap:53 },
       { age:"Toddler (1–2 yr)",   demand_idx:82, supply_idx:48, gap:34 },
@@ -10206,15 +10215,17 @@ const DEMO_DATA = {
   daycare: {
     summary: "Gwinnett corridor childcare market is dominated by national chains (Primrose, KinderCare) at the premium tier and independent centers at mid-tier. Suwanee has only 3 licensed centers within 2 miles vs. demand for 6+. No NAEYC-accredited center exists in Sugar Hill. Competitive differentiation opportunity: premium infant/toddler program with NAEYC pathway.",
     cities: [
-      { city:"Suwanee",    total_centers:3, licensed_capacity:285, qris_rated_count:2, naeyc_count:1, avg_tuition_infant:1980, avg_tuition_preschool:1520, avg_rating:4.2, market_saturation:"Low",    notes:"One Primrose; two independent; no true infant waitlist capacity" },
-      { city:"Sugar Hill", total_centers:4, licensed_capacity:340, qris_rated_count:1, naeyc_count:0, avg_tuition_infant:1850, avg_tuition_preschool:1420, avg_rating:3.9, market_saturation:"Low",    notes:"No NAEYC-accredited center; quality gap at infant level" },
-      { city:"Duluth",     total_centers:7, licensed_capacity:620, qris_rated_count:3, naeyc_count:2, avg_tuition_infant:1790, avg_tuition_preschool:1380, avg_rating:4.0, market_saturation:"Medium", notes:"KinderCare and 2 Brightspring centers; more competitive" },
+      { city:"Suwanee",        total_centers:3, licensed_capacity:285, qris_rated_count:2, naeyc_count:1, avg_tuition_infant:1980, avg_tuition_preschool:1520, avg_rating:4.2, market_saturation:"Low",    gap_score:9.0, lat:34.0514, lng:-84.0663, notes:"One Primrose; two independent; no true infant waitlist capacity" },
+      { city:"Sugar Hill",     total_centers:4, licensed_capacity:340, qris_rated_count:1, naeyc_count:0, avg_tuition_infant:1850, avg_tuition_preschool:1420, avg_rating:3.9, market_saturation:"Low",    gap_score:8.1, lat:34.1029, lng:-84.0547, notes:"No NAEYC-accredited center; quality gap at infant level" },
+      { city:"Duluth",         total_centers:7, licensed_capacity:620, qris_rated_count:3, naeyc_count:2, avg_tuition_infant:1790, avg_tuition_preschool:1380, avg_rating:4.0, market_saturation:"Medium", gap_score:6.4, lat:33.9959, lng:-84.1447, notes:"KinderCare and 2 Brightspring centers; more competitive" },
+      { city:"Buford",         total_centers:5, licensed_capacity:420, qris_rated_count:2, naeyc_count:1, avg_tuition_infant:1750, avg_tuition_preschool:1380, avg_rating:3.8, market_saturation:"Low",    gap_score:6.0, lat:34.1215, lng:-83.9913, notes:"Growing market; 3 independents + 2 national chains" },
+      { city:"Flowery Branch", total_centers:2, licensed_capacity:160, qris_rated_count:0, naeyc_count:0, avg_tuition_infant:1700, avg_tuition_preschool:1350, avg_rating:3.7, market_saturation:"Low",    gap_score:6.8, lat:34.1840, lng:-83.9243, notes:"Very underserved small market — only 2 licensed centers for fastest-growing ZIP" },
     ],
     top_chains: [
-      { name:"Primrose Schools",   locations_in_area:2, avg_tuition_infant:2100, avg_rating:4.5, qris_stars:4 },
-      { name:"KinderCare",         locations_in_area:3, avg_tuition_infant:1900, avg_rating:4.0, qris_stars:3 },
-      { name:"Bright Horizons",    locations_in_area:1, avg_tuition_infant:2300, avg_rating:4.6, qris_stars:4 },
-      { name:"Independent Centers",locations_in_area:8, avg_tuition_infant:1650, avg_rating:3.8, qris_stars:2 },
+      { name:"Primrose Schools",   locations_in_area:2, avg_tuition_infant:2100, avg_tuition_preschool:1700, avg_rating:4.5, qris_stars:4, naeyc:true,  utilization_pct:94, avg_capacity:110, waitlist_weeks:10 },
+      { name:"KinderCare",         locations_in_area:3, avg_tuition_infant:1900, avg_tuition_preschool:1520, avg_rating:4.0, qris_stars:3, naeyc:false, utilization_pct:86, avg_capacity:140, waitlist_weeks:3  },
+      { name:"Bright Horizons",    locations_in_area:1, avg_tuition_infant:2300, avg_tuition_preschool:1880, avg_rating:4.6, qris_stars:4, naeyc:true,  utilization_pct:97, avg_capacity:100, waitlist_weeks:14 },
+      { name:"Independent Centers",locations_in_area:8, avg_tuition_infant:1650, avg_tuition_preschool:1320, avg_rating:3.8, qris_stars:2, naeyc:false, utilization_pct:71, avg_capacity:65,  waitlist_weeks:1  },
     ],
   },
 },
@@ -10252,14 +10263,25 @@ const DEMO_DATA = {
       { name:"Optimistic",    label:"Full capacity",  enrolled:90, revenue_infant:78800, revenue_toddler:51400, revenue_preschool:30400, revenue_prek:24400, avg_tuition:1978, monthly_revenue:185000, monthly_expenses:118600, monthly_net:66400,  annual_net:796800,  breakeven_months:9,  roi_3yr:44, color:"var(--green)" },
     ],
     projections: [
-      { month:"M1",  rev:18000,   exp:108400, cum:-526000 },
-      { month:"M3",  rev:55000,   exp:108400, cum:-440000 },
-      { month:"M6",  rev:85000,   exp:108400, cum:-340000 },
-      { month:"M9",  rev:110000,  exp:108400, cum:-245000 },
-      { month:"M12", rev:130000,  exp:108400, cum:-155000 },
-      { month:"M15", rev:140000,  exp:108400, cum:-40000  },
-      { month:"M18", rev:145000,  exp:110000, cum:95000   },
-      { month:"M24", rev:155000,  exp:112000, cum:320000  },
+      { month:"M1",  rev:12000,   exp:108400, cum:-590000 },
+      { month:"M2",  rev:28000,   exp:108400, cum:-565000 },
+      { month:"M3",  rev:46000,   exp:108400, cum:-536000 },
+      { month:"M4",  rev:63000,   exp:108400, cum:-502000 },
+      { month:"M5",  rev:78000,   exp:108400, cum:-466000 },
+      { month:"M6",  rev:91000,   exp:108400, cum:-430000 },
+      { month:"M7",  rev:102000,  exp:108400, cum:-395000 },
+      { month:"M8",  rev:110000,  exp:108400, cum:-361000 },
+      { month:"M9",  rev:117000,  exp:108400, cum:-318000 },
+      { month:"M10", rev:123000,  exp:108400, cum:-268000 },
+      { month:"M11", rev:129000,  exp:108400, cum:-212000 },
+      { month:"M12", rev:133000,  exp:108400, cum:-152000 },
+      { month:"M13", rev:136000,  exp:108400, cum:-88000  },
+      { month:"M14", rev:138000,  exp:108400, cum:-22000  },
+      { month:"M15", rev:140000,  exp:108400, cum:48000   },
+      { month:"M16", rev:142000,  exp:110000, cum:120000  },
+      { month:"M17", rev:145000,  exp:110000, cum:195000  },
+      { month:"M18", rev:148000,  exp:112000, cum:271000  },
+      { month:"M24", rev:158000,  exp:114000, cum:594000  },
     ],
     by_city_financials: [
       { city:"Suwanee",    avg_tuition:2050, break_even_mo:13, annual_net_yr2:228000, risk:"Low-Med" },
@@ -10376,8 +10398,11 @@ const DEMO_DATA = {
       { name:"Flowery Branch", county:"Hall",     lat:_DC.flowery.lat,  lng:_DC.flowery.lng,  gap_score:6.8, demand_score:7.4, supply_score:4.8, unserved_children:210, median_income:82100,  competitor_count:2, priority:"Good Opportunity", recommended_action:"Small market — high gap but limited ceiling", real_estate_url:"https://www.loopnet.com" },
     ],
     real_estate_pins: [
-      { label:"3820 Lawrenceville-Suwanee Rd", lat:34.055, lng:-84.072, city:"Suwanee",    sqft:6400, monthly_rent:10800, type:"Freestanding" },
-      { label:"3340 Peachtree Industrial Blvd", lat:34.108, lng:-84.058, city:"Sugar Hill", sqft:6100, monthly_rent:8900,  type:"Strip Anchor"  },
+      { label:"3820 Lawrenceville-Suwanee Rd",      lat:34.055, lng:-84.072, city:"Suwanee",        sqft:6400, monthly_rent:10800, type:"Freestanding",   zoning:"C-2", ada_parking:true,  schools_within_half_mi:2, highlights:["Existing playground pad","Drive-through convertible","I-85 access"] },
+      { label:"475 Buford Hwy — End Cap",            lat:34.051, lng:-84.062, city:"Suwanee",        sqft:5800, monthly_rent:9600,  type:"End-Cap Retail", zoning:"C-2", ada_parking:true,  schools_within_half_mi:1, highlights:["Corner visibility","Large rear yard","2024 HVAC"] },
+      { label:"3340 Peachtree Industrial Blvd",      lat:34.108, lng:-84.058, city:"Sugar Hill",     sqft:6100, monthly_rent:8900,  type:"Strip Anchor",   zoning:"C-1", ada_parking:true,  schools_within_half_mi:3, highlights:["Below-market NNN","High residential density","Separate entrance"] },
+      { label:"4885 Nelson Brogdon Blvd",            lat:34.112, lng:-84.050, city:"Sugar Hill",     sqft:5500, monthly_rent:8200,  type:"Freestanding",   zoning:"C-2", ada_parking:true,  schools_within_half_mi:2, highlights:["Fenced rear lot","ADA parking","2022 roof"] },
+      { label:"3455 Hamilton Mill Rd — Retail Bay",  lat:34.002, lng:-84.101, city:"Duluth",         sqft:5200, monthly_rent:7400,  type:"Strip Anchor",   zoning:"C-1", ada_parking:false, schools_within_half_mi:1, highlights:["Lowest rent in corridor","Near apartment cluster","ADA upgrade needed"] },
     ],
     directions: [],
   },
@@ -18657,6 +18682,276 @@ function v2ReRunAgent(panelName, agentIndex) {
 
     // E. Inject competitor pins onto heat map (after short delay for SVG render)
     setTimeout(v2InjectCompetitorPins, 600);
+  };
+})();
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// V2-15 DEMO SHOWCASE — Seeds portfolio state and localStorage for demo mode
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Seed two portfolio runs for "What Changed" diff ───────────────────────────
+const _V2_DEMO_RUN_A = {
+  id: 'demo-run-001',
+  zip: '30097',
+  city: 'Johns Creek',
+  state: 'GA',
+  industry: 'daycare',
+  radius: '15',
+  capacity: '75',
+  budget: '526500',
+  score: 74.2,
+  label: 'Initial Analysis — Mar 2025',
+  savedAt: new Date('2025-03-01').getTime(),
+  timestamp: new Date('2025-03-01').getTime(),
+  gap_score: 18.2,
+  financial_score: 17.8,
+  ai_score: 14.4,
+  competition_score: 12.8,
+  compliance_score: 11.0,
+  verdict: 'Cautious Go',
+  notes: 'First run — conservative enrollment assumptions',
+};
+
+const _V2_DEMO_RUN_B = {
+  id: 'demo-run-002',
+  zip: '30097',
+  city: 'Johns Creek',
+  state: 'GA',
+  industry: 'daycare',
+  radius: '15',
+  capacity: '90',
+  budget: '600000',
+  score: 82.7,
+  label: 'Updated Analysis — Apr 2025',
+  savedAt: new Date('2025-04-15').getTime(),
+  timestamp: new Date('2025-04-15').getTime(),
+  gap_score: 21.4,
+  financial_score: 20.1,
+  ai_score: 16.2,
+  competition_score: 13.5,
+  compliance_score: 11.5,
+  verdict: 'Go',
+  notes: 'Updated with 90-slot capacity and confirmed grant funding',
+};
+
+(function _v2SeedDemoPortfolio() {
+  // Only seed if portfolio is empty (don't overwrite real user data)
+  if (!V2.portfolio || V2.portfolio.length === 0) {
+    V2.portfolio = [_V2_DEMO_RUN_A, _V2_DEMO_RUN_B];
+  }
+})();
+
+// ── Seed localStorage saved searches ─────────────────────────────────────────
+(function _v2SeedDemoSavedSearches() {
+  try {
+    const existing = JSON.parse(localStorage.getItem('v2_saved_searches') || '[]');
+    if (existing.length === 0) {
+      const demo = [
+        {
+          id: 'saved-demo-001',
+          savedAt: new Date('2025-03-01').getTime(),
+          label: 'Suwanee Childcare — Primary',
+          industry: 'daycare',
+          zip: '30097',
+          radius: '15',
+          capacity: '75',
+          budget: '526500',
+          score: 82.7,
+        },
+        {
+          id: 'saved-demo-002',
+          savedAt: new Date('2025-02-14').getTime(),
+          label: 'Sugar Hill — Backup Site',
+          industry: 'daycare',
+          zip: '30518',
+          radius: '10',
+          capacity: '80',
+          budget: '480000',
+          score: 78.3,
+        },
+        {
+          id: 'saved-demo-003',
+          savedAt: new Date('2025-01-20').getTime(),
+          label: 'Duluth — Feasibility Check',
+          industry: 'daycare',
+          zip: '30096',
+          radius: '10',
+          capacity: '65',
+          budget: '420000',
+          score: 71.5,
+        },
+      ];
+      localStorage.setItem('v2_saved_searches', JSON.stringify(demo));
+    }
+  } catch(e) {}
+})();
+
+// ── Showcase banner injected into dashboard header ────────────────────────────
+function v2InjectShowcaseBanner() {
+  const wrap = document.getElementById('v2-dash-wrap');
+  if (!wrap || document.getElementById('v2-showcase-banner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'v2-showcase-banner';
+  banner.style.cssText = `
+    background: linear-gradient(135deg, rgba(99,102,241,.15), rgba(139,92,246,.12));
+    border: 1px solid rgba(99,102,241,.3);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  `;
+  banner.innerHTML = `
+    <div style="font-size:20px">🎬</div>
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:13px;font-weight:700;color:var(--v2-t1)">Demo Mode — Childcare Center · Suwanee, GA (ZIP 30097)</div>
+      <div style="font-size:11px;color:var(--v2-t3);margin-top:2px">
+        All 17 agents ran · Score <strong style="color:#22c55e">82.7/100</strong> · Verdict: <strong style="color:#22c55e">GO</strong> ·
+        All tabs, charts, exports, and drill-downs are fully functional
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="v2-btn primary sm" onclick="v2TourDashboard()">▶ Feature Tour</button>
+      <button class="v2-btn ghost sm" onclick="document.getElementById('v2-showcase-banner').style.display='none'">✕ Dismiss</button>
+    </div>
+  `;
+  wrap.insertBefore(banner, wrap.firstChild);
+}
+
+// ── Feature tour — cycles through all tabs showing key features ───────────────
+const _V2_TOUR_STEPS = [
+  { tab: 'market',      label: 'Market Gap',        msg: '📊 Age-group gaps by infant/toddler/pre-K with 5-year demand forecast and subsidy-eligible population %' },
+  { tab: 'competition', label: 'Competitor Intel',   msg: '🏪 Click any competitor row for full profile — tuition, staff ratios, NAEYC status, capacity utilization' },
+  { tab: 'financials',  label: 'Financials',         msg: '💰 Full 18-month enrollment ramp · Click any month for P&L detail · Lease sensitivity slider · Wage inflation scenario' },
+  { tab: 'risks',       label: 'Risk Scoring',       msg: '⚠️ Probability × Impact scores with trigger conditions and mitigation cost per risk' },
+  { tab: 'realestate',  label: 'Real Estate',        msg: '🏠 5 scored listings — zoning, ADA, school proximity, density, parking all rated out of 10' },
+  { tab: 'multizip',    label: 'Multi-ZIP',          msg: '📍 5 cities ranked by composite score — click any to launch sub-analysis' },
+  { tab: 'compare',     label: 'Compare',            msg: '⚖️ Side-by-side run comparison · "What Changed" diff between your March and April analyses' },
+  { tab: 'sensitivity', label: 'Sensitivity',        msg: '🎯 Which single assumption most changes your break-even month — enrollment rate, tuition, lease, wages' },
+  { tab: 'trends',      label: 'Trends',             msg: '📈 5-year market trends for demand, income growth, and competitor entry rate' },
+  { tab: 'freshness',   label: 'Sources',            msg: '🔍 Source attribution with confidence %, stale warnings, and live link checker for all 13 data sources' },
+  { tab: 'saved',       label: 'Saved Searches',     msg: '🔖 3 bookmarked analyses — ZIP + industry + score history' },
+];
+
+let _v2TourIdx = 0;
+let _v2TourTimer = null;
+
+function v2TourDashboard() {
+  _v2TourIdx = 0;
+  _v2RunTourStep();
+}
+
+function _v2RunTourStep() {
+  if (_v2TourIdx >= _V2_TOUR_STEPS.length) {
+    _v2ShowTourToast('✅ Tour complete! Every tab and feature is live — explore freely.', 4000);
+    return;
+  }
+  const step = _V2_TOUR_STEPS[_v2TourIdx];
+
+  // Switch to the tab
+  const tabEl = document.querySelector(`[onclick*="v2DashTab('${step.tab}'"]`);
+  if (tabEl && typeof v2DashTab === 'function') v2DashTab(step.tab, tabEl);
+
+  // Show toast
+  _v2ShowTourToast(`<strong>${step.label}:</strong> ${step.msg}`, 3200);
+
+  _v2TourIdx++;
+  if (_v2TourTimer) clearTimeout(_v2TourTimer);
+  _v2TourTimer = setTimeout(_v2RunTourStep, 3400);
+}
+
+function _v2ShowTourToast(msg, duration) {
+  let toast = document.getElementById('v2-tour-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'v2-tour-toast';
+    toast.style.cssText = `
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: rgba(15,15,30,.96); border: 1px solid rgba(99,102,241,.4);
+      border-radius: 12px; padding: 12px 20px; max-width: 500px; width: calc(100% - 40px);
+      font-size: 13px; color: var(--v2-t1); z-index: 9999; text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,.6);
+      transition: opacity .3s;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `
+    <div>${msg}</div>
+    <div style="margin-top:6px;font-size:10px;color:var(--v2-t3)">
+      Step ${_v2TourIdx}/${_V2_TOUR_STEPS.length} ·
+      <span style="cursor:pointer;color:var(--v2-a1)" onclick="clearTimeout(_v2TourTimer);this.closest('#v2-tour-toast').style.opacity=0">Skip tour</span>
+    </div>
+  `;
+  toast.style.opacity = '1';
+  setTimeout(() => { if (toast) toast.style.opacity = '0'; }, duration - 400);
+}
+
+// ── Full showcase launch: load demo run + inject banner + show score ───────────
+function v2LaunchShowcase() {
+  // Build a full demo run object that mirrors what v2RenderDashboard expects
+  const demoRun = {
+    ..._V2_DEMO_RUN_B,
+    ts: Date.now(),
+    // Inject the rich R data for all panels
+    _demoMode: true,
+  };
+
+  // Populate the global R used by all render functions
+  if (typeof getDemoData === 'function') {
+    window.R = {
+      a1:  getDemoData(1,  'daycare') || {},
+      a2:  getDemoData(2,  'daycare') || {},
+      a3:  getDemoData(3,  'daycare') || {},
+      a4:  getDemoData(4,  'daycare') || {},
+      a5:  getDemoData(5,  'daycare') || {},
+      a6:  getDemoData(6,  'daycare') || {},
+      a7:  getDemoData(7,  'daycare') || {},
+      a8:  getDemoData(8,  'daycare') || {},
+      a9:  getDemoData(9,  'daycare') || {},
+      a10: getDemoData(10, 'daycare') || {},
+      a11: getDemoData(11, 'daycare') || {},
+      a12: getDemoData(12, 'daycare') || {},
+      a13: getDemoData(13, 'daycare') || {},
+      a14: getDemoData(14, 'daycare') || {},
+      a15: getDemoData(15, 'daycare') || {},
+      a16: getDemoData(16, 'daycare') || {},
+      a17: getDemoData(17, 'daycare') || {},
+    };
+  }
+
+  // Go to dashboard screen
+  if (typeof v2GoTo === 'function') v2GoTo('dashboard');
+
+  // Render the dashboard
+  if (typeof v2RenderDashboard === 'function') v2RenderDashboard(demoRun);
+
+  // Inject the showcase banner after a tick
+  setTimeout(v2InjectShowcaseBanner, 100);
+}
+
+// ── Wire the "Try Demo" button on landing to use the showcase ─────────────────
+(function _v2PatchLandingDemo() {
+  // Override the existing v2StartDemo if present
+  const _origDemo = (typeof v2StartDemo === 'function') ? v2StartDemo : null;
+  window.v2StartDemo = function() {
+    v2LaunchShowcase();
+  };
+})();
+
+// ── Auto-seed on every dashboard render ──────────────────────────────────────
+(function() {
+  if (typeof v2RenderDashboard !== 'function') return;
+  const _base15 = v2RenderDashboard;
+  v2RenderDashboard = function(run) {
+    _base15(run);
+    // After a tick, inject banner if demo run
+    if (run && run._demoMode) {
+      setTimeout(v2InjectShowcaseBanner, 150);
+    }
   };
 })();
 
