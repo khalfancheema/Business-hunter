@@ -1,4 +1,4 @@
 {
-  "outputDirectory": "public",
-  "buildCommand": "node build.mjs"
+  "outputDirectory": "v2/public",
+  "buildCommand": "node v2/build-v2.mjs"
 }

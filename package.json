@@ -2,14 +2,15 @@
   "name": "daycare-agent-system",
   "version": "4.0.0",
   "description": "13-agent AI pipeline for daycare business planning — demographics, gap analysis, site selection, real estate, compliance, financials, SBA business plan, project plan, market map, grants, and competitor deep-dive.",
-  "main": "public/index.html",
+  "main": "v2/public/index.html",
   "scripts": {
-    "start": "python3 -m http.server 8080 --directory public",
-    "serve": "npx serve public -l 8080",
-    "dev": "node build.mjs && npx serve public -l 8080 --no-clipboard",
-    "build": "node build.mjs",
+    "start": "python3 -m http.server 8080 --directory v2/public",
+    "serve": "npx serve v2/public -l 8080",
+    "dev": "node v2/build-v2.mjs && npx serve v2/public -l 8080 --no-clipboard",
+    "build": "node v2/build-v2.mjs",
+    "build-v1": "node build.mjs",
     "test": "node test-all.mjs",
-    "lint": "node --input-type=module --eval \"import { readFileSync } from 'fs'; const h = readFileSync('public/index.html','utf8'); const s = h.match(/<script>([\\s\\S]*?)<\\/script>/g); console.log('Script blocks:', s?.length); console.log('OK');\"",
+    "lint": "node --input-type=module --eval \"import { readFileSync } from 'fs'; const h = readFileSync('v2/public/index.html','utf8'); const s = h.match(/<script>([\\s\\S]*?)<\\/script>/g); console.log('Script blocks:', s?.length); console.log('OK');\"",
     "build-legacy": "node scripts/build.js"
   },
   "keywords": [
