@@ -149,20 +149,20 @@ const _V2_TOUR_STEPS = [
   { tab: 'saved',       label: 'Saved Searches',     msg: '🔖 3 bookmarked analyses — ZIP + industry + score history' },
 ];
 
-let _v2TourIdx = 0;
-let _v2TourTimer = null;
+let _v2ShowcaseTourIdx = 0;
+let _v2ShowcaseTourTimer = null;
 
 function v2TourDashboard() {
-  _v2TourIdx = 0;
+  _v2ShowcaseTourIdx = 0;
   _v2RunTourStep();
 }
 
 function _v2RunTourStep() {
-  if (_v2TourIdx >= _V2_TOUR_STEPS.length) {
+  if (_v2ShowcaseTourIdx >= _V2_TOUR_STEPS.length) {
     _v2ShowTourToast('✅ Tour complete! Every tab and feature is live — explore freely.', 4000);
     return;
   }
-  const step = _V2_TOUR_STEPS[_v2TourIdx];
+  const step = _V2_TOUR_STEPS[_v2ShowcaseTourIdx];
 
   // Switch to the tab
   const tabEl = document.querySelector(`[onclick*="v2DashTab('${step.tab}'"]`);
@@ -171,9 +171,9 @@ function _v2RunTourStep() {
   // Show toast
   _v2ShowTourToast(`<strong>${step.label}:</strong> ${step.msg}`, 3200);
 
-  _v2TourIdx++;
-  if (_v2TourTimer) clearTimeout(_v2TourTimer);
-  _v2TourTimer = setTimeout(_v2RunTourStep, 3400);
+  _v2ShowcaseTourIdx++;
+  if (_v2ShowcaseTourTimer) clearTimeout(_v2ShowcaseTourTimer);
+  _v2ShowcaseTourTimer = setTimeout(_v2RunTourStep, 3400);
 }
 
 function _v2ShowTourToast(msg, duration) {
@@ -194,8 +194,8 @@ function _v2ShowTourToast(msg, duration) {
   toast.innerHTML = `
     <div>${msg}</div>
     <div style="margin-top:6px;font-size:10px;color:var(--v2-t3)">
-      Step ${_v2TourIdx}/${_V2_TOUR_STEPS.length} ·
-      <span style="cursor:pointer;color:var(--v2-a1)" onclick="clearTimeout(_v2TourTimer);this.closest('#v2-tour-toast').style.opacity=0">Skip tour</span>
+      Step ${_v2ShowcaseTourIdx}/${_V2_TOUR_STEPS.length} ·
+      <span style="cursor:pointer;color:var(--v2-a1)" onclick="clearTimeout(_v2ShowcaseTourTimer);this.closest('#v2-tour-toast').style.opacity=0">Skip tour</span>
     </div>
   `;
   toast.style.opacity = '1';
