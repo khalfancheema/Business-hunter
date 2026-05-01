@@ -47,10 +47,11 @@ function v2RenderPortfolioStats(list) {
 }
 
 function v2RenderPortfolioCard(r) {
-  const verdict = v2ScoreVerdict(r.score);
+  const verdict   = v2ScoreVerdict(r.score);
   const ringColor = r.score >= 70 ? 'var(--v2-green)' : r.score >= 45 ? 'var(--v2-amber)' : 'var(--v2-red)';
+  const hasR      = !!(r.R && Object.keys(r.R).length);
   return `
-    <div class="v2-port-card">
+    <div class="v2-port-card" id="v2-port-card-${r.id}">
       <div class="v2-port-card-head">
         <div>
           <div class="v2-port-ico">${r.indEmoji||'🏢'}</div>
@@ -63,9 +64,17 @@ function v2RenderPortfolioCard(r) {
           <span class="v2-port-badge ${r.verdict||'caution'}" style="margin-top:6px;display:inline-block">${r.label||'—'}</span>
         </div>
       </div>
-      <div style="font-size:12px;color:var(--v2-t3)">${new Date(r.ts||Date.now()).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+      <div style="font-size:12px;color:var(--v2-t3);margin-bottom:10px">
+        ${new Date(r.ts||Date.now()).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+        ${hasR ? ' · <span style="color:var(--v2-green);font-size:11px">● Full data</span>' : ''}
+      </div>
+      ${r.tag ? `<div style="margin-bottom:8px"><span class="v2-port-tag-chip" style="background:${(typeof V2_PORT_TAGS!=='undefined'?V2_PORT_TAGS:[]).find(t=>t.id===r.tag)?.color||'rgba(99,102,241,.15)'};color:${(typeof V2_PORT_TAGS!=='undefined'?V2_PORT_TAGS:[]).find(t=>t.id===r.tag)?.text||'var(--v2-a1)'}">${(typeof V2_PORT_TAGS!=='undefined'?V2_PORT_TAGS:[]).find(t=>t.id===r.tag)?.label||r.tag}</span></div>` : ''}
+      ${r.note ? `<div class="v2-port-note">${r.note}</div>` : ''}
       <div class="v2-port-actions">
         <button class="v2-btn ghost sm" style="flex:1;justify-content:center" onclick="v2PortRestore('${r.id}')">↩ Restore</button>
+        <button class="v2-btn ghost sm" onclick="v2PortCompareSelect('${r.id}')" title="Compare with another analysis">↔</button>
+        ${typeof v2PortCycleTag === 'function' ? `<button class="v2-btn ghost sm" onclick="event.stopPropagation();v2PortCycleTag('${r.id}')" title="Tag this analysis">🏷</button>` : ''}
+        ${typeof v2PortStartNote === 'function' ? `<button class="v2-btn ghost sm" onclick="event.stopPropagation();v2PortStartNote('${r.id}')" title="Add note">📝</button>` : ''}
         <button class="v2-btn danger sm" onclick="v2PortDelete('${r.id}')">🗑</button>
       </div>
     </div>

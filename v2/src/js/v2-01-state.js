@@ -56,8 +56,35 @@ function v2GoTo(screen) {
     if (el) el.classList.toggle('active', s === screen);
   });
 
+  // Update global nav active state
+  const navMap = { landing: 'gnav-landing', dashboard: 'gnav-dashboard', portfolio: 'gnav-portfolio' };
+  ['gnav-landing','gnav-dashboard','gnav-portfolio','gnav-classic'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const activeId = navMap[screen];
+  if (activeId) {
+    const el = document.getElementById(activeId);
+    if (el) el.classList.add('active');
+  }
+
+  // Scroll overlay back to top on screen change
+  const overlay = document.getElementById('v2-overlay');
+  if (overlay) overlay.scrollTo({ top: 0, behavior: 'smooth' });
+
   if (screen === 'portfolio') v2RenderPortfolio();
   if (screen === 'dashboard' && V2.run) v2RenderDashboard(V2.run);
+  if (screen === 'wizard' && typeof v2CheckWizardDraft === 'function') v2CheckWizardDraft();
+}
+
+function v2ToggleChat() {
+  const widget = document.getElementById('v2-chat-widget');
+  if (!widget) return;
+  const isCollapsed = widget.classList.contains('collapsed');
+  widget.classList.toggle('collapsed', !isCollapsed);
+  // Update the toggle button label
+  const btn = document.getElementById('v2-chat-toggle-btn');
+  if (btn) btn.textContent = isCollapsed ? '✕ AI Answers' : '💬 AI Answers';
 }
 
 function v2Toast(msg, ms = 2800) {

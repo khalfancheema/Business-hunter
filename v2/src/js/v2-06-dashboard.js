@@ -2,6 +2,8 @@
 function v2RenderDashboard(run) {
   const wrap = document.getElementById('v2-dash-wrap');
   if (!wrap) return;
+  // Render agent sidenav alongside dashboard
+  v2RenderAgentSidenav();
 
   const score   = run.score || v2CalcScore();
   const verdict = v2ScoreVerdict(score);
@@ -30,10 +32,17 @@ function v2RenderDashboard(run) {
         <div class="v2-dash-meta">ZIP ${run.zip} · ${run.radius} mi radius · $${parseInt(run.budget||0).toLocaleString()} budget · ${new Date(run.ts||Date.now()).toLocaleDateString()}</div>
       </div>
       <div class="v2-dash-actions">
-        <button class="v2-btn ghost sm" onclick="v2ShowExecution()">🗓 Execution Plan</button>
-        <button class="v2-btn ghost sm" onclick="v2ShowInvestor()">📑 Investor Pack</button>
-        <button class="v2-btn ghost sm" onclick="v2GoTo('traditional')">🔬 Traditional View</button>
-        <button class="v2-btn primary sm" onclick="v2SaveCurrentRun()">💾 Save</button>
+        <button class="v2-btn ghost sm" onclick="v2ShowExecution()" title="18-month Gantt + milestone tracker">🗓 Execution Plan</button>
+        <button class="v2-btn ghost sm" onclick="v2ShowInvestor()" title="Investor deck + pitch summary">📑 Investor Pack</button>
+        <button class="v2-btn ghost sm" onclick="v2ExportAll()" title="Export full pipeline as JSON">⬇ Export</button>
+        <button class="v2-btn ghost sm" onclick="v2PrintDashboard()" title="Print / Save as PDF">🖨 Print</button>
+        <button class="v2-btn ghost sm" onclick="v2ShareReport()" title="Copy shareable link">🔗 Share</button>
+        ${typeof v2GeneratePDFReport === 'function' ? `<button class="v2-btn ghost sm" onclick="v2GeneratePDFReport()" title="Formatted PDF report">📄 PDF</button>` : ''}
+        ${typeof v2ExportSlides === 'function' ? `<button class="v2-btn ghost sm" onclick="v2ExportSlides()" title="12-slide pitch deck">📊 Slides</button>` : ''}
+        ${typeof v2ShowREditor === 'function' ? `<button class="v2-btn ghost sm" onclick="v2ShowREditor()" title="Edit raw data & recalculate">🔧 Edit Data</button>` : ''}
+        ${typeof v2ShowZIPCompare === 'function' ? `<button class="v2-btn ghost sm" onclick="v2ShowZIPCompare()" title="Compare two ZIP codes">📍 ZIP Compare</button>` : ''}
+        <button class="v2-btn ghost sm" onclick="v2GoTo('traditional')" title="All raw agent outputs + advanced tools">🔬 Advanced View</button>
+        <button class="v2-btn primary sm" onclick="v2SaveCurrentRun()">💾 Save Run</button>
       </div>
     </div>
 
@@ -52,7 +61,8 @@ function v2RenderDashboard(run) {
       <div class="v2-card glow v2-score-card">
         <div class="v2-score-ring-wrap">${ring}</div>
         <div class="v2-score-verdict" style="color:${ringColor}">${verdict.title}</div>
-        <div class="v2-score-reason">Gap · Financials · Compliance · Competition</div>
+        <div class="v2-score-reason">Gap · Financials · Verdict · Competition · Compliance</div>
+        ${v2RenderScoreBreakdown()}
       </div>
       <div class="v2-card" style="padding:20px">
         <div class="v2-label" style="margin-bottom:14px">Key Metrics</div>
@@ -68,6 +78,8 @@ function v2RenderDashboard(run) {
       </div>
     </div>
 
+    ${v2RenderScoreBreakdown(score)}
+
     <div class="v2-dash-tabs" id="v2-dash-tabs">
       <div class="v2-dash-tab active" onclick="v2DashTab('executive',this)">📋 Executive</div>
       <div class="v2-dash-tab" onclick="v2DashTab('financials',this)">💰 Financials</div>
@@ -77,17 +89,343 @@ function v2RenderDashboard(run) {
       <div class="v2-dash-tab" onclick="v2DashTab('plan',this)">✅ Action Plan</div>
       <div class="v2-dash-tab" onclick="v2DashTab('grants',this)">💵 Grants</div>
       <div class="v2-dash-tab" onclick="v2DashTab('agents',this)">🤖 All Agents</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('dag',this)">🕸 Agent Flow</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('heatmap',this)">🗺 Heat Map</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('whatif',this)">🎲 What-If</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('benchmark',this)">📊 Benchmark</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('correlation',this)">🔗 Score Drivers</div>
+      <div class="v2-dash-tab" onclick="v2DashTab('audit',this)">🔬 Audit Trail</div>
     </div>
 
     <div class="v2-dash-panel active" id="v2-panel-executive">${v2RenderExecutive()}</div>
-    <div class="v2-dash-panel" id="v2-panel-financials">${v2RenderFinancials()}</div>
-    <div class="v2-dash-panel" id="v2-panel-market">${v2RenderMarket()}</div>
-    <div class="v2-dash-panel" id="v2-panel-competition">${v2RenderCompetition()}</div>
-    <div class="v2-dash-panel" id="v2-panel-risks">${v2RenderRisks()}</div>
-    <div class="v2-dash-panel" id="v2-panel-plan">${v2RenderActionPlan()}</div>
-    <div class="v2-dash-panel" id="v2-panel-grants">${v2RenderGrants()}</div>
-    <div class="v2-dash-panel" id="v2-panel-agents">${v2RenderAgents()}</div>
+    <div class="v2-dash-panel" id="v2-panel-financials">
+      ${v2RenderFinancials()}
+      <div class="v2-card" style="padding:20px;margin-top:16px">
+        <div class="v2-label" style="margin-bottom:12px">💧 Startup Cost Waterfall</div>
+        ${typeof v2RenderWaterfallChart === 'function' ? v2RenderWaterfallChart() : ''}
+        <div style="margin-top:12px;text-align:center">
+          <button class="v2-btn ghost sm" onclick="v2ShowFinancialDeepDive()">💰 Open 36-Month P&L Deep-Dive →</button>
+        </div>
+      </div>
+    </div>
+    <div class="v2-dash-panel" id="v2-panel-market">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="v2-btn ghost sm" onclick="v2ShowCityDrilldown()">🏙 City-by-City Table →</button>
+      </div>
+      ${v2RenderMarket()}
+    </div>
+    <div class="v2-dash-panel" id="v2-panel-competition">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="v2-btn ghost sm" onclick="v2ShowCompetitorProfiles()">🎯 Competitor Profile Cards →</button>
+      </div>
+      ${v2RenderCompetition()}
+    </div>
+    <div class="v2-dash-panel" id="v2-panel-risks">
+      ${v2RenderRisks()}
+      <div class="v2-card" style="padding:20px;margin-top:16px">
+        <div class="v2-label" style="margin-bottom:12px">⚠️ Risk Matrix — click a cell for details</div>
+        ${typeof v2RenderRiskMatrix === 'function' ? v2RenderRiskMatrix() : ''}
+      </div>
+    </div>
+    <div class="v2-dash-panel" id="v2-panel-plan">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="v2-btn ghost sm" onclick="v2ShowComplianceTimeline()">📋 Compliance Timeline →</button>
+      </div>
+      ${v2RenderActionPlan()}
+    </div>
+    <div class="v2-dash-panel" id="v2-panel-grants">
+      ${v2RenderGrants()}
+      <div class="v2-card" style="padding:20px;margin-top:16px">
+        <div class="v2-label" style="margin-bottom:12px">🎯 Grant Fit Rankings — sorted by match score</div>
+        ${typeof v2RenderGrantsWithFit === 'function' ? v2RenderGrantsWithFit() : ''}
+      </div>
+    </div>
+    <div class="v2-dash-panel" id="v2-panel-agents">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="v2-btn ghost sm" onclick="v2ShowDataExplorer()">🔍 Raw Data Explorer →</button>
+      </div>
+      ${v2RenderAgents()}
+    </div>
+    <div class="v2-dash-panel" id="v2-panel-dag">${typeof v2RenderDAGPanel === 'function' ? v2RenderDAGPanel() : ''}</div>
+    <div class="v2-dash-panel" id="v2-panel-heatmap">${typeof v2RenderMarketHeatMap === 'function' ? v2RenderMarketHeatMap() : ''}</div>
+    <div class="v2-dash-panel" id="v2-panel-whatif">${typeof v2RenderWhatIfInline === 'function' ? v2RenderWhatIfInline() : ''}</div>
+    <div class="v2-dash-panel" id="v2-panel-benchmark">${typeof v2RenderBenchmarking === 'function' ? v2RenderBenchmarking() : ''}</div>
+    <div class="v2-dash-panel" id="v2-panel-correlation">${typeof v2RenderAgentCorrelation === 'function' ? v2RenderAgentCorrelation() : ''}</div>
+    <div class="v2-dash-panel" id="v2-panel-audit">${typeof v2RenderAuditTrail === 'function' ? v2RenderAuditTrail() : ''}</div>
+
+    <div class="v2-tools-strip">
+      <div class="v2-tools-label">🔧 Advanced Tools</div>
+      <div class="v2-tools-btns">
+        <button class="v2-tool-btn" onclick="v2GoTo('traditional');setTimeout(()=>{ const btn=document.getElementById('compareBtn'); if(btn) btn.click(); },500)" title="Compare two ZIP codes side-by-side">
+          📊 ZIP Compare
+        </button>
+        <button class="v2-tool-btn" onclick="v2GoTo('traditional');setTimeout(()=>{ const btn=document.getElementById('scenarioBtn')||document.querySelector('[onclick*=scenario]'); if(btn) btn.click(); },500)" title="Adjust enrollment, pricing, and cost assumptions">
+          🎲 Scenario Builder
+        </button>
+        <button class="v2-tool-btn" onclick="v2GoTo('traditional');setTimeout(()=>{ const btn=document.getElementById('dagBtn')||document.querySelector('[onclick*=dag]'); if(btn) btn.click(); },500)" title="Agent dependency graph">
+          🕸 Agent DAG
+        </button>
+        <button class="v2-tool-btn" onclick="typeof fullPipelineExport==='function'?fullPipelineExport():v2GoTo('traditional')" title="Export all 17 agents as one PDF">
+          📄 Full PDF Export
+        </button>
+        <button class="v2-tool-btn" onclick="typeof printReport==='function'?printReport():v2GoTo('traditional')" title="Print-ready summary report">
+          🖨 Print Report
+        </button>
+        <button class="v2-tool-btn" onclick="typeof exportResults==='function'?exportResults():v2GoTo('traditional')" title="Download raw pipeline JSON">
+          ⬇ Raw JSON
+        </button>
+      </div>
+    </div>
   `;
+}
+
+// ── SCORE BREAKDOWN ───────────────────────────────────────────────────────
+function v2RenderScoreBreakdown(score) {
+  const components = v2GetScoreBreakdown();
+  const totalEarned = components.reduce((s, c) => s + c.earned, 0);
+  const totalMax    = components.reduce((s, c) => s + c.max,    0);
+  const dataComponents = components.filter(c => !c.missing);
+  const missingCount   = components.filter(c =>  c.missing).length;
+
+  // Bar color based on pct
+  const barColor = pct =>
+    pct >= 0.8 ? 'var(--v2-green)' :
+    pct >= 0.5 ? 'var(--v2-amber)' : 'var(--v2-red)';
+
+  const compRows = components.map(c => {
+    if (c.missing) return `
+      <div class="v2-bkd-row missing">
+        <div class="v2-bkd-ico">${c.ico}</div>
+        <div class="v2-bkd-col">
+          <div class="v2-bkd-label">${c.label}</div>
+          <div class="v2-bkd-agent">${c.agent}</div>
+        </div>
+        <div class="v2-bkd-pts missing">—&nbsp;/&nbsp;${c.max}<span class="v2-bkd-unit">pts</span></div>
+      </div>`;
+
+    const fillPct = Math.round(c.pct * 100);
+    const color   = barColor(c.pct);
+
+    const subRows = c.subPts ? c.subPts.map(sp => `
+      <div class="v2-bkd-subrow">
+        <span class="v2-bkd-sub-label">${sp.label}</span>
+        <span class="v2-bkd-sub-pts" style="color:${barColor(sp.pts/sp.maxPts)}">${sp.pts}/${sp.maxPts}</span>
+      </div>`).join('') : '';
+
+    return `
+      <div class="v2-bkd-row">
+        <div class="v2-bkd-ico">${c.ico}</div>
+        <div class="v2-bkd-col">
+          <div class="v2-bkd-top">
+            <div>
+              <div class="v2-bkd-label">${c.label}</div>
+              <div class="v2-bkd-agent">${c.agent}</div>
+            </div>
+            <div class="v2-bkd-pts" style="color:${color}">
+              ${c.earned}<span style="color:var(--v2-t3);font-weight:400">&nbsp;/&nbsp;${c.max}</span><span class="v2-bkd-unit">pts</span>
+            </div>
+          </div>
+          <div class="v2-bkd-bar-track">
+            <div class="v2-bkd-bar-fill" style="width:${fillPct}%;background:${color}"></div>
+          </div>
+          <div class="v2-bkd-detail">${c.detail}</div>
+          ${subRows ? `<div class="v2-bkd-subreasons">${subRows}</div>` : ''}
+          ${c.tip ? `<div class="v2-bkd-tip">💡 ${c.tip}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('<div class="v2-bkd-divider"></div>');
+
+  const weightNote = missingCount > 0
+    ? `<div class="v2-bkd-weight-note">⚠️ ${missingCount} component${missingCount>1?'s':''} not yet analyzed — score normalized to ${totalMax - components.filter(c=>c.missing).reduce((s,c)=>s+c.max,0)} available points</div>`
+    : '';
+
+  return `
+    <div class="v2-card v2-bkd-card" id="v2-score-breakdown">
+      <div class="v2-bkd-header" onclick="v2ToggleBreakdown()" role="button" aria-expanded="false" id="v2-bkd-header">
+        <div class="v2-bkd-header-left">
+          <span class="v2-bkd-header-ico">🔬</span>
+          <div>
+            <div class="v2-bkd-header-title">How this score was calculated</div>
+            <div class="v2-bkd-header-sub">${dataComponents.length} of 5 components · ${totalEarned} points earned</div>
+          </div>
+        </div>
+        <div class="v2-bkd-header-right">
+          <div class="v2-bkd-pill" style="background:${score>=70?'rgba(34,197,94,.12)':score>=45?'rgba(245,158,11,.12)':'rgba(239,68,68,.12)'};color:${score>=70?'var(--v2-green)':score>=45?'var(--v2-amber)':'var(--v2-red)'}">
+            ${score}/100
+          </div>
+          <span class="v2-bkd-chevron" id="v2-bkd-chevron">▼</span>
+        </div>
+      </div>
+      <div class="v2-bkd-body" id="v2-bkd-body">
+        ${weightNote}
+        <div class="v2-bkd-rows">${compRows}</div>
+        <div class="v2-bkd-footer">
+          <div class="v2-bkd-footer-note">Score formula: Gap (25) + Financials (25) + AI Verdict (20) + Competition (15) + Compliance (15) = 100 pts max</div>
+          ${missingCount === 0 ? `<button class="v2-btn ghost sm" onclick="v2DashTab('financials',document.querySelector('[onclick*=financials]'));event.stopPropagation()">Improve Score →</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function v2ToggleBreakdown() {
+  const body    = document.getElementById('v2-bkd-body');
+  const chevron = document.getElementById('v2-bkd-chevron');
+  const header  = document.getElementById('v2-bkd-header');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
+  if (header)  header.setAttribute('aria-expanded', open);
+}
+
+// ── AGENT SIDENAV ─────────────────────────────────────────────────────────
+function v2RenderAgentSidenav() {
+  const nav = document.getElementById('v2-agent-sidenav');
+  if (!nav) return;
+
+  const doneCount = V2_AGENTS.filter(a => {
+    const row = document.getElementById(`v2-ar-${a.id}`);
+    return row?.classList.contains('done');
+  }).length;
+
+  nav.innerHTML = `
+    <div class="v2-aside-header">
+      <div class="v2-aside-title">🤖 Agent Outputs</div>
+      <div class="v2-aside-subtitle">${doneCount} / ${V2_AGENTS.length} complete</div>
+    </div>
+    ${V2_AGENTS.map(a => {
+      const row     = document.getElementById(`v2-ar-${a.id}`);
+      const isDone  = row?.classList.contains('done');
+      const isError = row?.classList.contains('error');
+      const isRun   = row?.classList.contains('running');
+      const st      = isDone ? 'done' : isError ? 'error' : isRun ? 'running' : '';
+      return `
+        <div class="v2-aside-item ${st}" id="v2-aside-item-${a.id}"
+             onclick="v2JumpToAgent(${a.id})" title="${a.name}">
+          <div class="v2-aside-dot ${st}"></div>
+          <span class="v2-aside-ico">${a.ico}</span>
+          <span class="v2-aside-name">${a.name}</span>
+          <span class="v2-aside-id">${a.id}</span>
+        </div>`;
+    }).join('')}
+  `;
+}
+
+function v2JumpToAgent(id) {
+  // Switch to the All Agents tab
+  const tabEl = document.querySelector('#v2-dash-tabs .v2-dash-tab:last-child');
+  v2DashTab('agents', tabEl);
+
+  // Highlight the sidenav item
+  document.querySelectorAll('.v2-aside-item').forEach(el => el.classList.remove('active-item'));
+  const sideItem = document.getElementById(`v2-aside-item-${id}`);
+  if (sideItem) sideItem.classList.add('active-item');
+
+  // Scroll to the agent card
+  setTimeout(() => {
+    const el = document.getElementById(`v2-agent-section-${id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Brief highlight pulse
+      el.style.outline = '2px solid var(--v2-a1)';
+      el.style.outlineOffset = '3px';
+      setTimeout(() => { el.style.outline = ''; el.style.outlineOffset = ''; }, 1500);
+    }
+  }, 80);
+}
+
+function v2ExportAll() {
+  if (typeof exportResults === 'function') exportResults();
+  else v2Toast('No data to export. Run the pipeline first.');
+}
+
+// ── SCORE BREAKDOWN EXPLAINER ─────────────────────────────────────────────
+function v2RenderScoreBreakdown() {
+  const parts = v2CalcScoreBreakdown();
+  if (!parts.length) return '';
+
+  const totalWeight = parts.reduce((s, p) => s + p.max, 0);
+  const totalEarned = parts.reduce((s, p) => s + p.earned, 0);
+  const normalized  = Math.round((totalEarned / totalWeight) * 100);
+
+  const barColor = tier =>
+    tier === 'strong'   ? 'var(--v2-green)' :
+    tier === 'moderate' ? 'var(--v2-amber)' : 'var(--v2-red)';
+
+  const rows = parts.map(p => {
+    const fillW = Math.round(p.pct * 100);
+    const color = barColor(p.tier);
+    const subHtml = (p.sub || []).map(s => `
+      <div class="v2-sb-sub">
+        <span class="v2-sb-sub-label">${s.label}</span>
+        <span class="v2-sb-sub-bar">
+          <span class="v2-sb-sub-fill" style="width:${Math.round(s.pts/s.max*100)}%;background:${color}"></span>
+        </span>
+        <span class="v2-sb-sub-pts">${s.pts}/${s.max}</span>
+        <span class="v2-sb-sub-note">${s.note}</span>
+      </div>`).join('');
+
+    return `
+      <div class="v2-sb-row">
+        <div class="v2-sb-header">
+          <span class="v2-sb-ico">${p.ico}</span>
+          <div class="v2-sb-meta">
+            <div class="v2-sb-label">${p.label}</div>
+            <div class="v2-sb-agent">${p.agent}</div>
+          </div>
+          <div class="v2-sb-right">
+            <span class="v2-sb-pts" style="color:${color}">${p.earned}<span class="v2-sb-max">/${p.max}</span></span>
+          </div>
+        </div>
+        <div class="v2-sb-bar-track">
+          <div class="v2-sb-bar-fill" style="width:${fillW}%;background:${color}"></div>
+        </div>
+        ${subHtml ? `<div class="v2-sb-subs">${subHtml}</div>` : ''}
+        <div class="v2-sb-tip ${p.tier}">
+          ${p.tier === 'strong' ? '✓' : p.tier === 'moderate' ? '→' : '⚠'} ${p.tip}
+        </div>
+        <div class="v2-sb-detail">${p.detail}</div>
+      </div>`;
+  }).join('');
+
+  const missingAgents = 5 - parts.length;
+  const missingNote = missingAgents > 0
+    ? `<div class="v2-sb-missing">${missingAgents} component${missingAgents>1?'s':''} not yet run — score will update as agents complete.</div>`
+    : '';
+
+  return `
+    <div class="v2-score-breakdown" id="v2-score-breakdown">
+      <button class="v2-sb-toggle" onclick="v2ToggleBreakdown(this)" aria-expanded="false">
+        <span class="v2-sb-toggle-label">📐 How is this score calculated?</span>
+        <span class="v2-sb-toggle-arrow">▾</span>
+      </button>
+      <div class="v2-sb-body" hidden>
+        <div class="v2-sb-intro">
+          Score is a weighted composite of 5 factors from ${parts.length} AI agents.
+          Each factor is normalized so the final score reflects relative performance — not raw data.
+        </div>
+        <div class="v2-sb-rows">${rows}</div>
+        ${missingNote}
+        <div class="v2-sb-formula">
+          <span class="v2-sb-formula-label">Weighted total</span>
+          <span class="v2-sb-formula-eq">${totalEarned.toFixed(1)} / ${totalWeight} pts → <strong>${normalized}/100</strong></span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function v2ToggleBreakdown(btn) {
+  const body = btn.closest('.v2-score-breakdown').querySelector('.v2-sb-body');
+  const arrow = btn.querySelector('.v2-sb-toggle-arrow');
+  const isHidden = body.hasAttribute('hidden');
+  if (isHidden) {
+    body.removeAttribute('hidden');
+    arrow.textContent = '▴';
+    btn.setAttribute('aria-expanded', 'true');
+  } else {
+    body.setAttribute('hidden', '');
+    arrow.textContent = '▾';
+    btn.setAttribute('aria-expanded', 'false');
+  }
 }
 
 // ── TAB SWITCHING ─────────────────────────────────────────────────────────
@@ -521,13 +859,15 @@ function v2RenderAgents() {
         const summary = v2GetAgentSummary(a.id);
         const timerEl = document.getElementById(`v2-at-${a.id}`);
         const elapsed = timerEl?.textContent || '';
+        const conf = isDone && typeof v2GetAgentConfidence === 'function' ? v2GetAgentConfidence(a.id) : null;
         return `
-          <div class="v2-agent-card ${st}" onclick="v2OpenAgentDetail(${a.id})" title="Click to view ${a.name} output">
+          <div class="v2-agent-card ${st}" id="v2-agent-section-${a.id}"
+               onclick="v2OpenAgentDetail(${a.id})" title="Click to view ${a.name} output">
             <div class="v2-agent-card-head">
               <span class="v2-agent-card-ico">${a.ico}</span>
               <div style="flex:1">
                 <div class="v2-agent-card-name">${a.name}</div>
-                <div class="v2-agent-card-num">Agent ${a.id}</div>
+                <div class="v2-agent-card-num">Agent ${a.id}${conf ? ` · <span class="v2-conf-badge ${conf.badge}">${conf.label} ${conf.pct}%</span>` : ''}</div>
               </div>
               <div class="v2-agent-card-status" style="color:${stColor}">
                 <span style="display:block;font-size:11px;font-weight:700">${stLabel}</span>
@@ -535,7 +875,11 @@ function v2RenderAgents() {
               </div>
             </div>
             ${summary?`<div class="v2-agent-card-summary">${summary}</div>`:''}
-            ${isDone?`<div class="v2-agent-card-cta">View Output →</div>`:''}
+            ${isDone?`<div class="v2-agent-card-cta" style="display:flex;justify-content:space-between;align-items:center">
+              <span>View Output →</span>
+              ${typeof v2RefreshAgentData === 'function' ? `<button class="v2-agent-rerun-btn" style="color:var(--v2-a1);border-color:rgba(99,102,241,.3)" onclick="event.stopPropagation();v2RefreshAgentData(${a.id})">🔄 Refresh</button>` : ''}
+            </div>`:''}
+            ${isError?`<button class="v2-agent-rerun-btn" onclick="event.stopPropagation();v2ReRunAgentFromDash(${a.id})">↺ Re-run</button>`:''}
           </div>`;
       }).join('')}
     </div>

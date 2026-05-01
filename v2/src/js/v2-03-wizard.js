@@ -69,7 +69,8 @@ function v2WizRenderStep() {
     body = `
       <div class="v2-field">
         <label>ZIP Code</label>
-        <input class="v2-input" id="wiz-zip" type="text" maxlength="5" placeholder="e.g. 30097" value="${d.zip||''}" oninput="V2.wizard.data.zip=this.value" />
+        <input class="v2-input" id="wiz-zip" type="text" maxlength="5" placeholder="e.g. 30097" value="${d.zip||''}" oninput="V2.wizard.data.zip=this.value;if(typeof v2LookupZIP==='function')v2LookupZIP(this.value)" />
+        <div id="wiz-zip-preview" style="font-size:12px;color:var(--v2-t2);margin-top:4px;min-height:16px"></div>
       </div>
       <div class="v2-field">
         <label>Search Radius (miles)</label>
@@ -113,7 +114,8 @@ function v2WizRenderStep() {
               <span class="lbl">${l}</span>
             </div>`).join('')}
         </div>
-      </div>`;
+      </div>
+      ${typeof v2GetIndustryExtrasHTML === 'function' ? v2GetIndustryExtrasHTML(d.industry||'') : ''}`;
 
   } else if (s.id === 'confirm') {
     const ind  = V2_INDUSTRIES.find(i=>i.val===d.industry)||{emoji:'🏢',label:'Business'};
@@ -199,6 +201,7 @@ function v2WizNext() {
     return;
   }
   V2.wizard.step = Math.min(V2.wizard.step + 1, V2_WIZARD_STEPS.length - 1);
+  if (typeof v2SaveWizardDraft === 'function') v2SaveWizardDraft();
   v2WizRenderStepsBar();
   v2WizRenderStep();
 }
@@ -231,14 +234,41 @@ function v2LaunchPipeline() {
 
   // Go to copilot screen
   v2GoTo('copilot');
-  const ctx = document.getElementById('v2-chat-context');
-  if (ctx) {
-    const ind = V2_INDUSTRIES.find(i=>i.val===d.industry)||{emoji:'🏢',label:'Business'};
-    ctx.textContent = `${ind.emoji} ${ind.label} · ZIP ${d.zip||'30097'} · $${parseInt(budget).toLocaleString()} budget`;
-  }
+  const ind = V2_INDUSTRIES.find(i=>i.val===d.industry)||{emoji:'🏢',label:'Business'};
+  const ctxText = `${ind.emoji} ${ind.label} · ZIP ${d.zip||'30097'} · $${parseInt(budget).toLocaleString()} budget`;
+  // Update copilot screen sub-heading
+  const copCtx = document.getElementById('v2-copilot-context');
+  if (copCtx) copCtx.textContent = ctxText;
+  // Update chat widget context label
+  const chatCtx = document.getElementById('v2-chat-context');
+  if (chatCtx) chatCtx.textContent = ctxText;
 
-  // Add opening copilot message
-  v2ChatMsg('ai', `🚀 Starting full analysis for your ${(V2_INDUSTRIES.find(i=>i.val===d.industry)||{label:'business'}).label} in ZIP ${d.zip||'30097'}.<br><br>I'll run all 17 research agents in parallel — demographics, compliance, real estate, financials, and more. This takes about 5–8 minutes with a live API key.`);
+  // Reset pipeline state
+  if (typeof _v2PipelineCompleted !== 'undefined') _v2PipelineCompleted = false;
+
+  // Clear chat history for new run
+  if (typeof v2ClearChatHistory === 'function') v2ClearChatHistory();
+
+  // Clear draft on launch
+  if (typeof v2ClearWizardDraft === 'function') v2ClearWizardDraft();
+
+  // Clear previous chat, lock chat input, collapse widget
+  const msgs = document.getElementById('v2-chat-msgs');
+  if (msgs) msgs.innerHTML = '';
+  const inp = document.getElementById('v2-chat-input');
+  const btn = document.getElementById('v2-chat-send');
+  if (inp) { inp.disabled = true; inp.placeholder = 'Available after analysis completes…'; }
+  if (btn) { btn.disabled = true; }
+  const widget = document.getElementById('v2-chat-widget');
+  if (widget) widget.classList.add('collapsed');
+  const toggleBtn = document.getElementById('v2-chat-toggle-btn');
+  if (toggleBtn) toggleBtn.textContent = '💬 AI Answers';
+
+  // Add opening copilot message (widget will be opened at pipeline complete)
+  v2ChatMsg('ai', `🚀 Starting full analysis for your ${ind.label} in ZIP ${d.zip||'30097'}.<br><br>I'll run all 17 research agents — demographics, compliance, real estate, financials, and more. ${demoMode ? 'Demo mode: instant results.' : 'Live mode: ~5–8 minutes with API key.'}`);
+
+  // F14: Request notification permission before pipeline starts
+  if (typeof v2RequestNotificationPermission === 'function') v2RequestNotificationPermission();
 
   // Run the pipeline
   setTimeout(() => {

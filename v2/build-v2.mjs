@@ -57,6 +57,10 @@ const V2_JS = [
   'v2/src/js/v2-07-portfolio.js',
   'v2/src/js/v2-08-investor.js',
   'v2/src/js/v2-09-execution.js',
+  'v2/src/js/v2-10-features.js',
+  'v2/src/js/v2-11-advanced.js',
+  'v2/src/js/v2-12-drilldown.js',
+  'v2/src/js/v2-13-enhancements.js',
 ].map(f => join(ROOT, f));
 
 const CSS_FILES = [
@@ -67,6 +71,12 @@ const CSS_FILES = [
 let html = readFileSync(join(ROOT, 'v2/src/template-v2.html'), 'utf8');
 const css = CSS_FILES.map(f => readFileSync(f, 'utf8')).join('\n');
 html = html.replace('<!-- BUILD:CSS -->', () => `<style>\n${css}\n</style>`);
+
+// Inject full v1 template body into #v1-shell for pixel-perfect Classic View
+const v1Template = readFileSync(join(ROOT, 'src/template.html'), 'utf8');
+const v1BodyMatch = v1Template.match(/<body>([\s\S]*?)<\/body>/i);
+const v1Body = v1BodyMatch ? v1BodyMatch[1].trim() : '';
+html = html.replace('<!-- BUILD:V1 -->', () => v1Body);
 
 const js = [...V1_JS, ...V2_JS].map(f => readFileSync(f, 'utf8')).join('\n\n');
 html = html.replace('<!-- BUILD:JS -->', () => `<script>\n${js}\n</script>`);

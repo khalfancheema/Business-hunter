@@ -15,333 +15,8 @@
 <!-- ═══════════════════════════════════════════════════════════
      V1 HIDDEN SHELL — all v1 DOM required by pipeline renders
      ═══════════════════════════════════════════════════════════ -->
-<div id="v1-shell" style="position:absolute;left:-9999px;top:0;width:1140px;pointer-events:none;visibility:hidden">
-<div class="page">
-<div id="mastheadTitle" style="display:none"></div>
-<div id="mastheadSub" style="display:none"></div>
-<div id="sessionRestoreBanner" style="display:none"></div>
-<select id="providerSelect" style="display:none">
-  <option value="anthropic">Anthropic (Claude)</option>
-  <option value="openai">OpenAI (GPT-4o)</option>
-  <option value="gemini">Google Gemini</option>
-  <option value="openai_compat">OpenAI-Compatible / Local</option>
-</select>
-<input id="modelInput" style="display:none" />
-<div id="customUrlRow" style="display:none"><input id="customUrlInput" /></div>
-<div id="localGuidePanel" style="display:none"></div>
-<input type="password" id="apiKey" autocomplete="off" style="display:none" />
-<div id="apiKeyGuidance" style="display:none"></div>
-<select id="industrySelect" style="display:none">
-  <option value="daycare">🏫 Daycare / Childcare</option>
-  <option value="gas_station">⛽ Gas Station / C-Store</option>
-  <option value="laundromat">🫧 Laundromat</option>
-  <option value="car_wash">🚗 Car Wash</option>
-  <option value="restaurant">🍽️ Restaurant</option>
-  <option value="gym">💪 Gym / Fitness Center</option>
-  <option value="indoor_play">🎠 Indoor Play Area / FEC</option>
-  <option value="dry_cleaning">👔 Dry Cleaning / Laundry</option>
-  <option value="senior_care">🏥 Senior Care / Assisted Living</option>
-  <option value="tutoring">📚 Tutoring / Learning Center</option>
-  <option value="urgent_care">🩺 Urgent Care Clinic</option>
-  <option value="coffee_shop">☕ Coffee Shop / Café</option>
-  <option value="barbershop">✂️ Barbershop / Salon</option>
-  <option value="coworking">🖥️ Co-Working Space</option>
-</select>
-<input type="text" id="zip" value="30097" style="display:none" />
-<input type="number" id="radius" value="40" style="display:none" />
-<div id="tiersField" style="display:none"><label id="tiersLabel"></label><select id="grades"></select></div>
-<label id="capacityLabel" style="display:none"></label>
-<input type="number" id="capacity" value="75" style="display:none" />
-<input type="number" id="budget" value="600000" style="display:none" />
-<button id="runBtn" onclick="runPipeline()" style="display:none"></button>
-<button id="stopBtn" onclick="stopRequested=true;this.disabled=true" style="display:none"></button>
-<button id="clearCacheBtn" style="display:none"></button>
-<button id="resetBtn" onclick="resetAll()" style="display:none"></button>
-<button id="exportBtn" onclick="exportResults()" style="display:none"></button>
-<button id="fullExportBtn" onclick="fullPipelineExport()" style="display:none"></button>
-<button id="copyLinkBtn" onclick="copyShareableLink()" style="display:none"></button>
-<button id="phasePanelBtn" onclick="togglePhasePanel()" style="display:none"></button>
-<button id="historyToggleBtn" onclick="toggleHistoryPanel()" style="display:none"></button>
-<button id="runsPanelBtn" onclick="toggleRunsPanel()" style="display:none"></button>
-<button id="saveRunBtn" onclick="promptSaveRun()" style="display:none"></button>
-<button id="dagPanelBtn" onclick="toggleDagPanel()" style="display:none"></button>
-<button id="printBtn" onclick="printReport()" style="display:none"></button>
-<button id="demoBtn" onclick="toggleDemo()" style="display:none"></button>
-<div id="phasePanel" style="display:none">
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-1" checked onchange="togglePhase(1,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-2" checked onchange="togglePhase(2,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-3" checked onchange="togglePhase(3,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-4" checked onchange="togglePhase(4,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-5" checked onchange="togglePhase(5,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-6" checked onchange="togglePhase(6,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-7" checked onchange="togglePhase(7,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-8" checked onchange="togglePhase(8,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-9" checked onchange="togglePhase(9,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-11" checked onchange="togglePhase(11,this)"></label>
-  <label class="phase-check-row"><input type="checkbox" id="phase-cb-12" checked onchange="togglePhase(12,this)"></label>
-</div>
-<div id="dagPanel" style="display:none"><div id="dagContainer"></div></div>
-<div id="runsPanel" style="display:none"></div>
-<div class="progress-wrap">
-  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="progress-text" id="progressText"></div>
-</div>
-<div class="error-banner" id="errorBanner"></div>
-<select id="compareIndustrySelect" style="display:none"></select>
-<input type="text" id="compareZipInput" style="display:none" />
-<div id="comparePanel" style="display:none"></div>
-<div id="zipComparePanel" style="display:none"></div>
-<div id="historyPanel" style="display:none"></div>
-<div id="orchStatus" style="display:none"></div>
-<div class="final-box" id="finalBox" style="display:none">
-  <div id="verdictEl"></div>
-  <div class="final-grid">
-    <div class="final-section full"><div class="final-prose" id="f-assess"></div></div>
-    <div class="final-section"><div class="final-prose" id="f-success"></div></div>
-    <div class="final-section"><div class="final-prose" id="f-risks"></div></div>
-    <div class="final-section full"><div class="step-list" id="f-steps"></div></div>
-  </div>
-</div>
-<div id="profileHeader" style="display:none"></div>
-<div id="profileFormToggle" style="display:none"></div>
-<div id="profileForm" style="display:none">
-  <input id="pf-name" /><input id="pf-owner" /><input id="pf-opening" />
-  <input id="pf-location" /><input id="pf-equity" /><input id="pf-email" />
-  <textarea id="pf-notes"></textarea><div id="pf-saved"></div>
-</div>
-<!-- Agent modal overlay (needed by openAgentModal / closeAgentModal) -->
-<div id="agentModalOverlay" style="display:none">
-  <div class="agent-modal">
-    <div class="agent-modal-header">
-      <div class="agent-modal-ico" id="modalAgentIco">🤖</div>
-      <div class="agent-modal-title">
-        <strong id="modalAgentName">Agent</strong>
-        <span id="modalAgentNum">Agent N</span>
-      </div>
-      <div class="agent-modal-actions">
-        <button id="modalSaveBtn" onclick="saveAgentJSON()">⬇ Save JSON</button>
-        <button id="modalPrintBtn" onclick="printAgentData()">🖨 Print</button>
-        <button onclick="closeAgentModal()">✕</button>
-      </div>
-    </div>
-    <div class="agent-modal-body" id="modalAgentBody"></div>
-  </div>
-</div>
-<!-- Scenario builder stubs (created dynamically by v1 but accessed by id) -->
-<div id="sb-occ-val" style="display:none"></div>
-<input type="range" id="sb-occ" style="display:none" />
-<div id="sb-t1-val" style="display:none"></div>
-<input type="range" id="sb-t1" style="display:none" />
-<div id="sb-rent-val" style="display:none"></div>
-<input type="range" id="sb-rent" style="display:none" />
-<div id="sb-output" style="display:none"></div>
-<!-- ZIP compare button stub -->
-<button id="compareZipBtn" style="display:none" onclick="runZipComparison()"></button>
-<input type="text" id="zipInput" style="display:none" />
-<div id="compCityOverlay" style="display:none"></div>
-
-<!-- Agent 1 -->
-<div class="agent-card" id="card-1"><div class="agent-head"><div class="agent-dot" id="dot-1"></div></div>
-<span id="timer-1"></span><button class="rerun-btn" id="rerun-1" onclick="reRunAgent(1)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-1">
-  <div class="panel active" id="1-s"><div class="prose" id="1-s-t"></div></div>
-  <div class="panel" id="1-h"><div class="hmap-wrap"><div id="1-h-c"></div></div></div>
-  <div class="panel" id="1-c"><div class="chart-wrap"><canvas id="ch-1"></canvas></div></div>
-  <div class="panel" id="1-t"><div class="tbl-wrap" id="1-t-c"></div></div>
-  <div id="raw-1" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 2 -->
-<div class="agent-card" id="card-2"><div class="agent-head"><div class="agent-dot" id="dot-2"></div></div>
-<span id="timer-2"></span><button class="rerun-btn" id="rerun-2" onclick="reRunAgent(2)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-2">
-  <div class="panel active" id="2-s"><div class="prose" id="2-s-t"></div></div>
-  <div class="panel" id="2-h"><div class="hmap-wrap"><div id="2-h-c"></div></div></div>
-  <div class="panel" id="2-r"><div id="2-r-c"></div></div>
-  <div class="panel" id="2-c"><div class="chart-wrap tall"><canvas id="ch-2"></canvas></div></div>
-  <div id="raw-2" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 3 -->
-<div class="agent-card" id="card-3"><div class="agent-head"><div class="agent-dot" id="dot-3"></div></div>
-<span id="timer-3"></span><button class="rerun-btn" id="rerun-3" onclick="reRunAgent(3)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-3">
-  <div class="panel active" id="3-s"><div class="prose" id="3-s-t"></div></div>
-  <div class="panel" id="3-r"><div id="3-r-c"></div></div>
-  <div class="panel" id="3-c"><div class="chart-wrap tall"><canvas id="ch-3"></canvas></div></div>
-  <div class="panel" id="3-t"><div class="tbl-wrap" id="3-t-c"></div></div>
-  <div id="raw-3" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 4 -->
-<div class="agent-card" id="card-4"><div class="agent-head"><div class="agent-dot" id="dot-4"></div></div>
-<span id="timer-4"></span><button class="rerun-btn" id="rerun-4" onclick="reRunAgent(4)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-4">
-  <div class="panel active" id="4-s"><div class="prose" id="4-s-t"></div></div>
-  <div class="panel" id="4-l"><div id="4-l-c"></div></div>
-  <div class="panel" id="4-t"><div class="tbl-wrap" id="4-t-c"></div></div>
-  <div class="panel" id="4-c"><div class="chart-wrap"><canvas id="ch-4"></canvas></div></div>
-  <div id="raw-4" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 5 -->
-<div class="agent-card" id="card-5"><div class="agent-head"><div class="agent-dot" id="dot-5"></div></div>
-<span id="timer-5"></span><button class="rerun-btn" id="rerun-5" onclick="reRunAgent(5)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-5">
-  <div class="panel active" id="5-s"><div class="prose" id="5-s-t"></div></div>
-  <div class="panel" id="5-t"><div class="tbl-wrap" id="5-t-c"></div></div>
-  <div class="panel" id="5-a"><div id="5-a-c"></div></div>
-  <div class="panel" id="5-c"><div class="chart-wrap"><canvas id="ch-5"></canvas></div></div>
-  <div id="raw-5" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 6 -->
-<div class="agent-card" id="card-6"><div class="agent-head"><div class="agent-dot" id="dot-6"></div></div>
-<span id="timer-6"></span><button class="rerun-btn" id="rerun-6" onclick="reRunAgent(6)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-6">
-  <div class="panel active" id="6-s"><div class="prose" id="6-s-t"></div></div>
-  <div class="panel" id="6-c"><div class="chart-wrap"><canvas id="ch-6"></canvas></div></div>
-  <div class="panel" id="6-t"><div class="tbl-wrap" id="6-t-c"></div></div>
-  <div id="raw-6" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 7 -->
-<div class="agent-card" id="card-7"><div class="agent-head"><div class="agent-dot" id="dot-7"></div></div>
-<span id="timer-7"></span><button class="rerun-btn" id="rerun-7" onclick="reRunAgent(7)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-7">
-  <div class="panel active" id="7-s"><div class="prose" id="7-s-t"></div><div id="7-sc-builder"></div></div>
-  <div class="panel" id="7-sc"><div id="7-sc-c"></div></div>
-  <div class="panel" id="7-c"><div class="chart-wrap tall"><canvas id="ch-7"></canvas></div></div>
-  <div class="panel" id="7-t"><div class="tbl-wrap" id="7-t-c"></div></div>
-  <div id="raw-7" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 8 -->
-<div class="agent-card" id="card-8"><div class="agent-head"><div class="agent-dot" id="dot-8"></div></div>
-<span id="timer-8"></span><button class="rerun-btn" id="rerun-8" onclick="reRunAgent(8)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-8">
-  <div class="prose" id="8-s-t"></div>
-  <div id="raw-8" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 9 -->
-<div class="agent-card" id="card-9"><div class="agent-head"><div class="agent-dot" id="dot-9"></div></div>
-<span id="timer-9"></span><button class="rerun-btn" id="rerun-9" onclick="reRunAgent(9)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-9">
-  <div class="panel active" id="9-ov"><div id="9-ov-c"></div></div>
-  <div class="panel" id="9-mkt"><div id="9-mkt-c"></div></div>
-  <div class="panel" id="9-fin"><div id="9-fin-c"></div></div>
-  <div class="panel" id="9-ops"><div id="9-ops-c"></div></div>
-  <div class="panel" id="9-sba"><div id="9-sba-c"></div></div>
-  <div class="panel" id="9-inv"><div id="9-inv-c"></div></div>
-  <div id="raw-9" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 10 -->
-<div class="agent-card" id="card-10"><div class="agent-head"><div class="agent-dot" id="dot-10"></div></div>
-<span id="timer-10"></span><button class="rerun-btn" id="rerun-10" onclick="reRunAgent(10)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-10">
-  <div class="panel active" id="10-gantt"><div id="10-gantt-c"></div></div>
-  <div class="panel" id="10-mile"><div id="10-mile-c"></div></div>
-  <div class="panel" id="10-budget"><div id="10-budget-c"></div></div>
-  <div class="panel" id="10-risk"><div id="10-risk-c"></div></div>
-  <div class="panel" id="10-team"><div id="10-team-c"></div></div>
-  <div class="panel" id="10-check"><div id="10-check-c"></div></div>
-  <div id="raw-10" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 11 -->
-<div class="agent-card" id="card-11"><div class="agent-head"><div class="agent-dot" id="dot-11"></div></div>
-<span id="timer-11"></span><button class="rerun-btn" id="rerun-11" onclick="reRunAgent(11)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-11">
-  <div class="panel active" id="11-map"><div id="11-map-c"></div></div>
-  <div class="panel" id="11-leg"><div id="11-leg-c"></div></div>
-  <div class="panel" id="11-dir"><div id="11-dir-c"></div></div>
-  <div id="raw-11" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 12 -->
-<div class="agent-card" id="card-12"><div class="agent-head"><div class="agent-dot" id="dot-12"></div></div>
-<span id="timer-12"></span><button class="rerun-btn" id="rerun-12" onclick="reRunAgent(12)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-12">
-  <div class="panel active" id="12-sum"><div class="prose" id="12-sum-t"></div></div>
-  <div id="tab-12-grant1" style="display:none"></div>
-  <div id="tab-12-grant2" style="display:none"></div>
-  <div class="panel" id="12-caps"><div id="12-caps-c"></div></div>
-  <div class="panel" id="12-usda"><div id="12-usda-c"></div></div>
-  <div class="panel" id="12-local"><div id="12-local-c"></div></div>
-  <div class="panel" id="12-tbl"><div class="tbl-wrap" id="12-tbl-c"></div></div>
-  <div id="raw-12" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 13 -->
-<div class="agent-card" id="card-13"><div class="agent-head"><div class="agent-dot" id="dot-13"></div></div>
-<span id="timer-13"></span><button class="rerun-btn" id="rerun-13" onclick="reRunAgent(13)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-13">
-  <div class="panel active" id="13-sum"><div class="prose" id="13-sum-t"></div></div>
-  <div class="panel" id="13-comp"><div id="13-comp-c"></div></div>
-  <div class="panel" id="13-pain"><div id="13-pain-c"></div></div>
-  <div class="panel" id="13-diff"><div id="13-diff-c"></div></div>
-  <div class="panel" id="13-msg"><div id="13-msg-c"></div></div>
-  <div id="raw-13" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 14 -->
-<div class="agent-card" id="card-14"><div class="agent-head"><div class="agent-dot" id="dot-14"></div></div>
-<span id="timer-14"></span><button class="rerun-btn" id="rerun-14" onclick="reRunAgent(14)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-14">
-  <div class="panel active" id="14-sum"><div class="prose" id="14-sum-t"></div></div>
-  <div class="panel" id="14-issues"><div id="14-issues-c"></div></div>
-  <div class="panel" id="14-perf"><div id="14-perf-c"></div></div>
-  <div class="panel" id="14-cost"><div id="14-cost-c"></div></div>
-  <div class="panel" id="14-fixes"><div id="14-fixes-c"></div></div>
-  <div id="raw-14" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 15 -->
-<div class="agent-card" id="card-15"><div class="agent-head"><div class="agent-dot" id="dot-15"></div></div>
-<span id="timer-15"></span><button class="rerun-btn" id="rerun-15" onclick="reRunAgent(15)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-15">
-  <div class="panel active" id="15-sum"><div class="prose" id="15-sum-t"></div></div>
-  <div class="panel" id="15-tests"><div id="15-tests-c"></div></div>
-  <div class="panel" id="15-data"><div id="15-data-c"></div></div>
-  <div class="panel" id="15-ux"><div id="15-ux-c"></div></div>
-  <div class="panel" id="15-score"><div id="15-score-c"></div></div>
-  <div id="raw-15" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 16 -->
-<div class="agent-card" id="card-16"><div class="agent-head"><div class="agent-dot" id="dot-16"></div></div>
-<span id="timer-16"></span><button class="rerun-btn" id="rerun-16" onclick="reRunAgent(16)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-16">
-  <div class="panel active" id="16-sum"><div id="16-sum-c"></div></div>
-  <div class="panel" id="16-list"><div id="16-list-c"></div></div>
-  <div class="panel" id="16-comp"><div id="16-comp-c"></div></div>
-  <div class="panel" id="16-matrix"><div id="16-matrix-c"></div></div>
-  <div class="panel" id="16-steps"><div id="16-steps-c"></div></div>
-  <div id="raw-16" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- Agent 17 -->
-<div class="agent-card" id="card-17"><div class="agent-head"><div class="agent-dot" id="dot-17"></div></div>
-<span id="timer-17"></span><button class="rerun-btn" id="rerun-17" onclick="reRunAgent(17)" style="display:none">↺ Re-run</button>
-<div class="agent-out" id="out-17">
-  <div class="panel active" id="17-sum"><div class="prose" id="17-sum-t"></div></div>
-  <div class="panel" id="17-sources"><div id="17-sources-c"></div></div>
-  <div class="panel" id="17-claims"><div id="17-claims-c"></div></div>
-  <div class="panel" id="17-unsourced"><div id="17-unsourced-c"></div></div>
-  <div id="raw-17" class="raw-data-wrap"></div>
-</div></div>
-
-<!-- drilldown modal (v1) -->
-<div id="expandModal" style="display:none"></div>
-<div id="gapDetailOverlay" style="display:none"></div>
-<div id="personalizePanelRoot" style="display:none">
-  <input id="biz-name" /><input id="biz-founder" /><input id="biz-open-date" />
-  <input id="biz-equity" /><input id="biz-email" /><textarea id="biz-notes"></textarea>
-</div>
-
-</div><!-- .page -->
+<div id="v1-shell" style="position:absolute;left:-9999px;top:0;width:100%;pointer-events:none;visibility:hidden">
+<!-- BUILD:V1 -->
 </div><!-- #v1-shell -->
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -349,20 +24,27 @@
      ═══════════════════════════════════════════════════════════ -->
 <div id="v2-overlay">
 
+  <!-- ── GLOBAL PERSISTENT NAV ────────────────────────────────── -->
+  <nav id="v2-global-nav">
+    <div class="v2-nav-logo" onclick="v2GoTo('landing')">Business Hunter</div>
+    <div class="v2-nav-links">
+      <span class="v2-nav-link" id="gnav-landing" onclick="v2GoTo('landing')">Home</span>
+      <span class="v2-nav-link" id="gnav-dashboard" onclick="v2GoTo('dashboard')">Dashboard</span>
+      <span class="v2-nav-link" id="gnav-portfolio" onclick="v2GoTo('portfolio')">Portfolio</span>
+      <span class="v2-nav-link" id="gnav-classic" onclick="v2GoTo('traditional')">Classic View</span>
+    </div>
+    <div class="v2-nav-right">
+      <span class="v2-tag">v2.0</span>
+      <button class="v2-btn ghost sm icon-only" id="v2-theme-btn" onclick="v2ToggleTheme()" title="Toggle light/dark mode">☀️</button>
+      <button class="v2-btn ghost sm" onclick="v2StartTour()" title="Quick tour">🗺</button>
+      <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
+      <button class="v2-btn ghost sm" id="v2-chat-toggle-btn" onclick="v2ToggleChat()">💬 AI Answers</button>
+      <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">+ New Analysis</button>
+    </div>
+  </nav>
+
   <!-- ── LANDING SCREEN ─────────────────────────────────────── -->
   <div id="screen-landing" class="v2-screen active">
-    <nav class="v2-nav">
-      <div class="v2-nav-logo" onclick="v2GoTo('landing')">Business Hunter</div>
-      <div class="v2-nav-links">
-        <span class="v2-nav-link" onclick="v2GoTo('portfolio')">Portfolio</span>
-        <span class="v2-nav-link" onclick="v2ShowApiKey()">API Key</span>
-      </div>
-      <div class="v2-nav-right">
-        <span class="v2-tag">v2.0</span>
-        <button class="v2-btn sm" onclick="v2StartDemo()">⚡ Try Demo</button>
-        <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">Start Analysis →</button>
-      </div>
-    </nav>
 
     <div class="v2-hero">
       <div class="v2-hero-badge"><div class="pulse"></div>17 AI Agents · Live Market Data</div>
@@ -377,7 +59,7 @@
     <div id="v2-demo-preview" style="max-width:460px;width:100%;margin:0 auto 48px;padding:0 24px"></div>
 
     <div class="v2-feature-grid">
-      <div class="v2-feature-card"><div class="v2-feature-ico">🧠</div><div class="v2-feature-title">AI Founder Copilot</div><div class="v2-feature-desc">Describe your idea in plain English. AI orchestrates all 17 research agents and keeps you updated live.</div></div>
+      <div class="v2-feature-card"><div class="v2-feature-ico">🧠</div><div class="v2-feature-title">AI Answers</div><div class="v2-feature-desc">Describe your idea in plain English. AI orchestrates all 17 research agents and keeps you updated live.</div></div>
       <div class="v2-feature-card"><div class="v2-feature-ico">📊</div><div class="v2-feature-title">Viability Score</div><div class="v2-feature-desc">Get a 0–100 business score with Go / Cautious / No-Go verdict backed by real market data.</div></div>
       <div class="v2-feature-card"><div class="v2-feature-ico">💰</div><div class="v2-feature-title">Financial Modeling</div><div class="v2-feature-desc">3-scenario P&L, break-even analysis, and city-by-city cost comparisons with live real estate data.</div></div>
       <div class="v2-feature-card"><div class="v2-feature-ico">📋</div><div class="v2-feature-title">SBA Business Plan</div><div class="v2-feature-desc">Full SBA 7(a) loan package, investor deck, and executive summary — ready to print or export.</div></div>
@@ -388,17 +70,14 @@
 
   <!-- ── WIZARD SCREEN ───────────────────────────────────────── -->
   <div id="screen-wizard" class="v2-screen">
-    <nav class="v2-nav">
-      <div class="v2-nav-logo" onclick="v2GoTo('landing')">Business Hunter</div>
-      <div class="v2-nav-right">
-        <button class="v2-btn ghost sm" onclick="v2GoTo('landing')">← Back</button>
-        <button class="v2-btn sm" onclick="v2ShowApiKey()">🔑 API Key</button>
-      </div>
-    </nav>
     <div class="v2-wizard-wrap">
       <div class="v2-wizard-header">
         <div class="v2-wizard-title">Configure Your Analysis</div>
         <div class="v2-wizard-sub">5 quick questions — then AI takes over</div>
+      </div>
+      <div id="v2-draft-banner" style="display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 16px;margin-bottom:12px;font-size:13px;color:var(--v2-amber);justify-content:space-between;align-items:center">
+        <span>📝 You have an unsaved wizard draft. <button class="v2-btn ghost sm" onclick="v2RestoreWizardDraft()" style="margin-left:8px">Resume</button></span>
+        <button class="v2-btn ghost sm" onclick="v2DismissWizardDraft()" style="padding:2px 8px">✕</button>
       </div>
       <div class="v2-steps-bar" id="v2-steps-bar"></div>
       <div class="v2-wizard-card" id="v2-wizard-card"></div>
@@ -411,79 +90,84 @@
 
   <!-- ── COPILOT SCREEN ─────────────────────────────────────── -->
   <div id="screen-copilot" class="v2-screen">
-    <nav class="v2-nav">
-      <div class="v2-nav-logo">Business Hunter</div>
-      <div class="v2-nav-right">
-        <button class="v2-btn ghost sm" id="v2-copilot-stop" onclick="v2StopPipeline()">⬛ Stop</button>
+    <div class="v2-copilot-center">
+      <div class="v2-copilot-header-block">
+        <div class="v2-copilot-running-title">🚀 AI Analysis Running</div>
+        <div class="v2-copilot-running-sub" id="v2-copilot-context">Initializing pipeline…</div>
+        <button class="v2-btn ghost sm" id="v2-copilot-stop" onclick="v2StopPipeline()" style="margin-top:12px">⬛ Stop Analysis</button>
       </div>
-    </nav>
-    <div class="v2-copilot-layout">
-      <div class="v2-chat-area">
-        <div class="v2-chat-header">
-          <div class="v2-chat-title">AI Founder Copilot</div>
-          <div class="v2-chat-sub" id="v2-chat-context"></div>
-        </div>
-        <div class="v2-chat-msgs" id="v2-chat-msgs"></div>
+      <div class="v2-pipeline-progress" style="margin-bottom:24px">
+        <div class="v2-progress-bar-track"><div class="v2-progress-bar-fill" id="v2-progress-fill"></div></div>
+        <div class="v2-progress-label" id="v2-progress-label">Initializing…</div>
       </div>
-      <div class="v2-progress-sidebar">
-        <div class="v2-progress-title">Pipeline Progress</div>
-        <div class="v2-agent-list" id="v2-agent-list"></div>
-        <div class="v2-pipeline-progress">
-          <div class="v2-progress-bar-track"><div class="v2-progress-bar-fill" id="v2-progress-fill"></div></div>
-          <div class="v2-progress-label" id="v2-progress-label">Initializing…</div>
-        </div>
-      </div>
+      <div class="v2-agent-list" id="v2-agent-list"></div>
     </div>
   </div>
 
   <!-- ── DASHBOARD SCREEN ───────────────────────────────────── -->
   <div id="screen-dashboard" class="v2-screen">
-    <nav class="v2-nav">
-      <div class="v2-nav-logo" onclick="v2GoTo('landing')">Business Hunter</div>
-      <div class="v2-nav-links">
-        <span class="v2-nav-link" onclick="v2GoTo('portfolio')">Portfolio</span>
-        <span class="v2-nav-link active">Dashboard</span>
-        <span class="v2-nav-link" onclick="v2GoTo('traditional')">Traditional View</span>
+    <div class="v2-screen-bar">
+      <div class="v2-screen-bar-links">
+        <span class="v2-screen-bar-link" onclick="v2GoTo('portfolio')">Portfolio</span>
+        <span class="v2-screen-bar-link active" id="sbar-dashboard">Dashboard</span>
+        <span class="v2-screen-bar-link" onclick="v2GoTo('traditional')">Advanced View</span>
       </div>
-      <div class="v2-nav-right">
+      <div class="v2-screen-bar-right">
         <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
         <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">+ New Analysis</button>
       </div>
-    </nav>
-    <div class="v2-dash-wrap" id="v2-dash-wrap"></div>
+    </div>
+    <div class="v2-dash-layout">
+      <div id="v2-agent-sidenav"></div>
+      <div class="v2-dash-wrap" id="v2-dash-wrap"></div>
+    </div>
   </div>
 
   <!-- ── PORTFOLIO SCREEN ───────────────────────────────────── -->
   <div id="screen-portfolio" class="v2-screen">
-    <nav class="v2-nav">
-      <div class="v2-nav-logo" onclick="v2GoTo('landing')">Business Hunter</div>
-      <div class="v2-nav-links">
-        <span class="v2-nav-link active">Portfolio</span>
-        <span class="v2-nav-link" onclick="v2GoTo('dashboard')">Dashboard</span>
-        <span class="v2-nav-link" onclick="v2GoTo('traditional')">Traditional View</span>
+    <div class="v2-screen-bar">
+      <div class="v2-screen-bar-links">
+        <span class="v2-screen-bar-link active">Portfolio</span>
+        <span class="v2-screen-bar-link" onclick="v2GoTo('dashboard')">Dashboard</span>
+        <span class="v2-screen-bar-link" onclick="v2GoTo('traditional')">Advanced View</span>
       </div>
-      <div class="v2-nav-right">
+      <div class="v2-screen-bar-right">
         <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
         <button class="v2-btn primary sm" onclick="v2GoTo('wizard')">+ New Analysis</button>
       </div>
-    </nav>
+    </div>
     <div class="v2-port-wrap" id="v2-port-wrap"></div>
+  </div>
+
+  <!-- ── PERSISTENT CHAT WIDGET ───────────────────────────────── -->
+  <div id="v2-chat-widget" class="collapsed">
+    <div class="v2-cwgt-toggle" onclick="v2ToggleChat()">
+      <span class="v2-cwgt-ico">🤖</span>
+      <span class="v2-cwgt-label">AI Answers</span>
+      <span class="v2-cwgt-context" id="v2-chat-context"></span>
+      <span class="v2-cwgt-badge" id="v2-cwgt-badge">▲</span>
+    </div>
+    <div class="v2-cwgt-panel">
+      <div class="v2-chat-msgs" id="v2-chat-msgs"></div>
+      <div class="v2-chat-input-row">
+        <input
+          type="text"
+          id="v2-chat-input"
+          class="v2-chat-input"
+          placeholder="Available after analysis completes…"
+          disabled
+          onkeydown="if(event.key==='Enter')v2SendChatQuestion()"
+        />
+        <button class="v2-btn primary sm" id="v2-chat-send" onclick="v2SendChatQuestion()" disabled>Send</button>
+      </div>
+    </div>
   </div>
 
 </div><!-- #v2-overlay -->
 
-<!-- ── Traditional View Bar (shown when body.v2-traditional) ── -->
-<div id="v2-trad-bar">
-  <div class="v2-trad-bar-left">
-    <div class="v2-nav-logo" style="-webkit-text-fill-color:initial;color:#f1f5f9">Business Hunter</div>
-    <span class="v2-trad-bar-label">Traditional View</span>
-  </div>
-  <div class="v2-trad-bar-actions">
-    <button class="v2-btn ghost sm" onclick="printReport()">🖨 Print Report</button>
-    <button class="v2-btn ghost sm" onclick="fullPipelineExport()">📄 Full PDF</button>
-    <button class="v2-btn ghost sm" onclick="exportResults()">⬇ Export JSON</button>
-    <button class="v2-btn primary sm" onclick="v2HideDetail()">← Back to Dashboard</button>
-  </div>
+<!-- ── Traditional View back chip (shown when body.v2-traditional) ── -->
+<div id="v2-trad-back">
+  <button class="v2-btn primary sm" onclick="v2HideDetail()">← Back to v2</button>
 </div>
 
 <!-- ── API Key Modal ────────────────────────────────────────── -->
@@ -522,6 +206,88 @@
 <!-- ── Execution Plan Modal ─────────────────────────────────── -->
 <div class="v2-modal-bg" id="v2-execution-modal">
   <div class="v2-modal" id="v2-execution-content"></div>
+</div>
+
+<!-- ── Agent Detail Modal (v2 native) ──────────────────────── -->
+<div class="v2-modal-bg" id="v2-agent-detail-modal" onclick="if(event.target===this)v2CloseAgentDetail()">
+  <div class="v2-modal v2-adm">
+    <div class="v2-modal-header">
+      <div class="v2-adm-head">
+        <span id="v2-adm-ico" style="font-size:22px">🤖</span>
+        <div>
+          <div class="v2-modal-title" id="v2-adm-name">Agent</div>
+          <div style="font-size:12px;color:var(--v2-t3)"><span id="v2-adm-num">Agent N</span> · <span id="v2-adm-time"></span></div>
+        </div>
+      </div>
+      <button class="v2-modal-close" onclick="v2CloseAgentDetail()">✕</button>
+    </div>
+    <div class="v2-adm-body" id="v2-adm-body"></div>
+  </div>
+</div>
+
+<!-- ── Onboarding Modal ─────────────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-onboarding-modal">
+  <div class="v2-modal" id="v2-onboard-content"></div>
+</div>
+
+<!-- ── Compare Modal ────────────────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-compare-modal" onclick="if(event.target===this)v2CloseComparison()">
+  <div class="v2-modal" id="v2-compare-content"></div>
+</div>
+
+<!-- ── Tour Overlay ─────────────────────────────────────────── -->
+<div id="v2-tour-overlay" onclick="v2EndTour()">
+  <div class="v2-tour-tooltip" id="v2-tour-tooltip" onclick="event.stopPropagation()"></div>
+</div>
+
+<!-- ── Data Explorer Modal ───────────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-explorer-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="v2-modal" id="v2-explorer-content" style="max-width:680px;max-height:85vh;overflow-y:auto"></div>
+</div>
+
+<!-- ── City Drilldown Modal ───────────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-city-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="v2-modal" id="v2-city-content" style="max-width:860px"></div>
+</div>
+
+<!-- ── Competitor Profiles Modal ─────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-comp-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="v2-modal" id="v2-comp-content" style="max-width:800px"></div>
+</div>
+
+<!-- ── Financial Deep-Dive Modal ─────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-fin-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="v2-modal" id="v2-fin-content" style="max-width:820px"></div>
+</div>
+
+<!-- ── Compliance Timeline Modal ─────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-compliance-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="v2-modal" id="v2-compliance-content" style="max-width:680px"></div>
+</div>
+
+<!-- ── ZIP Compare Modal ─────────────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-zipcompare-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="v2-modal" id="v2-zipcompare-content" style="max-width:720px"></div>
+</div>
+
+<!-- ── R Editor Modal ────────────────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-reditor-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="v2-modal" id="v2-reditor-content" style="max-width:560px"></div>
+</div>
+
+<!-- ── Competitor Detail Modal ───────────────────────────── -->
+<div class="v2-modal-bg" id="v2-comp-detail-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none">
+  <div class="v2-modal" id="v2-comp-detail-content" style="max-width:640px"></div>
+</div>
+
+<!-- ── Break-Even Month P&L Modal ────────────────────────── -->
+<div class="v2-modal-bg" id="v2-breakeven-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none">
+  <div class="v2-modal" id="v2-breakeven-content" style="max-width:580px"></div>
+</div>
+
+<!-- ── ZIP Sub-Analysis Modal ────────────────────────────── -->
+<div class="v2-modal-bg" id="v2-zip-subanalysis-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none">
+  <div class="v2-modal" id="v2-zip-subanalysis-content" style="max-width:680px"></div>
 </div>
 
 <!-- ── Toast ────────────────────────────────────────────────── -->
