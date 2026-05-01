@@ -1042,7 +1042,7 @@ function v2ExportDashboardHTML() {
 ${dashWrap.innerHTML}
 </div>
 <script>document.querySelectorAll('.v2-dash-tab').forEach(t=>t.onclick=null);
-document.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));</script>
+document.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));<\/script>
 </body></html>`;
 
   const blob = new Blob([html], {type:'text/html'});
