@@ -202,19 +202,48 @@ function _v2ShowTourToast(msg, duration) {
   setTimeout(() => { if (toast) toast.style.opacity = '0'; }, duration - 400);
 }
 
+// ── Mark all 17 agent rows as "done" in DOM (populates All Agents tab) ───────
+function _v2DemoMarkAgentsDone() {
+  let sentinel = document.getElementById('v2-demo-agent-sentinels');
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.id = 'v2-demo-agent-sentinels';
+    sentinel.style.display = 'none';
+    document.body.appendChild(sentinel);
+  }
+  for (let i = 1; i <= 17; i++) {
+    let row = document.getElementById('v2-ar-' + i);
+    if (!row) {
+      row = document.createElement('div');
+      row.id = 'v2-ar-' + i;
+      sentinel.appendChild(row);
+    }
+    row.classList.add('done');
+    let timer = document.getElementById('v2-at-' + i);
+    if (!timer) {
+      timer = document.createElement('span');
+      timer.id = 'v2-at-' + i;
+      sentinel.appendChild(timer);
+    }
+    if (!timer.textContent) timer.textContent = '~2.1s';
+  }
+}
+
 // ── Full showcase launch: load demo run + inject banner + show score ───────────
 function v2LaunchShowcase() {
   // Build a full demo run object that mirrors what v2RenderDashboard expects
   const demoRun = {
     ..._V2_DEMO_RUN_B,
     ts: Date.now(),
-    // Inject the rich R data for all panels
     _demoMode: true,
   };
 
-  // Populate the global R used by all render functions
+  // ── CRITICAL: assign directly to the bundle-scope `R` variable ────────────
+  // `R` is declared `let R = {}` in 01-config.js (same concatenated <script>).
+  // Setting window.R does NOT update that local variable — all dashboard render
+  // functions (v2CalcScore, v2GetKPIs, v2RenderMarket, etc.) read from `R`.
   if (typeof getDemoData === 'function') {
-    window.R = {
+    R = {
       a1:  getDemoData(1,  'daycare') || {},
       a2:  getDemoData(2,  'daycare') || {},
       a3:  getDemoData(3,  'daycare') || {},
@@ -235,10 +264,16 @@ function v2LaunchShowcase() {
     };
   }
 
-  // Go to dashboard screen
+  // Set V2.run so v2GoTo re-renders correctly and save/export/portfolio work
+  V2.run = demoRun;
+
+  // Mark all 17 agent rows as done before rendering
+  _v2DemoMarkAgentsDone();
+
+  // Go to dashboard (v2GoTo will re-render via V2.run if screen is already dashboard)
   if (typeof v2GoTo === 'function') v2GoTo('dashboard');
 
-  // Render the dashboard
+  // Force a fresh render in case v2GoTo skipped it (already on dashboard screen)
   if (typeof v2RenderDashboard === 'function') v2RenderDashboard(demoRun);
 
   // Inject the showcase banner after a tick
