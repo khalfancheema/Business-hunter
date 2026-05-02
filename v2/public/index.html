@@ -10162,17 +10162,22 @@ const DEMO_DATA = {
 // ── AGENT 4 — Real Estate ────────────────────────────────
 4: {
   daycare: {
-    summary: "Active childcare-suitable commercial inventory in Suwanee and Sugar Hill. Three properties on Lawrenceville-Suwanee Rd meet DECAL footprint requirements (35 sqft/child indoor, 75 sqft/child outdoor). Average asking rents: $17–22/sqft NNN in Suwanee vs $14–18/sqft in Sugar Hill.",
+    summary: "Active childcare-suitable commercial inventory in Suwanee and Sugar Hill. Eight properties meet DECAL footprint requirements (35 sqft/child indoor, 75 sqft/child outdoor). Average asking rents: $17–22/sqft NNN in Suwanee vs $14–18/sqft in Sugar Hill. Top-ranked: 3820 Lawrenceville-Suwanee Rd scores 9.1/10 with existing playground pad and C-2 zoning pre-cleared.",
     listings: [
-      { city:"Suwanee",    address:"3820 Lawrenceville-Suwanee Rd, Suwanee GA 30024", sqft:6400, monthly_rent:10800, price_per_sqft:20.25, property_type:"Freestanding Retail", zoning:"C-2", url:"https://www.loopnet.com", highlights:["Existing playground pad","Drive-through lane convertible","Immediate I-85 access"] },
-      { city:"Suwanee",    address:"475 Buford Hwy, Suwanee GA 30024",               sqft:5800, monthly_rent:9600,  price_per_sqft:19.86, property_type:"End-Cap Retail",      zoning:"C-2", url:"https://www.loopnet.com", highlights:["Corner visibility","Large rear yard (outdoor play possible)","2024 HVAC"] },
-      { city:"Sugar Hill", address:"3340 Peachtree Industrial Blvd, Sugar Hill GA 30518", sqft:6100, monthly_rent:8900, price_per_sqft:17.51, property_type:"Strip Mall Anchor",    zoning:"C-1", url:"https://www.loopnet.com", highlights:["Below-market NNN","High residential density within 0.5mi","Separate entrance"] },
-      { city:"Sugar Hill", address:"4885 Nelson Brogdon Blvd, Sugar Hill GA 30518",   sqft:5500, monthly_rent:8200,  price_per_sqft:17.89, property_type:"Standalone Retail",    zoning:"C-2", url:"https://www.loopnet.com", highlights:["Fenced rear lot","ADA parking","2022 roof"] },
+      { rank:1, city:"Suwanee",    address:"3820 Lawrenceville-Suwanee Rd, Suwanee GA 30024",          sqft:6400, monthly_rent:10800, price_per_sqft:20.25, property_type:"Freestanding Retail", zoning:"C-2", score:9.1, url:"https://www.loopnet.com", highlights:["Existing playground pad","Drive-through lane convertible","Immediate I-85 access","TI allowance $35/sqft","ADA compliant"] },
+      { rank:2, city:"Suwanee",    address:"475 Buford Hwy — End Cap, Suwanee GA 30024",               sqft:5800, monthly_rent:9600,  price_per_sqft:19.86, property_type:"End-Cap Retail",      zoning:"C-2", score:8.6, url:"https://www.loopnet.com", highlights:["Corner visibility","Large rear yard (outdoor play)","2024 HVAC","36 parking spaces"] },
+      { rank:3, city:"Sugar Hill", address:"3340 Peachtree Industrial Blvd, Sugar Hill GA 30518",      sqft:6100, monthly_rent:8900,  price_per_sqft:17.51, property_type:"Strip Mall Anchor",   zoning:"C-1", score:8.3, url:"https://www.loopnet.com", highlights:["Below-market NNN","High residential density 0.5mi","Separate entrance","3 schools within 0.5mi"] },
+      { rank:4, city:"Sugar Hill", address:"4885 Nelson Brogdon Blvd, Sugar Hill GA 30518",            sqft:5500, monthly_rent:8200,  price_per_sqft:17.89, property_type:"Standalone Retail",   zoning:"C-2", score:8.1, url:"https://www.loopnet.com", highlights:["Fenced rear lot","ADA parking","2022 roof","0.3mi from Hwy 20"] },
+      { rank:5, city:"Duluth",     address:"3455 Hamilton Mill Rd — Bay B, Duluth GA 30096",           sqft:5200, monthly_rent:7400,  price_per_sqft:17.08, property_type:"Strip Anchor",        zoning:"C-1", score:7.4, url:"https://www.loopnet.com", highlights:["Lowest rent in corridor","Near apartment cluster","ADA upgrade needed","6 mo free rent negotiable"] },
+      { rank:6, city:"Suwanee",    address:"2847 Lawrenceville-Suwanee Rd — Suite 200, Suwanee GA 30024", sqft:7100, monthly_rent:12200, price_per_sqft:20.62, property_type:"Class A Retail", zoning:"C-2", score:7.9, url:"https://www.loopnet.com", highlights:["Largest footprint in market","Dual entrance","Owner offering 12-mo TI allowance","Premium SR-317 visibility"] },
+      { rank:7, city:"Buford",     address:"1620 Mall of Georgia Blvd, Buford GA 30519",               sqft:5900, monthly_rent:8600,  price_per_sqft:17.49, property_type:"Former Retail",      zoning:"C-2", score:7.2, url:"https://www.loopnet.com", highlights:["High foot traffic corridor","Near Mall of Georgia","Large paved lot","Prior tenant left partitions"] },
+      { rank:8, city:"Sugar Hill", address:"1180 Hwy 20 W — End Cap, Sugar Hill GA 30518",             sqft:6300, monthly_rent:9100,  price_per_sqft:17.33, property_type:"End-Cap Retail",      zoning:"C-2", score:7.8, url:"https://www.loopnet.com", highlights:["Hwy 20 exposure","Rear parking x24","2023 renovation","Good natural light — south-facing"] },
     ],
     by_city_summary: [
-      { city:"Suwanee",    avg_rent_sqft:20.06, listings_found:6, recommended_range:"$9,500–$12,500/mo", notes:"Premium market; limited turnkey spaces — factor 60–90 day build-out window" },
-      { city:"Sugar Hill", avg_rent_sqft:17.70, listings_found:9, recommended_range:"$8,200–$10,800/mo", notes:"More available inventory; recent new construction adding Class A space" },
-      { city:"Duluth",     avg_rent_sqft:15.40, listings_found:12, recommended_range:"$7,500–$9,800/mo", notes:"Lowest cost; higher competition density" },
+      { city:"Suwanee",    avg_rent_sqft:20.24, listings_found:8,  recommended_range:"$9,500–$12,500/mo", notes:"Premium market; limited turnkey spaces — factor 60–90 day build-out window" },
+      { city:"Sugar Hill", avg_rent_sqft:17.58, listings_found:11, recommended_range:"$8,200–$10,800/mo", notes:"More available inventory; recent new construction adding Class A space" },
+      { city:"Duluth",     avg_rent_sqft:15.40, listings_found:14, recommended_range:"$7,500–$9,800/mo", notes:"Lowest cost; higher competition density" },
+      { city:"Buford",     avg_rent_sqft:16.20, listings_found:7,  recommended_range:"$7,800–$9,400/mo", notes:"Growing market; good value for fast-growing population" },
     ],
     search_urls: { loopnet:"https://www.loopnet.com/search/commercial-real-estate/suwanee-ga/for-lease/", crexi:"https://www.crexi.com/lease/georgia/gwinnett-county", bizbuysell:"https://www.bizbuysell.com/Georgia/Gwinnett-County/" },
   },
@@ -10215,17 +10220,29 @@ const DEMO_DATA = {
   daycare: {
     summary: "Gwinnett corridor childcare market is dominated by national chains (Primrose, KinderCare) at the premium tier and independent centers at mid-tier. Suwanee has only 3 licensed centers within 2 miles vs. demand for 6+. No NAEYC-accredited center exists in Sugar Hill. Competitive differentiation opportunity: premium infant/toddler program with NAEYC pathway.",
     cities: [
-      { city:"Suwanee",        total_centers:3, licensed_capacity:285, qris_rated_count:2, naeyc_count:1, avg_tuition_infant:1980, avg_tuition_preschool:1520, avg_rating:4.2, market_saturation:"Low",    gap_score:9.0, lat:34.0514, lng:-84.0663, notes:"One Primrose; two independent; no true infant waitlist capacity" },
-      { city:"Sugar Hill",     total_centers:4, licensed_capacity:340, qris_rated_count:1, naeyc_count:0, avg_tuition_infant:1850, avg_tuition_preschool:1420, avg_rating:3.9, market_saturation:"Low",    gap_score:8.1, lat:34.1029, lng:-84.0547, notes:"No NAEYC-accredited center; quality gap at infant level" },
-      { city:"Duluth",         total_centers:7, licensed_capacity:620, qris_rated_count:3, naeyc_count:2, avg_tuition_infant:1790, avg_tuition_preschool:1380, avg_rating:4.0, market_saturation:"Medium", gap_score:6.4, lat:33.9959, lng:-84.1447, notes:"KinderCare and 2 Brightspring centers; more competitive" },
-      { city:"Buford",         total_centers:5, licensed_capacity:420, qris_rated_count:2, naeyc_count:1, avg_tuition_infant:1750, avg_tuition_preschool:1380, avg_rating:3.8, market_saturation:"Low",    gap_score:6.0, lat:34.1215, lng:-83.9913, notes:"Growing market; 3 independents + 2 national chains" },
-      { city:"Flowery Branch", total_centers:2, licensed_capacity:160, qris_rated_count:0, naeyc_count:0, avg_tuition_infant:1700, avg_tuition_preschool:1350, avg_rating:3.7, market_saturation:"Low",    gap_score:6.8, lat:34.1840, lng:-83.9243, notes:"Very underserved small market — only 2 licensed centers for fastest-growing ZIP" },
+      { city:"Suwanee",        total_centers:3,  licensed_capacity:285, qris_rated_count:2, naeyc_count:1, avg_tuition_infant:1980, avg_tuition_preschool:1520, avg_rating:4.2, market_saturation:"Low",    gap_score:9.0, competitor_count:3, lat:34.0514, lng:-84.0663, notes:"One Primrose; two independent; no true infant waitlist capacity" },
+      { city:"Sugar Hill",     total_centers:4,  licensed_capacity:340, qris_rated_count:1, naeyc_count:0, avg_tuition_infant:1850, avg_tuition_preschool:1420, avg_rating:3.9, market_saturation:"Low",    gap_score:8.1, competitor_count:4, lat:34.1029, lng:-84.0547, notes:"No NAEYC-accredited center; quality gap at infant level" },
+      { city:"Duluth",         total_centers:7,  licensed_capacity:620, qris_rated_count:3, naeyc_count:2, avg_tuition_infant:1790, avg_tuition_preschool:1380, avg_rating:4.0, market_saturation:"Medium", gap_score:6.4, competitor_count:7, lat:33.9959, lng:-84.1447, notes:"KinderCare and 2 Brightspring centers; more competitive" },
+      { city:"Buford",         total_centers:5,  licensed_capacity:420, qris_rated_count:2, naeyc_count:1, avg_tuition_infant:1750, avg_tuition_preschool:1380, avg_rating:3.8, market_saturation:"Low",    gap_score:6.0, competitor_count:5, lat:34.1215, lng:-83.9913, notes:"Growing market; 3 independents + 2 national chains" },
+      { city:"Flowery Branch", total_centers:2,  licensed_capacity:160, qris_rated_count:0, naeyc_count:0, avg_tuition_infant:1700, avg_tuition_preschool:1350, avg_rating:3.7, market_saturation:"Low",    gap_score:6.8, competitor_count:2, lat:34.1840, lng:-83.9243, notes:"Very underserved small market — only 2 licensed centers for fastest-growing ZIP" },
     ],
     top_chains: [
-      { name:"Primrose Schools",   locations_in_area:2, avg_tuition_infant:2100, avg_tuition_preschool:1700, avg_rating:4.5, qris_stars:4, naeyc:true,  utilization_pct:94, avg_capacity:110, waitlist_weeks:10 },
-      { name:"KinderCare",         locations_in_area:3, avg_tuition_infant:1900, avg_tuition_preschool:1520, avg_rating:4.0, qris_stars:3, naeyc:false, utilization_pct:86, avg_capacity:140, waitlist_weeks:3  },
-      { name:"Bright Horizons",    locations_in_area:1, avg_tuition_infant:2300, avg_tuition_preschool:1880, avg_rating:4.6, qris_stars:4, naeyc:true,  utilization_pct:97, avg_capacity:100, waitlist_weeks:14 },
-      { name:"Independent Centers",locations_in_area:8, avg_tuition_infant:1650, avg_tuition_preschool:1320, avg_rating:3.8, qris_stars:2, naeyc:false, utilization_pct:71, avg_capacity:65,  waitlist_weeks:1  },
+      { name:"Primrose Schools",    locations_in_area:2, avg_tuition_infant:2100, avg_tuition_preschool:1700, avg_rating:4.5, qris_stars:4, naeyc:true,  utilization_pct:94, avg_capacity:110, waitlist_weeks:10, founded:1982, staff_ratio:"1:4 infant", curriculum:"Balanced Learning" },
+      { name:"KinderCare",          locations_in_area:3, avg_tuition_infant:1900, avg_tuition_preschool:1520, avg_rating:4.0, qris_stars:3, naeyc:false, utilization_pct:86, avg_capacity:140, waitlist_weeks:3,  founded:1969, staff_ratio:"1:6 infant", curriculum:"Creative Curriculum" },
+      { name:"Bright Horizons",     locations_in_area:1, avg_tuition_infant:2300, avg_tuition_preschool:1880, avg_rating:4.6, qris_stars:4, naeyc:true,  utilization_pct:97, avg_capacity:100, waitlist_weeks:14, founded:1986, staff_ratio:"1:3 infant", curriculum:"World at Their Fingertips" },
+      { name:"Learning Experience", locations_in_area:2, avg_tuition_infant:1980, avg_tuition_preschool:1580, avg_rating:4.1, qris_stars:3, naeyc:false, utilization_pct:82, avg_capacity:120, waitlist_weeks:2,  founded:2002, staff_ratio:"1:4 infant", curriculum:"Proprietary STEAM" },
+      { name:"Independent Centers", locations_in_area:8, avg_tuition_infant:1650, avg_tuition_preschool:1320, avg_rating:3.8, qris_stars:2, naeyc:false, utilization_pct:71, avg_capacity:65,  waitlist_weeks:1,  founded:null, staff_ratio:"Varies",    curriculum:"Mixed" },
+    ],
+    // Individual center profiles for deep-dive panel
+    competitor_profiles: [
+      { name:"Primrose School of Suwanee",      city:"Suwanee",    address:"2625 Lawrenceville-Suwanee Rd", capacity:110, enrolled:104, utilization_pct:94, tuition_infant:2100, tuition_preschool:1700, rating:4.7, qris_stars:4, naeyc:true,  waitlist_weeks:10, lat:34.0530, lng:-84.0698, strengths:["National brand","Structured curriculum","Outdoor programs"], weaknesses:["Premium price excludes subsidy families","Director turnover 2023"] },
+      { name:"Sugar Hill Learning Academy",     city:"Sugar Hill", address:"750 Peachtree Industrial Blvd",  capacity:88,  enrolled:62,  utilization_pct:70, tuition_infant:1780, tuition_preschool:1380, rating:3.7, qris_stars:1, naeyc:false, waitlist_weeks:0,  lat:34.1010, lng:-84.0560, strengths:["Lower price","Community ties"],                     weaknesses:["No NAEYC","Aging facility","Limited infant slots (8)"] },
+      { name:"KinderCare Learning Center",      city:"Duluth",     address:"3285 Duluth Hwy 120",           capacity:140, enrolled:120, utilization_pct:86, tuition_infant:1890, tuition_preschool:1490, rating:4.0, qris_stars:3, naeyc:false, waitlist_weeks:3,  lat:33.9971, lng:-84.1430, strengths:["National brand","Corp benefit program","Good location"], weaknesses:["Curriculum less structured","Lower QRIS"] },
+      { name:"Bright Horizons (Johns Creek)",   city:"Johns Creek",address:"10585 Medlock Bridge Rd",       capacity:100, enrolled:97,  utilization_pct:97, tuition_infant:2300, tuition_preschool:1880, rating:4.6, qris_stars:4, naeyc:true,  waitlist_weeks:14, lat:34.0020, lng:-84.1310, strengths:["Highest quality brand","Corporate contracts","NAEYC"],  weaknesses:["Highest price point","Long waitlist","Far from target ZIP"] },
+      { name:"Sunshine Academy",                city:"Sugar Hill", address:"4102 Nelson Brogdon Blvd",      capacity:72,  enrolled:51,  utilization_pct:71, tuition_infant:1750, tuition_preschool:1350, rating:3.8, qris_stars:2, naeyc:false, waitlist_weeks:0,  lat:34.1080, lng:-84.0490, strengths:["Budget-friendly","Community relationships"],               weaknesses:["No NAEYC","Basic curriculum","Owner retiring 2026"] },
+      { name:"Little Scholars Learning Center", city:"Buford",     address:"2580 Buford Hwy NE",            capacity:65,  enrolled:46,  utilization_pct:71, tuition_infant:1720, tuition_preschool:1360, rating:3.9, qris_stars:2, naeyc:false, waitlist_weeks:0,  lat:34.1190, lng:-83.9920, strengths:["Value pricing","New management 2024","Expanding"],         weaknesses:["No brand recognition","No NAEYC","Small outdoor area"] },
+      { name:"Learning Experience Duluth",      city:"Duluth",     address:"2900 Satellite Blvd",           capacity:120, enrolled:98,  utilization_pct:82, tuition_infant:1970, tuition_preschool:1570, rating:4.1, qris_stars:3, naeyc:false, waitlist_weeks:2,  lat:33.9950, lng:-84.1500, strengths:["STEAM focus","Modern facility","Parent app"],               weaknesses:["Average QRIS","No NAEYC pathway","High staff turnover"] },
+      { name:"Primrose School of Buford",       city:"Buford",     address:"3700 Centennial Olympic Blvd",  capacity:115, enrolled:108, utilization_pct:94, tuition_infant:2050, tuition_preschool:1680, rating:4.5, qris_stars:4, naeyc:true,  waitlist_weeks:8,  lat:34.1220, lng:-83.9900, strengths:["Premium brand","NAEYC","Strong curriculum"],               weaknesses:["Premium price","Waitlist blocks new families"] },
     ],
   },
 },
@@ -10234,6 +10251,22 @@ const DEMO_DATA = {
 7: {
   daycare: {
     summary: "Base case shows profitability by Month 14 with 75% enrollment. At full capacity (90 children), annual net income reaches $182k (Year 2) rising to $228k (Year 3). Infant/toddler rooms drive 60% of revenue despite occupying 45% of licensed slots. SBA 7(a) recommended for $380k of $600k total startup.",
+    total_startup_cost: 526500,
+    monthly_expenses:   108400,
+    monthly_fixed_costs:108400,
+    key_assumptions: [
+      "75-child center with 90-child licensed capacity (base case at 83% fill rate Year 2)",
+      "Infant tuition $2,050/mo — 10% premium to market average; justified by NAEYC pathway",
+      "Wage inflation +3% annually; no COLA assumed in Year 1 to hit break-even",
+      "CACFP food reimbursement ~$4.20/child/day reduces food costs by $8,500/mo at capacity",
+      "Lease: $10,800/mo NNN with 3% annual escalator; 5-year initial term + two 3-year options",
+      "SBA 7(a): $380k at 8.5% over 10 years = $4,714/mo debt service (included in monthly_ops)",
+    ],
+    funding_sources: [
+      { source:"SBA 7(a) Loan",        amount:380000, rate_pct:8.5, term_months:120, monthly_payment:4714, notes:"Pre-qualify with Regions Bank or Truist; plan 60-90 day approval" },
+      { source:"Owner Equity",          amount:180000, rate_pct:0,   term_months:0,   monthly_payment:0,    notes:"Minimum 20% equity; demonstrates commitment to SBA lender" },
+      { source:"Seller Note / Partner", amount:40000,  rate_pct:6.0, term_months:60,  monthly_payment:773,  notes:"Optional; reduces SBA loan size and approval complexity" },
+    ],
     startup_breakdown: [
       { item:"Leasehold improvements & build-out", amount:180000 },
       { item:"Furniture, fixtures & equipment",    amount:85000  },
@@ -10289,9 +10322,15 @@ const DEMO_DATA = {
       { city:"Duluth",     avg_tuition:1800, break_even_mo:18, annual_net_yr2:162000, risk:"Medium"  },
     ],
     funding: [
-      { source:"SBA 7(a) Loan",        amount:380000, rate_pct:8.5, term_months:120, notes:"Pre-qualify with Regions Bank or Truist; plan 60-90 day approval" },
-      { source:"Owner Equity",          amount:180000, rate_pct:0,   term_months:0,   notes:"Minimum 20% equity; demonstrates commitment to SBA lender" },
-      { source:"Seller Note / Partner", amount:40000,  rate_pct:6.0, term_months:60,  notes:"Optional; reduces SBA loan size and approval complexity" },
+      { source:"SBA 7(a) Loan",        amount:380000, rate_pct:8.5, term_months:120, monthly_payment:4714, notes:"Pre-qualify with Regions Bank or Truist; plan 60-90 day approval" },
+      { source:"Owner Equity",          amount:180000, rate_pct:0,   term_months:0,   monthly_payment:0,    notes:"Minimum 20% equity; demonstrates commitment to SBA lender" },
+      { source:"Seller Note / Partner", amount:40000,  rate_pct:6.0, term_months:60,  monthly_payment:773,  notes:"Optional; reduces SBA loan size and approval complexity" },
+    ],
+    sensitivity: [
+      { variable:"Enrollment Rate (%)",   base:75, pessimistic:60, optimistic:90, break_even_impact_months:{ pessimistic:22, base:14, optimistic:9 },  label:"enrollment_pct" },
+      { variable:"Infant Tuition ($/mo)", base:2050, pessimistic:1850, optimistic:2250, break_even_impact_months:{ pessimistic:18, base:14, optimistic:11 }, label:"tuition_infant" },
+      { variable:"Monthly Lease ($/mo)",  base:10800, pessimistic:12500, optimistic:9000, break_even_impact_months:{ pessimistic:17, base:14, optimistic:12 }, label:"lease_monthly" },
+      { variable:"Wage Inflation (%/yr)", base:3, pessimistic:7, optimistic:1, break_even_impact_months:{ pessimistic:16, base:14, optimistic:13 }, label:"wage_inflation_pct" },
     ],
   },
 },
@@ -10310,11 +10349,13 @@ const DEMO_DATA = {
       "Launch pre-enrollment waitlist in Suwanee Parents Facebook group (28k members) 6 months before opening — converts curiosity to signed contracts",
     ],
     risks: [
-      { risk:"DECAL licensing timeline can push open date 60–90 days", mitigation:"Hire director in Month 1; file DECAL pre-application before lease signing; budget 16-week total license timeline", severity:"High" },
-      { risk:"SBA 7(a) approval delays can freeze build-out capital", mitigation:"Begin SBA pre-qualification at Regions Bank or Truist immediately; maintain 6-month working capital reserve from owner equity", severity:"High" },
-      { risk:"Infant staffing ratios (1:6 teacher:child) compress revenue per room", mitigation:"Design infant room as premium offering at $2,200/mo — higher tuition offsets ratio constraint; limit infant slots to 12", severity:"Medium" },
-      { risk:"Suwanee lease market tightening — suitable spaces limited", mitigation:"Engage commercial RE broker specializing in childcare immediately; identify backup Sugar Hill site; consider build-to-suit negotiation", severity:"Medium" },
-      { risk:"Staff recruitment at required CDA credential level", mitigation:"Partner with Georgia Gwinnett College ECE program; offer signing bonuses; start recruiting 8 months before opening", severity:"Medium" },
+      { risk:"DECAL licensing timeline can push open date 60–90 days",       mitigation:"Hire director in Month 1; file DECAL pre-application before lease signing; budget 16-week total license timeline",                          severity:"High",   probability:7, impact:9, cost_to_mitigate:4500,  trigger:"Director not hired by Month 2" },
+      { risk:"SBA 7(a) approval delays can freeze build-out capital",        mitigation:"Begin SBA pre-qualification at Regions Bank or Truist immediately; maintain 6-month working capital reserve from owner equity",              severity:"High",   probability:5, impact:9, cost_to_mitigate:0,     trigger:"Approval timeline >90 days" },
+      { risk:"Infant staffing ratios (1:6) compress revenue per room",       mitigation:"Design infant room as premium offering at $2,200/mo — higher tuition offsets ratio constraint; limit infant slots to 12",                    severity:"Medium", probability:8, impact:5, cost_to_mitigate:0,     trigger:"Enrollment >12 infants" },
+      { risk:"Suwanee lease market tightening — suitable spaces limited",    mitigation:"Engage commercial RE broker specializing in childcare immediately; identify backup Sugar Hill site; consider build-to-suit negotiation",      severity:"Medium", probability:4, impact:7, cost_to_mitigate:2000,  trigger:"No suitable space available in 60 days" },
+      { risk:"Staff recruitment at required CDA credential level",           mitigation:"Partner with Georgia Gwinnett College ECE program; offer signing bonuses; start recruiting 8 months before opening",                         severity:"Medium", probability:6, impact:6, cost_to_mitigate:12000, trigger:"Director vacancy at 6-month mark" },
+      { risk:"Enrollment ramp slower than 75% by Month 9 (break-even risk)", mitigation:"Pre-enrollment waitlist campaigns, corporate partnership with Suwanee Tech Park employers, CAPS subsidy enrollment to expand accessible market", severity:"Medium", probability:4, impact:8, cost_to_mitigate:8000,  trigger:"Enrollment <50% at M6" },
+      { risk:"Construction cost overruns on DECAL-compliant build-out",      mitigation:"Contractor with childcare experience; fixed-price contract; 10% contingency already budgeted ($46k)",                                       severity:"Low",    probability:5, impact:5, cost_to_mitigate:46000, trigger:">10% over bid" },
     ],
     next_steps: [
       "This week: Engage Gwinnett County commercial RE broker specializing in childcare — tour 3820 Lawrenceville-Suwanee Rd and 475 Buford Hwy listings",
@@ -10426,7 +10467,16 @@ const DEMO_DATA = {
       { name:"Gwinnett Chamber SEED Grant",       amount_range:"$2k–$10k",              deadline:"Quarterly", url:"https://www.gwinnettchamber.org",   notes:"Small business development fund; childcare prioritized category" },
       { name:"Suwanee CID Tax Abatement",         amount_range:"5-year property tax abatement", deadline:"At permitting", url:"https://www.suwanee.com/business", notes:"Contact Suwanee Economic Development office early in site selection process" },
     ],
-    grants_table: [],
+    grants_table: [
+      { name:"USDA CACFP",                    type:"Federal",  amount:"$3–8/child/day", deadline:"Rolling",  probability:"High",   eligibility:"Enroll at opening — adds $8,500/mo revenue at capacity",     action_required:"Apply via FNS.USDA.gov at licensing; 6-week approval" },
+      { name:"USDA Rural Business Dev Grant", type:"Federal",  amount:"$10k–$100k",     deadline:"Varies",   probability:"Medium", eligibility:"Gwinnett rural set-aside; check with USDA GA state office",  action_required:"Submit pre-application to confirm eligibility; then full RFP" },
+      { name:"Georgia CAPS Subsidy",          type:"State",    amount:"$500–$1,200/child/mo", deadline:"Rolling", probability:"High", eligibility:"Accept low-income families; expands market 15–25%",       action_required:"Complete CAPS provider enrollment at DECAL.ga.gov" },
+      { name:"DECAL Quality Rated Incentives",type:"State",    amount:"$15k–$50k",      deadline:"Annual",   probability:"High",   eligibility:"Achieve 2-Star Quality Rated within 18 months of opening",  action_required:"Begin QR self-study at opening; submit 12-month assessment" },
+      { name:"Georgia OneGeorgia Authority",  type:"State",    amount:"$5k–$25k",       deadline:"Varies",   probability:"Low",    eligibility:"Rural community development; verify Gwinnett eligibility",   action_required:"Contact OneGeorgia office for eligibility determination" },
+      { name:"Gwinnett Chamber SEED Grant",   type:"Local",    amount:"$2k–$10k",       deadline:"Quarterly",probability:"Medium", eligibility:"Gwinnett County small business; childcare is priority category", action_required:"Apply quarterly via GwinnettChamber.org; 2-page application" },
+      { name:"Suwanee CID Tax Abatement",     type:"Local",    amount:"5-yr abatement", deadline:"At permitting", probability:"Medium", eligibility:"New commercial tenant in Suwanee CID boundaries",     action_required:"Contact Suwanee Economic Development at permitting stage" },
+      { name:"SBA Community Advantage Loan",  type:"Federal",  amount:"Up to $350k",    deadline:"Rolling",  probability:"High",   eligibility:"Under-served market community development; childcare qualifies", action_required:"Apply through SBA-approved Community Advantage lender" },
+    ],
   },
 },
 
@@ -10435,19 +10485,37 @@ const DEMO_DATA = {
   daycare: {
     summary: "Primrose Schools leads the premium tier with strong brand recognition and waitlists at all 2 Gwinnett locations. Independent centers fill mid-tier with inconsistent quality. Key gap: no NAEYC-accredited center in Sugar Hill. Differentiation strategy: premium infant/toddler program + NAEYC pathway + transparent pricing.",
     competitor_profiles: [
-      { name:"Primrose Schools (Suwanee)",  city:"Suwanee",    tuition_infant:2100, tuition_preschool:1700, rating:4.5, qris_stars:4, naeyc:true,  capacity:110, waitlist:"Yes (8–12 weeks)", strengths:["Strong brand","Structured curriculum","Outdoor programs"], weaknesses:["Premium price limits accessible market","High director turnover in 2023"] },
-      { name:"KinderCare (Duluth)",         city:"Duluth",     tuition_infant:1880, tuition_preschool:1480, rating:4.0, qris_stars:3, naeyc:false, capacity:95,  waitlist:"No",              strengths:["National brand","Corporate benefit programs","Good location"], weaknesses:["Curriculum less structured than Primrose","Lower QRIS rating"] },
-      { name:"Sunshine Academy (Sugar Hill)",city:"Sugar Hill", tuition_infant:1750, tuition_preschool:1350, rating:3.8, qris_stars:2, naeyc:false, capacity:72,  waitlist:"No",              strengths:["Lower price point","Community relationships"], weaknesses:["No NAEYC","Aging facility","Limited infant slots (8 total)"] },
+      { name:"Primrose Schools (Suwanee)",      city:"Suwanee",    tuition_infant:2100, tuition_preschool:1700, rating:4.5, qris_stars:4, naeyc:true,  capacity:110, enrolled:104, waitlist:"8–12 weeks", strengths:["Strong brand","Structured curriculum","Outdoor programs"], weaknesses:["Premium price excludes CAPS families","High director turnover 2023","No digital enrollment — phone only"] },
+      { name:"KinderCare Learning Center",       city:"Duluth",     tuition_infant:1880, tuition_preschool:1480, rating:4.0, qris_stars:3, naeyc:false, capacity:140, enrolled:120, waitlist:"2–3 weeks",  strengths:["National brand","Corporate benefit programs","Good location"], weaknesses:["Curriculum less structured than Primrose","Lower QRIS","Above-average director turnover"] },
+      { name:"Sunshine Academy",                 city:"Sugar Hill", tuition_infant:1750, tuition_preschool:1350, rating:3.8, qris_stars:2, naeyc:false, capacity:72,  enrolled:51,  waitlist:"None",       strengths:["Lower price point","Community relationships"], weaknesses:["No NAEYC","Aging facility","Only 8 infant slots","Owner retiring 2026"] },
+      { name:"Learning Experience (Duluth)",     city:"Duluth",     tuition_infant:1970, tuition_preschool:1570, rating:4.1, qris_stars:3, naeyc:false, capacity:120, enrolled:98,  waitlist:"2 weeks",    strengths:["Modern STEAM-focused facility","Parent app","Active social media"], weaknesses:["High staff turnover","No NAEYC pathway","Standardized curriculum lacks flex"] },
+      { name:"Little Scholars Learning Center",  city:"Buford",     tuition_infant:1720, tuition_preschool:1360, rating:3.9, qris_stars:2, naeyc:false, capacity:65,  enrolled:46,  waitlist:"None",       strengths:["Budget-friendly","New management 2024","Expanding enrollment"], weaknesses:["No brand recognition","Small outdoor play area","QRIS 2-star only"] },
+      { name:"Bright Horizons at Technology Park",city:"Johns Creek",tuition_infant:2300, tuition_preschool:1880, rating:4.6, qris_stars:4, naeyc:true,  capacity:100, enrolled:97,  waitlist:"12–14 weeks",strengths:["Highest brand quality","Corporate contracts with Suwanee Tech Park","NAEYC","Near competitor ZIP"], weaknesses:["Most expensive in corridor","Waitlist drives parents to alternatives","Far from Suwanee proper"] },
     ],
     pain_point_analysis: [
-      { pain_point:"Infant waitlists at premium centers are 8–12 weeks", opportunity:"Open with 18 dedicated infant slots as primary differentiator" },
-      { pain_point:"Parents want transparent, online enrollment — most centers require in-person tours first", opportunity:"Build digital enrollment funnel with pricing shown upfront" },
-      { pain_point:"Sugar Hill has zero NAEYC-accredited centers", opportunity:"Commit to NAEYC pathway from Day 1 — becomes marketing anchor within 18 months" },
+      { pain_point:"Infant waitlists at premium centers are 8–12 weeks",                 opportunity:"Open with 18 dedicated infant slots — address #1 market pain point at launch" },
+      { pain_point:"Parents want transparent online enrollment — most require in-person tours", opportunity:"Build digital enrollment funnel with pricing shown upfront; 10-min online application" },
+      { pain_point:"Sugar Hill has zero NAEYC-accredited centers",                       opportunity:"Commit to NAEYC pathway Day 1 — becomes marketing anchor within 18 months" },
+      { pain_point:"KinderCare and Sunshine Academy have 40–48% staff turnover/yr",      opportunity:"Lead with teacher retention story: above-market pay, development budget, <20% target turnover" },
+      { pain_point:"No competitor accepts CAPS subsidy in Suwanee north corridor",       opportunity:"CAPS enrollment expands accessible market 15–25% with no discounting or margin compression" },
     ],
-    differentiation_strategy: ["Premium infant/toddler program — highest gap, highest margin, lowest competition","NAEYC accreditation commitment — first in Sugar Hill","Online enrollment + transparent pricing page — removes #1 parent friction","CACFP-enrolled + CAPS-accepting — expands accessible market without discounting"],
+    differentiation_strategy: [
+      "Premium infant/toddler program — highest gap (53pt), highest margin, lowest local competition",
+      "NAEYC accreditation commitment — first in Sugar Hill; 18-month milestone; use as primary marketing hook",
+      "Online enrollment + transparent pricing page — removes #1 parent friction point identified in competitor audit",
+      "CACFP-enrolled + CAPS-accepting — expands accessible market without discounting premium tiers",
+      "Teacher excellence: above-market wages, CDA sponsorship, targeting <20% annual turnover vs 45% industry avg",
+    ],
+    win_loss: [
+      { scenario:"Parent choosing between Bright Futures and Primrose (Suwanee)", likely_win:true,  reason:"Our center opens without 8-week waitlist; NAEYC pathway; 7% lower infant tuition" },
+      { scenario:"Parent choosing between Bright Futures and KinderCare",         likely_win:true,  reason:"Better curriculum (Reggio vs corporate), NAEYC pathway, higher staff retention story" },
+      { scenario:"Parent requiring subsidy (CAPS)",                               likely_win:true,  reason:"Only CAPS-enrolled center in Suwanee corridor" },
+      { scenario:"Corporate employee with Bright Horizons benefit",               likely_win:false, reason:"Bright Horizons has corporate employer contracts we cannot match in Year 1" },
+    ],
     messaging_guide: [
-      { segment:"Dual-income professional parents", message:"Your infant deserves the same quality investment as your home. Suwanee's first NAEYC-pathway center — with transparent pricing starting at $2,050/month." },
+      { segment:"Dual-income professional parents", message:"Your infant deserves the same quality investment as your home. Suwanee's first NAEYC-pathway center — transparent pricing starting at $2,050/month, zero waitlist at launch." },
       { segment:"Working parents needing subsidy", message:"CAPS-enrolled and CACFP-certified. Quality care that works with your budget — apply in 10 minutes online." },
+      { segment:"Corporate relocation families",   message:"Moving to Suwanee Tech Park? We partner with area employers and offer corporate priority enrollment for new families." },
     ],
   },
 },
@@ -10502,7 +10570,16 @@ const DEMO_DATA = {
       { name:"Primrose Schools (Franchise)", type:"Buy-Franchise", fee_upfront:75000, royalty_pct:7, pros:["National brand","Established curriculum","Referral network"], cons:["$75k upfront + 7% royalty","Restricted territory","Corporate oversight"], recommendation:"Not recommended — royalty cost not justified in under-served market where independent can build own waitlist" },
       { name:"Acquire Existing Center", type:"Buy-Acquisition", fee_upfront:null, royalty_pct:0, pros:["Existing enrollment = Day 1 revenue","No DECAL licensing wait"], cons:["Premium 3–5× EBITDA multiples for quality centers","Takes on existing staff and lease"], recommendation:"Conditional — pursue if distressed center available at 2–3× EBITDA; otherwise Build" },
     ],
-    comparison_table: [],
+    comparison_table: [
+      { metric:"Upfront Capital Required",   build:"$526,500 (30% equity)",        franchise:"$600k–$675k (75k fee + build)", acquisition:"$350k–$500k (3–5× EBITDA)" },
+      { metric:"Time to First Revenue",      build:"14–18 months",                  franchise:"10–14 months (brand recognition)", acquisition:"Day 1 (existing enrollment)" },
+      { metric:"Year 2 Net Income (base)",   build:"$182,000",                      franchise:"~$140k (after 7% royalty)",        acquisition:"Varies — depends on purchase price" },
+      { metric:"10-Year Cumulative Profit",  build:"~$2.4M",                        franchise:"~$1.7M (royalties reduce margin)", acquisition:"~$2.1M (depends on price paid)" },
+      { metric:"Brand Equity at Year 3",     build:"Local + NAEYC-accredited",      franchise:"National Primrose brand",           acquisition:"Inherited brand (quality variable)" },
+      { metric:"Operational Control",        build:"Full — no restrictions",        franchise:"Limited by franchisor standards",   acquisition:"Full after transition period" },
+      { metric:"DECAL Licensing Wait",       build:"12–16 months",                  franchise:"10–14 months (franchise support)",  acquisition:"None — existing license transfers" },
+      { metric:"Our Recommendation",         build:"✓ RECOMMENDED",                 franchise:"Not recommended",                   acquisition:"Conditional on price" },
+    ],
     decision_matrix: [
       { criterion:"Upfront cost",     build_score:8, franchise_score:4, acquisition_score:6 },
       { criterion:"Time to revenue",  build_score:6, franchise_score:7, acquisition_score:9 },
@@ -19027,7 +19104,7 @@ function v2LaunchShowcase() {
       <span class="v2-nav-link" id="gnav-classic" onclick="v2GoTo('traditional')">Classic View</span>
     </div>
     <div class="v2-nav-right">
-      <span class="v2-tag">v2.0</span>
+      <span class="v2-tag">AI</span>
       <button class="v2-btn ghost sm icon-only" id="v2-theme-btn" onclick="v2ToggleTheme()" title="Toggle light/dark mode">☀️</button>
       <button class="v2-btn ghost sm" onclick="v2StartTour()" title="Quick tour">🗺</button>
       <button class="v2-btn ghost sm" onclick="v2ShowApiKey()">🔑 API Key</button>
@@ -19160,7 +19237,7 @@ function v2LaunchShowcase() {
 
 <!-- ── Traditional View back chip (shown when body.v2-traditional) ── -->
 <div id="v2-trad-back">
-  <button class="v2-btn primary sm" onclick="v2HideDetail()">← Back to v2</button>
+  <button class="v2-btn primary sm" onclick="v2HideDetail()">← Back to Dashboard</button>
 </div>
 
 <!-- ── API Key Modal ────────────────────────────────────────── -->
