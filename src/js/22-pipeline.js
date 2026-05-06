@@ -12,7 +12,7 @@ async function runPipeline() {
   const cached = k => R['a'+k] ? JSON.stringify(R['a'+k]) : null;
   const best   = k => cached(k) || fb(k);
   try {
-    // ── Phase 1: Foundation Research (parallel) ─────────────
+    // ── Phase 1: Foundation Research (parallel) ───────────────────────
     let r1, r5, r6;
     if (phaseShouldRun(1)) {
       setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
@@ -29,7 +29,7 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 2: Gap Analysis ────────────────────────────────
+    // ── Phase 2: Gap Analysis ────────────────────────────────────
     setProgress(16, phaseShouldRun(2)?'Phase 2 — Gap Analysis…':'Phase 2 — skipped');
     let r2=best(2);
     if (phaseShouldRun(2)) {
@@ -37,7 +37,7 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 3: Site Selection ──────────────────────────────
+    // ── Phase 3: Site Selection ──────────────────────────────────
     setProgress(24, phaseShouldRun(3)?'Phase 3 — Site Selection…':'Phase 3 — skipped');
     let r3=best(3);
     if (phaseShouldRun(3)) {
@@ -45,7 +45,7 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 4: Real Estate (needs site selection first) ────
+    // ── Phase 4: Real Estate (needs site selection first) ────────
     setProgress(32, phaseShouldRun(4)?'Phase 4 — Real Estate Search…':'Phase 4 — skipped');
     let r4=best(4);
     if (phaseShouldRun(4)) {
@@ -61,7 +61,7 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 6: Executive Summary ───────────────────────────
+    // ── Phase 6: Executive Summary ─────────────────────────────
     setProgress(50, phaseShouldRun(6)?'Phase 6 — Executive Summary & Verdict…':'Phase 6 — skipped');
     let r8=best(8);
     if (phaseShouldRun(6)) {
@@ -69,7 +69,7 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 7: Business Plan (4 sub-calls) ─────────────────
+    // ── Phase 7: Business Plan (4 sub-calls) ───────────────────
     setProgress(58, phaseShouldRun(7)?'Phase 7 — Business Plan (4 focused sub-agents)…':'Phase 7 — skipped');
     let r9=best(9);
     if (phaseShouldRun(7)) {
@@ -84,7 +84,7 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 9: Supplemental Analysis (parallel) ───────────
+    // ── Phase 9: Supplemental Analysis (parallel) ───────────────
     if (phaseShouldRun(9)) {
       setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
       await Promise.allSettled([
@@ -98,10 +98,10 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 10: Marketing Strategy ────────────────────────
+    // ── Phase 10: Marketing Strategy ───────────────────────
     // (Agent 10 = project plan, marketing is embedded — no separate agent yet)
 
-    // ── Phase 11: Meta Agents ────────────────────────────────
+    // ── Phase 11: Meta Agents ──────────────────────────────
     if (phaseShouldRun(11)) {
       setProgress(86,'Phase 11 — Code Review · QA Testing…');
       try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
@@ -112,7 +112,7 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 12: Sources & Citations ────────────────────────
+    // ── Phase 12: Sources & Citations ───────────────────────
     if (phaseShouldRun(12)) {
       setProgress(94,'Phase 12 — Sources & Citations…');
       try {
@@ -135,6 +135,7 @@ async function runPipeline() {
     $('stopBtn').style.display='none';
     $('stopBtn').disabled=false;
     $('stopBtn').textContent='⬛ Stop';
+    if (typeof v2OnPipelineComplete === 'function') v2OnPipelineComplete();
   }
 }
 
@@ -206,7 +207,7 @@ function printReport() {
   w.print();
 }
 
-// ── Profile / Personalize Report ─────────────────────────────
+// ── Profile / Personalize Report ─────────────────────────────────
 
 function toggleProfileForm() {
   const f = $('profileForm');
@@ -325,4 +326,3 @@ function resetAll() {
   $('resetBtn').style.display='none';
   hideErr(); R={};
 }
-
