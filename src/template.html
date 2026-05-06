@@ -3,12 +3,88 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Daycare Planning Agent System v4</title>
+<title>Business Hunter — AI Co-Founder Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- BUILD:CSS -->
 </head>
 <body>
+
+<!-- ══ NAVIGATION ═══════════════════════════════════════════════════════ -->
+<nav class="v2-nav">
+  <div class="v2-nav-logo">Business<span>Hunter</span></div>
+  <div class="v2-nav-links">
+    <button class="v2-nav-link active" data-view="home"      onclick="v2ShowView('home')">&#127968; Home</button>
+    <button class="v2-nav-link"        data-view="dashboard" onclick="v2ShowView('dashboard')">&#128202; Dashboard</button>
+    <button class="v2-nav-link"        data-view="portfolio" onclick="v2ShowView('portfolio')">&#128193; Portfolio</button>
+    <button class="v2-nav-link hide-mobile" data-view="classic" onclick="v2ShowView('classic')">⚙ Classic View</button>
+  </div>
+  <div class="v2-nav-right">
+    <button class="v2-theme-btn" id="themeBtn" onclick="v2ToggleLightMode()" title="Toggle light/dark mode">☀️</button>
+    <button class="v2-nav-link hide-mobile" onclick="v2OpenApiModal()" style="gap:5px">🔑 API Key</button>
+    <button class="v2-nav-link hide-mobile" onclick="v2ToggleAiWidget()">✨ AI Answers</button>
+    <button class="v2-nav-cta" onclick="v2OpenWizard()">+ New Analysis</button>
+    <button class="v2-hamburger" id="hamburgerBtn" onclick="v2ToggleDrawer()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══ MOBILE NAV DRAWER (Bug #7) ════════════════════════════════════════ -->
+<div id="navDrawer" class="v2-nav-drawer">
+  <button class="v2-drawer-link active" data-view="home"      onclick="v2ShowView('home')">&#127968; Home</button>
+  <button class="v2-drawer-link"        data-view="dashboard" onclick="v2ShowView('dashboard')">&#128202; Dashboard</button>
+  <button class="v2-drawer-link"        data-view="portfolio" onclick="v2ShowView('portfolio')">&#128193; Portfolio</button>
+  <div class="v2-drawer-divider"></div>
+  <button class="v2-drawer-link"        data-view="classic"   onclick="v2ShowView('classic')">⚙ Classic View</button>
+  <button class="v2-drawer-link"        onclick="v2OpenApiModal()">🔑 API Key</button>
+  <button class="v2-drawer-link"        onclick="v2ToggleAiWidget();v2CloseDrawer()">✨ AI Answers</button>
+</div>
+
+<!-- ══ HOME VIEW ════════════════════════════════════════════════════════════════ -->
+<div id="viewHome" class="v2-view">
+  <div class="v2-hero">
+    <div class="v2-hero-tag">❆ 17-Agent AI Pipeline</div>
+    <!-- Bug #6: gradient text uses CSS with light-mode overrides in styles.css -->
+    <h1>Your AI Co-Founder<br>for Any Business</h1>
+    <p>Enter a ZIP code, choose your industry and budget — our 17 parallel AI agents run demographic research, gap analysis, site selection, financials, and more in minutes.</p>
+    <div class="v2-hero-actions">
+      <button class="v2-hero-cta" onclick="v2OpenWizard()">🚀 Start Free Analysis</button>
+      <button class="v2-hero-cta secondary" onclick="toggleDemo();v2ShowView('dashboard')">⚡ Try Demo</button>
+    </div>
+    <div class="v2-hero-stats">
+      <div class="v2-hero-stat"><div class="v2-hero-stat-num">17</div><div class="v2-hero-stat-label">AI Agents</div></div>
+      <div class="v2-hero-stat"><div class="v2-hero-stat-num">8</div><div class="v2-hero-stat-label">Industries</div></div>
+      <div class="v2-hero-stat"><div class="v2-hero-stat-num">40+</div><div class="v2-hero-stat-label">Data Sources</div></div>
+      <div class="v2-hero-stat"><div class="v2-hero-stat-num">100%</div><div class="v2-hero-stat-label">In Browser · BYOK</div></div>
+    </div>
+  </div>
+
+  <div style="max-width:900px;margin:0 auto;padding:0 1rem 4rem">
+    <div style="text-align:center;margin-bottom:20px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted)">Choose an Industry to Get Started</div>
+    <div class="v2-industries-grid" id="homeIndustriesGrid"></div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD VIEW ════════════════════════════════════════════════════════════════ -->
+<div id="viewDashboard" style="display:none" class="v2-view">
+  <div class="v2-dash-wrap">
+    <div class="v2-dash-header">
+      <div class="v2-dash-title">Dashboard</div>
+      <button class="btn primary" onclick="v2OpenWizard()">+ New Analysis</button>
+    </div>
+    <!-- Bug #5: demo banner populated by v2RenderDashboard() -->
+    <div class="v2-demo-banner" id="v2DemoBanner"></div>
+    <!-- Bug #1: empty state rendered by v2RenderDashboard() when R is empty -->
+    <div id="v2DashContent" class="v2-dash-content"></div>
+  </div>
+</div>
+
+<!-- ══ PORTFOLIO VIEW ═══════════════════════════════════════════════════════════════ -->
+<div id="viewPortfolio" style="display:none" class="v2-view"></div>
+
+<!-- ══ CLASSIC VIEW (existing pipeline) ═══════════════════════════════════════════════ -->
+<div id="viewClassic" style="display:none">
 <div class="page">
 
 <div class="masthead">
@@ -16,7 +92,10 @@
     <h1 id="mastheadTitle">Business Planning Agent System</h1>
     <p id="mastheadSub">17-agent AI pipeline · Demographics · Compliance · Gap Analysis · Site Selection · Real Estate · Financials · Business Plan · Project Plan · Market Intelligence · Build vs Buy · Sources</p>
   </div>
-  <div class="live-badge"><div class="live-dot"></div>Live Search Enabled</div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="live-badge"><div class="live-dot"></div>Live Search Enabled</div>
+    <button class="btn" onclick="v2ShowView('dashboard')" style="font-size:11px;height:32px;padding:0 12px">← Dashboard</button>
+  </div>
 </div>
 
 <!-- Session Restore Banner -->
@@ -52,7 +131,7 @@
       <select id="industrySelect" style="width:210px" onchange="onIndustryChange()">
         <option value="daycare">🏫 Daycare / Childcare</option>
         <option value="gas_station">⛽ Gas Station / C-Store</option>
-        <option value="laundromat">🫧 Laundromat</option>
+        <option value="laundromat">🪷 Laundromat</option>
         <option value="car_wash">🚗 Car Wash</option>
         <option value="restaurant">🍽️ Restaurant</option>
         <option value="gym">💪 Gym / Fitness Center</option>
@@ -91,7 +170,7 @@
     <button class="btn" id="fullExportBtn" onclick="fullPipelineExport()" style="border-color:var(--blue);color:var(--blue)">📄 Full PDF</button>
     <button class="btn" id="copyLinkBtn" onclick="copyShareableLink()">🔗 Copy Link</button>
     <button class="btn" id="phasePanelBtn" onclick="togglePhasePanel()">⚙ Phases</button>
-    <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖨 Print Report</button>
+    <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)">🖸 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)">⚡ Demo Mode</button>
   </div>
 
@@ -130,7 +209,7 @@
         <option value="">— Select industry to compare —</option>
         <option value="daycare">🏫 Daycare / Childcare</option>
         <option value="gas_station">⛽ Gas Station / C-Store</option>
-        <option value="laundromat">🫧 Laundromat</option>
+        <option value="laundromat">🪷 Laundromat</option>
         <option value="car_wash">🚗 Car Wash</option>
         <option value="restaurant">🍽️ Restaurant</option>
         <option value="gym">💪 Gym / Fitness Center</option>
@@ -155,7 +234,6 @@
 <div class="phase-label">Phase 1 — Parallel Research (Live Web Search)</div>
 <div class="agents-grid g3">
 
-  <!-- Demographics Agent -->
   <div class="agent-card" id="card-1">
     <div class="agent-head">
       <div class="agent-ico">📊</div>
@@ -180,7 +258,6 @@
     </div>
   </div>
 
-  <!-- Compliance Agent -->
   <div class="agent-card" id="card-5">
     <div class="agent-head">
       <div class="agent-ico">⚖️</div>
@@ -205,7 +282,6 @@
     </div>
   </div>
 
-  <!-- Competitive Intelligence Agent -->
   <div class="agent-card" id="card-6">
     <div class="agent-head">
       <div class="agent-ico">🔍</div>
@@ -428,7 +504,6 @@
 <div class="phase-label">Phase 9 — Market Intelligence · Map · Grants · Competitors · Build vs Buy (Parallel)</div>
 <div class="agents-grid g2">
 
-  <!-- Market Map Agent -->
   <div class="agent-card" id="card-11">
     <div class="agent-head">
       <div class="agent-ico">🗺️</div>
@@ -451,7 +526,6 @@
     </div>
   </div>
 
-  <!-- Grant & Funding Agent -->
   <div class="agent-card" id="card-12">
     <div class="agent-head">
       <div class="agent-ico">💵</div>
@@ -478,7 +552,6 @@
     </div>
   </div>
 
-  <!-- Competitor Deep-Dive Agent -->
   <div class="agent-card" id="card-13">
     <div class="agent-head">
       <div class="agent-ico">🎯</div>
@@ -505,7 +578,6 @@
     </div>
   </div>
 
-  <!-- Build vs Buy Agent -->
   <div class="agent-card" id="card-16">
     <div class="agent-head">
       <div class="agent-ico">🏗️</div>
@@ -538,7 +610,6 @@
 <div class="phase-label">Phase 10 — Code Review &amp; QA · Correctness · Performance · Validation (Parallel)</div>
 <div class="agents-grid g2">
 
-  <!-- Code Review Agent -->
   <div class="agent-card" id="card-14">
     <div class="agent-head">
       <div class="agent-ico">🔬</div>
@@ -565,7 +636,6 @@
     </div>
   </div>
 
-  <!-- QA Agent -->
   <div class="agent-card" id="card-15">
     <div class="agent-head">
       <div class="agent-ico">✅</div>
@@ -627,10 +697,7 @@
     <h2 style="margin:0;padding:0;border:none">Executive Report</h2>
     <button onclick="toggleProfileForm()" id="profileFormToggle" style="font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-family:'Instrument Sans',sans-serif">✏️ Personalize Report</button>
   </div>
-
-  <!-- Personalized header (visible after applyProfile) -->
   <div id="profileHeader" style="display:none"></div>
-
   <div id="verdictEl"></div>
   <div class="final-grid">
     <div class="final-section full"><h3>Overall Assessment</h3><div class="final-prose" id="f-assess"></div></div>
@@ -638,44 +705,19 @@
     <div class="final-section"><h3>Risks &amp; Mitigations</h3><div class="final-prose" id="f-risks"></div></div>
     <div class="final-section full"><h3>Next Steps</h3><div class="step-list" id="f-steps"></div></div>
   </div>
-
-  <!-- Personalize form -->
   <div id="profileForm" style="display:none;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
     <div style="margin-bottom:16px">
       <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px">Personalize This Report</div>
       <div style="font-size:12px;color:var(--muted)">Your details are saved locally and included in exports and print. None of this is sent anywhere.</div>
     </div>
     <div class="profile-grid">
-      <div class="profile-field">
-        <label>Business Name</label>
-        <input id="pf-name" type="text" placeholder="e.g. Little Stars Academy LLC" />
-      </div>
-      <div class="profile-field">
-        <label>Owner / Founder</label>
-        <input id="pf-owner" type="text" placeholder="Your full name" />
-      </div>
-      <div class="profile-field">
-        <label>Target Opening</label>
-        <input id="pf-opening" type="month" />
-      </div>
-      <div class="profile-field">
-        <label>Chosen Location</label>
-        <select id="pf-location">
-          <option value="">— Review Site Selection first —</option>
-        </select>
-      </div>
-      <div class="profile-field">
-        <label>Personal Equity ($)</label>
-        <input id="pf-equity" type="number" placeholder="e.g. 150000" min="0" />
-      </div>
-      <div class="profile-field">
-        <label>Contact Email</label>
-        <input id="pf-email" type="email" placeholder="your@email.com" />
-      </div>
-      <div class="profile-field pf-full">
-        <label>Vision / Notes</label>
-        <textarea id="pf-notes" rows="3" placeholder="What makes your business unique? Any personal goals, constraints, or questions for advisors..."></textarea>
-      </div>
+      <div class="profile-field"><label>Business Name</label><input id="pf-name" type="text" placeholder="e.g. Little Stars Academy LLC" /></div>
+      <div class="profile-field"><label>Owner / Founder</label><input id="pf-owner" type="text" placeholder="Your full name" /></div>
+      <div class="profile-field"><label>Target Opening</label><input id="pf-opening" type="month" /></div>
+      <div class="profile-field"><label>Chosen Location</label><select id="pf-location"><option value="">— Review Site Selection first —</option></select></div>
+      <div class="profile-field"><label>Personal Equity ($)</label><input id="pf-equity" type="number" placeholder="e.g. 150000" min="0" /></div>
+      <div class="profile-field"><label>Contact Email</label><input id="pf-email" type="email" placeholder="your@email.com" /></div>
+      <div class="profile-field pf-full"><label>Vision / Notes</label><textarea id="pf-notes" rows="3" placeholder="What makes your business unique?..."></textarea></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
       <button onclick="applyProfile()" style="padding:9px 20px;background:var(--blue);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer">✓ Update Report</button>
@@ -685,10 +727,87 @@
   </div>
 </div>
 
-</div>
+</div><!-- end .page -->
+</div><!-- end #viewClassic -->
+
 <!-- BUILD:JS -->
 
-<!-- ══ AGENT DRILL-DOWN MODAL ══════════════════════════════ -->
+<!-- ══ WIZARD OVERLAY (z-index 900 — Bug #3) ═══════════════════════════════════════════ -->
+<div id="wizardOverlay" onclick="if(event.target===this)v2CloseWizard()">
+  <div class="wiz-modal">
+    <div class="wiz-header">
+      <div class="wiz-title">New Analysis</div>
+      <div class="wiz-steps">
+        <div class="wiz-step-dot active" id="wizDot1">1</div>
+        <div class="wiz-step-line"></div>
+        <div class="wiz-step-dot" id="wizDot2">2</div>
+        <div class="wiz-step-line"></div>
+        <div class="wiz-step-dot" id="wizDot3">3</div>
+      </div>
+      <button class="wiz-close" onclick="v2CloseWizard()">✕</button>
+    </div>
+    <div class="wiz-body" id="wizBody"></div>
+    <div class="wiz-footer" id="wizFooter"></div>
+  </div>
+</div>
+
+<!-- ══ API KEY MODAL (overflow hidden — Bug #2) ══════════════════════════════════════════ -->
+<div id="apiKeyModal" onclick="if(event.target===this)v2CloseApiModal()">
+  <div class="api-modal-panel">
+    <div class="api-modal-header">
+      <div class="api-modal-title">🔑 API Key</div>
+      <button class="api-modal-close" onclick="v2CloseApiModal()">✕</button>
+    </div>
+    <!-- Bug #2: overflow:hidden by default; .has-custom class enables scroll -->
+    <div class="api-modal-body" id="apiModalBody">
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;font-family:'Syne',sans-serif">Provider</label>
+        <select id="modalProviderSelect" onchange="v2SyncModalCustomUrl()" style="width:100%;height:38px;padding:0 12px;font-size:13px;font-family:'Instrument Sans',sans-serif;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI (GPT-4o)</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="openai_compat">OpenAI-Compatible / Local</option>
+        </select>
+      </div>
+      <div id="modalCustomUrlRow" style="display:none;margin-bottom:12px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;font-family:'Syne',sans-serif">Custom Endpoint URL</label>
+        <input id="modalCustomUrlInput" type="text" placeholder="http://localhost:11434/v1/chat/completions" style="width:100%;height:38px;padding:0 12px;font-size:13px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none" />
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;font-family:'Syne',sans-serif">API Key</label>
+        <input id="modalApiKey" type="password" placeholder="sk-ant-... / sk-... / AIza..." autocomplete="off" style="width:100%;height:38px;padding:0 12px;font-size:13px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none" />
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;font-family:'Syne',sans-serif">Model Override <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input id="modalModelInput" type="text" placeholder="e.g. claude-opus-4-7" style="width:100%;height:38px;padding:0 12px;font-size:13px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none" />
+      </div>
+      <div style="font-size:11px;color:var(--faint);margin-bottom:16px">Your key is used only in this browser session and sent directly to the provider — never to any server.</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button onclick="v2SaveApiKey()" style="flex:1;height:38px;background:var(--blue);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer">Save Key</button>
+        <button onclick="v2CloseApiModal()" style="height:38px;padding:0 16px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer">Cancel</button>
+        <span id="apiKeySavedMsg" style="font-size:12px;color:var(--green);display:none">Saved ✓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AI ANSWERS WIDGET (z-index 400 — Bug #3) ══════════════════════════════════════════ -->
+<div id="aiAnswersWidget">
+  <div class="ai-widget-panel" id="aiWidgetPanel">
+    <div class="ai-widget-panel-header">
+      <div class="ai-widget-panel-title">✨ AI Answers</div>
+      <button class="ai-widget-close" onclick="v2ToggleAiWidget()">✕</button>
+    </div>
+    <div class="ai-widget-messages" id="aiWidgetMessages"></div>
+    <div class="ai-widget-input-row">
+      <input class="ai-widget-input" id="aiWidgetInput" type="text" placeholder="Ask about your analysis…" />
+      <button class="ai-widget-send" id="aiWidgetSend" onclick="v2AiSend()">Send</button>
+    </div>
+  </div>
+  <button class="ai-widget-btn" id="aiWidgetBtn" onclick="v2ToggleAiWidget()">✨ AI Answers</button>
+</div>
+
+<!-- ══ AGENT DRILL-DOWN MODAL ═════════════════════════════════════════════════════ -->
 <div id="agentModalOverlay" onclick="if(event.target===this)closeAgentModal()">
   <div class="agent-modal">
     <div class="agent-modal-header">
@@ -699,7 +818,7 @@
       </div>
       <div class="agent-modal-actions">
         <button class="modal-action-btn save"  id="modalSaveBtn"  onclick="saveAgentJSON()">⬇ Save JSON</button>
-        <button class="modal-action-btn print" id="modalPrintBtn" onclick="printAgentData()">🖨 Print</button>
+        <button class="modal-action-btn print" id="modalPrintBtn" onclick="printAgentData()">🖸 Print</button>
         <button class="modal-close-btn" onclick="closeAgentModal()" title="Close (Esc)">✕</button>
       </div>
     </div>
