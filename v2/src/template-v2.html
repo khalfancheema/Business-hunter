@@ -200,6 +200,18 @@
       <div class="v2-modal-title">🔑 Configure AI Provider</div>
       <button class="v2-modal-close" onclick="v2CloseApiKey()">✕</button>
     </div>
+    <!-- Ollama quick-connect banner -->
+    <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #334155;border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:22px;line-height:1">🦙</div>
+      <div style="flex:1;min-width:140px">
+        <div style="font-size:12px;font-weight:700;color:#e2e8f0">Run 100% locally with Ollama</div>
+        <div id="v2-ollama-status" style="font-size:11px;color:var(--v2-t3);margin-top:2px"><span style="color:#94a3b8">● detecting…</span></div>
+      </div>
+      <select id="v2-ollama-model-sel" style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:5px 8px;border-radius:6px;font-size:12px;max-width:160px">
+        <option value="llama3">llama3</option>
+      </select>
+      <button id="v2-ollama-btn" class="v2-btn primary sm" onclick="v2ApplyOllamaPreset()" style="white-space:nowrap;font-size:12px" disabled title="Start Ollama to enable">Use Ollama →</button>
+    </div>
     <div class="v2-provider-grid" id="v2-provider-grid"></div>
     <div id="v2-custom-url-row" style="display:none;margin-bottom:16px">
       <label class="v2-field" style="margin:0"><label style="font-size:12px;font-weight:600;color:var(--v2-t2);display:block;margin-bottom:8px">Custom API Endpoint URL</label>

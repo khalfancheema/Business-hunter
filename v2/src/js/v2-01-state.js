@@ -126,6 +126,58 @@ function v2ShowApiKey() {
   if (el) el.value = saved;
   const mi = document.getElementById('v2-model-input');
   if (mi) mi.value = localStorage.getItem('v2_model') || '';
+  // Populate Ollama model picker if Ollama is running
+  v2DetectOllamaModels();
+}
+
+// ── OLLAMA PRESET ─────────────────────────────────────────────────────────
+
+async function v2DetectOllamaModels() {
+  const btn = document.getElementById('v2-ollama-btn');
+  if (!btn) return;
+  try {
+    const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(1500) });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const models = (data.models || []).map(m => m.name);
+    if (models.length) {
+      const sel = document.getElementById('v2-ollama-model-sel');
+      if (sel) {
+        sel.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
+        // Pre-select currently saved model if it matches
+        const saved = localStorage.getItem('v2_model') || '';
+        if (models.includes(saved)) sel.value = saved;
+      }
+      btn.disabled = false;
+      btn.title = `Ollama running · ${models.length} model(s) available`;
+      const status = document.getElementById('v2-ollama-status');
+      if (status) status.innerHTML = `<span style="color:#22c55e">● running</span> · ${models.length} model(s)`;
+    }
+  } catch {
+    const status = document.getElementById('v2-ollama-status');
+    if (status) status.innerHTML = `<span style="color:#ef4444">● not detected</span> · <a href="https://ollama.com" target="_blank" style="color:inherit">install ollama.com</a>`;
+  }
+}
+
+function v2ApplyOllamaPreset() {
+  const sel = document.getElementById('v2-ollama-model-sel');
+  const model = sel?.value || 'llama3';
+  // Switch to openai_compat provider
+  v2SelectProvider('openai_compat');
+  // Fill fields
+  const cu = document.getElementById('v2-custom-url-input');
+  if (cu) cu.value = 'http://localhost:11434/v1/chat/completions';
+  const mi = document.getElementById('v2-model-input');
+  if (mi) mi.value = model;
+  const ki = document.getElementById('v2-api-key-input');
+  if (ki) ki.value = 'ollama';
+  // Save immediately
+  localStorage.setItem('v2_provider',   'openai_compat');
+  localStorage.setItem('v2_custom_url', 'http://localhost:11434/v1/chat/completions');
+  localStorage.setItem('v2_model',      model);
+  localStorage.setItem('v2_apikey',     'ollama');
+  v2SyncToV1Dom();
+  v2Toast(`🦙 Ollama configured — using ${model}`);
 }
 
 function v2CloseApiKey() {
