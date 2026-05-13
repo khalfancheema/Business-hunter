@@ -8588,8 +8588,14 @@ function renderAgent7(d) {
 // ══════════════════════════════════════════════════════════
 
 async function runAgent16(a3, a4, a7, a8) {
+  // Demo mode early return
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(16);
+    if (_d) { R.a16 = _d; try { renderAgent16(_d); } catch(e) {} setDot(16,'done'); showOut(16); return JSON.stringify(_d); }
+  }
   setDot(16, 'running');
   showOut(16);
+  try {
   const ind = industry();
   const base = `${ind.unit} · ${ind.capacity_label}: ${capacity()} · Budget $${parseInt(budget()).toLocaleString()} · ZIP ${zip()}`;
   const ctx3 = ctx(a3, ['summary', 'locations']);
@@ -8720,6 +8726,13 @@ Return ONLY:
   renderAgent16(merged);
   setDot(16, 'done');
   return JSON.stringify(merged);
+  } catch(e) {
+    console.error('Agent 16 failed:', e.message);
+    setDot(16, 'error');
+    const outEl16 = $('out-16');
+    if (outEl16) outEl16.innerHTML = `<div class="prose" style="color:var(--red);padding:16px">Build vs Buy analysis unavailable: ${e.message}</div>`;
+    throw e;
+  }
 }
 
 function renderAgent16(d) {
@@ -13537,6 +13550,19 @@ function v2HookPipeline() {
     const lbl  = document.getElementById('v2-progress-label');
     if (fill) fill.style.transform = `scaleX(${p / 100})`;
     if (lbl)  lbl.textContent = t || '';
+    // Fallback: when pipeline reports 100%, force any stuck agent rows to error
+    // so allDone check passes even if an agent never called setDot('error')
+    if (p >= 100 && !_v2PipelineCompleted) {
+      setTimeout(() => {
+        V2_AGENTS.forEach(a => {
+          const row = document.getElementById(`v2-ar-${a.id}`);
+          if (row && !row.classList.contains('done') && !row.classList.contains('error')) {
+            v2UpdateAgentRow(a.id, 'error');
+          }
+        });
+        v2OnAgentComplete(0); // trigger allDone check
+      }, 500);
+    }
   };
 
   // Patch showOut — also triggers completion check (belt-and-suspenders)

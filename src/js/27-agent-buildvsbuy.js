@@ -6,8 +6,14 @@
 // ══════════════════════════════════════════════════════════
 
 async function runAgent16(a3, a4, a7, a8) {
+  // Demo mode early return
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(16);
+    if (_d) { R.a16 = _d; try { renderAgent16(_d); } catch(e) {} setDot(16,'done'); showOut(16); return JSON.stringify(_d); }
+  }
   setDot(16, 'running');
   showOut(16);
+  try {
   const ind = industry();
   const base = `${ind.unit} · ${ind.capacity_label}: ${capacity()} · Budget $${parseInt(budget()).toLocaleString()} · ZIP ${zip()}`;
   const ctx3 = ctx(a3, ['summary', 'locations']);
@@ -138,6 +144,13 @@ Return ONLY:
   renderAgent16(merged);
   setDot(16, 'done');
   return JSON.stringify(merged);
+  } catch(e) {
+    console.error('Agent 16 failed:', e.message);
+    setDot(16, 'error');
+    const outEl16 = $('out-16');
+    if (outEl16) outEl16.innerHTML = `<div class="prose" style="color:var(--red);padding:16px">Build vs Buy analysis unavailable: ${e.message}</div>`;
+    throw e;
+  }
 }
 
 function renderAgent16(d) {

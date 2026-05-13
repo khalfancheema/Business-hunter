@@ -76,6 +76,19 @@ function v2HookPipeline() {
     const lbl  = document.getElementById('v2-progress-label');
     if (fill) fill.style.transform = `scaleX(${p / 100})`;
     if (lbl)  lbl.textContent = t || '';
+    // Fallback: when pipeline reports 100%, force any stuck agent rows to error
+    // so allDone check passes even if an agent never called setDot('error')
+    if (p >= 100 && !_v2PipelineCompleted) {
+      setTimeout(() => {
+        V2_AGENTS.forEach(a => {
+          const row = document.getElementById(`v2-ar-${a.id}`);
+          if (row && !row.classList.contains('done') && !row.classList.contains('error')) {
+            v2UpdateAgentRow(a.id, 'error');
+          }
+        });
+        v2OnAgentComplete(0); // trigger allDone check
+      }, 500);
+    }
   };
 
   // Patch showOut — also triggers completion check (belt-and-suspenders)
