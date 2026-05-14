@@ -36,10 +36,11 @@ async function runAgent14(allResults) {
   if (R.a12) signals.push(`Grants: $${((R.a12.total_potential_funding||0)/1000).toFixed(0)}K potential funding`);
   if (R.a8)  signals.push(`Verdict: ${R.a8.verdict||R.a8.recommendation||'present'}`);
 
-  const sys = `You are a senior AI pipeline architect reviewing a multi-agent ${ind.unit} business planning pipeline. Respond JSON only.`;
-  const usr = `Review this browser-based ${ind.unit} planning pipeline. Analyze the ACTUAL run data below and produce a real code review.
+  // Show sub-agent progress
+  const _t14 = $('14-sum-t'); if (_t14) _t14.innerHTML = subProgress(1, 2, 'Reviewing issues & performance…');
 
-ACTUAL PIPELINE STATE:
+  const sysCommon = `You are a senior AI pipeline architect reviewing a multi-agent ${ind.unit} business planning pipeline. Respond JSON only.`;
+  const ctxBlock = `ACTUAL PIPELINE STATE:
 - Industry: ${ind.unit}
 - Agents completed: ${completed.length}/${agentMap.length} (${completePct}%)
 - Failed agents: ${failed.length > 0 ? failed.map(a=>a.n+' '+a.name).join(', ') : 'none'}
@@ -47,56 +48,69 @@ ACTUAL PIPELINE STATE:
 - Data signals: ${signals.join(' | ') || 'no data yet'}
 
 ARCHITECTURE FACTS:
-- claudeJSON(): 3-retry + 5-strategy JSON extraction, max_tokens 4096, stop_reason guard
+- claudeJSON(): 3-retry + 5-strategy JSON extraction, max_tokens 8192, stop_reason guard
 - ctx(): field extraction limits upstream context size
 - Parallel phases: agents 1+5+6 (phase 1), agents 11+12+13+16 (phase 9)
 - Per-agent fallbacks: getFallback1()-getFallback17()
 - Source files: src/js/ modules bundled via build.mjs → public/index.html
-- Sub-agents: agents 7 (3 sub-calls), 9 (4 sub-calls), 10 (3 sub-calls), 13 (3 sub-calls), 1 (2 sub-calls)
+- Sub-agents: agents 7 (3 sub-calls), 9 (4 sub-calls), 10 (3 sub-calls), 13 (3 sub-calls), 14 (2 sub-calls), 1 (2 sub-calls)`;
 
-Return ONLY this JSON structure:
+  // ── Part A: Issues + performance + summary + recommended fixes ───────
+  const usrA = `Review this browser-based ${ind.unit} planning pipeline. Part A: issues + performance.
+
+${ctxBlock}
+
+Return ONLY:
 {
   "summary": "2-3 sentence honest assessment based on actual completion rate and data quality above",
   "overall_grade": "A|B|C|D",
   "issues": [
-    {
-      "id": "CR-001",
-      "severity": "critical|high|medium|low",
-      "category": "Performance|Cost|Reliability|Data|UX",
-      "title": "Issue title",
-      "detail": "Specific detail referencing actual pipeline state data",
-      "location": "function name or agent number",
-      "fix": "Specific actionable fix"
-    }
+    {"id":"CR-001","severity":"critical|high|medium|low","category":"Performance|Cost|Reliability|Data|UX","title":"Issue title","detail":"Specific detail referencing actual pipeline state","location":"function or agent number","fix":"Specific actionable fix"}
   ],
   "performance_metrics": [
-    {"metric": "Metric name", "current": "observed value", "optimized": "target value", "score": 85, "notes": "explanation"}
+    {"metric":"Metric name","current":"observed","optimized":"target","score":85,"notes":"explanation"}
   ],
+  "recommended_fixes_priority": [
+    {"priority":1,"id":"CR-001","effort":"1 hour","impact":"Specific impact"}
+  ]
+}
+Identify 4-8 real issues. Ground-truth: completion rate, failed agents, data signals above.`;
+
+  // ── Part B: Cost analysis (the heaviest section) ──────────────────────
+  const usrB = `Cost analysis for the same ${ind.unit} pipeline. Part B: token economics only.
+
+${ctxBlock}
+
+Return ONLY:
+{
   "cost_analysis": {
     "model": "claude-sonnet-4-6",
     "input_cost_per_mtok": 3.00,
     "output_cost_per_mtok": 15.00,
-    "agents": [{"agent": "Name", "avg_input_tokens": 900, "avg_output_tokens": 1200, "cost_per_run": 0.021}],
+    "agents": [
+      {"agent":"Demographics","avg_input_tokens":900,"avg_output_tokens":1200,"cost_per_run":0.021}
+    ],
     "total_cost_per_run": 0.45,
     "optimized_cost_per_run": 0.35,
     "monthly_cost_10runs": 4.50,
     "monthly_cost_50runs": 22.50,
-    "optimization_tips": ["Tip based on actual data"]
-  },
-  "recommended_fixes_priority": [
-    {"priority": 1, "id": "CR-001", "effort": "1 hour", "impact": "Specific impact"}
-  ]
+    "optimization_tips": ["Specific tip based on actual data"]
+  }
 }
-Identify 3-6 real issues based on the actual pipeline state. Completion rate, failed agents, and data signals above are ground truth.`;
+Include all 15 active agents (1,2,3,4,5,6,7,8,9,10,11,12,13,16,17) with realistic token estimates.`;
 
   try {
-    let d = await claudeJSON(sys, usr);
-    if (!d) { console.warn('Agent 14 fallback'); d = getFallback14(); }
+    const partA = await claudeJSON(sysCommon, usrA);
+    if (_t14) _t14.innerHTML = subProgress(2, 2, 'Building cost analysis…');
+    const partB = await claudeJSON(sysCommon, usrB);
+
+    const d = Object.assign({}, partA || {}, partB || {});
+    if (!d.summary && !d.issues) { console.warn('Agent 14 fallback'); Object.assign(d, getFallback14()); }
     R.a14 = d;
     renderCodeReview(d);
     setDot(14,'done'); showOut(14);
     return JSON.stringify(d);
-  } catch(e) { setDot(14,'error'); showOut(14); $('14-sum-t').textContent = 'Error: ' + e.message; throw e; }
+  } catch(e) { setDot(14,'error'); showOut(14); if ($('14-sum-t')) $('14-sum-t').textContent = 'Error: ' + e.message; throw e; }
 }
 
 function renderCodeReview(d) {

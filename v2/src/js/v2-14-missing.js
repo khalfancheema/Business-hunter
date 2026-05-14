@@ -113,6 +113,10 @@ function v2RenderWageSlider(a7) {
   const baseRev  = base.monthly_revenue  || 138000;
   // Wages estimated at ~52% of operating costs (industry benchmark)
   const wageBase = Math.round(baseExp * 0.52);
+  // Use real startup cost when available so break-even is meaningful
+  const startup = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
+    || (typeof V2 !== 'undefined' && V2.run?.budget)
+    || 600000;
 
   return `
     <div style="margin-top:12px;padding:14px;background:rgba(139,92,246,.06);border-radius:10px;border:1px solid rgba(139,92,246,.15)">
@@ -121,24 +125,25 @@ function v2RenderWageSlider(a7) {
         <span style="font-size:11px;color:var(--v2-t3)">2%</span>
         <input type="range" id="v2-wage-slider" min="2" max="10" step="0.5" value="3"
           style="flex:1;accent-color:#8b5cf6"
-          oninput="v2UpdateWageCalc(this.value,${wageBase},${baseRev},${baseExp})">
+          oninput="v2UpdateWageCalc(this.value,${wageBase},${baseRev},${baseExp},${startup})">
         <span style="font-size:11px;color:var(--v2-t3)">10%</span>
       </div>
       <div style="display:flex;justify-content:center;margin-top:4px;font-size:11px;color:var(--v2-t2)">
         Current: <strong id="v2-wage-pct-label" style="color:var(--v2-t1);margin-left:4px">3.0% / yr</strong>
       </div>
       <div id="v2-wage-output" style="margin-top:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        ${_v2WageCalcHTML(3.0, wageBase, baseRev, baseExp)}
+        ${_v2WageCalcHTML(3.0, wageBase, baseRev, baseExp, startup)}
       </div>
     </div>`;
 }
 
-function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp) {
+function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp, startup) {
   const yr1WageIncrease  = Math.round(wageBase * (pct / 100));
   const yr3WageIncrease  = Math.round(wageBase * ((Math.pow(1 + pct/100, 3) - 1)));
   const yr1Expenses = baseExp + yr1WageIncrease;
   const yr1Net  = baseRev - yr1Expenses;
-  const beMonths = yr1Net > 0 ? Math.round(600000 / yr1Net) : 99;
+  const cap = startup || 600000;
+  const beMonths = yr1Net > 0 ? Math.round(cap / yr1Net) : 99;
   const deltaColor = yr1WageIncrease > 0 ? '#ef4444' : '#22c55e';
   return `
     <div class="v2-lease-stat">
@@ -159,11 +164,11 @@ function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp) {
     </div>`;
 }
 
-function v2UpdateWageCalc(pct, wageBase, baseRev, baseExp) {
+function v2UpdateWageCalc(pct, wageBase, baseRev, baseExp, startup) {
   const out = document.getElementById('v2-wage-output');
   const lbl = document.getElementById('v2-wage-pct-label');
   if (lbl) lbl.textContent = parseFloat(pct).toFixed(1) + '% / yr';
-  if (out) out.innerHTML = _v2WageCalcHTML(parseFloat(pct), wageBase, baseRev, baseExp);
+  if (out) out.innerHTML = _v2WageCalcHTML(parseFloat(pct), wageBase, baseRev, baseExp, startup);
 }
 
 // ── 3. "WHAT CHANGED" DIFF VIEW ──────────────────────────────────────────────
@@ -311,10 +316,15 @@ function v2InjectCompetitorPins() {
   const cities = (a6.cities || []);
   if (!cities.length) return;
 
-  // Get SVG dimensions
-  const vb = svg.viewBox.baseVal;
-  const svgW = vb.width || 560;
-  const svgH = vb.height || 280;
+  // Get SVG dimensions — fall back to bounding rect when viewBox is missing/zero
+  const vb = svg.viewBox && svg.viewBox.baseVal;
+  let svgW = vb && vb.width  ? vb.width  : 0;
+  let svgH = vb && vb.height ? vb.height : 0;
+  if (!svgW || !svgH) {
+    const rect = svg.getBoundingClientRect();
+    svgW = rect.width  || 560;
+    svgH = rect.height || 280;
+  }
 
   // Lat/lng bounds from A1 data
   const a1 = R_data.a1 || {};
@@ -334,9 +344,19 @@ function v2InjectCompetitorPins() {
   const pinsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
   pinsGroup.setAttribute('class','v2-comp-pins-layer');
 
-  cities.forEach(city => {
-    const lat = parseFloat(city.lat || lat0 + (Math.random()-.5)*0.4);
-    const lng = parseFloat(city.lng || lng0 + (Math.random()-.5)*0.4);
+  // Stable per-city hash so missing-lat cities don't jitter on every render
+  function _hashStr(s) { let h=0; for (let i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; } return h; }
+  cities.forEach((city, idx) => {
+    let lat = parseFloat(city.lat);
+    let lng = parseFloat(city.lng);
+    if (!isFinite(lat) || !isFinite(lng)) {
+      const h = _hashStr((city.name||city.city||'')+'-'+idx);
+      // Map hash to [-0.2, 0.2] deterministic offset
+      const ox = ((h & 0xffff) / 0xffff - 0.5) * 0.4;
+      const oy = (((h >>> 16) & 0xffff) / 0xffff - 0.5) * 0.4;
+      lat = lat0 + ox;
+      lng = lng0 + oy;
+    }
     const cx = toX(lng);
     const cy = toY(lat);
     const gap = city.gap_score || 5;

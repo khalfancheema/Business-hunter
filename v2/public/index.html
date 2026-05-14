@@ -6324,7 +6324,7 @@ Return ONLY this JSON:
     }
   ]
 }
-Use REAL coordinates for all cities. Include 8-12 cities, 4-5 real estate pins at top locations, 5-6 driving directions. LoopNet URLs must use actual city slugs (e.g. suwanee-ga not generic).`;
+Use REAL coordinates for all cities. Cap at 8 cities, 4 real estate pins at top locations, 5 driving directions. LoopNet URLs must use actual city slugs (e.g. suwanee-ga not generic). Hard cap on counts prevents max_tokens truncation.`;
   try {
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 11 fallback'); d=getFallback11(); }
@@ -6947,10 +6947,11 @@ async function runAgent14(allResults) {
   if (R.a12) signals.push(`Grants: $${((R.a12.total_potential_funding||0)/1000).toFixed(0)}K potential funding`);
   if (R.a8)  signals.push(`Verdict: ${R.a8.verdict||R.a8.recommendation||'present'}`);
 
-  const sys = `You are a senior AI pipeline architect reviewing a multi-agent ${ind.unit} business planning pipeline. Respond JSON only.`;
-  const usr = `Review this browser-based ${ind.unit} planning pipeline. Analyze the ACTUAL run data below and produce a real code review.
+  // Show sub-agent progress
+  const _t14 = $('14-sum-t'); if (_t14) _t14.innerHTML = subProgress(1, 2, 'Reviewing issues & performance…');
 
-ACTUAL PIPELINE STATE:
+  const sysCommon = `You are a senior AI pipeline architect reviewing a multi-agent ${ind.unit} business planning pipeline. Respond JSON only.`;
+  const ctxBlock = `ACTUAL PIPELINE STATE:
 - Industry: ${ind.unit}
 - Agents completed: ${completed.length}/${agentMap.length} (${completePct}%)
 - Failed agents: ${failed.length > 0 ? failed.map(a=>a.n+' '+a.name).join(', ') : 'none'}
@@ -6958,56 +6959,69 @@ ACTUAL PIPELINE STATE:
 - Data signals: ${signals.join(' | ') || 'no data yet'}
 
 ARCHITECTURE FACTS:
-- claudeJSON(): 3-retry + 5-strategy JSON extraction, max_tokens 4096, stop_reason guard
+- claudeJSON(): 3-retry + 5-strategy JSON extraction, max_tokens 8192, stop_reason guard
 - ctx(): field extraction limits upstream context size
 - Parallel phases: agents 1+5+6 (phase 1), agents 11+12+13+16 (phase 9)
 - Per-agent fallbacks: getFallback1()-getFallback17()
 - Source files: src/js/ modules bundled via build.mjs → public/index.html
-- Sub-agents: agents 7 (3 sub-calls), 9 (4 sub-calls), 10 (3 sub-calls), 13 (3 sub-calls), 1 (2 sub-calls)
+- Sub-agents: agents 7 (3 sub-calls), 9 (4 sub-calls), 10 (3 sub-calls), 13 (3 sub-calls), 14 (2 sub-calls), 1 (2 sub-calls)`;
 
-Return ONLY this JSON structure:
+  // ── Part A: Issues + performance + summary + recommended fixes ───────
+  const usrA = `Review this browser-based ${ind.unit} planning pipeline. Part A: issues + performance.
+
+${ctxBlock}
+
+Return ONLY:
 {
   "summary": "2-3 sentence honest assessment based on actual completion rate and data quality above",
   "overall_grade": "A|B|C|D",
   "issues": [
-    {
-      "id": "CR-001",
-      "severity": "critical|high|medium|low",
-      "category": "Performance|Cost|Reliability|Data|UX",
-      "title": "Issue title",
-      "detail": "Specific detail referencing actual pipeline state data",
-      "location": "function name or agent number",
-      "fix": "Specific actionable fix"
-    }
+    {"id":"CR-001","severity":"critical|high|medium|low","category":"Performance|Cost|Reliability|Data|UX","title":"Issue title","detail":"Specific detail referencing actual pipeline state","location":"function or agent number","fix":"Specific actionable fix"}
   ],
   "performance_metrics": [
-    {"metric": "Metric name", "current": "observed value", "optimized": "target value", "score": 85, "notes": "explanation"}
+    {"metric":"Metric name","current":"observed","optimized":"target","score":85,"notes":"explanation"}
   ],
+  "recommended_fixes_priority": [
+    {"priority":1,"id":"CR-001","effort":"1 hour","impact":"Specific impact"}
+  ]
+}
+Identify 4-8 real issues. Ground-truth: completion rate, failed agents, data signals above.`;
+
+  // ── Part B: Cost analysis (the heaviest section) ──────────────────────
+  const usrB = `Cost analysis for the same ${ind.unit} pipeline. Part B: token economics only.
+
+${ctxBlock}
+
+Return ONLY:
+{
   "cost_analysis": {
     "model": "claude-sonnet-4-6",
     "input_cost_per_mtok": 3.00,
     "output_cost_per_mtok": 15.00,
-    "agents": [{"agent": "Name", "avg_input_tokens": 900, "avg_output_tokens": 1200, "cost_per_run": 0.021}],
+    "agents": [
+      {"agent":"Demographics","avg_input_tokens":900,"avg_output_tokens":1200,"cost_per_run":0.021}
+    ],
     "total_cost_per_run": 0.45,
     "optimized_cost_per_run": 0.35,
     "monthly_cost_10runs": 4.50,
     "monthly_cost_50runs": 22.50,
-    "optimization_tips": ["Tip based on actual data"]
-  },
-  "recommended_fixes_priority": [
-    {"priority": 1, "id": "CR-001", "effort": "1 hour", "impact": "Specific impact"}
-  ]
+    "optimization_tips": ["Specific tip based on actual data"]
+  }
 }
-Identify 3-6 real issues based on the actual pipeline state. Completion rate, failed agents, and data signals above are ground truth.`;
+Include all 15 active agents (1,2,3,4,5,6,7,8,9,10,11,12,13,16,17) with realistic token estimates.`;
 
   try {
-    let d = await claudeJSON(sys, usr);
-    if (!d) { console.warn('Agent 14 fallback'); d = getFallback14(); }
+    const partA = await claudeJSON(sysCommon, usrA);
+    if (_t14) _t14.innerHTML = subProgress(2, 2, 'Building cost analysis…');
+    const partB = await claudeJSON(sysCommon, usrB);
+
+    const d = Object.assign({}, partA || {}, partB || {});
+    if (!d.summary && !d.issues) { console.warn('Agent 14 fallback'); Object.assign(d, getFallback14()); }
     R.a14 = d;
     renderCodeReview(d);
     setDot(14,'done'); showOut(14);
     return JSON.stringify(d);
-  } catch(e) { setDot(14,'error'); showOut(14); $('14-sum-t').textContent = 'Error: ' + e.message; throw e; }
+  } catch(e) { setDot(14,'error'); showOut(14); if ($('14-sum-t')) $('14-sum-t').textContent = 'Error: ' + e.message; throw e; }
 }
 
 function renderCodeReview(d) {
@@ -7142,7 +7156,7 @@ ACTUAL TEST RESULTS:
 - Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
 - Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
-Return ONLY this JSON:
+Return ONLY this JSON (we will inject data_validation counts from real JS-side stats — do NOT include data_validation in your response):
 {
   "summary": "2-3 sentence honest QA summary based on actual results above",
   "overall_pass_rate": ${passRate},
@@ -7154,15 +7168,6 @@ Return ONLY this JSON:
       ]
     }
   ],
-  "data_validation": {
-    "fields_checked": ${totalFields},
-    "fields_passed": ${totalPass},
-    "fields_warned": ${totalWarn},
-    "fields_failed": ${totalFail},
-    "critical_issues": ${JSON.stringify(critIssues)},
-    "warnings": ${JSON.stringify(warnings.slice(0,8))},
-    "by_agent": ${JSON.stringify(byAgent)}
-  },
   "ux_audit": [
     {"category":"Category","title":"Finding title","severity":"high|medium|low","detail":"Detail","recommendation":"Fix"}
   ],
@@ -7178,15 +7183,16 @@ Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with
   try {
     let d = await claudeJSON(sys, usr);
     if (!d) { console.warn('Agent 15 fallback'); d = getFallback15(); }
-    // Inject real by_agent and counts in case Claude altered them
-    if (d.data_validation) {
-      d.data_validation.by_agent  = byAgent;
-      d.data_validation.fields_checked = totalFields;
-      d.data_validation.fields_passed  = totalPass;
-      d.data_validation.fields_warned  = totalWarn;
-      d.data_validation.fields_failed  = totalFail;
-      d.data_validation.critical_issues = critIssues;
-    }
+    // Inject real data_validation from JS-side counts (we asked Claude to skip it)
+    d.data_validation = {
+      fields_checked:   totalFields,
+      fields_passed:    totalPass,
+      fields_warned:    totalWarn,
+      fields_failed:    totalFail,
+      critical_issues:  critIssues,
+      warnings:         warnings.slice(0, 8),
+      by_agent:         byAgent,
+    };
     R.a15 = d;
     renderQA(d);
     setDot(15,'done'); showOut(15);
@@ -8314,13 +8320,23 @@ Return ONLY:
     let main = await claudeJSON(sysMain, usrMain);
     if (!main) { console.warn('Agent 7 consolidation fallback'); main = getFallback7(); }
 
-    // Merge sub-model arrays into result so renderAgent7 can use them
-    main.one_time_startup_costs  = costModel.one_time_startup_costs  || main.one_time_startup_costs  || [];
-    main.fixed_monthly_costs     = costModel.fixed_monthly_costs     || main.fixed_monthly_costs     || [];
-    main.variable_monthly_costs  = costModel.variable_monthly_costs  || main.variable_monthly_costs  || [];
-    main.selected_site           = revModel.selected_site            || null;
-    main.revenue_streams         = revModel.revenue_streams          || [];
-    main.revenue_assumptions     = revModel.revenue_assumptions      || [];
+    // Merge sub-model arrays into result so renderAgent7 can use them.
+    // Only overwrite when sub-model returned non-empty data, otherwise keep
+    // whatever the consolidation call (or fallback) already populated.
+    const nonEmpty = a => Array.isArray(a) && a.length > 0;
+    if (costModel && nonEmpty(costModel.one_time_startup_costs))  main.one_time_startup_costs  = costModel.one_time_startup_costs;
+    else if (!Array.isArray(main.one_time_startup_costs))         main.one_time_startup_costs  = [];
+    if (costModel && nonEmpty(costModel.fixed_monthly_costs))     main.fixed_monthly_costs     = costModel.fixed_monthly_costs;
+    else if (!Array.isArray(main.fixed_monthly_costs))            main.fixed_monthly_costs     = [];
+    if (costModel && nonEmpty(costModel.variable_monthly_costs))  main.variable_monthly_costs  = costModel.variable_monthly_costs;
+    else if (!Array.isArray(main.variable_monthly_costs))         main.variable_monthly_costs  = [];
+    if (revModel) {
+      main.selected_site       = revModel.selected_site       || main.selected_site || null;
+      if (nonEmpty(revModel.revenue_streams))     main.revenue_streams     = revModel.revenue_streams;
+      else if (!Array.isArray(main.revenue_streams))             main.revenue_streams     = [];
+      if (nonEmpty(revModel.revenue_assumptions)) main.revenue_assumptions = revModel.revenue_assumptions;
+      else if (!Array.isArray(main.revenue_assumptions))         main.revenue_assumptions = [];
+    }
 
     R.a7 = main;
     renderAgent7(main);
@@ -8553,7 +8569,8 @@ Return ONLY:
   "buy_summary": "2-sentence summary of the acquisition landscape for this business type and market"
 }`;
 
-  _setDemoKey(16);
+  // (No _setDemoKey here — demo path already returned above. Live path uses
+  // real claudeJSON calls for all three sub-agents.)
   const listingsData = await claudeJSON(sysA, usrA);
 
   // ── Sub-call B: Build Analysis ──────────────────────────
@@ -12814,15 +12831,17 @@ function v2ApplyOllamaPreset() {
 
 // ── OPENROUTER PRESET ─────────────────────────────────────────────────────
 
-// Curated best free models for JSON/business-analysis tasks (fallback list)
+// Curated free models for JSON/business-analysis tasks (offline fallback list).
+// Live fetch from openrouter.ai replaces these whenever network reaches it;
+// kept only for the offline path so the dropdown isn't empty. Only IDs that
+// are known-good as of late 2025 are listed here.
 const _V2_OR_DEFAULTS = [
   { id: 'meta-llama/llama-3.3-70b-instruct:free',       name: 'Llama 3.3 70B' },
   { id: 'nousresearch/hermes-3-llama-3.1-405b:free',    name: 'Hermes 3 405B' },
-  { id: 'nvidia/nemotron-3-super-120b-a12b:free',       name: 'Nemotron 120B' },
-  { id: 'openai/gpt-oss-120b:free',                     name: 'GPT-OSS 120B' },
-  { id: 'google/gemma-4-31b-it:free',                   name: 'Gemma 4 31B' },
+  { id: 'qwen/qwen-2.5-72b-instruct:free',              name: 'Qwen 2.5 72B' },
   { id: 'qwen/qwen3-coder:free',                        name: 'Qwen3 Coder' },
   { id: 'meta-llama/llama-3.2-3b-instruct:free',        name: 'Llama 3.2 3B (fast)' },
+  { id: 'google/gemma-2-9b-it:free',                    name: 'Gemma 2 9B' },
 ];
 
 async function v2DetectOpenRouterModels() {
@@ -13683,8 +13702,11 @@ function v2PipelineComplete() {
     setTimeout(() => v2ShowProactiveFollowUps(), 1000);
   }
 
-  // Auto-navigate after 3s
-  setTimeout(() => v2GoToDashboard(), 3000);
+  // Auto-navigate after 3s — only if user is still on copilot screen
+  if (window._v2AutoNavTimer) clearTimeout(window._v2AutoNavTimer);
+  window._v2AutoNavTimer = setTimeout(() => {
+    if (V2.screen === 'copilot') v2GoToDashboard();
+  }, 3000);
 }
 
 // ── Chat Q&A ──────────────────────────────────────────────────
@@ -16028,7 +16050,7 @@ function v2ShowExecution() {
 
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--v2-border)">
       <button class="v2-btn ghost sm" onclick="v2CloseExecution()">Close</button>
-      <button class="v2-btn ghost sm" onclick="v2ShowDetail()">📊 Full Project Plan</button>
+      <button class="v2-btn ghost sm" onclick="v2CloseExecution();v2ShowDetail()">📊 Full Project Plan</button>
       <button class="v2-btn primary sm" onclick="v2PrintExecution()">🖨 Print Roadmap</button>
     </div>
   `;
@@ -16051,9 +16073,14 @@ function v2CloseExecution() {
 }
 
 function v2PrintExecution() {
-  const content = document.getElementById('v2-execution-content')?.innerHTML || '';
+  // Strip <script>/<style> + on*= handlers so AI payload can't run in popup
+  let content = document.getElementById('v2-execution-content')?.innerHTML || '';
+  content = content
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '');
   const w = window.open('', '_blank');
-  if (!w) return;
+  if (!w) { if (typeof v2Toast === 'function') v2Toast('Pop-up blocked — allow pop-ups to print roadmap.'); return; }
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Execution Roadmap</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -20947,6 +20974,10 @@ function v2RenderWageSlider(a7) {
   const baseRev  = base.monthly_revenue  || 138000;
   // Wages estimated at ~52% of operating costs (industry benchmark)
   const wageBase = Math.round(baseExp * 0.52);
+  // Use real startup cost when available so break-even is meaningful
+  const startup = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
+    || (typeof V2 !== 'undefined' && V2.run?.budget)
+    || 600000;
 
   return `
     <div style="margin-top:12px;padding:14px;background:rgba(139,92,246,.06);border-radius:10px;border:1px solid rgba(139,92,246,.15)">
@@ -20955,24 +20986,25 @@ function v2RenderWageSlider(a7) {
         <span style="font-size:11px;color:var(--v2-t3)">2%</span>
         <input type="range" id="v2-wage-slider" min="2" max="10" step="0.5" value="3"
           style="flex:1;accent-color:#8b5cf6"
-          oninput="v2UpdateWageCalc(this.value,${wageBase},${baseRev},${baseExp})">
+          oninput="v2UpdateWageCalc(this.value,${wageBase},${baseRev},${baseExp},${startup})">
         <span style="font-size:11px;color:var(--v2-t3)">10%</span>
       </div>
       <div style="display:flex;justify-content:center;margin-top:4px;font-size:11px;color:var(--v2-t2)">
         Current: <strong id="v2-wage-pct-label" style="color:var(--v2-t1);margin-left:4px">3.0% / yr</strong>
       </div>
       <div id="v2-wage-output" style="margin-top:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        ${_v2WageCalcHTML(3.0, wageBase, baseRev, baseExp)}
+        ${_v2WageCalcHTML(3.0, wageBase, baseRev, baseExp, startup)}
       </div>
     </div>`;
 }
 
-function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp) {
+function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp, startup) {
   const yr1WageIncrease  = Math.round(wageBase * (pct / 100));
   const yr3WageIncrease  = Math.round(wageBase * ((Math.pow(1 + pct/100, 3) - 1)));
   const yr1Expenses = baseExp + yr1WageIncrease;
   const yr1Net  = baseRev - yr1Expenses;
-  const beMonths = yr1Net > 0 ? Math.round(600000 / yr1Net) : 99;
+  const cap = startup || 600000;
+  const beMonths = yr1Net > 0 ? Math.round(cap / yr1Net) : 99;
   const deltaColor = yr1WageIncrease > 0 ? '#ef4444' : '#22c55e';
   return `
     <div class="v2-lease-stat">
@@ -20993,11 +21025,11 @@ function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp) {
     </div>`;
 }
 
-function v2UpdateWageCalc(pct, wageBase, baseRev, baseExp) {
+function v2UpdateWageCalc(pct, wageBase, baseRev, baseExp, startup) {
   const out = document.getElementById('v2-wage-output');
   const lbl = document.getElementById('v2-wage-pct-label');
   if (lbl) lbl.textContent = parseFloat(pct).toFixed(1) + '% / yr';
-  if (out) out.innerHTML = _v2WageCalcHTML(parseFloat(pct), wageBase, baseRev, baseExp);
+  if (out) out.innerHTML = _v2WageCalcHTML(parseFloat(pct), wageBase, baseRev, baseExp, startup);
 }
 
 // ── 3. "WHAT CHANGED" DIFF VIEW ──────────────────────────────────────────────
@@ -21145,10 +21177,15 @@ function v2InjectCompetitorPins() {
   const cities = (a6.cities || []);
   if (!cities.length) return;
 
-  // Get SVG dimensions
-  const vb = svg.viewBox.baseVal;
-  const svgW = vb.width || 560;
-  const svgH = vb.height || 280;
+  // Get SVG dimensions — fall back to bounding rect when viewBox is missing/zero
+  const vb = svg.viewBox && svg.viewBox.baseVal;
+  let svgW = vb && vb.width  ? vb.width  : 0;
+  let svgH = vb && vb.height ? vb.height : 0;
+  if (!svgW || !svgH) {
+    const rect = svg.getBoundingClientRect();
+    svgW = rect.width  || 560;
+    svgH = rect.height || 280;
+  }
 
   // Lat/lng bounds from A1 data
   const a1 = R_data.a1 || {};
@@ -21168,9 +21205,19 @@ function v2InjectCompetitorPins() {
   const pinsGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
   pinsGroup.setAttribute('class','v2-comp-pins-layer');
 
-  cities.forEach(city => {
-    const lat = parseFloat(city.lat || lat0 + (Math.random()-.5)*0.4);
-    const lng = parseFloat(city.lng || lng0 + (Math.random()-.5)*0.4);
+  // Stable per-city hash so missing-lat cities don't jitter on every render
+  function _hashStr(s) { let h=0; for (let i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; } return h; }
+  cities.forEach((city, idx) => {
+    let lat = parseFloat(city.lat);
+    let lng = parseFloat(city.lng);
+    if (!isFinite(lat) || !isFinite(lng)) {
+      const h = _hashStr((city.name||city.city||'')+'-'+idx);
+      // Map hash to [-0.2, 0.2] deterministic offset
+      const ox = ((h & 0xffff) / 0xffff - 0.5) * 0.4;
+      const oy = (((h >>> 16) & 0xffff) / 0xffff - 0.5) * 0.4;
+      lat = lat0 + ox;
+      lng = lng0 + oy;
+    }
     const cx = toX(lng);
     const cy = toY(lat);
     const gap = city.gap_score || 5;

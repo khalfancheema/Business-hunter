@@ -71,7 +71,7 @@ function v2ShowExecution() {
 
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--v2-border)">
       <button class="v2-btn ghost sm" onclick="v2CloseExecution()">Close</button>
-      <button class="v2-btn ghost sm" onclick="v2ShowDetail()">📊 Full Project Plan</button>
+      <button class="v2-btn ghost sm" onclick="v2CloseExecution();v2ShowDetail()">📊 Full Project Plan</button>
       <button class="v2-btn primary sm" onclick="v2PrintExecution()">🖨 Print Roadmap</button>
     </div>
   `;
@@ -94,9 +94,14 @@ function v2CloseExecution() {
 }
 
 function v2PrintExecution() {
-  const content = document.getElementById('v2-execution-content')?.innerHTML || '';
+  // Strip <script>/<style> + on*= handlers so AI payload can't run in popup
+  let content = document.getElementById('v2-execution-content')?.innerHTML || '';
+  content = content
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '');
   const w = window.open('', '_blank');
-  if (!w) return;
+  if (!w) { if (typeof v2Toast === 'function') v2Toast('Pop-up blocked — allow pop-ups to print roadmap.'); return; }
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Execution Roadmap</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>

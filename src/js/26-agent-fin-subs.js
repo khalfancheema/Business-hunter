@@ -166,13 +166,23 @@ Return ONLY:
     let main = await claudeJSON(sysMain, usrMain);
     if (!main) { console.warn('Agent 7 consolidation fallback'); main = getFallback7(); }
 
-    // Merge sub-model arrays into result so renderAgent7 can use them
-    main.one_time_startup_costs  = costModel.one_time_startup_costs  || main.one_time_startup_costs  || [];
-    main.fixed_monthly_costs     = costModel.fixed_monthly_costs     || main.fixed_monthly_costs     || [];
-    main.variable_monthly_costs  = costModel.variable_monthly_costs  || main.variable_monthly_costs  || [];
-    main.selected_site           = revModel.selected_site            || null;
-    main.revenue_streams         = revModel.revenue_streams          || [];
-    main.revenue_assumptions     = revModel.revenue_assumptions      || [];
+    // Merge sub-model arrays into result so renderAgent7 can use them.
+    // Only overwrite when sub-model returned non-empty data, otherwise keep
+    // whatever the consolidation call (or fallback) already populated.
+    const nonEmpty = a => Array.isArray(a) && a.length > 0;
+    if (costModel && nonEmpty(costModel.one_time_startup_costs))  main.one_time_startup_costs  = costModel.one_time_startup_costs;
+    else if (!Array.isArray(main.one_time_startup_costs))         main.one_time_startup_costs  = [];
+    if (costModel && nonEmpty(costModel.fixed_monthly_costs))     main.fixed_monthly_costs     = costModel.fixed_monthly_costs;
+    else if (!Array.isArray(main.fixed_monthly_costs))            main.fixed_monthly_costs     = [];
+    if (costModel && nonEmpty(costModel.variable_monthly_costs))  main.variable_monthly_costs  = costModel.variable_monthly_costs;
+    else if (!Array.isArray(main.variable_monthly_costs))         main.variable_monthly_costs  = [];
+    if (revModel) {
+      main.selected_site       = revModel.selected_site       || main.selected_site || null;
+      if (nonEmpty(revModel.revenue_streams))     main.revenue_streams     = revModel.revenue_streams;
+      else if (!Array.isArray(main.revenue_streams))             main.revenue_streams     = [];
+      if (nonEmpty(revModel.revenue_assumptions)) main.revenue_assumptions = revModel.revenue_assumptions;
+      else if (!Array.isArray(main.revenue_assumptions))         main.revenue_assumptions = [];
+    }
 
     R.a7 = main;
     renderAgent7(main);

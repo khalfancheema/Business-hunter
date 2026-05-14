@@ -51,7 +51,8 @@ Return ONLY:
   "buy_summary": "2-sentence summary of the acquisition landscape for this business type and market"
 }`;
 
-  _setDemoKey(16);
+  // (No _setDemoKey here — demo path already returned above. Live path uses
+  // real claudeJSON calls for all three sub-agents.)
   const listingsData = await claudeJSON(sysA, usrA);
 
   // ── Sub-call B: Build Analysis ──────────────────────────

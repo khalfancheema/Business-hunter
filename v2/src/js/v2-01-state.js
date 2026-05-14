@@ -258,15 +258,17 @@ function v2ApplyOllamaPreset() {
 
 // ── OPENROUTER PRESET ─────────────────────────────────────────────────────
 
-// Curated best free models for JSON/business-analysis tasks (fallback list)
+// Curated free models for JSON/business-analysis tasks (offline fallback list).
+// Live fetch from openrouter.ai replaces these whenever network reaches it;
+// kept only for the offline path so the dropdown isn't empty. Only IDs that
+// are known-good as of late 2025 are listed here.
 const _V2_OR_DEFAULTS = [
   { id: 'meta-llama/llama-3.3-70b-instruct:free',       name: 'Llama 3.3 70B' },
   { id: 'nousresearch/hermes-3-llama-3.1-405b:free',    name: 'Hermes 3 405B' },
-  { id: 'nvidia/nemotron-3-super-120b-a12b:free',       name: 'Nemotron 120B' },
-  { id: 'openai/gpt-oss-120b:free',                     name: 'GPT-OSS 120B' },
-  { id: 'google/gemma-4-31b-it:free',                   name: 'Gemma 4 31B' },
+  { id: 'qwen/qwen-2.5-72b-instruct:free',              name: 'Qwen 2.5 72B' },
   { id: 'qwen/qwen3-coder:free',                        name: 'Qwen3 Coder' },
   { id: 'meta-llama/llama-3.2-3b-instruct:free',        name: 'Llama 3.2 3B (fast)' },
+  { id: 'google/gemma-2-9b-it:free',                    name: 'Gemma 2 9B' },
 ];
 
 async function v2DetectOpenRouterModels() {

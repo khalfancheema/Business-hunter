@@ -51,7 +51,7 @@ Return ONLY this JSON:
     }
   ]
 }
-Use REAL coordinates for all cities. Include 8-12 cities, 4-5 real estate pins at top locations, 5-6 driving directions. LoopNet URLs must use actual city slugs (e.g. suwanee-ga not generic).`;
+Use REAL coordinates for all cities. Cap at 8 cities, 4 real estate pins at top locations, 5 driving directions. LoopNet URLs must use actual city slugs (e.g. suwanee-ga not generic). Hard cap on counts prevents max_tokens truncation.`;
   try {
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 11 fallback'); d=getFallback11(); }

@@ -88,7 +88,7 @@ ACTUAL TEST RESULTS:
 - Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
 - Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
-Return ONLY this JSON:
+Return ONLY this JSON (we will inject data_validation counts from real JS-side stats — do NOT include data_validation in your response):
 {
   "summary": "2-3 sentence honest QA summary based on actual results above",
   "overall_pass_rate": ${passRate},
@@ -100,15 +100,6 @@ Return ONLY this JSON:
       ]
     }
   ],
-  "data_validation": {
-    "fields_checked": ${totalFields},
-    "fields_passed": ${totalPass},
-    "fields_warned": ${totalWarn},
-    "fields_failed": ${totalFail},
-    "critical_issues": ${JSON.stringify(critIssues)},
-    "warnings": ${JSON.stringify(warnings.slice(0,8))},
-    "by_agent": ${JSON.stringify(byAgent)}
-  },
   "ux_audit": [
     {"category":"Category","title":"Finding title","severity":"high|medium|low","detail":"Detail","recommendation":"Fix"}
   ],
@@ -124,15 +115,16 @@ Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with
   try {
     let d = await claudeJSON(sys, usr);
     if (!d) { console.warn('Agent 15 fallback'); d = getFallback15(); }
-    // Inject real by_agent and counts in case Claude altered them
-    if (d.data_validation) {
-      d.data_validation.by_agent  = byAgent;
-      d.data_validation.fields_checked = totalFields;
-      d.data_validation.fields_passed  = totalPass;
-      d.data_validation.fields_warned  = totalWarn;
-      d.data_validation.fields_failed  = totalFail;
-      d.data_validation.critical_issues = critIssues;
-    }
+    // Inject real data_validation from JS-side counts (we asked Claude to skip it)
+    d.data_validation = {
+      fields_checked:   totalFields,
+      fields_passed:    totalPass,
+      fields_warned:    totalWarn,
+      fields_failed:    totalFail,
+      critical_issues:  critIssues,
+      warnings:         warnings.slice(0, 8),
+      by_agent:         byAgent,
+    };
     R.a15 = d;
     renderQA(d);
     setDot(15,'done'); showOut(15);

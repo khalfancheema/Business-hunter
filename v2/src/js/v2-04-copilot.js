@@ -222,8 +222,11 @@ function v2PipelineComplete() {
     setTimeout(() => v2ShowProactiveFollowUps(), 1000);
   }
 
-  // Auto-navigate after 3s
-  setTimeout(() => v2GoToDashboard(), 3000);
+  // Auto-navigate after 3s — only if user is still on copilot screen
+  if (window._v2AutoNavTimer) clearTimeout(window._v2AutoNavTimer);
+  window._v2AutoNavTimer = setTimeout(() => {
+    if (V2.screen === 'copilot') v2GoToDashboard();
+  }, 3000);
 }
 
 // ── Chat Q&A ──────────────────────────────────────────────────
