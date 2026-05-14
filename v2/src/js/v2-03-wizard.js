@@ -134,7 +134,7 @@ function v2WizRenderStep() {
             <select class="v2-input" id="wiz-state" style="padding-left:6px"
               onchange="V2.wizard.data.state=this.value;v2GeoSearchDebounced(v2WizBuildAddress())">
               <option value="">—</option>
-              ${V2_US_STATES.map(st=>`<option value="${st}"${(d.state||''===st)?'selected':''}>${st}</option>`).join('')}
+              ${V2_US_STATES.map(st=>`<option value="${st}"${((d.state||'')===st)?'selected':''}>${st}</option>`).join('')}
             </select>
           </div>
         </div>

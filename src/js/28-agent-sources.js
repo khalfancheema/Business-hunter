@@ -5,7 +5,7 @@
 // list, then renders in out-17 with 4 tabs.
 // ══════════════════════════════════════════════════════════
 
-async function runAgent17(R) {
+async function runAgent17() {
   setDot(17, 'running');
   showOut(17);
   const out = $('out-17');

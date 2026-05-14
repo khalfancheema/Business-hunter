@@ -335,18 +335,20 @@ async function _v2AiAnswer(question, R_data) {
 
     const sys = `You are AI Answers for Business Hunter, an AI-powered business viability analysis app.
 Answer concisely (2-4 sentences max) based on the analysis data provided. Be specific, cite numbers.
-If the answer isn't in the data, say so briefly. Use HTML formatting: <strong> for emphasis, <br> for line breaks.`;
+If the answer isn't in the data, say so briefly. Use HTML formatting: <strong> for emphasis, <br> for line breaks.
+Return ONLY valid JSON: {"answer": "your HTML answer here"}`;
 
     const usr = `User question: "${question}"
 
 Analysis data snapshot:
 ${snapshot}
 
-Answer the question based on this data.`;
+Return JSON: {"answer": "2-4 sentence answer with <strong> and <br> HTML formatting"}. No markdown, no extra keys.`;
 
     const d = await claudeJSON(sys, usr);
     const thinking = document.getElementById(thinkingId);
-    if (thinking) thinking.parentElement.innerHTML = d?.answer || d?.response || JSON.stringify(d) || 'I couldn\'t generate a response.';
+    const answerHtml = d?.answer || d?.response || (typeof d === 'string' ? d : null) || 'I couldn\'t generate a response.';
+    if (thinking) thinking.parentElement.innerHTML = answerHtml;
   } catch(e) {
     const thinking = document.getElementById(thinkingId);
     if (thinking) thinking.parentElement.innerHTML = '⚠️ Could not connect to AI. Check your API key.';

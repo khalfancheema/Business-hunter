@@ -8164,7 +8164,7 @@ async function runAgent7(a3, a4, a5) {
 
   // ── Sub-call A: Revenue Model ───────────────────────────
   $('7-s-t').textContent = '';
-  $('7-sc-c').innerHTML = subProgress(1, 3, 'Sub-agent 1/2: Revenue Model…');
+  $('7-sc-c').innerHTML = subProgress(1, 3, 'Sub-agent 1/3: Revenue Model…');
 
   const sysA = `You are a financial analyst specializing in ${ind.unit} revenue modeling. Return JSON only.`;
   const usrA = `Build a detailed revenue model for a ${base}.
@@ -8206,7 +8206,7 @@ Return ONLY:
   const revModel = await claudeJSON(sysA, usrA) || {};
 
   // ── Sub-call B: Cost Model ──────────────────────────────
-  $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/2: Cost Model…');
+  $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/3: Cost Model…');
 
   const sysB = `You are a financial analyst specializing in ${ind.unit} cost structures. Return JSON only.`;
   const usrB = `Build a detailed cost model for a ${base}.
@@ -8851,7 +8851,7 @@ function _bvbCard16(title, analysis, color, badge) {
 // list, then renders in out-17 with 4 tabs.
 // ══════════════════════════════════════════════════════════
 
-async function runAgent17(R) {
+async function runAgent17() {
   setDot(17, 'running');
   showOut(17);
   const out = $('out-17');
@@ -13145,7 +13145,7 @@ function v2WizRenderStep() {
             <select class="v2-input" id="wiz-state" style="padding-left:6px"
               onchange="V2.wizard.data.state=this.value;v2GeoSearchDebounced(v2WizBuildAddress())">
               <option value="">—</option>
-              ${V2_US_STATES.map(st=>`<option value="${st}"${(d.state||''===st)?'selected':''}>${st}</option>`).join('')}
+              ${V2_US_STATES.map(st=>`<option value="${st}"${((d.state||'')===st)?'selected':''}>${st}</option>`).join('')}
             </select>
           </div>
         </div>
@@ -13755,18 +13755,20 @@ async function _v2AiAnswer(question, R_data) {
 
     const sys = `You are AI Answers for Business Hunter, an AI-powered business viability analysis app.
 Answer concisely (2-4 sentences max) based on the analysis data provided. Be specific, cite numbers.
-If the answer isn't in the data, say so briefly. Use HTML formatting: <strong> for emphasis, <br> for line breaks.`;
+If the answer isn't in the data, say so briefly. Use HTML formatting: <strong> for emphasis, <br> for line breaks.
+Return ONLY valid JSON: {"answer": "your HTML answer here"}`;
 
     const usr = `User question: "${question}"
 
 Analysis data snapshot:
 ${snapshot}
 
-Answer the question based on this data.`;
+Return JSON: {"answer": "2-4 sentence answer with <strong> and <br> HTML formatting"}. No markdown, no extra keys.`;
 
     const d = await claudeJSON(sys, usr);
     const thinking = document.getElementById(thinkingId);
-    if (thinking) thinking.parentElement.innerHTML = d?.answer || d?.response || JSON.stringify(d) || 'I couldn\'t generate a response.';
+    const answerHtml = d?.answer || d?.response || (typeof d === 'string' ? d : null) || 'I couldn\'t generate a response.';
+    if (thinking) thinking.parentElement.innerHTML = answerHtml;
   } catch(e) {
     const thinking = document.getElementById(thinkingId);
     if (thinking) thinking.parentElement.innerHTML = '⚠️ Could not connect to AI. Check your API key.';

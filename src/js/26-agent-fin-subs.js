@@ -17,7 +17,7 @@ async function runAgent7(a3, a4, a5) {
 
   // ── Sub-call A: Revenue Model ───────────────────────────
   $('7-s-t').textContent = '';
-  $('7-sc-c').innerHTML = subProgress(1, 3, 'Sub-agent 1/2: Revenue Model…');
+  $('7-sc-c').innerHTML = subProgress(1, 3, 'Sub-agent 1/3: Revenue Model…');
 
   const sysA = `You are a financial analyst specializing in ${ind.unit} revenue modeling. Return JSON only.`;
   const usrA = `Build a detailed revenue model for a ${base}.
@@ -59,7 +59,7 @@ Return ONLY:
   const revModel = await claudeJSON(sysA, usrA) || {};
 
   // ── Sub-call B: Cost Model ──────────────────────────────
-  $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/2: Cost Model…');
+  $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/3: Cost Model…');
 
   const sysB = `You are a financial analyst specializing in ${ind.unit} cost structures. Return JSON only.`;
   const usrB = `Build a detailed cost model for a ${base}.
