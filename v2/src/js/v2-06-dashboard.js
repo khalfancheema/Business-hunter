@@ -352,7 +352,10 @@ function v2RenderScoreBreakdown() {
 
   const totalWeight = parts.reduce((s, p) => s + p.max, 0);
   const totalEarned = parts.reduce((s, p) => s + p.earned, 0);
-  const normalized  = Math.round((totalEarned / totalWeight) * 100);
+  // Score is a fixed-100 scale (Gap25+Fin25+Verdict20+Comp15+Compl15);
+  // do NOT normalize by partial weight or breakdown will disagree with
+  // the main score ring (which uses raw earned points).
+  const normalized  = Math.round(totalEarned);
 
   const barColor = tier =>
     tier === 'strong'   ? 'var(--v2-green)' :
@@ -407,14 +410,13 @@ function v2RenderScoreBreakdown() {
       </button>
       <div class="v2-sb-body" hidden>
         <div class="v2-sb-intro">
-          Score is a weighted composite of 5 factors from ${parts.length} AI agents.
-          Each factor is normalized so the final score reflects relative performance — not raw data.
+          Score is a weighted composite on a fixed 100-point scale: Gap (25) + Financials (25) + Verdict (20) + Competition (15) + Compliance (15). Missing agents = 0 points.
         </div>
         <div class="v2-sb-rows">${rows}</div>
         ${missingNote}
         <div class="v2-sb-formula">
-          <span class="v2-sb-formula-label">Weighted total</span>
-          <span class="v2-sb-formula-eq">${totalEarned.toFixed(1)} / ${totalWeight} pts → <strong>${normalized}/100</strong></span>
+          <span class="v2-sb-formula-label">Score earned</span>
+          <span class="v2-sb-formula-eq">${totalEarned.toFixed(1)} of 100 pts (from ${parts.length} agents · ${totalWeight} pts available) → <strong>${normalized}/100</strong></span>
         </div>
       </div>
     </div>`;

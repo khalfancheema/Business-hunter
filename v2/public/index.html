@@ -1184,6 +1184,8 @@ select option{background:var(--surface2)}
 .v2-agent-status.running { background: var(--v2-a1); animation: v2blink 0.9s infinite; }
 .v2-agent-status.done { background: var(--v2-green); }
 .v2-agent-status.error { background: var(--v2-red); }
+.v2-agent-status.skipped { background: var(--v2-t3); opacity: .55; }
+.v2-agent-row.skipped { opacity: .55; }
 .v2-agent-name { font-size: 12px; font-weight: 600; flex: 1; }
 .v2-agent-time { font-size: 11px; color: var(--v2-t3); }
 
@@ -12797,12 +12799,14 @@ function v2StopPipeline() {
     if (btn) btn.disabled = false;
     const hasResults = typeof R !== 'undefined' && Object.keys(R).length > 0;
     if (hasResults) {
-      // Mark all still-pending agents as skipped
+      // Mark all still-pending agents as skipped (distinct from error)
       if (typeof V2_AGENTS !== 'undefined') {
         V2_AGENTS.forEach(a => {
           const row = document.getElementById(`v2-ar-${a.id}`);
           if (row && !row.classList.contains('done') && !row.classList.contains('error')) {
-            if (typeof v2UpdateAgentRow === 'function') v2UpdateAgentRow(a.id, 'error');
+            row.classList.add('skipped');
+            const dot = document.getElementById(`v2-as-${a.id}`);
+            if (dot) { dot.classList.remove('running'); dot.classList.add('skipped'); }
           }
         });
       }
@@ -13589,7 +13593,6 @@ function v2ChatMsg(role, html) {
 }
 
 // Hook into v1 setDot() to drive v2 copilot UI
-const _v1SetDot = typeof setDot !== 'undefined' ? setDot : null;
 // We override after v1 loads via the v2 init
 function v2HookPipeline() {
   // Idempotency guard — prevents exponential wrapping on hot-reload
@@ -14798,7 +14801,10 @@ function v2RenderScoreBreakdown() {
 
   const totalWeight = parts.reduce((s, p) => s + p.max, 0);
   const totalEarned = parts.reduce((s, p) => s + p.earned, 0);
-  const normalized  = Math.round((totalEarned / totalWeight) * 100);
+  // Score is a fixed-100 scale (Gap25+Fin25+Verdict20+Comp15+Compl15);
+  // do NOT normalize by partial weight or breakdown will disagree with
+  // the main score ring (which uses raw earned points).
+  const normalized  = Math.round(totalEarned);
 
   const barColor = tier =>
     tier === 'strong'   ? 'var(--v2-green)' :
@@ -14853,14 +14859,13 @@ function v2RenderScoreBreakdown() {
       </button>
       <div class="v2-sb-body" hidden>
         <div class="v2-sb-intro">
-          Score is a weighted composite of 5 factors from ${parts.length} AI agents.
-          Each factor is normalized so the final score reflects relative performance — not raw data.
+          Score is a weighted composite on a fixed 100-point scale: Gap (25) + Financials (25) + Verdict (20) + Competition (15) + Compliance (15). Missing agents = 0 points.
         </div>
         <div class="v2-sb-rows">${rows}</div>
         ${missingNote}
         <div class="v2-sb-formula">
-          <span class="v2-sb-formula-label">Weighted total</span>
-          <span class="v2-sb-formula-eq">${totalEarned.toFixed(1)} / ${totalWeight} pts → <strong>${normalized}/100</strong></span>
+          <span class="v2-sb-formula-label">Score earned</span>
+          <span class="v2-sb-formula-eq">${totalEarned.toFixed(1)} of 100 pts (from ${parts.length} agents · ${totalWeight} pts available) → <strong>${normalized}/100</strong></span>
         </div>
       </div>
     </div>`;
@@ -21470,10 +21475,16 @@ function v2ReRunAgent(panelName, agentIndex) {
     statusEl.innerHTML = `
       <span style="color:var(--v2-t2)">
         To re-run Agent ${agentIndex}: switch to
-        <strong style="cursor:pointer;color:var(--v2-a1)" onclick="v2SwitchToTraditional()">Classic View</strong>
+        <strong style="cursor:pointer;color:var(--v2-a1)" onclick="v2ShowDetail()">Classic View</strong>
         and click the Agent ${agentIndex} button.
       </span>`;
   }
+}
+
+// Alias for older inline onclick refs — Classic View = traditional pipeline view
+function v2SwitchToTraditional() {
+  if (typeof v2GoTo === 'function') v2GoTo('traditional');
+  else if (typeof v2ShowDetail === 'function') v2ShowDetail();
 }
 
 // ── 7. MOBILE-RESPONSIVE CSS INJECTION ───────────────────────────────────────

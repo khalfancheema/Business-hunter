@@ -439,6 +439,8 @@
 .v2-agent-status.running { background: var(--v2-a1); animation: v2blink 0.9s infinite; }
 .v2-agent-status.done { background: var(--v2-green); }
 .v2-agent-status.error { background: var(--v2-red); }
+.v2-agent-status.skipped { background: var(--v2-t3); opacity: .55; }
+.v2-agent-row.skipped { opacity: .55; }
 .v2-agent-name { font-size: 12px; font-weight: 600; flex: 1; }
 .v2-agent-time { font-size: 11px; color: var(--v2-t3); }
 

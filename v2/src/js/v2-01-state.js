@@ -177,12 +177,14 @@ function v2StopPipeline() {
     if (btn) btn.disabled = false;
     const hasResults = typeof R !== 'undefined' && Object.keys(R).length > 0;
     if (hasResults) {
-      // Mark all still-pending agents as skipped
+      // Mark all still-pending agents as skipped (distinct from error)
       if (typeof V2_AGENTS !== 'undefined') {
         V2_AGENTS.forEach(a => {
           const row = document.getElementById(`v2-ar-${a.id}`);
           if (row && !row.classList.contains('done') && !row.classList.contains('error')) {
-            if (typeof v2UpdateAgentRow === 'function') v2UpdateAgentRow(a.id, 'error');
+            row.classList.add('skipped');
+            const dot = document.getElementById(`v2-as-${a.id}`);
+            if (dot) { dot.classList.remove('running'); dot.classList.add('skipped'); }
           }
         });
       }

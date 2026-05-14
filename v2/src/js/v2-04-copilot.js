@@ -52,7 +52,6 @@ function v2ChatMsg(role, html) {
 }
 
 // Hook into v1 setDot() to drive v2 copilot UI
-const _v1SetDot = typeof setDot !== 'undefined' ? setDot : null;
 // We override after v1 loads via the v2 init
 function v2HookPipeline() {
   // Idempotency guard — prevents exponential wrapping on hot-reload

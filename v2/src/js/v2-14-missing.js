@@ -552,10 +552,16 @@ function v2ReRunAgent(panelName, agentIndex) {
     statusEl.innerHTML = `
       <span style="color:var(--v2-t2)">
         To re-run Agent ${agentIndex}: switch to
-        <strong style="cursor:pointer;color:var(--v2-a1)" onclick="v2SwitchToTraditional()">Classic View</strong>
+        <strong style="cursor:pointer;color:var(--v2-a1)" onclick="v2ShowDetail()">Classic View</strong>
         and click the Agent ${agentIndex} button.
       </span>`;
   }
+}
+
+// Alias for older inline onclick refs — Classic View = traditional pipeline view
+function v2SwitchToTraditional() {
+  if (typeof v2GoTo === 'function') v2GoTo('traditional');
+  else if (typeof v2ShowDetail === 'function') v2ShowDetail();
 }
 
 // ── 7. MOBILE-RESPONSIVE CSS INJECTION ───────────────────────────────────────
