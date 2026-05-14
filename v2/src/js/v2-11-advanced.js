@@ -61,12 +61,18 @@ If data is missing, say so briefly and suggest what to run.`;
       // Gemini — non-streaming fallback with history context
       await _v2GeminiFallback(apiKey, sys, historySlice, bubbleText);
     }
-    // Record AI response in history
-    _v2ChatHistory.push({ role: 'assistant', content: bubbleText?.innerHTML || '' });
+    // Record AI response in history (only on success)
+    const assistantContent = bubbleText?.innerHTML || '';
+    if (assistantContent) _v2ChatHistory.push({ role: 'assistant', content: assistantContent });
     bubbleText?.classList.remove('v2-streaming');
   } catch(e) {
+    // Do NOT push error message into history — it would corrupt subsequent API calls
     if (bubbleText) { bubbleText.innerHTML = `⚠️ ${e.message || 'Connection error. Check your API key.'}`; }
     bubbleText?.classList.remove('v2-streaming');
+    // Remove the user message we already pushed, since there's no valid assistant reply
+    if (_v2ChatHistory.length && _v2ChatHistory[_v2ChatHistory.length - 1].role === 'user') {
+      _v2ChatHistory.pop();
+    }
   }
   if (msgs) msgs.scrollTop = msgs.scrollHeight;
 }

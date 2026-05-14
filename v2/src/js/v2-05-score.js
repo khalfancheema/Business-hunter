@@ -339,34 +339,6 @@ function v2ScoreVerdict(score) {
   };
 }
 
-function v2GetKPIs() {
-  const kpis = [];
-  if (typeof R === 'undefined') return kpis;
-
-  if (R.a7) {
-    const sc = _toArr(R.a7.scenarios);
-    const base = sc.find(s=>(s.name||'').toLowerCase().includes('base'))||sc[1]||{};
-    if (base.breakeven_months) kpis.push({ ico:'📅', val:`${base.breakeven_months} mo`, lbl:'Break-Even' });
-    if (base.monthly_revenue)  kpis.push({ ico:'💵', val:`$${Math.round(base.monthly_revenue/1000)}K/mo`, lbl:'Base Revenue' });
-    if (base.roi_3yr!=null)    kpis.push({ ico:'📈', val:`${base.roi_3yr>0?'+':''}${base.roi_3yr}%`, lbl:'3yr ROI' });
-  }
-  const startupCost = R.a7?.total_startup_cost || R.a7?.startup_cost ||
-    _toArr(R.a7?.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||b.cost||0),0);
-  if (startupCost)
-    kpis.push({ ico:'💰', val:`$${Math.round(startupCost/1000)}K`, lbl:'Startup Cost' });
-
-  if (R.a2?.cities?.length) {
-    const top = [...R.a2.cities].sort((a,b)=>(b.gap_score||0)-(a.gap_score||0))[0];
-    if (top) kpis.push({ ico:'🏆', val:top.city||'—', lbl:'Top City' });
-    kpis.push({ ico:'🎯', val:`${top?.gap_score||0}/10`, lbl:'Gap Score' });
-  }
-
-  if (R.a5?.total_timeline_months)
-    kpis.push({ ico:'⏱', val:`${R.a5.total_timeline_months} mo`, lbl:'Permit Timeline' });
-
-  return kpis.slice(0, 6);
-}
-
 function v2GetRisks() {
   if (typeof R === 'undefined' || !R.a8) return [];
   const raw = R.a8.risks || R.a8.risk_factors || R.a8.key_risks || [];

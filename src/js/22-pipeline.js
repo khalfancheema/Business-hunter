@@ -87,12 +87,20 @@ async function runPipeline() {
     // ── Phase 9: Supplemental Analysis (parallel) ───────────
     if (phaseShouldRun(9)) {
       setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
-      await Promise.allSettled([
+      const [res11,res12,res13,res16] = await Promise.allSettled([
         runAgent11(r1,r2,r4),
         runAgent12(r3,r5),
         runAgent13(r6),
         (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
       ]);
+      if(res11.status==='rejected') console.error('Agent 11 failed:',res11.reason?.message);
+      if(res12.status==='rejected') console.error('Agent 12 failed:',res12.reason?.message);
+      if(res13.status==='rejected') console.error('Agent 13 failed:',res13.reason?.message);
+      if(res16.status==='rejected') console.error('Agent 16 failed:',res16.reason?.message);
+      // Apply fallbacks for any phase 9 agent that failed and has no data
+      if(!R.a11) try{R.a11=getFallback11();}catch(e){}
+      if(!R.a12) try{R.a12=getFallback12();}catch(e){}
+      if(!R.a13) try{R.a13=getFallback13();}catch(e){}
     } else {
       setProgress(72,'Phase 9 — skipped');
     }

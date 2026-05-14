@@ -1,25 +1,143 @@
 async function runAgent15(allResults) {
   setDot(15,'running');
-  const sys=`You are a senior QA engineer specializing in AI pipeline testing and data validation. Respond JSON only.`;
-  const agentsCompleted=Object.keys(allResults).length;
-  const ind=industry();
-  const usr=`Perform a comprehensive QA audit of this 15-agent ${ind.unit} planning pipeline.
+  const ind = industry();
 
-PIPELINE STATUS: ${agentsCompleted}/15 agents completed
-ZIP: ${zip()}, RADIUS: ${radius()} miles, GRADES: ${grades()}, CAPACITY: ${capacity()}, BUDGET: $${budget()}
-AGENTS WITH DATA: ${Object.keys(allResults).join(', ')}
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(15);
+    if (_d) { R.a15 = _d; try { renderQA(_d); } catch(e){} setDot(15,'done'); showOut(15); return JSON.stringify(_d); }
+  }
+
+  // ── Real JS-level validation checks ────────────────────────
+  const agentSpecs = [
+    { n:1,  name:'Demographics',       requiredKeys:['summary','cities'] },
+    { n:2,  name:'Gap Analysis',       requiredKeys:['summary','cities','overall_opportunity_score'] },
+    { n:3,  name:'Site Selection',     requiredKeys:['summary','locations'] },
+    { n:4,  name:'Real Estate',        requiredKeys:['summary'] },
+    { n:5,  name:'Compliance',         requiredKeys:['summary','requirements','total_timeline_months'] },
+    { n:6,  name:'Competitive Intel',  requiredKeys:['summary','cities'] },
+    { n:7,  name:'Financials',         requiredKeys:['summary','scenarios'] },
+    { n:8,  name:'Executive Summary',  requiredKeys:['verdict','assessment','success_factors','risks'] },
+    { n:9,  name:'Business Plan',      requiredKeys:['executive_summary','company_overview'] },
+    { n:10, name:'Project Plan',       requiredKeys:['phases','total_duration_months'] },
+    { n:11, name:'Market Map',         requiredKeys:['summary'] },
+    { n:12, name:'Grants',             requiredKeys:['summary','total_potential_funding'] },
+    { n:13, name:'Deep-Dive',          requiredKeys:['summary','competitor_profiles'] },
+    { n:16, name:'Build vs Buy',       requiredKeys:['summary'] },
+    { n:17, name:'Data Sources',       requiredKeys:['summary','data_sources'] },
+  ];
+
+  const byAgent = [];
+  let totalFields = 0, totalPass = 0, totalWarn = 0, totalFail = 0;
+  const critIssues = [];
+  const warnings = [];
+
+  agentSpecs.forEach(spec => {
+    const d = R[`a${spec.n}`];
+    let ok = 0, warn = 0, fail = 0;
+    if (!d) {
+      fail = spec.requiredKeys.length;
+      critIssues.push(`Agent ${spec.n} (${spec.name}) did not complete — data missing`);
+    } else {
+      spec.requiredKeys.forEach(k => {
+        const v = d[k];
+        if (v === undefined || v === null) { fail++; }
+        else if (Array.isArray(v) && v.length === 0) { warn++; warnings.push(`Agent ${spec.n} ${k} array empty`); }
+        else if (typeof v === 'string' && v.length < 10) { warn++; warnings.push(`Agent ${spec.n} ${k} suspiciously short`); }
+        else { ok++; }
+      });
+    }
+    const total = ok + warn + fail;
+    totalFields += total; totalPass += ok; totalWarn += warn; totalFail += fail;
+    byAgent.push({
+      agent: spec.name,
+      fields_ok: ok, fields_warn: warn, fields_fail: fail,
+      score: total > 0 ? Math.round((ok / total) * 100) : 0,
+    });
+  });
+
+  // Additional checks
+  const hasParallelPhase1 = true; // architecture fact
+  const hasPerAgentFallbacks = typeof getFallback1 === 'function' && typeof getFallback7 === 'function';
+  const hasStopCheck = typeof stopRequested !== 'undefined';
+  const agentsWithData = agentSpecs.filter(a => !!R[`a${a.n}`]).length;
+  const passRate = totalFields > 0
+    ? Math.round(((totalPass) / totalFields) * 100)
+    : 0;
+
+  // Suite-level results for Claude
+  const suiteResults = [
+    { suite:'Pipeline Completion', passCount: agentsWithData, totalCount: agentSpecs.length,
+      detail:`${agentsWithData}/${agentSpecs.length} agents returned data. Failed: ${critIssues.length ? critIssues.join('; ') : 'none'}.` },
+    { suite:'Data Field Validation', passCount: totalPass, totalCount: totalFields,
+      detail:`${totalPass} fields valid, ${totalWarn} warnings, ${totalFail} missing. Warnings: ${warnings.slice(0,5).join('; ')||'none'}.` },
+    { suite:'Architecture Checks', passCount: (hasPerAgentFallbacks?1:0)+(hasStopCheck?1:0)+1+1,
+      totalCount: 4,
+      detail:`Fallbacks present: ${hasPerAgentFallbacks}. Stop flag: ${hasStopCheck}. Parallel phase 1 (agents 1+5+6): true. Sub-agents (7,9,10,13): true.` },
+  ];
+
+  const sys = `You are a senior QA engineer validating an AI pipeline run. Respond JSON only.`;
+  const usr = `Produce a QA audit for a ${ind.unit} planning pipeline based on ACTUAL test results below.
+
+ACTUAL TEST RESULTS:
+- ZIP: ${zip()}, Radius: ${radius()}mi, Industry: ${ind.unit}
+- Agents with data: ${agentsWithData}/${agentSpecs.length}
+- Fields checked: ${totalFields} | Passed: ${totalPass} | Warned: ${totalWarn} | Failed: ${totalFail}
+- Field pass rate: ${passRate}%
+- Critical issues: ${critIssues.length > 0 ? critIssues.join('; ') : 'none'}
+- Warnings: ${warnings.slice(0,8).join('; ')||'none'}
+- Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
+- Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
 Return ONLY this JSON:
-{"summary":"Pipeline QA pass rate improved to 96%. All CRs are resolved including CR-007 (single-file architecture) — codebase now uses src/ modules with build.mjs. ctx() context extraction, stop_reason checks, exponential backoff, per-agent timers, export/print, re-run buttons, per-agent fallback data, and modular source structure are all implemented. One low-priority item remains: CR-003 (large Agent 9/10 prompts). Health score upgraded to 96.","overall_pass_rate":96,"test_suites":[{"suite":"API & Connectivity","tests":[{"id":"T001","name":"API authentication","status":"pass","detail":"Multi-provider support: Anthropic, OpenAI, Gemini, OpenAI-compatible","expected":"HTTP 200 with valid JSON from selected provider"},{"id":"T002","name":"claudeJSON retry logic","status":"pass","detail":"3-attempt retry with exponential backoff (attempt * 1500ms) implemented","expected":"Retries on parse failure with delay"},{"id":"T003","name":"stop_reason check","status":"pass","detail":"stop_reason=max_tokens throws 'Response truncated' before parse attempt","expected":"No silent truncation accepted"},{"id":"T004","name":"CORS header present","status":"pass","detail":"anthropic-dangerous-direct-browser-access header included for Anthropic provider","expected":"No CORS errors"},{"id":"T005","name":"Response caching","status":"pass","detail":"In-memory + localStorage cache with 4h TTL — re-runs skip API calls","expected":"Cache hit logged; same inputs return instantly"}]},{"suite":"Pipeline Reliability","tests":[{"id":"T006","name":"Per-agent try/catch","status":"pass","detail":"Every agent wrapped individually — pipeline continues through any single failure","expected":"Failed agent shows error card; subsequent agents still run"},{"id":"T007","name":"Fallback data coverage","status":"pass","detail":"getFallback1() through getFallback15() defined for all agents","expected":"No undefined rendering on fallback path"},{"id":"T008","name":"Parallel phase 1","status":"pass","detail":"Agents 1, 5, 6 run via Promise.allSettled — each gets fallback on rejection","expected":"All three start simultaneously"},{"id":"T009","name":"Parallel phase 8","status":"pass","detail":"Agents 11, 12, 13 run via Promise.allSettled — saves ~75s runtime","expected":"All three start simultaneously"},{"id":"T010","name":"Stop button","status":"pass","detail":"stopRequested flag checked after each agent await — halts cleanly","expected":"Pipeline stops after current agent, not mid-render"},{"id":"T011","name":"Re-run buttons","status":"pass","detail":"reRunAgent(n) reinvokes individual agents using stored R{} data","expected":"Error card shows Re-run button; click retries that agent only"}]},{"suite":"Agent Output Validation","tests":[{"id":"T012","name":"Demographics — cities array guarded","status":"pass","detail":"cities1=d.cities||[] prevents map crash on missing field","expected":"Renders empty state gracefully"},{"id":"T013","name":"Site Selection — radar/bar fallback","status":"pass","detail":"window.innerWidth<500 switches radar to horizontal bar chart","expected":"No chart overflow on mobile"},{"id":"T014","name":"Business Plan — nested guards","status":"pass","detail":"executive_summary, company_overview, market_analysis all guarded with ||{}","expected":"No TypeError on undefined nested access"},{"id":"T015","name":"Code Review — demo data current","status":"pass","detail":"Demo JSON reflects resolved CRs; CR-007 resolved — grade A, health 96","expected":"No stale resolved issues shown"},{"id":"T016","name":"Financial — 3 scenarios present","status":"pass","detail":"Conservative/Base/Optimistic with monthly_revenue and breakeven_months","expected":"All 3 scenarios rendered"},{"id":"T017","name":"ctx() context extraction","status":"pass","detail":"All inter-agent passing uses ctx() field extraction, not raw substrings","expected":"Downstream agents receive structured key fields"},{"id":"T018","name":"Demo mode parsing","status":"pass","detail":"Demo parses from Return ONLY: marker — ctx() embedded JSON no longer confuses parseJSON","expected":"Demo mode returns full template JSON, not partial ctx data"}]},{"suite":"UX & Rendering","tests":[{"id":"T019","name":"Per-agent timers","status":"pass","detail":"setDot('running') starts setInterval showing elapsed seconds; cleared on done/error","expected":"Each running agent shows live timer in header"},{"id":"T020","name":"Export JSON","status":"pass","detail":"exportResults() downloads R{} as timestamped .json file","expected":"File downloads with all agent data"},{"id":"T021","name":"Print Report","status":"pass","detail":"printReport() opens new window with formatted summary and triggers print dialog","expected":"Print-friendly page with key sections"},{"id":"T022","name":"Raw drill-down","status":"pass","detail":"showRaw(n) renders JSON with copy button, key count, 400px scrollable panel","expected":"Click toggles raw panel open/close"},{"id":"T023","name":"All agent tabs functional","status":"pass","detail":"tab() correctly toggles .active class on panels","expected":"Tab content switches without errors"},{"id":"T024","name":"API key guidance","status":"pass","detail":"Usage limits link shown below key input for Anthropic provider","expected":"Link to console.anthropic.com/settings/keys visible"},{"id":"T025","name":"Modular build system","status":"pass","detail":"src/ has 22 JS modules + styles.css + template.html; build.mjs concatenates to public/index.html","expected":"node build.mjs produces valid, identical public/index.html"}]}],"data_validation":{"fields_checked":58,"fields_passed":57,"fields_warned":1,"fields_failed":0,"critical_issues":[],"warnings":["Agent 9/10 prompts still large — CR-003 open"],"by_agent":[{"agent":"Demographics","fields_ok":9,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Compliance","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Competitive Intel","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Gap Analysis","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Site Selection","fields_ok":10,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Real Estate","fields_ok":9,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Financial","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Executive Summary","fields_ok":5,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Business Plan","fields_ok":10,"fields_warn":1,"fields_fail":0,"score":92},{"agent":"Project Plan","fields_ok":9,"fields_warn":1,"fields_fail":0,"score":92},{"agent":"Market Map","fields_ok":6,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Grant Search","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Competitor Deep-Dive","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Code Review","fields_ok":6,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"QA Testing","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100}]},"ux_audit":[{"category":"Cost","title":"Agent 9 and 10 prompts are verbose (CR-003)","severity":"low","detail":"Business Plan and Project Plan include large inline schema examples adding ~800 tokens each.","recommendation":"Replace schema examples with field-name-only references. Save ~$0.06/run."}],"health_score":{"overall":96,"dimensions":[{"label":"API Reliability","score":95,"color":"var(--green)","notes":"Backoff, stop_reason, multi-provider all implemented"},{"label":"Data Accuracy","score":92,"color":"var(--green)","notes":"ctx() extraction; all nested property guards in place"},{"label":"Output Completeness","score":98,"color":"var(--green)","notes":"All 15 agents with fallbacks — pipeline never halts"},{"label":"UX Quality","score":93,"color":"var(--green)","notes":"Timers, export, print, re-run, drill-down all added"},{"label":"Code Quality","score":90,"color":"var(--green)","notes":"CR-007 resolved — src/ modules + build.mjs; only CR-003 remains"},{"label":"Cost Efficiency","score":85,"color":"var(--green)","notes":"$0.41/run; caching makes repeat runs free"},{"label":"Test Coverage","score":96,"color":"var(--green)","notes":"25 tests, 96% pass rate"},{"label":"Error Recovery","score":98,"color":"var(--green)","notes":"Per-agent try/catch + fallbacks for all 15 agents"}]}}`;
+{
+  "summary": "2-3 sentence honest QA summary based on actual results above",
+  "overall_pass_rate": ${passRate},
+  "test_suites": [
+    {
+      "suite": "Suite name",
+      "tests": [
+        {"id":"T001","name":"Test name","status":"pass|fail|warn","detail":"Specific detail from actual data","expected":"What was expected"}
+      ]
+    }
+  ],
+  "data_validation": {
+    "fields_checked": ${totalFields},
+    "fields_passed": ${totalPass},
+    "fields_warned": ${totalWarn},
+    "fields_failed": ${totalFail},
+    "critical_issues": ${JSON.stringify(critIssues)},
+    "warnings": ${JSON.stringify(warnings.slice(0,8))},
+    "by_agent": ${JSON.stringify(byAgent)}
+  },
+  "ux_audit": [
+    {"category":"Category","title":"Finding title","severity":"high|medium|low","detail":"Detail","recommendation":"Fix"}
+  ],
+  "health_score": {
+    "overall": ${Math.max(20, Math.min(100, passRate))},
+    "dimensions": [
+      {"label":"Dimension","score":85,"color":"var(--green)","notes":"Explanation"}
+    ]
+  }
+}
+Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with 4-6 tests each based on actual results above.`;
+
   try {
-    _setDemoKey(15);
-    let d=await claudeJSON(sys,usr);
-    if(!d) { console.warn('Agent 15 fallback'); d=getFallback15(); }
-    R.a15=d;
+    let d = await claudeJSON(sys, usr);
+    if (!d) { console.warn('Agent 15 fallback'); d = getFallback15(); }
+    // Inject real by_agent and counts in case Claude altered them
+    if (d.data_validation) {
+      d.data_validation.by_agent  = byAgent;
+      d.data_validation.fields_checked = totalFields;
+      d.data_validation.fields_passed  = totalPass;
+      d.data_validation.fields_warned  = totalWarn;
+      d.data_validation.fields_failed  = totalFail;
+      d.data_validation.critical_issues = critIssues;
+    }
+    R.a15 = d;
     renderQA(d);
     setDot(15,'done'); showOut(15);
     return JSON.stringify(d);
-  } catch(e){setDot(15,'error');showOut(15);$('15-sum-t').textContent='Error: '+e.message;throw e}
+  } catch(e) { setDot(15,'error'); showOut(15); $('15-sum-t').textContent = 'Error: ' + e.message; throw e; }
 }
 
 function renderQA(d) {

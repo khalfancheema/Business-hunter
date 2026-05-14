@@ -1,30 +1,102 @@
 async function runAgent14(allResults) {
   setDot(14,'running');
-  const ind=industry();
-  const sys=`You are a senior software engineer and AI API cost optimization specialist. You review multi-agent AI pipelines for correctness, efficiency, and cost. Respond JSON only.`;
-  const usr=`Review this 15-agent browser-based ${ind.unit} planning pipeline built on claude-sonnet-4-6.
+  const ind = industry();
 
-ARCHITECTURE SUMMARY:
-- 15 agents total, sequential with 1 parallel phase (agents 1+5+6)
-- Agent 4 now runs before Agent 7 (fixed — Agent 7 receives real estate context)
-- claudeJSON() wrapper: 3 retries + 5-strategy JSON extraction
-- max_tokens: 4096 per call, web search disabled (useSearch hardcoded false)
-- Context passing: upstream JSON.stringify() substrings passed to downstream agents
-- Charts: Chart.js 4.4.1 CDN, killChart() before re-render
-- Map: inline SVG with linear lat/lng projection
-- Agents completed this run: ${Object.keys(allResults).length}/15
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(14);
+    if (_d) { R.a14 = _d; try { renderCodeReview(_d); } catch(e){} setDot(14,'done'); showOut(14); return JSON.stringify(_d); }
+  }
 
-Return ONLY this JSON:
-{"summary":"Pipeline quality is excellent. CR-001 through CR-008 are all resolved. ctx() field extraction, retry backoff, stop_reason checks, per-agent timers, multi-provider support, response caching, parallel execution, and modular src/ architecture with build.mjs are all implemented. One item remains open: CR-003 (large Agent 9/10 prompts). Overall grade upgraded to A.","overall_grade":"A","issues":[{"id":"CR-003","severity":"medium","category":"Cost","title":"Agents 9 and 10 prompts still large","detail":"Business Plan and Project Plan prompts include verbose inline schema examples that cost ~35% more tokens than needed.","location":"runAgent9(), runAgent10()","fix":"Replace inline JSON examples with compact field-name-only schema references. Save ~$0.06/run."}],"performance_metrics":[{"metric":"Pipeline Total Runtime","current":"4-6 minutes","optimized":"3-5 minutes","score":80,"notes":"Phases 1 and 8 now parallel; CR-008 resolved"},{"metric":"Token Efficiency (input)","current":"~22000 tokens/run","optimized":"~18000 tokens/run","score":78,"notes":"ctx() extraction reduces upstream context; Agents 9+10 still large"},{"metric":"Parallel Execution","current":"2 parallel phases (1+5+6, 11+12+13)","optimized":"Optimal","score":95,"notes":"CR-008 resolved — both parallel phases active"},{"metric":"Error Recovery","current":"Per-agent try/catch + fallbacks for all 15 agents","optimized":"Optimal","score":95,"notes":"Pipeline continues through any single agent failure"},{"metric":"Data Integrity","current":"ctx() field extraction, structured passing","optimized":"Optimal","score":90,"notes":"CR-001 resolved — key fields extracted, not raw substrings"},{"metric":"API Reliability","current":"3 retries + exponential backoff + stop_reason check","optimized":"Optimal","score":92,"notes":"CR-002 and CR-004 resolved"},{"metric":"Response Caching","current":"In-memory + localStorage, 4h TTL","optimized":"Optimal","score":90,"notes":"Cache hit avoids all API calls on re-run"},{"metric":"Maintainability","current":"src/ modules + build.mjs","optimized":"Optimal","score":95,"notes":"CR-007 resolved — 22 source files, build concatenates to public/index.html"}],"cost_analysis":{"model":"claude-sonnet-4-6","input_cost_per_mtok":3.00,"output_cost_per_mtok":15.00,"agents":[{"agent":"Demographics","avg_input_tokens":900,"avg_output_tokens":1200,"cost_per_run":0.021},{"agent":"Compliance","avg_input_tokens":800,"avg_output_tokens":1100,"cost_per_run":0.019},{"agent":"Competitive Intel","avg_input_tokens":750,"avg_output_tokens":1000,"cost_per_run":0.017},{"agent":"Gap Analysis","avg_input_tokens":1200,"avg_output_tokens":1500,"cost_per_run":0.024},{"agent":"Site Selection","avg_input_tokens":1400,"avg_output_tokens":2000,"cost_per_run":0.034},{"agent":"Real Estate","avg_input_tokens":1600,"avg_output_tokens":2200,"cost_per_run":0.038},{"agent":"Financial","avg_input_tokens":1300,"avg_output_tokens":2000,"cost_per_run":0.034},{"agent":"Executive Summary","avg_input_tokens":1800,"avg_output_tokens":1200,"cost_per_run":0.023},{"agent":"Business Plan","avg_input_tokens":2400,"avg_output_tokens":3000,"cost_per_run":0.052},{"agent":"Project Plan","avg_input_tokens":2400,"avg_output_tokens":3000,"cost_per_run":0.052},{"agent":"Market Map","avg_input_tokens":1100,"avg_output_tokens":1800,"cost_per_run":0.030},{"agent":"Grant Search","avg_input_tokens":1000,"avg_output_tokens":1600,"cost_per_run":0.027},{"agent":"Competitor Deep-Dive","avg_input_tokens":900,"avg_output_tokens":2000,"cost_per_run":0.033},{"agent":"Code Review","avg_input_tokens":1200,"avg_output_tokens":1500,"cost_per_run":0.029},{"agent":"QA Testing","avg_input_tokens":1000,"avg_output_tokens":1800,"cost_per_run":0.030}],"total_cost_per_run":0.413,"optimized_cost_per_run":0.35,"monthly_cost_10runs":4.13,"monthly_cost_50runs":20.65,"optimization_tips":["Reduce Agent 9+10 prompt sizes by removing inline schema examples: save ~$0.06/run (CR-003)","Use claude-haiku-4-5 for aggregation agents (2, 8, 11): save ~$0.04/run","Cached re-runs cost $0.00 — encourage users to use Clear Cache only when needed"]},"recommended_fixes_priority":[{"priority":1,"id":"CR-003","effort":"1 hour","impact":"Reduces cost ~15% on two heaviest agents"}]}`;
+  // Build real pipeline state from actual R data
+  const agentMap = [
+    {n:1, name:'Demographics'}, {n:2, name:'Gap Analysis'}, {n:3, name:'Site Selection'},
+    {n:4, name:'Real Estate'}, {n:5, name:'Compliance'}, {n:6, name:'Competitive Intel'},
+    {n:7, name:'Financials'}, {n:8, name:'Executive Summary'}, {n:9, name:'Business Plan'},
+    {n:10, name:'Project Plan'}, {n:11, name:'Market Map'}, {n:12, name:'Grants'},
+    {n:13, name:'Competitor Deep-Dive'}, {n:16, name:'Build vs Buy'}, {n:17, name:'Data Sources'}
+  ];
+  const completed = agentMap.filter(a => !!R[`a${a.n}`]);
+  const failed    = agentMap.filter(a => !R[`a${a.n}`]);
+  const completePct = Math.round(completed.length / agentMap.length * 100);
+
+  // Derive real data quality signals
+  const signals = [];
+  if (R.a2) {
+    const cities = _toArr(R.a2.cities||[]);
+    signals.push(`Gap analysis: ${cities.length} cities, top gap ${Math.max(...cities.map(c=>c.gap_score||0),0)}/10`);
+  }
+  if (R.a7) {
+    const sc = _toArr(R.a7.scenarios||[]);
+    const base = sc.find(s=>(s.name||'').toLowerCase().includes('base'))||sc[1]||{};
+    signals.push(`Financials: ${sc.length} scenarios, base net $${(base.monthly_net||0).toLocaleString()}/mo, break-even month ${base.breakeven_months||'?'}`);
+  }
+  if (R.a5) signals.push(`Compliance: ${_toArr(R.a5.requirements||[]).length} requirements, ${R.a5.total_timeline_months||'?'}-month timeline`);
+  if (R.a6) signals.push(`Competition: ${_toArr(R.a6.cities||[]).length} markets scanned, ${R.a6.total_licensed_estimated||'?'} total licensed`);
+  if (R.a13) signals.push(`Deep-dive: ${_toArr(R.a13.competitor_profiles||[]).length} profiles, ${_toArr(R.a13.pain_point_analysis||[]).length} pain points`);
+  if (R.a12) signals.push(`Grants: $${((R.a12.total_potential_funding||0)/1000).toFixed(0)}K potential funding`);
+  if (R.a8)  signals.push(`Verdict: ${R.a8.verdict||R.a8.recommendation||'present'}`);
+
+  const sys = `You are a senior AI pipeline architect reviewing a multi-agent ${ind.unit} business planning pipeline. Respond JSON only.`;
+  const usr = `Review this browser-based ${ind.unit} planning pipeline. Analyze the ACTUAL run data below and produce a real code review.
+
+ACTUAL PIPELINE STATE:
+- Industry: ${ind.unit}
+- Agents completed: ${completed.length}/${agentMap.length} (${completePct}%)
+- Failed agents: ${failed.length > 0 ? failed.map(a=>a.n+' '+a.name).join(', ') : 'none'}
+- Input: ZIP ${zip()}, Radius ${radius()}mi, Budget $${budget()}, Capacity ${capacity()}
+- Data signals: ${signals.join(' | ') || 'no data yet'}
+
+ARCHITECTURE FACTS:
+- claudeJSON(): 3-retry + 5-strategy JSON extraction, max_tokens 4096, stop_reason guard
+- ctx(): field extraction limits upstream context size
+- Parallel phases: agents 1+5+6 (phase 1), agents 11+12+13+16 (phase 9)
+- Per-agent fallbacks: getFallback1()-getFallback17()
+- Source files: src/js/ modules bundled via build.mjs → public/index.html
+- Sub-agents: agents 7 (3 sub-calls), 9 (4 sub-calls), 10 (3 sub-calls), 13 (3 sub-calls), 1 (2 sub-calls)
+
+Return ONLY this JSON structure:
+{
+  "summary": "2-3 sentence honest assessment based on actual completion rate and data quality above",
+  "overall_grade": "A|B|C|D",
+  "issues": [
+    {
+      "id": "CR-001",
+      "severity": "critical|high|medium|low",
+      "category": "Performance|Cost|Reliability|Data|UX",
+      "title": "Issue title",
+      "detail": "Specific detail referencing actual pipeline state data",
+      "location": "function name or agent number",
+      "fix": "Specific actionable fix"
+    }
+  ],
+  "performance_metrics": [
+    {"metric": "Metric name", "current": "observed value", "optimized": "target value", "score": 85, "notes": "explanation"}
+  ],
+  "cost_analysis": {
+    "model": "claude-sonnet-4-6",
+    "input_cost_per_mtok": 3.00,
+    "output_cost_per_mtok": 15.00,
+    "agents": [{"agent": "Name", "avg_input_tokens": 900, "avg_output_tokens": 1200, "cost_per_run": 0.021}],
+    "total_cost_per_run": 0.45,
+    "optimized_cost_per_run": 0.35,
+    "monthly_cost_10runs": 4.50,
+    "monthly_cost_50runs": 22.50,
+    "optimization_tips": ["Tip based on actual data"]
+  },
+  "recommended_fixes_priority": [
+    {"priority": 1, "id": "CR-001", "effort": "1 hour", "impact": "Specific impact"}
+  ]
+}
+Identify 3-6 real issues based on the actual pipeline state. Completion rate, failed agents, and data signals above are ground truth.`;
+
   try {
-    _setDemoKey(14);
-    let d=await claudeJSON(sys,usr);
-    if(!d) { console.warn('Agent 14 fallback'); d=getFallback14(); }
-    R.a14=d;
+    let d = await claudeJSON(sys, usr);
+    if (!d) { console.warn('Agent 14 fallback'); d = getFallback14(); }
+    R.a14 = d;
     renderCodeReview(d);
     setDot(14,'done'); showOut(14);
     return JSON.stringify(d);
-  } catch(e){setDot(14,'error');showOut(14);$('14-sum-t').textContent='Error: '+e.message;throw e}
+  } catch(e) { setDot(14,'error'); showOut(14); $('14-sum-t').textContent = 'Error: ' + e.message; throw e; }
 }
 
 function renderCodeReview(d) {

@@ -497,10 +497,11 @@ function v2GetKPIs() {
   if (R_data.a5?.total_timeline_months)
     kpis.push({ ico:'⏱',  val:`${R_data.a5.total_timeline_months} mo`, lbl:'Permit Timeline', key: null });
 
-  return kpis.map(k => ({
-    ...k,
-    trendArrow: k.key ? v2GetKPITrendArrow(k.key, k.raw, industry) : '',
-  }));
+  return kpis.map(k => {
+    const arrow = k.key ? v2GetKPITrendArrow(k.key, k.raw, industry) : '';
+    const dir   = arrow === '↑' ? 'up' : arrow === '↓' ? 'down' : 'flat';
+    return { ...k, trend: arrow, trendDir: dir };
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════

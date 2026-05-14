@@ -4271,6 +4271,8 @@ function getFallback8(){return {verdict:'Cautious Go',verdict_rationale:'Analysi
 function getFallback9(){return {business_name:'[Business Name]',entity_type:'LLC',owner_placeholder:'[Owner Name]',executive_summary:{concept:'Business plan unavailable in demo mode.',opportunity:'Run with API key for full business plan.',ask:'Contact SBA for loan information.'},company_overview:{mission:'To be determined.',vision:'To be determined.',values:['Quality','Service','Community'],legal_structure:'LLC',location_rationale:'See site analysis.',services:[]},market_analysis:{target_market:'Local market',market_size:{total_addressable:'TBD',serviceable:'TBD',target_share:'TBD'},competitor_comparison:[],differentiators:['Run with API key for full analysis'],trends:['Market data requires live API call']},operations_plan:{facility:{total_sqft:5000,indoor_sqft_per_child:35,outdoor_sqft_per_child:75,rooms:[]},hours:'Mon-Fri 6:30am-6:30pm',staffing_plan:[],curriculum:'TBD',technology:[]},financial_plan:{startup_capital_needed:parseInt(budget()),use_of_funds:[],funding_sources:[],year1_projections:{revenue:0,gross_profit:0,operating_expenses:0,ebitda:0,net_income:0},year2_projections:{revenue:0,gross_profit:0,operating_expenses:0,ebitda:0,net_income:0},year3_projections:{revenue:0,gross_profit:0,operating_expenses:0,ebitda:0,net_income:0},breakeven_analysis:'TBD',debt_service_coverage:'TBD',collateral:'TBD'},sba_checklist:[],investor_slides:[{slide:1,title:'Demo Mode',content:'Run with a valid API key to generate full investor slides.'}]};}
 function getFallback10(){return {project_name:'Launch Plan',total_duration_months:18,target_open_date:'Month 19',phases:[{phase:'Phase 1: Foundation',months:'1-6',color:'#4a9eff',tasks:[{task:'Run with API key',month_start:1,duration:1,owner:'Owner',priority:'Critical',cost:0,detail:'Full project plan requires live API.',links:[]}]}],milestones:[{month:'Month 1',title:'Get Started',detail:'Run with API key for full milestones',owner:'Owner',priority:'critical'}],budget_tracker:[],risk_register:[],team_vendors:[],checklist_phases:[]};}
 function getFallback11(){return {center:{lat:33.9,lng:-84.0,label:'Target Area'},cities:[{name:'Target Area',county:'Local',lat:33.9,lng:-84.0,gap_score:7,demand_score:7,supply_score:4,unserved_children:300,median_income:70000,competitor_count:3,priority:'Good Opportunity',recommended_action:'Analyze further',real_estate_url:'https://www.loopnet.com'}],real_estate_pins:[],directions:[]};}
+function getFallback6(){return {summary:'Competitive intelligence unavailable — baseline used.',total_licensed_estimated:0,total_accredited_naeyc:0,total_head_start_slots:0,data_sources:['Baseline estimate'],cities:[{city:'Target Area',county:'Local',total_centers_found:0,avg_google_rating:0,avg_yelp_rating:0,licensed_capacity_total:0,market_saturation:'Unknown',market_notes:'Run with API key for live competitive data'}]};}
+function getFallback12(){return {summary:'Grant information unavailable — baseline used.',total_potential_funding:0,federal_grants:[],all_grants_table:[],caps_program:{program_name:'CAPS Subsidy Program',administered_by:'State Agency',what_it_is:'State subsidy program — run with API key for current rates',benefit_to_provider:'Guaranteed payment per enrolled subsidized child'},barrow_county_incentives:[],quality_rated_benefits:{program:'Quality Rated',benefits_by_star:[]}};}
 function getFallback13(){return {summary:'Competitor analysis unavailable — run with API key.',competitor_profiles:[],pain_point_analysis:[],differentiation_strategy:[],messaging_guide:[]};}
 function getFallback14(){return {summary:'Code review unavailable.',overall_grade:'N/A',issues:[],performance_metrics:[],cost_analysis:{total_cost_per_run:0,optimized_cost_per_run:0,monthly_cost_10runs:0,monthly_cost_50runs:0,agents:[],optimization_tips:[]},recommended_fixes_priority:[]};}
 function getFallback15(){return {summary:'QA audit unavailable — run with API key for full testing.',overall_pass_rate:0,test_suites:[],data_validation:{fields_checked:0,fields_passed:0,fields_warned:0,fields_failed:0,critical_issues:[],warnings:[],by_agent:[]},ux_audit:[],health_score:{overall:0,dimensions:[]}};}
@@ -4502,116 +4504,29 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
     "new_permits_issued_2023": 3200,
     "yoy_permit_growth_pct": 8.4,
     "source": "Census Building Permits Survey 2023"
-  },
-  "age_pyramid": [
-    {"bracket": "0-4",   "male": 2400, "female": 2350},
-    {"bracket": "5-9",   "male": 2600, "female": 2500},
-    {"bracket": "10-14", "male": 2550, "female": 2480},
-    {"bracket": "15-19", "male": 2300, "female": 2200},
-    {"bracket": "20-24", "male": 2800, "female": 2750},
-    {"bracket": "25-29", "male": 4200, "female": 4100},
-    {"bracket": "30-34", "male": 5100, "female": 4900},
-    {"bracket": "35-39", "male": 4800, "female": 4700},
-    {"bracket": "40-44", "male": 4200, "female": 4100},
-    {"bracket": "45-49", "male": 3800, "female": 3900},
-    {"bracket": "50-54", "male": 3200, "female": 3400},
-    {"bracket": "55-59", "male": 2800, "female": 3100},
-    {"bracket": "60-64", "male": 2200, "female": 2600},
-    {"bracket": "65-69", "male": 1600, "female": 2100},
-    {"bracket": "70-74", "male": 1100, "female": 1600},
-    {"bracket": "75+",   "male":  700, "female": 1200}
-  ],
-  "generation_breakdown": [
-    {"gen": "Gen Alpha (0-12)",   "population_pct": 16.2, "households_pct": 19.4},
-    {"gen": "Gen Z (13-28)",      "population_pct": 14.8, "households_pct": 12.1},
-    {"gen": "Millennial (29-44)", "population_pct": 24.6, "households_pct": 32.8},
-    {"gen": "Gen X (45-60)",      "population_pct": 22.4, "households_pct": 25.2},
-    {"gen": "Boomer (61-79)",     "population_pct": 18.2, "households_pct":  9.4},
-    {"gen": "Silent (80+)",       "population_pct":  3.8, "households_pct":  1.1}
-  ],
-  "multi_radius": [
-    {"ring": "1 mi", "population": 8200,   "households": 2900,  "median_hh_income": 142000, "pct_with_children": 38, "pop_under5":   980, "avg_hh_size": 2.82},
-    {"ring": "3 mi", "population": 48600,  "households": 16800, "median_hh_income": 138900, "pct_with_children": 41, "pop_under5":  5800, "avg_hh_size": 2.91},
-    {"ring": "5 mi", "population": 124000, "households": 42400, "median_hh_income": 128400, "pct_with_children": 40, "pop_under5": 14800, "avg_hh_size": 2.88}
-  ],
-  "consumer_expenditure": {
-    "radius_miles": 5,
-    "total_expenditure_millions": 8110,
-    "categories": [
-      {"category": "Housing",               "amount_millions": 2840, "pct_of_total": 35.0},
-      {"category": "Transportation",        "amount_millions": 1140, "pct_of_total": 14.1},
-      {"category": "Food at Home",          "amount_millions":  810, "pct_of_total": 10.0},
-      {"category": "Healthcare",            "amount_millions":  620, "pct_of_total":  7.6},
-      {"category": "Education & Childcare", "amount_millions":  490, "pct_of_total":  6.0},
-      {"category": "Food Away from Home",   "amount_millions":  480, "pct_of_total":  5.9},
-      {"category": "Entertainment",         "amount_millions":  340, "pct_of_total":  4.2},
-      {"category": "Personal Care",         "amount_millions":  180, "pct_of_total":  2.2},
-      {"category": "Other",                 "amount_millions": 1210, "pct_of_total": 14.9}
-    ]
-  },
-  "lifestyle_segments": [
-    {"segment": "Savvy Suburbanites",         "pct": 18.4, "description": "Established upper-middle-class families, homeowners, education-focused"},
-    {"segment": "Professional Pride",         "pct": 14.2, "description": "Younger professionals, dual-income, high education, tech-forward"},
-    {"segment": "Bright Young Professionals", "pct": 11.8, "description": "Recent college grads building careers, renter households"},
-    {"segment": "In Style",                   "pct":  9.6, "description": "Upper-middle urban lifestyle, brand conscious, high disposable income"},
-    {"segment": "Family Foundations",         "pct":  7.3, "description": "Young families prioritizing schools, safety, and suburban amenities"}
-  ],
-  "population_projections": [
-    {"year": 2020, "population": 41200},
-    {"year": 2021, "population": 43800},
-    {"year": 2022, "population": 46100},
-    {"year": 2023, "population": 47800},
-    {"year": 2024, "population": 49200},
-    {"year": 2025, "population": 51000},
-    {"year": 2030, "population": 58400}
-  ],
-  "occupation_lq": [
-    {"occupation": "Computer & Math",          "area_pct": 12.4, "us_pct":  3.1, "lq": 4.00},
-    {"occupation": "Business & Financial",     "area_pct":  8.6, "us_pct":  5.3, "lq": 1.62},
-    {"occupation": "Management",               "area_pct":  7.2, "us_pct":  5.8, "lq": 1.24},
-    {"occupation": "Healthcare Practitioners", "area_pct":  6.8, "us_pct":  6.3, "lq": 1.08},
-    {"occupation": "Education & Training",     "area_pct":  5.4, "us_pct":  6.1, "lq": 0.89},
-    {"occupation": "Sales & Related",          "area_pct":  9.2, "us_pct": 10.1, "lq": 0.91},
-    {"occupation": "Service Occupations",      "area_pct": 11.8, "us_pct": 17.4, "lq": 0.68}
-  ],
-  "education_attainment": {
-    "radius_miles": 3,
-    "less_than_hs_pct":  2.4,
-    "hs_grad_pct":       8.6,
-    "some_college_pct": 14.2,
-    "associates_pct":    5.8,
-    "bachelors_pct":    38.4,
-    "graduate_pct":     30.6
-  },
-  "housing_detail": {
-    "median_home_value":    548000,
-    "avg_home_value":       624000,
-    "owner_occupied_pct":    72.4,
-    "renter_occupied_pct":   27.6,
-    "median_gross_rent":     1840,
-    "built_2010_later_pct":  28.2,
-    "built_2000_2009_pct":   34.6
-  },
-  "language_spoken": [
-    {"language": "English only",  "pct": 58.4},
-    {"language": "Asian/Pacific", "pct": 22.8},
-    {"language": "Spanish",       "pct": 12.6},
-    {"language": "Indo-European", "pct":  4.2},
-    {"language": "Other",         "pct":  2.0}
-  ],
-  "daytime_population": {
-    "residential_pop":               49200,
-    "daytime_pop":                   54800,
-    "daytime_to_residential_ratio":   1.11,
-    "workers_present":               28400,
-    "workers_at_home":               14600
   }
+}`;
+  // ── Part 2 prompt (community profile — separate sub-call to avoid max_tokens) ──
+  const usr2 = `Return community profile data for ZIP ${zip()} area (${radius()} mile radius). Use US Census ACS, BLS CES, and Esri lifestyle segmentation sources.
+Return ONLY this JSON:
+{
+  "age_pyramid": [{"bracket":"0-4","male":2400,"female":2350},{"bracket":"5-9","male":2600,"female":2500},{"bracket":"10-14","male":2550,"female":2480},{"bracket":"15-19","male":2300,"female":2200},{"bracket":"20-24","male":2800,"female":2750},{"bracket":"25-29","male":4200,"female":4100},{"bracket":"30-34","male":5100,"female":4900},{"bracket":"35-39","male":4800,"female":4700},{"bracket":"40-44","male":4200,"female":4100},{"bracket":"45-49","male":3800,"female":3900},{"bracket":"50-54","male":3200,"female":3400},{"bracket":"55-59","male":2800,"female":3100},{"bracket":"60-64","male":2200,"female":2600},{"bracket":"65-69","male":1600,"female":2100},{"bracket":"70-74","male":1100,"female":1600},{"bracket":"75+","male":700,"female":1200}],
+  "generation_breakdown": [{"gen":"Gen Alpha (0-12)","population_pct":16.2,"households_pct":19.4},{"gen":"Gen Z (13-28)","population_pct":14.8,"households_pct":12.1},{"gen":"Millennial (29-44)","population_pct":24.6,"households_pct":32.8},{"gen":"Gen X (45-60)","population_pct":22.4,"households_pct":25.2},{"gen":"Boomer (61-79)","population_pct":18.2,"households_pct":9.4},{"gen":"Silent (80+)","population_pct":3.8,"households_pct":1.1}],
+  "multi_radius": [{"ring":"1 mi","population":8200,"households":2900,"median_hh_income":142000,"pct_with_children":38,"pop_under5":980,"avg_hh_size":2.82},{"ring":"3 mi","population":48600,"households":16800,"median_hh_income":138900,"pct_with_children":41,"pop_under5":5800,"avg_hh_size":2.91},{"ring":"5 mi","population":124000,"households":42400,"median_hh_income":128400,"pct_with_children":40,"pop_under5":14800,"avg_hh_size":2.88}],
+  "consumer_expenditure": {"radius_miles":5,"total_expenditure_millions":8110,"categories":[{"category":"Housing","amount_millions":2840,"pct_of_total":35.0},{"category":"Transportation","amount_millions":1140,"pct_of_total":14.1},{"category":"Food at Home","amount_millions":810,"pct_of_total":10.0},{"category":"Healthcare","amount_millions":620,"pct_of_total":7.6},{"category":"Education & Childcare","amount_millions":490,"pct_of_total":6.0},{"category":"Food Away from Home","amount_millions":480,"pct_of_total":5.9},{"category":"Entertainment","amount_millions":340,"pct_of_total":4.2},{"category":"Personal Care","amount_millions":180,"pct_of_total":2.2},{"category":"Other","amount_millions":1210,"pct_of_total":14.9}]},
+  "lifestyle_segments": [{"segment":"Savvy Suburbanites","pct":18.4,"description":"Established upper-middle-class families, homeowners, education-focused"},{"segment":"Professional Pride","pct":14.2,"description":"Younger professionals, dual-income, high education, tech-forward"},{"segment":"Bright Young Professionals","pct":11.8,"description":"Recent college grads building careers, renter households"},{"segment":"In Style","pct":9.6,"description":"Upper-middle urban lifestyle, brand conscious, high disposable income"},{"segment":"Family Foundations","pct":7.3,"description":"Young families prioritizing schools, safety, and suburban amenities"}],
+  "population_projections": [{"year":2020,"population":41200},{"year":2021,"population":43800},{"year":2022,"population":46100},{"year":2023,"population":47800},{"year":2024,"population":49200},{"year":2025,"population":51000},{"year":2030,"population":58400}],
+  "occupation_lq": [{"occupation":"Computer & Math","area_pct":12.4,"us_pct":3.1,"lq":4.00},{"occupation":"Business & Financial","area_pct":8.6,"us_pct":5.3,"lq":1.62},{"occupation":"Management","area_pct":7.2,"us_pct":5.8,"lq":1.24},{"occupation":"Healthcare Practitioners","area_pct":6.8,"us_pct":6.3,"lq":1.08},{"occupation":"Education & Training","area_pct":5.4,"us_pct":6.1,"lq":0.89},{"occupation":"Sales & Related","area_pct":9.2,"us_pct":10.1,"lq":0.91},{"occupation":"Service Occupations","area_pct":11.8,"us_pct":17.4,"lq":0.68}],
+  "education_attainment": {"radius_miles":3,"less_than_hs_pct":2.4,"hs_grad_pct":8.6,"some_college_pct":14.2,"associates_pct":5.8,"bachelors_pct":38.4,"graduate_pct":30.6},
+  "housing_detail": {"median_home_value":548000,"avg_home_value":624000,"owner_occupied_pct":72.4,"renter_occupied_pct":27.6,"median_gross_rent":1840,"built_2010_later_pct":28.2,"built_2000_2009_pct":34.6},
+  "language_spoken": [{"language":"English only","pct":58.4},{"language":"Asian/Pacific","pct":22.8},{"language":"Spanish","pct":12.6},{"language":"Indo-European","pct":4.2},{"language":"Other","pct":2.0}],
+  "daytime_population": {"residential_pop":49200,"daytime_pop":54800,"daytime_to_residential_ratio":1.11,"workers_present":28400,"workers_at_home":14600}
 }`;
 
   try {
     _setDemoKey(1);
     let d=await claudeJSON(sys,usr);
-    if(!d) { console.warn('Agent 1 fallback'); d=getFallback1(); }
+    if(!d) { console.warn('Agent 1 Part 1 fallback'); d=getFallback1(); }
     R.a1=d;
 
     // Summary + sources
@@ -4683,6 +4598,25 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
     tbl+=`</tbody></table>`;
     $('1-t-c').innerHTML=tbl;
     setDot(1,'done'); showOut(1);
+
+    // ── Part 2 of 2: Community Profile (separate sub-call to avoid max_tokens) ──
+    // Runs after Part 1 renders — enriches R.a1 with community profile data
+    // Non-blocking for the main pipeline (downstream agents use Part 1 data)
+    if (!demoMode) {
+      try {
+        const sys2 = `You are a community profile analyst. Return only accurate JSON — no text before or after.`;
+        const cp = await claudeJSON(sys2, usr2);
+        if (cp) {
+          // Merge community profile fields into R.a1
+          const cpFields = ['age_pyramid','generation_breakdown','multi_radius','consumer_expenditure',
+            'lifestyle_segments','population_projections','occupation_lq','education_attainment',
+            'housing_detail','language_spoken','daytime_population'];
+          cpFields.forEach(f => { if (cp[f] !== undefined) R.a1[f] = cp[f]; });
+          d = R.a1;
+        }
+      } catch(e2) { console.warn('Agent 1 Part 2 community profile failed:', e2.message); }
+    }
+
     return JSON.stringify(d);
   } catch(e){setDot(1,'error');showOut(1);$('1-s-t').textContent='Error: '+e.message;throw e}
 }
@@ -4695,269 +4629,90 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
 async function runAgent5() {
   setDot(5,'running');
   const ind=industry();
-  const sys=`You are a regulatory compliance expert for small businesses in the US. Research current licensing, zoning, and permit requirements for opening a ${ind.unit}. For every requirement you list, you MUST provide the exact agency name, the direct URL to apply or start the application, the specific form number/name if applicable, and step-by-step instructions for how to apply. Respond JSON only.`;
-  const usr=`Search for ALL federal, state, and local requirements to open a ${ind.unit} near ZIP ${zip()}.
+
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(5);
+    if (_d) { R.a5 = _d; }
+  }
+
+  // ── Part A: Requirements metadata + timeline ────────────────
+  $('5-s-t').textContent = 'Researching licensing requirements…';
+  const sysA=`You are a regulatory compliance expert for small businesses in the US. Research current licensing, zoning, and permit requirements for opening a ${ind.unit}. Respond JSON only.`;
+  const usrA=`Search for ALL federal, state, and local requirements to open a ${ind.unit} near ZIP ${zip()}.
 
 Regulatory authority: ${ind.regulatory}
 Key compliance areas: ${ind.compliance}
 
-CRITICAL REQUIREMENT: For every item in the requirements array, you must include:
-- apply_url: The DIRECT URL to the online application portal or the agency's licensing page (not just the homepage). For state licensing, search "[state] ${ind.unit} license application" and find the exact portal URL.
-- agency_name: The exact official agency name (e.g. "Georgia Department of Early Care and Learning (DECAL)", "Gwinnett County Building & Development", "Georgia Secretary of State — Business Registration")
-- apply_instructions: An array of 3–6 specific numbered steps explaining exactly HOW to apply (e.g. "1. Go to childcare.georgia.gov, click 'Apply for a License'", "2. Create an account with your email", "3. Complete the Bright from the Start Form 100 online")
-- form_name: The specific form number and name (e.g. "Form 100 — Initial Application for Child Care Center License") or null if online-only
-- apply_phone: The agency's direct phone number for application inquiries
-- apply_email: The agency's contact email if available
-- apply_notes: Any important caveats (e.g. "Background checks must be completed BEFORE submitting", "Requires notarized signature", "Fire inspection must precede this application")
-- online_available: true if the application can be completed online, false if paper/in-person only
-
-Search specifically for:
-1. "[state name] ${ind.unit} license application online" — find the state licensing portal
-2. "[county name] business license application" — find the county portal
-3. "[county name] zoning permit application" — find planning dept URL
-4. "[county name] building permit online application" — find building dept portal
-5. "SBA licenses permits [state] ${ind.unit}" — cross-reference federal requirements
-6. "[state] LLC formation online" — Secretary of State portal
-7. "IRS EIN application" — always online at irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online
-
-Return ONLY:
+Return ONLY this JSON (no apply_instructions yet — those come separately):
 {
-  "summary": "4-sentence overview of the main regulatory requirements, mentioning the key agencies by name",
-  "decal_url": "https://childcare.georgia.gov/apply-license",
-  "sba_permits_url": "https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits",
+  "summary": "4-sentence overview of main regulatory requirements mentioning key agencies by name",
   "state_portal_url": "https://[actual state licensing portal URL]",
+  "sba_permits_url": "https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits",
+  "total_timeline_months": 14,
   "requirements": [
     {
-      "category": "Business Formation",
-      "item": "LLC / Business Entity Formation",
-      "detail": "Register your business entity with the state Secretary of State before applying for any licenses",
-      "timeline_weeks": 1,
+      "category": "Business Formation|Tax|Licensing|Zoning|Building|Fire|Insurance|Staffing",
+      "item": "Requirement name",
+      "detail": "1-2 sentence detail",
+      "timeline_weeks": 2,
       "cost_usd": 100,
-      "source": "Georgia Secretary of State",
-      "priority": "Critical",
-      "agency_name": "Georgia Secretary of State — Corporations Division",
-      "apply_url": "https://ecorp.sos.ga.gov/",
-      "form_name": "Articles of Organization (online filing)",
-      "apply_phone": "404-656-2817",
-      "apply_email": "corporations@sos.ga.gov",
-      "online_available": true,
-      "apply_instructions": [
-        "1. Go to ecorp.sos.ga.gov and click 'File a New Domestic LLC'",
-        "2. Enter your proposed business name and check availability",
-        "3. Complete the Articles of Organization form online — list your registered agent",
-        "4. Pay the $100 filing fee online by credit card",
-        "5. Download your Certificate of Organization (usually issued same day)"
-      ],
-      "apply_notes": "Choose your business name carefully — it must match exactly on all subsequent license applications"
-    },
-    {
-      "category": "Tax",
-      "item": "Federal EIN (Employer Identification Number)",
-      "detail": "Required to hire employees, open a business bank account, and file taxes",
-      "timeline_weeks": 0,
-      "cost_usd": 0,
-      "source": "IRS",
-      "priority": "Critical",
-      "agency_name": "Internal Revenue Service (IRS)",
-      "apply_url": "https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online",
-      "form_name": "IRS Form SS-4 (online EIN application)",
-      "apply_phone": "800-829-4933",
-      "apply_email": null,
-      "online_available": true,
-      "apply_instructions": [
-        "1. Go to irs.gov and search 'EIN Online Application' or use the direct link",
-        "2. Select entity type 'Limited Liability Company'",
-        "3. Answer questions about your business structure and purpose",
-        "4. Submit — your EIN is issued immediately online",
-        "5. Print and save the EIN confirmation letter (EIN Assignment Notice)"
-      ],
-      "apply_notes": "Apply online Mon–Fri 7am–10pm ET. EIN is issued instantly. Free — no charge."
-    },
-    {
-      "category": "Licensing",
-      "item": "State ${ind.unit} Operating License",
-      "detail": "Primary state license required to operate — issued by ${ind.regulatory}",
-      "timeline_weeks": 8,
-      "cost_usd": 500,
-      "source": "${ind.regulatory}",
-      "priority": "Critical",
-      "agency_name": "Replace with actual agency full name",
-      "apply_url": "https://Replace-with-actual-state-portal-URL",
-      "form_name": "Replace with actual form name/number",
-      "apply_phone": "Replace with actual phone",
-      "apply_email": "Replace with actual email or null",
-      "online_available": true,
-      "apply_instructions": [
-        "1. Complete all prerequisite steps first (LLC formation, EIN, lease agreement, background checks)",
-        "2. Go to the state licensing portal URL above",
-        "3. Create an account / log in",
-        "4. Complete the initial license application form with facility details",
-        "5. Upload required documents: floor plan, lease/deed, proof of insurance, staff credentials",
-        "6. Pay application fee online",
-        "7. Schedule pre-licensing inspection with the state licensor"
-      ],
-      "apply_notes": "Do NOT sign a lease until you have confirmed the zoning allows a ${ind.unit}. License cannot be transferred — it is tied to the specific address."
-    },
-    {
-      "category": "Zoning",
-      "item": "Zoning / Conditional Use Permit",
-      "detail": "Confirm ${ind.unit} is a permitted or conditional use in your target zoning district",
-      "timeline_weeks": 4,
-      "cost_usd": 400,
-      "source": "Local planning department",
-      "priority": "Critical",
-      "agency_name": "Replace with county/city Planning & Zoning Department name",
-      "apply_url": "https://Replace-with-actual-county-planning-dept-URL",
-      "form_name": "Replace with actual permit form name",
-      "apply_phone": "Replace with actual phone",
-      "apply_email": null,
-      "online_available": false,
-      "apply_instructions": [
-        "1. Visit the county/city planning department website (link above)",
-        "2. Look up the zoning designation of your target property using the GIS map or parcel lookup",
-        "3. Check the zoning ordinance to confirm ${ind.unit} is a permitted or conditional use",
-        "4. If conditional use: download and complete the Conditional Use Permit (CUP) application",
-        "5. Submit application with site plan, fee, and any required neighbor notifications",
-        "6. Attend public hearing if required for conditional use approval"
-      ],
-      "apply_notes": "Do this BEFORE signing a lease. Zoning approval can take 4–8 weeks and is not guaranteed."
-    },
-    {
-      "category": "Building",
-      "item": "Building Permit",
-      "detail": "Required for any construction, renovation, or change of occupancy to the space",
-      "timeline_weeks": 6,
-      "cost_usd": 1500,
-      "source": "Local Building Department",
-      "priority": "Critical",
-      "agency_name": "Replace with county/city Building Department name",
-      "apply_url": "https://Replace-with-actual-building-dept-URL",
-      "form_name": "Building Permit Application",
-      "apply_phone": "Replace with actual phone",
-      "apply_email": null,
-      "online_available": true,
-      "apply_instructions": [
-        "1. Hire a licensed architect to prepare construction drawings/plans per local code",
-        "2. Go to the building department portal (link above) and create a contractor/owner account",
-        "3. Submit permit application with: architect's stamped drawings, site plan, energy calculations",
-        "4. Pay permit fee (usually based on construction value)",
-        "5. Wait for plan review (2–6 weeks) — respond to any correction requests",
-        "6. Once approved, post the permit on-site before construction begins"
-      ],
-      "apply_notes": "Permit is required even if you are not doing major construction — change of occupancy classification alone triggers a permit in most jurisdictions."
-    },
-    {
-      "category": "Fire",
-      "item": "Fire Marshal Inspection & Certificate",
-      "detail": "Fire safety inspection required before Certificate of Occupancy is issued",
-      "timeline_weeks": 2,
-      "cost_usd": 0,
-      "source": "Local Fire Marshal",
-      "priority": "Critical",
-      "agency_name": "Replace with county/city Fire Marshal name",
-      "apply_url": "https://Replace-with-county-fire-marshal-URL",
-      "form_name": "Fire Inspection Request Form",
-      "apply_phone": "Replace with actual phone",
-      "apply_email": null,
-      "online_available": false,
-      "apply_instructions": [
-        "1. Complete all construction and install all fire safety equipment (sprinklers, extinguishers, exit signs, smoke detectors)",
-        "2. Contact the fire marshal office (phone/link above) to schedule a pre-occupancy inspection",
-        "3. Provide address, square footage, and intended occupancy type",
-        "4. Pass the inspection — correct any deficiencies and schedule re-inspection if needed",
-        "5. Receive fire safety certificate — required before applying for Certificate of Occupancy"
-      ],
-      "apply_notes": "Fire marshal inspections are typically free. Allow 2–4 weeks for scheduling. Sprinkler systems may be required for spaces over a certain size — confirm with fire marshal early."
-    },
-    {
-      "category": "Building",
-      "item": "Certificate of Occupancy (CO)",
-      "detail": "Final building department sign-off that the space is safe and legal to occupy",
-      "timeline_weeks": 2,
-      "cost_usd": 300,
-      "source": "Local Building Department",
-      "priority": "Critical",
-      "agency_name": "Replace with county/city Building Department name",
-      "apply_url": "https://Replace-with-actual-building-dept-URL",
-      "form_name": "Certificate of Occupancy Application",
-      "apply_phone": "Replace with actual phone",
-      "apply_email": null,
-      "online_available": false,
-      "apply_instructions": [
-        "1. Ensure all permitted construction work has passed final building inspections",
-        "2. Obtain fire marshal certificate (prerequisite)",
-        "3. Contact the building department to request a final inspection and CO",
-        "4. Pass all final inspections (building, electrical, plumbing, mechanical)",
-        "5. Pay CO fee and receive your Certificate of Occupancy",
-        "6. State licensor will require a copy of the CO before issuing your operating license"
-      ],
-      "apply_notes": "You CANNOT open or occupy the space without a valid CO. The state licensing agency will ask for a copy."
-    },
-    {
-      "category": "Insurance",
-      "item": "General Liability & Professional Liability Insurance",
-      "detail": "State licensing requires proof of insurance before issuing operating license",
-      "timeline_weeks": 1,
-      "cost_usd": 3000,
-      "source": "Licensed Insurance Broker",
-      "priority": "Critical",
-      "agency_name": "Licensed Insurance Broker (see notes for recommended providers)",
-      "apply_url": "https://www.thehartford.com/small-business-insurance/daycare-insurance",
-      "form_name": "Certificate of Insurance (ACORD 25)",
-      "apply_phone": null,
-      "apply_email": null,
-      "online_available": true,
-      "apply_instructions": [
-        "1. Contact a commercial insurance broker who specializes in childcare or small business",
-        "2. Request a quote for: General Liability ($1M–$2M), Professional Liability, Abuse & Molestation coverage, Workers Compensation (required once you hire staff)",
-        "3. Compare quotes from at least 3 insurers — recommended: The Hartford, Philadelphia Insurance, Markel, West Bend",
-        "4. Purchase the policy and request a Certificate of Insurance (ACORD 25 form)",
-        "5. Name the state licensing agency as an additional interested party on the certificate",
-        "6. Upload the certificate to your state license application"
-      ],
-      "apply_notes": "Abuse & Molestation (A&M) coverage is specifically required by most state childcare licensing agencies — ensure your policy includes it explicitly."
-    },
-    {
-      "category": "Staffing",
-      "item": "Director & Staff Background Checks",
-      "detail": "All staff must pass criminal background checks and fingerprinting before hire",
-      "timeline_weeks": 3,
-      "cost_usd": 50,
-      "source": "${ind.regulatory}",
-      "priority": "Critical",
-      "agency_name": "Replace with state background check agency (e.g. Georgia GAPS / FBI CJIS)",
-      "apply_url": "https://Replace-with-state-background-check-portal-URL",
-      "form_name": "Replace with state form (e.g. Georgia Form CJIS-1)",
-      "apply_phone": "Replace with actual phone",
-      "apply_email": null,
-      "online_available": false,
-      "apply_instructions": [
-        "1. All employees (including the director/owner) must be fingerprinted before working with children",
-        "2. Go to the state licensing portal and complete the background check authorization form",
-        "3. Schedule a fingerprinting appointment at an authorized location (LiveScan or IdentoGO)",
-        "4. Pay the fingerprinting fee per person (typically $40–$70)",
-        "5. Results are sent directly to the licensing agency — not to you",
-        "6. Staff must have clearance BEFORE they can count in staff-to-child ratios"
-      ],
-      "apply_notes": "Start background checks early — they can take 2–6 weeks. Out-of-state staff may require FBI checks in addition to state checks."
+      "source": "Agency short name",
+      "priority": "Critical|High|Medium",
+      "agency_name": "Full official agency name",
+      "apply_url": "https://actual-portal-url",
+      "form_name": "Form name/number or null",
+      "apply_phone": "Phone number or null",
+      "apply_email": "Email or null",
+      "online_available": true
     }
   ],
   "timeline_phases": [
-    {"phase": "Business Formation", "weeks": 2, "tasks": "LLC registration, EIN, business bank account"},
-    {"phase": "Site & Zoning", "weeks": 6, "tasks": "Zoning confirmation, lease negotiation, zoning/CUP application"},
-    {"phase": "Permits & Plans", "weeks": 10, "tasks": "Architect drawings, building permit application, state license pre-application"},
-    {"phase": "Build-Out", "weeks": 14, "tasks": "Construction, equipment install, signage, fire safety systems"},
-    {"phase": "Final Inspections", "weeks": 4, "tasks": "Fire marshal, building final, Certificate of Occupancy"},
-    {"phase": "Licensing & Insurance", "weeks": 4, "tasks": "State license application, insurance, background checks, staff hiring"},
-    {"phase": "Soft Open", "weeks": 2, "tasks": "Pre-licensing inspection, staff training, marketing, grand opening"}
+    {"phase": "Phase name", "weeks": 4, "tasks": "Brief task list"}
   ]
 }
+Include 8-10 requirements covering: LLC formation, EIN, state ${ind.unit} license, zoning/CUP, building permit, fire inspection, certificate of occupancy, insurance, background checks.
+Use REAL URLs, agency names, and phone numbers for ZIP ${zip()}.`;
 
-Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, phone numbers, agency names, and instructions specific to ZIP ${zip()} and the state/county. Search for the actual portal URLs.`;
+  // ── Part B (called after Part A renders) ───────────────────
+  async function _runAgent5PartB(reqs) {
+    const sysB = `You are a regulatory compliance expert. Respond JSON only.`;
+    const reqList = reqs.map(r => `${r.category}: ${r.item}`).join('\n');
+    const usrB = `For each requirement below for opening a ${ind.unit} near ZIP ${zip()}, provide apply_instructions and apply_notes.
+
+Requirements:
+${reqList}
+
+Return ONLY this JSON:
+{
+  "instructions": [
+    {
+      "item": "Exact requirement name",
+      "apply_instructions": ["1. Step one", "2. Step two", "3. Step three", "4. Step four", "5. Step five"],
+      "apply_notes": "Critical caveat or null"
+    }
+  ]
+}
+For each item provide 4-6 numbered steps with SPECIFIC actions (not generic). Include actual form names, website paths, and timing caveats.`;
+    try {
+      const partB = await claudeJSON(sysB, usrB);
+      if (partB && Array.isArray(partB.instructions)) {
+        partB.instructions.forEach(inst => {
+          const req = reqs.find(r => r.item === inst.item ||
+            r.item.toLowerCase().includes((inst.item||'').toLowerCase().split(' ')[0]));
+          if (req) {
+            if (inst.apply_instructions) req.apply_instructions = inst.apply_instructions;
+            if (inst.apply_notes) req.apply_notes = inst.apply_notes;
+          }
+        });
+        // Re-render How to Apply tab
+        const applyContainer = $('5-a-c');
+        if (applyContainer) _renderAgent5ApplyCards(R.a5, applyContainer);
+      }
+    } catch(e2) { console.warn('Agent 5 Part B failed:', e2.message); }
+  }
 
   try {
-    _setDemoKey(5);
-    let d=await claudeJSON(sys,usr);
+    let d = !demoMode ? await claudeJSON(sysA, usrA) : (R.a5 || null);
     if(!d) { console.warn('Agent 5 fallback'); d=getFallback5(); }
     R.a5=d;
 
@@ -4999,63 +4754,73 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
 
     // ── How to Apply cards ────────────────────────────────
     const applyContainer = $('5-a-c');
-    if (applyContainer) {
-      let applyHtml = `<div style="padding:14px;display:flex;flex-direction:column;gap:14px">`;
-      (d.requirements||[]).forEach((r, i) => {
-        const pb = r.priority==='Critical'?'b-red':r.priority==='High'?'b-amber':'b-blue';
-        const onlineBadge = r.online_available
-          ? `<span class="badge b-green" style="font-size:10px">🌐 Online</span>`
-          : `<span class="badge b-amber" style="font-size:10px">📄 In-Person / Paper</span>`;
-        const stepsHtml = (r.apply_instructions||[]).map(step =>
-          `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px">
-            <span style="background:var(--blue-dim);color:var(--blue);border-radius:50%;width:22px;height:22px;min-width:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'Syne',sans-serif">${step.match(/^\d+/)?step.match(/^\d+/)[0]:'•'}</span>
-            <span style="font-size:12px;line-height:1.65;color:var(--text)">${step.replace(/^\d+\.\s*/,'')}</span>
-          </div>`
-        ).join('');
-        const phoneOk = r.apply_phone && r.apply_phone !== 'N/A' && r.apply_phone !== 'null';
-        const emailOk = r.apply_email && r.apply_email !== 'N/A' && r.apply_email !== 'null';
-        const contactRow = [
-          phoneOk ? `📞 ${r.apply_phone}` : '',
-          emailOk ? `✉ <a href="mailto:${r.apply_email}" style="color:var(--blue)">${r.apply_email}</a>` : ''
-        ].filter(Boolean).join(' &nbsp;·&nbsp; ');
-
-        applyHtml += `
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-            <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span class="badge ${pb}">${r.category}</span>
-              ${onlineBadge}
-              <strong style="font-size:13px;font-family:'Syne',sans-serif;flex:1;min-width:140px">${r.item}</strong>
-              <span style="font-size:11px;color:var(--faint)">${r.timeline_weeks>0?r.timeline_weeks+' wks':''} ${r.cost_usd>0?'· $'+r.cost_usd.toLocaleString():'· Free'}</span>
-            </div>
-            <div style="padding:12px 14px;display:flex;flex-direction:column;gap:10px">
-              <div style="font-size:11px;color:var(--muted)">🏛 <strong>${r.agency_name||r.source||''}</strong></div>
-              ${r.form_name ? `<div style="font-size:11px;color:var(--faint)">📋 Form: ${r.form_name}</div>` : ''}
-              ${contactRow ? `<div style="font-size:11px;color:var(--muted)">${contactRow}</div>` : ''}
-              ${stepsHtml ? `<div style="margin-top:4px">${stepsHtml}</div>` : ''}
-              ${r.apply_notes ? `<div style="padding:8px 10px;background:var(--surface3);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;font-size:11px;color:var(--amber);line-height:1.6">⚠ ${r.apply_notes}</div>` : ''}
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-                ${r.apply_url && r.apply_url !== 'N/A' && r.apply_url.startsWith('http')
-                  ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:12px">↗ Go to Application Portal</a>`
-                  : `<span style="font-size:11px;color:var(--faint)">Application portal URL not available — contact agency directly</span>`}
-              </div>
-            </div>
-          </div>`;
-      });
-      applyHtml += `</div>`;
-      applyContainer.innerHTML = applyHtml;
-    }
+    if (applyContainer) _renderAgent5ApplyCards(d, applyContainer);
 
     // ── Timeline chart ────────────────────────────────────
     killChart('ch-5');
-    const ctx=$('ch-5').getContext('2d');
-    charts['ch-5']=new Chart(ctx,{type:'bar',data:{
+    const ctx5=$('ch-5').getContext('2d');
+    charts['ch-5']=new Chart(ctx5,{type:'bar',data:{
       labels:(d.timeline_phases||[]).map(p=>p.phase),
       datasets:[{label:'Weeks',data:(d.timeline_phases||[]).map(p=>p.weeks),backgroundColor:['rgba(74,158,255,0.7)','rgba(61,214,140,0.7)','rgba(245,166,35,0.7)','rgba(167,139,250,0.7)','rgba(45,212,191,0.7)','rgba(255,95,95,0.7)','rgba(74,158,255,0.5)'],borderWidth:0,borderRadius:4}]
     },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} weeks — ${(d.timeline_phases||[])[c.dataIndex]?.tasks||''}`}}},scales:{x:{ticks:{color:'#8a8d96'},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96',font:{size:10}},grid:{color:'#2a2d35'}}}}});
 
     setDot(5,'done'); showOut(5);
+
+    // Part B: enrich with apply_instructions (non-blocking, post-render)
+    if (!demoMode && d.requirements && d.requirements.length) {
+      _runAgent5PartB(d.requirements).catch(e => console.warn('Agent 5 Part B err:', e.message));
+    }
+
     return JSON.stringify(d);
   } catch(e){setDot(5,'error');showOut(5);$('5-s-t').textContent='Error: '+e.message;throw e}
+}
+
+function _renderAgent5ApplyCards(d, applyContainer) {
+  let applyHtml = `<div style="padding:14px;display:flex;flex-direction:column;gap:14px">`;
+  (d.requirements||[]).forEach((r) => {
+    const pb = r.priority==='Critical'?'b-red':r.priority==='High'?'b-amber':'b-blue';
+    const onlineBadge = r.online_available
+      ? `<span class="badge b-green" style="font-size:10px">🌐 Online</span>`
+      : `<span class="badge b-amber" style="font-size:10px">📄 In-Person / Paper</span>`;
+    const stepsHtml = (r.apply_instructions||[]).map(step =>
+      `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px">
+        <span style="background:var(--blue-dim);color:var(--blue);border-radius:50%;width:22px;height:22px;min-width:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'Syne',sans-serif">${step.match(/^\d+/)?step.match(/^\d+/)[0]:'•'}</span>
+        <span style="font-size:12px;line-height:1.65;color:var(--text)">${step.replace(/^\d+\.\s*/,'')}</span>
+      </div>`
+    ).join('');
+    const loadingSteps = r.apply_instructions ? '' :
+      `<div style="font-size:11px;color:var(--faint);padding:8px 0;font-style:italic">⏳ Loading step-by-step instructions…</div>`;
+    const phoneOk = r.apply_phone && r.apply_phone !== 'N/A' && r.apply_phone !== 'null';
+    const emailOk = r.apply_email && r.apply_email !== 'N/A' && r.apply_email !== 'null';
+    const contactRow = [
+      phoneOk ? `📞 ${r.apply_phone}` : '',
+      emailOk ? `✉ <a href="mailto:${r.apply_email}" style="color:var(--blue)">${r.apply_email}</a>` : ''
+    ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+
+    applyHtml += `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="badge ${pb}">${r.category}</span>
+          ${onlineBadge}
+          <strong style="font-size:13px;font-family:'Syne',sans-serif;flex:1;min-width:140px">${r.item}</strong>
+          <span style="font-size:11px;color:var(--faint)">${r.timeline_weeks>0?r.timeline_weeks+' wks':''} ${r.cost_usd>0?'· $'+r.cost_usd.toLocaleString():'· Free'}</span>
+        </div>
+        <div style="padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:11px;color:var(--muted)">🏛 <strong>${r.agency_name||r.source||''}</strong></div>
+          ${r.form_name ? `<div style="font-size:11px;color:var(--faint)">📋 Form: ${r.form_name}</div>` : ''}
+          ${contactRow ? `<div style="font-size:11px;color:var(--muted)">${contactRow}</div>` : ''}
+          ${stepsHtml ? `<div style="margin-top:4px">${stepsHtml}</div>` : loadingSteps}
+          ${r.apply_notes ? `<div style="padding:8px 10px;background:var(--surface3);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;font-size:11px;color:var(--amber);line-height:1.6">⚠ ${r.apply_notes}</div>` : ''}
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+            ${r.apply_url && r.apply_url !== 'N/A' && r.apply_url.startsWith('http')
+              ? `<a href="${r.apply_url}" target="_blank" class="link-btn primary-btn" style="font-size:12px">↗ Go to Application Portal</a>`
+              : `<span style="font-size:11px;color:var(--faint)">Application portal URL not available — contact agency directly</span>`}
+          </div>
+        </div>
+      </div>`;
+  });
+  applyHtml += `</div>`;
+  applyContainer.innerHTML = applyHtml;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -5066,202 +4831,65 @@ Replace ALL placeholder text (e.g. "Replace with actual...") with REAL URLs, pho
 async function runAgent6() {
   setDot(6,'running');
   const ind=industry();
-  const sys=`You are a senior competitive intelligence analyst specializing in ${ind.unit} market research. You cross-reference commercial directories, state licensing systems, consumer review platforms, accreditation databases, and non-profit financial disclosures to build a complete competitor landscape. Always cite your specific sources and search queries. Respond with ONLY a valid JSON object — no prose before or after.`;
-  const usr=`Conduct a comprehensive competitive intelligence sweep for ALL existing ${ind.units} within ${radius()} miles of ZIP ${zip()}.
-Key national/regional competitors to look for: ${ind.competitors}.
 
-AUTHORITATIVE DATA SOURCES — search ALL of the following and cite each one used:
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(6);
+    if (_d) { R.a6 = _d; }
+  }
 
-COMMERCIAL DIRECTORIES & REVIEW PLATFORMS:
-1. Google Maps / Google Business Profile — search "${ind.unit} near ${zip()}" and per-city searches. Note name, address, rating, review count, hours, website.
-2. Yelp Business Search — search "${ind.units} [city, state]" for ratings, reviews, price tier, photos
-3. Winnie.com — childcare-specific aggregator with real availability, tuition, and waitlist data
-4. Care.com provider directory — includes both licensed centers and home daycares
-5. Daycare.com / ChildcareCenter.us — location + rating directories
-6. Facebook Business Pages — community-recommended centers, local parents groups
-7. Nextdoor business listings — hyper-local competitor discovery
+  // ── Part A: City-level aggregates + top_chains (no nested centers arrays) ──
+  const sysA=`You are a senior competitive intelligence analyst specializing in ${ind.unit} market research. You cross-reference commercial directories, state licensing, review platforms, and NDCP data. Respond JSON only.`;
+  const usrA=`Conduct a competitive intelligence sweep for ${ind.units} within ${radius()} miles of ZIP ${zip()}.
+Key competitors: ${ind.competitors}
 
-STATE LICENSING & REGULATORY DATABASES:
-8. State child care licensing portal (primary source for OFFICIAL licensed capacity):
-   - Georgia: childcare.georgia.gov/find-licensed-program (CAPS — search by county/city)
-   - Texas: hhs.texas.gov/childcare-licensing-search
-   - California: ccld.dss.ca.gov
-   - Florida: childcarefacilities.net
-   - All states: childcareeta.acf.hhs.gov/cclc (federal CCDF gateway)
-9. State QRIS (Quality Rating and Improvement System) database — quality star ratings:
-   - Georgia QRIS: qualityrated.decal.ga.gov
-   - Search "[state] QRIS childcare quality ratings database"
-10. Head Start / Early Head Start locator — eclkc.acf.hhs.gov/center-locator (subsidized competition)
-11. State Pre-K program locator — publicly funded competition for 3–4 year olds
+Search: Google Maps "${ind.unit} near ${zip()}", Yelp, state licensing portal, Winnie.com, NAEYC accreditation finder, Head Start locator (eclkc.acf.hhs.gov), NDCP (DOL Women's Bureau county rates).
 
-ACCREDITATION & QUALITY DATABASES:
-12. NAEYC accreditation finder — naeyc.org/accreditation/find (gold standard for center quality)
-13. NAC (National Accreditation Commission) database — naccreditation.org
-14. National School-Age Care Alliance (NSACA/COA) accreditation
-15. State QRIS quality level lookup (star ratings 1–5)
-
-NON-PROFIT / FINANCIAL TRANSPARENCY:
-16. ProPublica Nonprofit Explorer — search non-profit center names for Form 990 data (revenue, capacity, executive pay)
-17. Charity Navigator / GuideStar — for non-profit competitors' financials and mission
-
-EMPLOYER-SPONSORED & INSTITUTIONAL COMPETITION:
-18. Hospital / large employer backup care programs (Bright Horizons, KinderCare employer partnerships)
-19. University campus childcare centers (often subsidized — direct competition for staff families)
-20. Military family childcare (MFCC) / CDCs on bases (if near military installation)
-
-PRICING INTELLIGENCE:
-21. NDCP (National Database of Childcare Prices) — DOL Women's Bureau — county median rates
-22. Child Care Aware "Price of Care" annual state report — average rates by age group and care type
-23. State CCDF subsidy rate schedules — market floor pricing
-
-SEARCH QUERIES TO EXECUTE:
-- Google Maps: "${ind.unit} near ${zip()}"
-- Yelp: "${ind.units} in [each city within ${radius()} miles]"
-- State licensing portal: search by county name for all licensed ${ind.units}
-- Winnie.com: search by ZIP code
-- NAEYC: search by ZIP or city
-- Head Start locator: search by county/ZIP
-- Google: "${ind.unit} [city name] reviews 2024"
-- Google: "${ind.unit} [city name] waitlist"
-- Google: "${ind.unit} tuition [city name] [state]"
-
-For each city, find the ACTUAL names and addresses of ALL competitor types — include ALL of the following, not just premium chains:
-- Premium chains (Primrose, KinderCare, Bright Horizons, Goddard)
-- Independent licensed centers (private, non-franchise)
-- Home-based / family daycares (licensed, typically 6–12 children)
-- Faith-based / church-run childcare programs
-- Non-profit childcare centers
-- Head Start / Early Head Start programs (federally subsidized)
-- Subsidized / CCAP-accepting centers (lower income brackets)
-- Employer-sponsored or campus-based centers
-- Childcare co-ops (parent-run or community-run)
-- After-school and school-age care programs (SACC)
-
-Include gap_score_explanation (cite specific numbers and sources).
-Note accreditation status, QRIS rating, provider_type (Premium/Budget/Subsidized/Home-based/Faith-based/Non-profit), and whether center accepts CCAP/CAPS subsidies.
-
-Return ONLY this JSON:
+Return ONLY this JSON (no individual center details — aggregate data only):
 {
-  "summary": "5-sentence competitive landscape citing specific numbers, sources, and market structure",
+  "summary": "5-sentence competitive landscape with specific numbers and sources",
   "total_licensed_estimated": 40,
   "total_accredited_naeyc": 4,
   "total_head_start_slots": 280,
   "ndcp_county_median_infant": 1820,
   "ndcp_county_median_preschool": 1280,
-  "ndcp_source": "DOL NDCP 2022 — [County Name] County",
-  "data_sources": ["Google Maps search '${ind.unit} near ${zip()}'", "State CAPS licensing database (childcare.georgia.gov)", "Winnie.com ZIP search", "NAEYC accreditation finder", "Head Start locator (eclkc.acf.hhs.gov)", "NDCP DOL Women's Bureau 2022", "Yelp business search", "ProPublica Nonprofit Explorer"],
-  "cities": [
-    {
-      "city": "City A",
-      "center_count": 8,
-      "licensed_capacity_total": 640,
-      "chain_count": 3, "independent_count": 4, "nonprofit_count": 1,
-      "naeyc_accredited_count": 2,
-      "qris_avg_stars": 3.4,
-      "head_start_slots_city": 60,
-      "avg_monthly_infant": 1950,
-      "avg_monthly_preschool": 1580,
-      "avg_rating": 4.1,
-      "avg_review_count": 87,
-      "capacity_utilization_pct": 88,
-      "waitlist_common": false,
-      "avg_waitlist_weeks": 4,
-      "gap_score": 7,
-      "gap_score_explanation": "Gap score 7/10: 8 licensed centers (CAPS database) with ~640 total capacity serving est. 3,400 children under 5 (Census ACS 2022). Utilization 88% per Winnie.com availability data. 3 of 8 centers report 4+ week waitlists. Market underserved but not critical. NDCP median infant rate $1,820/mo.",
-      "centers": [
-        {
-          "name": "Bright Horizons Suwanee", "address": "123 Main St, City A, GA",
-          "rating": 4.3, "review_count": 124, "type": "Chain", "nonprofit": false,
-          "capacity_est": 120, "monthly_rate_est": 1950,
-          "accreditation": "NAEYC", "qris_stars": 4,
-          "waitlist_weeks": 6, "currently_enrolling": false,
-          "google_maps_url": "https://maps.google.com/?q=Bright+Horizons+Suwanee+GA",
-          "yelp_url": "https://www.yelp.com/search?find_desc=daycare&find_loc=Suwanee+GA",
-          "winnie_url": "https://winnie.com/place/bright-horizons-suwanee",
-          "notes": "120 capacity, NAEYC accredited, 4-star QRIS, 6-week waitlist for infants"
-        },
-        {
-          "name": "KinderCare City A", "address": "456 Oak Ave, City A, GA",
-          "rating": 4.0, "review_count": 89, "type": "Chain", "nonprofit": false,
-          "capacity_est": 90, "monthly_rate_est": 1780,
-          "accreditation": "None", "qris_stars": 3,
-          "waitlist_weeks": 0, "currently_enrolling": true,
-          "google_maps_url": "https://maps.google.com/?q=KinderCare+City+A+GA",
-          "yelp_url": "", "winnie_url": "",
-          "notes": "90 capacity, currently enrolling, 3-star QRIS"
-        },
-        {
-          "name": "Mary's Home Daycare", "address": "789 Elm St, City A, GA",
-          "rating": 4.7, "review_count": 28, "type": "Home-based", "provider_type": "Home-based/Budget", "nonprofit": false,
-          "capacity_est": 8, "monthly_rate_est": 950,
-          "accreditation": "None", "qris_stars": 2,
-          "accepts_subsidy": true, "waitlist_weeks": 0, "currently_enrolling": true,
-          "google_maps_url": "", "yelp_url": "", "winnie_url": "",
-          "notes": "Licensed home daycare, 8 capacity, CAPS-accepting, flexible hours, $950/mo"
-        },
-        {
-          "name": "Grace Church Early Learning", "address": "101 Oak Rd, City A, GA",
-          "rating": 4.5, "review_count": 45, "type": "Faith-based", "provider_type": "Faith-based/Budget", "nonprofit": true,
-          "capacity_est": 40, "monthly_rate_est": 850,
-          "accreditation": "None", "qris_stars": 3,
-          "accepts_subsidy": true, "waitlist_weeks": 2, "currently_enrolling": true,
-          "google_maps_url": "", "yelp_url": "", "winnie_url": "",
-          "notes": "Church-run, 40 capacity, CAPS-accepting, $850/mo — direct competition for budget-conscious families"
-        }
-      ]
-    }
-  ],
-  "top_chains": [
-    {
-      "name": "Competitor A (Premium)", "locations_in_area": 4,
-      "monthly_tuition_range": "$1,600–$2,100", "rating": 4.1,
-      "type": "Chain", "provider_type": "Premium", "nonprofit": false, "market_share_pct": 22,
-      "accepts_subsidy": false, "naeyc_accredited": true, "employer_partnerships": true,
-      "strengths": "Brand recognition, employer subsidies, NAEYC accreditation",
-      "weaknesses": "Premium pricing, rigid curriculum, long waitlists"
-    },
-    {
-      "name": "Local Home Daycare Network", "locations_in_area": 12,
-      "monthly_tuition_range": "$800–$1,200", "rating": 4.3,
-      "type": "Home-based", "provider_type": "Home-based/Budget", "nonprofit": false, "market_share_pct": 15,
-      "accepts_subsidy": true, "naeyc_accredited": false, "employer_partnerships": false,
-      "strengths": "Low cost, flexible hours, personalized care, subsidy-friendly",
-      "weaknesses": "Small capacity (6–12), limited structured curriculum, licensing varies"
-    },
-    {
-      "name": "First Baptist Childcare Center", "locations_in_area": 2,
-      "monthly_tuition_range": "$700–$1,000", "rating": 4.5,
-      "type": "Faith-based", "provider_type": "Faith-based/Budget", "nonprofit": true, "market_share_pct": 8,
-      "accepts_subsidy": true, "naeyc_accredited": false, "employer_partnerships": false,
-      "strengths": "Community trust, low cost, faith-based values, CAPS-accepting",
-      "weaknesses": "Limited capacity, may have religious enrollment preference"
-    },
-    {
-      "name": "Head Start Program — [County]", "locations_in_area": 3,
-      "monthly_tuition_range": "$0 (income-qualified)", "rating": 4.0,
-      "type": "Government/Non-profit", "provider_type": "Subsidized", "nonprofit": true, "market_share_pct": 10,
-      "accepts_subsidy": true, "naeyc_accredited": false, "employer_partnerships": false,
-      "strengths": "Free for qualifying families, comprehensive services (health, nutrition, family support)",
-      "weaknesses": "Income-limited, part-day only in many sites, waitlist for slots"
-    }
-  ],
+  "ndcp_source": "DOL NDCP 2022 — [County] County",
+  "data_sources": ["Source 1", "Source 2"],
   "home_daycares_estimated": 20,
   "faith_based_count": 4,
   "subsidized_seats_total": 180,
   "competitive_intensity_score": 6,
-  "market_structure_note": "Fragmented market — 4 chains (35% share) + 8 independents + 12 home daycares + 2 faith-based + 1 Head Start program"
+  "market_structure_note": "Brief market structure description",
+  "cities": [
+    {
+      "city": "City name",
+      "center_count": 8, "licensed_capacity_total": 640,
+      "chain_count": 3, "independent_count": 4, "nonprofit_count": 1,
+      "naeyc_accredited_count": 2, "qris_avg_stars": 3.4, "head_start_slots_city": 60,
+      "avg_monthly_infant": 1950, "avg_monthly_preschool": 1580,
+      "avg_rating": 4.1, "avg_review_count": 87,
+      "capacity_utilization_pct": 88, "waitlist_common": false, "avg_waitlist_weeks": 4,
+      "gap_score": 7,
+      "gap_score_explanation": "1-2 sentence explanation citing sources"
+    }
+  ],
+  "top_chains": [
+    {
+      "name": "Chain name", "locations_in_area": 4,
+      "monthly_tuition_range": "$1,600–$2,100", "rating": 4.1,
+      "type": "Chain|Independent|Non-profit|Home-based|Faith-based|Subsidized",
+      "provider_type": "Premium|Budget|Subsidized|Home-based|Faith-based",
+      "nonprofit": false, "market_share_pct": 22,
+      "accepts_subsidy": false, "naeyc_accredited": true,
+      "strengths": "Key strengths", "weaknesses": "Key weaknesses"
+    }
+  ]
 }
+Use REAL data for ZIP ${zip()}. Revenue model: ${ind.revenue_unit}.`;
 
-Replace ALL example values with real search data for ZIP ${zip()}.
-Use avg_monthly_infant and avg_monthly_preschool as the primary and secondary revenue price points.
-Revenue model: ${ind.revenue_unit}.
-Be specific about which source each data point came from.`;
   try {
-    _setDemoKey(6);
-    let d=await claudeJSON(sys,usr);
+    let d = !demoMode ? await claudeJSON(sysA, usrA) : (R.a6 || null);
     // Fallback: if claudeJSON returns null after 3 retries, use baseline data
     if(!d) {
-      const ind=industry();
       console.warn('Agent 6: using baseline fallback data');
       d={
         summary:`Competitive intelligence for ${radius()}-mile radius of ZIP ${zip()}. Baseline data used — run with a valid API key for live market research on ${ind.units} in this area.`,
@@ -5337,8 +4965,60 @@ Be specific about which source each data point came from.`;
     tbl+=`</tbody></table>`;
     $('6-t-c').innerHTML=tbl;
     setDot(6,'done'); showOut(6);
+
+    // Part B: Enrich cities with individual center details (non-blocking, lazy)
+    if (!demoMode && d.cities && d.cities.length) {
+      _runAgent6PartB(d).catch(e => console.warn('Agent 6 Part B err:', e.message));
+    }
+
     return JSON.stringify(d);
   } catch(e){setDot(6,'error');showOut(6);$('6-s-t').textContent='Error: '+e.message;throw e}
+}
+
+async function _runAgent6PartB(data) {
+  const ind6 = industry();
+  const cityNames = (data.cities||[]).map(c=>c.city).join(', ');
+  const sys6b = `You are a competitive intelligence analyst. Respond JSON only.`;
+  const usr6b = `For each city below near ZIP ${zip()}, list the specific named ${ind6.units} (4-6 per city) you find via Google Maps, Yelp, state licensing portal, and Winnie.com.
+
+Cities: ${cityNames}
+
+Return ONLY this JSON:
+{
+  "cities": [
+    {
+      "city": "City name",
+      "centers": [
+        {
+          "name": "Center name", "address": "Full address",
+          "rating": 4.3, "review_count": 124,
+          "type": "Chain|Independent|Home-based|Faith-based|Non-profit",
+          "nonprofit": false, "capacity_est": 120, "monthly_rate_est": 1950,
+          "accreditation": "NAEYC|None", "qris_stars": 4,
+          "accepts_subsidy": false, "waitlist_weeks": 6, "currently_enrolling": false,
+          "google_maps_url": "https://maps.google.com/?q=...",
+          "yelp_url": "https://www.yelp.com/...",
+          "winnie_url": "https://winnie.com/...",
+          "notes": "Brief note"
+        }
+      ]
+    }
+  ]
+}`;
+  try {
+    const partB = await claudeJSON(sys6b, usr6b);
+    if (partB && Array.isArray(partB.cities)) {
+      partB.cities.forEach(bc => {
+        const cityObj = (data.cities||[]).find(c => c.city === bc.city ||
+          c.city.toLowerCase().includes(bc.city.toLowerCase().split(' ')[0]));
+        if (cityObj && Array.isArray(bc.centers)) {
+          cityObj.centers = bc.centers;
+        }
+      });
+      window._comp6cities = data.cities;
+      window._comp6full = data;
+    }
+  } catch(e) { console.warn('Agent 6 Part B failed:', e.message); }
 }
 
 // ── Competitive Intel: drill-down on chart bar click ────────
@@ -7184,27 +6864,123 @@ function buildGrants(d) {
 // ══════════════════════════════════════════════════════════
 
 
+// ══════════════════════════════════════════════════════════
+// AGENT 13 — Competitor Deep-Dive (3 sub-calls to avoid max_tokens)
+// Part A: Summary + Competitor Profiles
+// Part B: Pain Point Analysis + Differentiation Strategy
+// Part C: Messaging Guide
+// ══════════════════════════════════════════════════════════
 async function runAgent13(a6) {
   setDot(13,'running');
-  const ind=industry();
-  const sys=`You are a competitive intelligence analyst for ${ind.unit} markets. Search Google reviews, Yelp, and Facebook for real customer complaints about ${ind.units} in the target area. Respond JSON only.`;
-  const usr=`Search for Google Maps reviews, Yelp reviews, and Facebook reviews for specific ${ind.units} near ZIP ${zip()}. Find real customer complaints and pain points. Known competitors in this market: ${ind.competitors}.
+  const ind = industry();
+  const compCtx = ctx(a6, ['summary','cities','top_chains'], 800);
 
-Search for reviews of the top ${ind.unit} chains and independent operators near ZIP ${zip()}. Find common complaint themes and differentiation opportunities.
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(13);
+    if (_d) { R.a13 = _d; try { buildCompDeepDive(_d); } catch(e){} setDot(13,'done'); showOut(13); return JSON.stringify(_d); }
+  }
 
-Competitor context: ${ctx(a6,['summary','cities','top_chains'])}
-
-Return ONLY:
-{"summary":"5-sentence competitive landscape and differentiation opportunity summary","competitor_profiles":[{"name":"Primrose Schools (Gwinnett locations)","type":"Corporate Franchise","avg_rating":4.1,"review_count_est":340,"monthly_tuition_infant":2100,"locations_nearby":6,"google_search_url":"https://www.google.com/search?q=Primrose+School+Gwinnett+County+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=primrose+school&find_loc=Duluth%2C+GA","top_positive_themes":["Strong structured curriculum","Clean facilities","Good parent communication app","Experienced teachers","Consistent routines"],"top_complaint_themes":["3-6 month infant waitlists","Corporate and impersonal — hard to reach director","High staff turnover in infant rooms","Tuition increases $150-200/mo with minimal notice","Cookie-cutter curriculum across all locations"],"sample_complaints":["We were on the waitlist 4 months and they never called","The director is never available — you talk to whoever is at the front desk","Third teacher change in 6 months for my infant son","They raised tuition $175/month with only 2 weeks notice","Every Primrose is scripted and corporate — my daughter's teachers barely know her name"],"differentiation_opportunity":"Waitlist demand shows massive unmet need. Director accessibility and teacher stability are clear gaps."},{"name":"KinderCare (Gwinnett locations)","type":"Corporate Chain","avg_rating":3.8,"review_count_est":280,"monthly_tuition_infant":1750,"locations_nearby":4,"google_search_url":"https://www.google.com/search?q=KinderCare+Gwinnett+County+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=kindercare&find_loc=Duluth%2C+GA","top_positive_themes":["More affordable than Primrose","Convenient locations","Accepts CAPS subsidies","Online billing system"],"top_complaint_themes":["Extreme staff turnover — new faces every month","Overcrowded classrooms at peak hours","Poor parent communication — incident reports delayed","Facility maintenance issues — broken equipment","Food quality poor — processed snacks only"],"sample_complaints":["My son has had 7 different teachers in 12 months","I reported a safety issue and nothing was fixed","The classroom smelled and furniture was torn — pulled daughter out after 2 weeks","They never answer the parent app","Lunch was goldfish crackers and a juice box — I pay $1,700/month"],"differentiation_opportunity":"Staff stability, fresh food, and proactive communication are massive opportunities."},{"name":"Bright Horizons (Atlanta area)","type":"Corporate Premium","avg_rating":4.4,"review_count_est":190,"monthly_tuition_infant":2400,"locations_nearby":2,"google_search_url":"https://www.google.com/search?q=Bright+Horizons+Atlanta+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=bright+horizons&find_loc=Atlanta%2C+GA","top_positive_themes":["Genuinely excellent credentialed teachers","Detailed daily reports","Beautiful facilities","Low teacher turnover","Strong individualized curriculum"],"top_complaint_themes":["$2,400+/month excludes most families","6-9 month waitlists","Very limited Gwinnett locations","Drop-in care nearly nonexistent"],"sample_complaints":["We love everything about Bright Horizons but $2,600/month is not sustainable","We were on the waitlist 7 months and had to find an alternative","Great if you can get in and afford it — most people cannot"],"differentiation_opportunity":"BH quality at mid-premium price ($1,900-2,050) is the exact gap the market needs."},{"name":"Independent Centers (Gwinnett avg)","type":"Independent","avg_rating":4.2,"review_count_est":85,"monthly_tuition_infant":1450,"locations_nearby":24,"google_search_url":"https://www.google.com/search?q=independent+daycare+reviews+Gwinnett+County+GA","yelp_url":"https://www.yelp.com/search?find_desc=daycare&find_loc=Gwinnett+County%2C+GA","top_positive_themes":["Owner-operated accountability","Teachers know every child","Flexible scheduling","Lower tuition"],"top_complaint_themes":["Outdated facilities and playground","No technology — paper sign-in, no parent app, no cameras","Curriculum not structured — mostly free play","Close at 5:30pm — not workable for most dual-income families"],"sample_complaints":["Love the people but the building is old and playground is falling apart","No cameras — I have no idea what happens during the day","My daughter is not learning anything — just TV and free play","They close at 5:30 and my husband gets off at 5"],"differentiation_opportunity":"Beat independents on: technology, structured curriculum, hours, facilities."},{"name":"Barrow County Providers","type":"Regional Independent","avg_rating":3.9,"review_count_est":28,"monthly_tuition_infant":1300,"locations_nearby":6,"google_search_url":"https://www.google.com/search?q=daycare+Winder+GA+reviews","yelp_url":"https://www.yelp.com/search?find_desc=daycare&find_loc=Winder%2C+GA","top_positive_themes":["Only affordable option in Barrow County","Community feel","Flexible in some cases"],"top_complaint_themes":["Severe shortage — families report no openings anywhere","Outdated facilities with minimal learning materials","Not all DECAL licensed — quality inconsistent","No curriculum — supervised childcare only"],"sample_complaints":["We called every daycare in Barrow County and everyone is full — we don't know what to do","The center doesn't even have a playground — it's a converted house","We drive to Gwinnett because there's nothing decent in Barrow County","My son learned almost nothing — no curriculum whatsoever"],"differentiation_opportunity":"Any quality provider in Barrow County becomes instant market leader — families literally have no alternative."}],"pain_point_analysis":[{"pain":"Staff Turnover","frequency_pct":68,"competitors_affected":["KinderCare","Primrose"],"your_solution":"Primary teacher guarantee 6 months minimum + above-market salaries + retention bonuses","marketing_angle":"The teacher who knows your baby — guaranteed for 6 months"},{"pain":"Waitlists / No Availability","frequency_pct":61,"competitors_affected":["Primrose","Bright Horizons","Barrow"],"your_solution":"Open pre-enrollment 6 months early. Position as THE waitlist alternative.","marketing_angle":"No waitlist — enroll this week"},{"pain":"Poor Communication","frequency_pct":54,"competitors_affected":["KinderCare","Independents"],"your_solution":"Brightwheel daily photos + videos + nap/meal reports. Director responds within 2 hours guaranteed.","marketing_angle":"See what your child does every hour of the day"},{"pain":"Surprise Tuition Increases","frequency_pct":42,"competitors_affected":["Primrose","KinderCare"],"your_solution":"Published annual tuition schedule. 60-day notice minimum. Rate locked 12 months.","marketing_angle":"No surprise bills — your rate is locked for a full year"},{"pain":"Corporate Impersonal Feel","frequency_pct":48,"competitors_affected":["Primrose","KinderCare","Bright Horizons"],"your_solution":"Owner present daily. Director meets every family. Personalized daily portfolio.","marketing_angle":"Locally owned — your child is not a number"},{"pain":"Poor Food Quality","frequency_pct":38,"competitors_affected":["KinderCare","Independents"],"your_solution":"Fresh locally sourced meals. CACFP enrolled. Weekly menu published.","marketing_angle":"Real food. Real ingredients. Every meal."},{"pain":"No Live Cameras","frequency_pct":45,"competitors_affected":["KinderCare","Independents","Barrow"],"your_solution":"Live parent camera access via Brightwheel app during all care hours","marketing_angle":"Watch your child anytime from your phone"},{"pain":"Limited Hours","frequency_pct":32,"competitors_affected":["Independents","Church-based"],"your_solution":"6:30am–6:30pm Monday–Friday. No in-service day closures.","marketing_angle":"6:30am to 6:30pm — we work your hours"}],"differentiation_strategy":[{"pillar":"Teacher Stability Promise","description":"Every child gets a dedicated primary teacher for minimum 6 months — guaranteed. Above-market salaries + $500 retention bonuses at 6-month mark. If teacher leaves early, family receives 1-month tuition credit.","competitors_this_beats":["KinderCare","Primrose"],"marketing_hook":"The teacher who knows your baby"},{"pillar":"Radical Transparency","description":"Live parent camera access all care hours. Daily Brightwheel video + photo reports. Director calls every new family after first week. Incident reports within 30 minutes.","competitors_this_beats":["KinderCare","Independents","Barrow"],"marketing_hook":"See everything. Know everything."},{"pillar":"Fresh Food Promise","description":"No processed snacks. All meals prepared in-house: morning snack, lunch, afternoon snack. Certified cook on staff. Weekly menu emailed to parents. CACFP enrolled.","competitors_this_beats":["KinderCare","Independents"],"marketing_hook":"You'd be proud of what they ate today"},{"pillar":"Reggio-Inspired Learning","description":"Project-based child-led learning vs scripted corporate curriculum. Children's work displayed at eye level. Parent documentation nights quarterly. Bi-annual learning portfolio for every family.","competitors_this_beats":["Primrose","KinderCare"],"marketing_hook":"Learning that looks like wonder"},{"pillar":"Mid-Premium Pricing","description":"$1,400–$2,050/month — far below Bright Horizons ($2,400) while matching or exceeding Primrose quality. Accept CAPS subsidies for income-diverse families.","competitors_this_beats":["Bright Horizons"],"marketing_hook":"Quality you thought you couldn't afford"},{"pillar":"Bilingual Classrooms","description":"English/Spanish classroom assistant in every room. Bilingual signage and parent communication available. Curriculum materials in both languages.","competitors_this_beats":["All corporate chains"],"marketing_hook":"Two languages. One classroom. A lifetime advantage."}],"messaging_guide":[{"audience":"Primrose/KinderCare waitlisted parents","headline":"The waitlist ends here.","body":"While other centers keep you waiting 4-6 months, we have spaces open now — with the quality you have been searching for. Fresh food. Live cameras. Teachers who stay.","cta":"Schedule a tour today","channel":"Facebook targeted ads — Primrose/KinderCare keyword targeting"},{"audience":"Parents leaving KinderCare (staff turnover)","headline":"Your child deserves a teacher who knows their name.","body":"At our center, every child has a dedicated primary teacher for a minimum of 6 months — guaranteed. No revolving door. No strangers. Just the consistency your child needs.","cta":"Get our Teacher Stability Promise","channel":"Google Search — KinderCare alternative near me"},{"audience":"Barrow County parents (Winder/Auburn)","headline":"Quality childcare. Finally, in Barrow County.","body":"We know you have been driving to Gwinnett or settling for something that does not feel right. We are bringing Reggio-inspired learning, live cameras, and fresh meals to your community.","cta":"Join our waitlist — opening soon","channel":"Nextdoor Winder/Auburn + Facebook Barrow County Parents"},{"audience":"Premium seekers priced out of Bright Horizons","headline":"Bright Horizons quality. Half the waitlist.","body":"Reggio curriculum. Credentialed teachers. Live cameras. Daily reports. Fresh meals. Starting at $1,400/month — no 7-month waitlist, no corporate runaround.","cta":"Book your enrollment tour","channel":"Instagram + LinkedIn affluent targeting Johns Creek/Alpharetta"},{"audience":"Working parents needing extended hours","headline":"We work your hours.","body":"6:30am open. 6:30pm close. 12 full hours every weekday. No in-service day closures. No surprise early dismissals. Because your job does not have a flexible schedule.","cta":"See our full calendar","channel":"Google Search — daycare open until 6:30 near me"}]}`;
   try {
-    _setDemoKey(13);
-    let d=await claudeJSON(sys,usr);
-    if(!d) { console.warn('Agent 13 fallback'); d=getFallback13(); }
-    R.a13=d;
+    // ── Part A: Summary + Competitor Profiles ───────────────
+    $('13-sum-t').textContent = 'Analyzing competitor profiles…';
+    const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Search Google, Yelp, Facebook reviews for real customer data. Respond JSON only.`;
+    const usrA = `Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
+Competitor market context: ${compCtx}
+Return ONLY:
+{
+  "summary": "5-sentence competitive landscape and differentiation opportunity summary citing real competitors and review patterns",
+  "competitor_profiles": [
+    {
+      "name": "Competitor name",
+      "type": "Corporate Franchise|Corporate Chain|Independent|Regional",
+      "avg_rating": 4.1,
+      "review_count_est": 340,
+      "monthly_tuition_infant": 2100,
+      "locations_nearby": 6,
+      "google_search_url": "https://www.google.com/search?q=...",
+      "yelp_url": "https://www.yelp.com/search?...",
+      "top_positive_themes": ["Theme 1","Theme 2","Theme 3"],
+      "top_complaint_themes": ["Complaint 1","Complaint 2","Complaint 3"],
+      "sample_complaints": ["Verbatim review quote 1","Quote 2","Quote 3"],
+      "differentiation_opportunity": "1-sentence gap this competitor creates for a new entrant"
+    }
+  ]
+}
+Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
+
+    const partA = await claudeJSON(sysA, usrA);
+
+    // ── Part B: Pain Points + Differentiation ───────────────
+    const competitorNames = (partA?.competitor_profiles || []).map(c => c.name).join(', ');
+    const sysB = `You are a ${ind.unit} market strategist. Respond JSON only.`;
+    const usrB = `Based on competitor review data for ${ind.units} near ZIP ${zip()}: competitors include ${competitorNames || ind.competitors}.
+Return ONLY:
+{
+  "pain_point_analysis": [
+    {
+      "pain": "Pain point name",
+      "frequency_pct": 68,
+      "competitors_affected": ["Competitor A","Competitor B"],
+      "your_solution": "Specific solution your new center would offer",
+      "marketing_angle": "Short compelling tagline"
+    }
+  ],
+  "differentiation_strategy": [
+    {
+      "pillar": "Strategic pillar name",
+      "description": "2-3 sentence description of this differentiator and how to execute it",
+      "competitors_this_beats": ["Competitor A","Competitor B"],
+      "marketing_hook": "Short punchy tagline"
+    }
+  ]
+}
+Include 6-8 pain points (with real frequency estimates from review data) and 5-6 differentiation pillars.`;
+
+    const partB = await claudeJSON(sysB, usrB);
+
+    // ── Part C: Messaging Guide ──────────────────────────────
+    const sysC = `You are a ${ind.unit} marketing strategist. Respond JSON only.`;
+    const usrC = `Create targeted messaging for a new ${ind.unit} near ZIP ${zip()} competing against: ${competitorNames || ind.competitors}.
+Return ONLY:
+{
+  "messaging_guide": [
+    {
+      "audience": "Specific parent segment (e.g. Primrose waitlisted parents)",
+      "headline": "Compelling headline targeting this pain",
+      "body": "2-3 sentence ad copy addressing their specific frustration",
+      "cta": "Call to action",
+      "channel": "Best marketing channel for this audience"
+    }
+  ]
+}
+Include 5 distinct audience segments with messaging tailored to their specific competitor frustrations.`;
+
+    const partC = await claudeJSON(sysC, usrC);
+
+    // Merge all 3 parts
+    const d = Object.assign(
+      { summary: '', competitor_profiles: [], pain_point_analysis: [], differentiation_strategy: [], messaging_guide: [] },
+      partA || {},
+      partB || {},
+      partC || {}
+    );
+
+    if (!d.summary && !d.competitor_profiles.length) {
+      console.warn('Agent 13 all parts failed — using fallback');
+      const fb = getFallback13();
+      R.a13 = fb; buildCompDeepDive(fb); setDot(13,'done'); showOut(13);
+      return JSON.stringify(fb);
+    }
+
+    R.a13 = d;
     buildCompDeepDive(d);
     setDot(13,'done'); showOut(13);
     return JSON.stringify(d);
-  } catch(e){setDot(13,'error');showOut(13);$('13-sum-t').textContent='Error: '+e.message;throw e}
+  } catch(e) {
+    setDot(13,'error'); showOut(13);
+    $('13-sum-t').textContent = 'Error: ' + e.message;
+    throw e;
+  }
 }
 
 function buildCompDeepDive(d) {
@@ -7292,31 +7068,103 @@ function buildCompDeepDive(d) {
 
 async function runAgent14(allResults) {
   setDot(14,'running');
-  const ind=industry();
-  const sys=`You are a senior software engineer and AI API cost optimization specialist. You review multi-agent AI pipelines for correctness, efficiency, and cost. Respond JSON only.`;
-  const usr=`Review this 15-agent browser-based ${ind.unit} planning pipeline built on claude-sonnet-4-6.
+  const ind = industry();
 
-ARCHITECTURE SUMMARY:
-- 15 agents total, sequential with 1 parallel phase (agents 1+5+6)
-- Agent 4 now runs before Agent 7 (fixed — Agent 7 receives real estate context)
-- claudeJSON() wrapper: 3 retries + 5-strategy JSON extraction
-- max_tokens: 4096 per call, web search disabled (useSearch hardcoded false)
-- Context passing: upstream JSON.stringify() substrings passed to downstream agents
-- Charts: Chart.js 4.4.1 CDN, killChart() before re-render
-- Map: inline SVG with linear lat/lng projection
-- Agents completed this run: ${Object.keys(allResults).length}/15
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(14);
+    if (_d) { R.a14 = _d; try { renderCodeReview(_d); } catch(e){} setDot(14,'done'); showOut(14); return JSON.stringify(_d); }
+  }
 
-Return ONLY this JSON:
-{"summary":"Pipeline quality is excellent. CR-001 through CR-008 are all resolved. ctx() field extraction, retry backoff, stop_reason checks, per-agent timers, multi-provider support, response caching, parallel execution, and modular src/ architecture with build.mjs are all implemented. One item remains open: CR-003 (large Agent 9/10 prompts). Overall grade upgraded to A.","overall_grade":"A","issues":[{"id":"CR-003","severity":"medium","category":"Cost","title":"Agents 9 and 10 prompts still large","detail":"Business Plan and Project Plan prompts include verbose inline schema examples that cost ~35% more tokens than needed.","location":"runAgent9(), runAgent10()","fix":"Replace inline JSON examples with compact field-name-only schema references. Save ~$0.06/run."}],"performance_metrics":[{"metric":"Pipeline Total Runtime","current":"4-6 minutes","optimized":"3-5 minutes","score":80,"notes":"Phases 1 and 8 now parallel; CR-008 resolved"},{"metric":"Token Efficiency (input)","current":"~22000 tokens/run","optimized":"~18000 tokens/run","score":78,"notes":"ctx() extraction reduces upstream context; Agents 9+10 still large"},{"metric":"Parallel Execution","current":"2 parallel phases (1+5+6, 11+12+13)","optimized":"Optimal","score":95,"notes":"CR-008 resolved — both parallel phases active"},{"metric":"Error Recovery","current":"Per-agent try/catch + fallbacks for all 15 agents","optimized":"Optimal","score":95,"notes":"Pipeline continues through any single agent failure"},{"metric":"Data Integrity","current":"ctx() field extraction, structured passing","optimized":"Optimal","score":90,"notes":"CR-001 resolved — key fields extracted, not raw substrings"},{"metric":"API Reliability","current":"3 retries + exponential backoff + stop_reason check","optimized":"Optimal","score":92,"notes":"CR-002 and CR-004 resolved"},{"metric":"Response Caching","current":"In-memory + localStorage, 4h TTL","optimized":"Optimal","score":90,"notes":"Cache hit avoids all API calls on re-run"},{"metric":"Maintainability","current":"src/ modules + build.mjs","optimized":"Optimal","score":95,"notes":"CR-007 resolved — 22 source files, build concatenates to public/index.html"}],"cost_analysis":{"model":"claude-sonnet-4-6","input_cost_per_mtok":3.00,"output_cost_per_mtok":15.00,"agents":[{"agent":"Demographics","avg_input_tokens":900,"avg_output_tokens":1200,"cost_per_run":0.021},{"agent":"Compliance","avg_input_tokens":800,"avg_output_tokens":1100,"cost_per_run":0.019},{"agent":"Competitive Intel","avg_input_tokens":750,"avg_output_tokens":1000,"cost_per_run":0.017},{"agent":"Gap Analysis","avg_input_tokens":1200,"avg_output_tokens":1500,"cost_per_run":0.024},{"agent":"Site Selection","avg_input_tokens":1400,"avg_output_tokens":2000,"cost_per_run":0.034},{"agent":"Real Estate","avg_input_tokens":1600,"avg_output_tokens":2200,"cost_per_run":0.038},{"agent":"Financial","avg_input_tokens":1300,"avg_output_tokens":2000,"cost_per_run":0.034},{"agent":"Executive Summary","avg_input_tokens":1800,"avg_output_tokens":1200,"cost_per_run":0.023},{"agent":"Business Plan","avg_input_tokens":2400,"avg_output_tokens":3000,"cost_per_run":0.052},{"agent":"Project Plan","avg_input_tokens":2400,"avg_output_tokens":3000,"cost_per_run":0.052},{"agent":"Market Map","avg_input_tokens":1100,"avg_output_tokens":1800,"cost_per_run":0.030},{"agent":"Grant Search","avg_input_tokens":1000,"avg_output_tokens":1600,"cost_per_run":0.027},{"agent":"Competitor Deep-Dive","avg_input_tokens":900,"avg_output_tokens":2000,"cost_per_run":0.033},{"agent":"Code Review","avg_input_tokens":1200,"avg_output_tokens":1500,"cost_per_run":0.029},{"agent":"QA Testing","avg_input_tokens":1000,"avg_output_tokens":1800,"cost_per_run":0.030}],"total_cost_per_run":0.413,"optimized_cost_per_run":0.35,"monthly_cost_10runs":4.13,"monthly_cost_50runs":20.65,"optimization_tips":["Reduce Agent 9+10 prompt sizes by removing inline schema examples: save ~$0.06/run (CR-003)","Use claude-haiku-4-5 for aggregation agents (2, 8, 11): save ~$0.04/run","Cached re-runs cost $0.00 — encourage users to use Clear Cache only when needed"]},"recommended_fixes_priority":[{"priority":1,"id":"CR-003","effort":"1 hour","impact":"Reduces cost ~15% on two heaviest agents"}]}`;
+  // Build real pipeline state from actual R data
+  const agentMap = [
+    {n:1, name:'Demographics'}, {n:2, name:'Gap Analysis'}, {n:3, name:'Site Selection'},
+    {n:4, name:'Real Estate'}, {n:5, name:'Compliance'}, {n:6, name:'Competitive Intel'},
+    {n:7, name:'Financials'}, {n:8, name:'Executive Summary'}, {n:9, name:'Business Plan'},
+    {n:10, name:'Project Plan'}, {n:11, name:'Market Map'}, {n:12, name:'Grants'},
+    {n:13, name:'Competitor Deep-Dive'}, {n:16, name:'Build vs Buy'}, {n:17, name:'Data Sources'}
+  ];
+  const completed = agentMap.filter(a => !!R[`a${a.n}`]);
+  const failed    = agentMap.filter(a => !R[`a${a.n}`]);
+  const completePct = Math.round(completed.length / agentMap.length * 100);
+
+  // Derive real data quality signals
+  const signals = [];
+  if (R.a2) {
+    const cities = _toArr(R.a2.cities||[]);
+    signals.push(`Gap analysis: ${cities.length} cities, top gap ${Math.max(...cities.map(c=>c.gap_score||0),0)}/10`);
+  }
+  if (R.a7) {
+    const sc = _toArr(R.a7.scenarios||[]);
+    const base = sc.find(s=>(s.name||'').toLowerCase().includes('base'))||sc[1]||{};
+    signals.push(`Financials: ${sc.length} scenarios, base net $${(base.monthly_net||0).toLocaleString()}/mo, break-even month ${base.breakeven_months||'?'}`);
+  }
+  if (R.a5) signals.push(`Compliance: ${_toArr(R.a5.requirements||[]).length} requirements, ${R.a5.total_timeline_months||'?'}-month timeline`);
+  if (R.a6) signals.push(`Competition: ${_toArr(R.a6.cities||[]).length} markets scanned, ${R.a6.total_licensed_estimated||'?'} total licensed`);
+  if (R.a13) signals.push(`Deep-dive: ${_toArr(R.a13.competitor_profiles||[]).length} profiles, ${_toArr(R.a13.pain_point_analysis||[]).length} pain points`);
+  if (R.a12) signals.push(`Grants: $${((R.a12.total_potential_funding||0)/1000).toFixed(0)}K potential funding`);
+  if (R.a8)  signals.push(`Verdict: ${R.a8.verdict||R.a8.recommendation||'present'}`);
+
+  const sys = `You are a senior AI pipeline architect reviewing a multi-agent ${ind.unit} business planning pipeline. Respond JSON only.`;
+  const usr = `Review this browser-based ${ind.unit} planning pipeline. Analyze the ACTUAL run data below and produce a real code review.
+
+ACTUAL PIPELINE STATE:
+- Industry: ${ind.unit}
+- Agents completed: ${completed.length}/${agentMap.length} (${completePct}%)
+- Failed agents: ${failed.length > 0 ? failed.map(a=>a.n+' '+a.name).join(', ') : 'none'}
+- Input: ZIP ${zip()}, Radius ${radius()}mi, Budget $${budget()}, Capacity ${capacity()}
+- Data signals: ${signals.join(' | ') || 'no data yet'}
+
+ARCHITECTURE FACTS:
+- claudeJSON(): 3-retry + 5-strategy JSON extraction, max_tokens 4096, stop_reason guard
+- ctx(): field extraction limits upstream context size
+- Parallel phases: agents 1+5+6 (phase 1), agents 11+12+13+16 (phase 9)
+- Per-agent fallbacks: getFallback1()-getFallback17()
+- Source files: src/js/ modules bundled via build.mjs → public/index.html
+- Sub-agents: agents 7 (3 sub-calls), 9 (4 sub-calls), 10 (3 sub-calls), 13 (3 sub-calls), 1 (2 sub-calls)
+
+Return ONLY this JSON structure:
+{
+  "summary": "2-3 sentence honest assessment based on actual completion rate and data quality above",
+  "overall_grade": "A|B|C|D",
+  "issues": [
+    {
+      "id": "CR-001",
+      "severity": "critical|high|medium|low",
+      "category": "Performance|Cost|Reliability|Data|UX",
+      "title": "Issue title",
+      "detail": "Specific detail referencing actual pipeline state data",
+      "location": "function name or agent number",
+      "fix": "Specific actionable fix"
+    }
+  ],
+  "performance_metrics": [
+    {"metric": "Metric name", "current": "observed value", "optimized": "target value", "score": 85, "notes": "explanation"}
+  ],
+  "cost_analysis": {
+    "model": "claude-sonnet-4-6",
+    "input_cost_per_mtok": 3.00,
+    "output_cost_per_mtok": 15.00,
+    "agents": [{"agent": "Name", "avg_input_tokens": 900, "avg_output_tokens": 1200, "cost_per_run": 0.021}],
+    "total_cost_per_run": 0.45,
+    "optimized_cost_per_run": 0.35,
+    "monthly_cost_10runs": 4.50,
+    "monthly_cost_50runs": 22.50,
+    "optimization_tips": ["Tip based on actual data"]
+  },
+  "recommended_fixes_priority": [
+    {"priority": 1, "id": "CR-001", "effort": "1 hour", "impact": "Specific impact"}
+  ]
+}
+Identify 3-6 real issues based on the actual pipeline state. Completion rate, failed agents, and data signals above are ground truth.`;
+
   try {
-    _setDemoKey(14);
-    let d=await claudeJSON(sys,usr);
-    if(!d) { console.warn('Agent 14 fallback'); d=getFallback14(); }
-    R.a14=d;
+    let d = await claudeJSON(sys, usr);
+    if (!d) { console.warn('Agent 14 fallback'); d = getFallback14(); }
+    R.a14 = d;
     renderCodeReview(d);
     setDot(14,'done'); showOut(14);
     return JSON.stringify(d);
-  } catch(e){setDot(14,'error');showOut(14);$('14-sum-t').textContent='Error: '+e.message;throw e}
+  } catch(e) { setDot(14,'error'); showOut(14); $('14-sum-t').textContent = 'Error: ' + e.message; throw e; }
 }
 
 function renderCodeReview(d) {
@@ -7363,26 +7211,144 @@ function renderCodeReview(d) {
 
 async function runAgent15(allResults) {
   setDot(15,'running');
-  const sys=`You are a senior QA engineer specializing in AI pipeline testing and data validation. Respond JSON only.`;
-  const agentsCompleted=Object.keys(allResults).length;
-  const ind=industry();
-  const usr=`Perform a comprehensive QA audit of this 15-agent ${ind.unit} planning pipeline.
+  const ind = industry();
 
-PIPELINE STATUS: ${agentsCompleted}/15 agents completed
-ZIP: ${zip()}, RADIUS: ${radius()} miles, GRADES: ${grades()}, CAPACITY: ${capacity()}, BUDGET: $${budget()}
-AGENTS WITH DATA: ${Object.keys(allResults).join(', ')}
+  if (demoMode && typeof getDemoData === 'function') {
+    const _d = getDemoData(15);
+    if (_d) { R.a15 = _d; try { renderQA(_d); } catch(e){} setDot(15,'done'); showOut(15); return JSON.stringify(_d); }
+  }
+
+  // ── Real JS-level validation checks ────────────────────────
+  const agentSpecs = [
+    { n:1,  name:'Demographics',       requiredKeys:['summary','cities'] },
+    { n:2,  name:'Gap Analysis',       requiredKeys:['summary','cities','overall_opportunity_score'] },
+    { n:3,  name:'Site Selection',     requiredKeys:['summary','locations'] },
+    { n:4,  name:'Real Estate',        requiredKeys:['summary'] },
+    { n:5,  name:'Compliance',         requiredKeys:['summary','requirements','total_timeline_months'] },
+    { n:6,  name:'Competitive Intel',  requiredKeys:['summary','cities'] },
+    { n:7,  name:'Financials',         requiredKeys:['summary','scenarios'] },
+    { n:8,  name:'Executive Summary',  requiredKeys:['verdict','assessment','success_factors','risks'] },
+    { n:9,  name:'Business Plan',      requiredKeys:['executive_summary','company_overview'] },
+    { n:10, name:'Project Plan',       requiredKeys:['phases','total_duration_months'] },
+    { n:11, name:'Market Map',         requiredKeys:['summary'] },
+    { n:12, name:'Grants',             requiredKeys:['summary','total_potential_funding'] },
+    { n:13, name:'Deep-Dive',          requiredKeys:['summary','competitor_profiles'] },
+    { n:16, name:'Build vs Buy',       requiredKeys:['summary'] },
+    { n:17, name:'Data Sources',       requiredKeys:['summary','data_sources'] },
+  ];
+
+  const byAgent = [];
+  let totalFields = 0, totalPass = 0, totalWarn = 0, totalFail = 0;
+  const critIssues = [];
+  const warnings = [];
+
+  agentSpecs.forEach(spec => {
+    const d = R[`a${spec.n}`];
+    let ok = 0, warn = 0, fail = 0;
+    if (!d) {
+      fail = spec.requiredKeys.length;
+      critIssues.push(`Agent ${spec.n} (${spec.name}) did not complete — data missing`);
+    } else {
+      spec.requiredKeys.forEach(k => {
+        const v = d[k];
+        if (v === undefined || v === null) { fail++; }
+        else if (Array.isArray(v) && v.length === 0) { warn++; warnings.push(`Agent ${spec.n} ${k} array empty`); }
+        else if (typeof v === 'string' && v.length < 10) { warn++; warnings.push(`Agent ${spec.n} ${k} suspiciously short`); }
+        else { ok++; }
+      });
+    }
+    const total = ok + warn + fail;
+    totalFields += total; totalPass += ok; totalWarn += warn; totalFail += fail;
+    byAgent.push({
+      agent: spec.name,
+      fields_ok: ok, fields_warn: warn, fields_fail: fail,
+      score: total > 0 ? Math.round((ok / total) * 100) : 0,
+    });
+  });
+
+  // Additional checks
+  const hasParallelPhase1 = true; // architecture fact
+  const hasPerAgentFallbacks = typeof getFallback1 === 'function' && typeof getFallback7 === 'function';
+  const hasStopCheck = typeof stopRequested !== 'undefined';
+  const agentsWithData = agentSpecs.filter(a => !!R[`a${a.n}`]).length;
+  const passRate = totalFields > 0
+    ? Math.round(((totalPass) / totalFields) * 100)
+    : 0;
+
+  // Suite-level results for Claude
+  const suiteResults = [
+    { suite:'Pipeline Completion', passCount: agentsWithData, totalCount: agentSpecs.length,
+      detail:`${agentsWithData}/${agentSpecs.length} agents returned data. Failed: ${critIssues.length ? critIssues.join('; ') : 'none'}.` },
+    { suite:'Data Field Validation', passCount: totalPass, totalCount: totalFields,
+      detail:`${totalPass} fields valid, ${totalWarn} warnings, ${totalFail} missing. Warnings: ${warnings.slice(0,5).join('; ')||'none'}.` },
+    { suite:'Architecture Checks', passCount: (hasPerAgentFallbacks?1:0)+(hasStopCheck?1:0)+1+1,
+      totalCount: 4,
+      detail:`Fallbacks present: ${hasPerAgentFallbacks}. Stop flag: ${hasStopCheck}. Parallel phase 1 (agents 1+5+6): true. Sub-agents (7,9,10,13): true.` },
+  ];
+
+  const sys = `You are a senior QA engineer validating an AI pipeline run. Respond JSON only.`;
+  const usr = `Produce a QA audit for a ${ind.unit} planning pipeline based on ACTUAL test results below.
+
+ACTUAL TEST RESULTS:
+- ZIP: ${zip()}, Radius: ${radius()}mi, Industry: ${ind.unit}
+- Agents with data: ${agentsWithData}/${agentSpecs.length}
+- Fields checked: ${totalFields} | Passed: ${totalPass} | Warned: ${totalWarn} | Failed: ${totalFail}
+- Field pass rate: ${passRate}%
+- Critical issues: ${critIssues.length > 0 ? critIssues.join('; ') : 'none'}
+- Warnings: ${warnings.slice(0,8).join('; ')||'none'}
+- Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
+- Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
 Return ONLY this JSON:
-{"summary":"Pipeline QA pass rate improved to 96%. All CRs are resolved including CR-007 (single-file architecture) — codebase now uses src/ modules with build.mjs. ctx() context extraction, stop_reason checks, exponential backoff, per-agent timers, export/print, re-run buttons, per-agent fallback data, and modular source structure are all implemented. One low-priority item remains: CR-003 (large Agent 9/10 prompts). Health score upgraded to 96.","overall_pass_rate":96,"test_suites":[{"suite":"API & Connectivity","tests":[{"id":"T001","name":"API authentication","status":"pass","detail":"Multi-provider support: Anthropic, OpenAI, Gemini, OpenAI-compatible","expected":"HTTP 200 with valid JSON from selected provider"},{"id":"T002","name":"claudeJSON retry logic","status":"pass","detail":"3-attempt retry with exponential backoff (attempt * 1500ms) implemented","expected":"Retries on parse failure with delay"},{"id":"T003","name":"stop_reason check","status":"pass","detail":"stop_reason=max_tokens throws 'Response truncated' before parse attempt","expected":"No silent truncation accepted"},{"id":"T004","name":"CORS header present","status":"pass","detail":"anthropic-dangerous-direct-browser-access header included for Anthropic provider","expected":"No CORS errors"},{"id":"T005","name":"Response caching","status":"pass","detail":"In-memory + localStorage cache with 4h TTL — re-runs skip API calls","expected":"Cache hit logged; same inputs return instantly"}]},{"suite":"Pipeline Reliability","tests":[{"id":"T006","name":"Per-agent try/catch","status":"pass","detail":"Every agent wrapped individually — pipeline continues through any single failure","expected":"Failed agent shows error card; subsequent agents still run"},{"id":"T007","name":"Fallback data coverage","status":"pass","detail":"getFallback1() through getFallback15() defined for all agents","expected":"No undefined rendering on fallback path"},{"id":"T008","name":"Parallel phase 1","status":"pass","detail":"Agents 1, 5, 6 run via Promise.allSettled — each gets fallback on rejection","expected":"All three start simultaneously"},{"id":"T009","name":"Parallel phase 8","status":"pass","detail":"Agents 11, 12, 13 run via Promise.allSettled — saves ~75s runtime","expected":"All three start simultaneously"},{"id":"T010","name":"Stop button","status":"pass","detail":"stopRequested flag checked after each agent await — halts cleanly","expected":"Pipeline stops after current agent, not mid-render"},{"id":"T011","name":"Re-run buttons","status":"pass","detail":"reRunAgent(n) reinvokes individual agents using stored R{} data","expected":"Error card shows Re-run button; click retries that agent only"}]},{"suite":"Agent Output Validation","tests":[{"id":"T012","name":"Demographics — cities array guarded","status":"pass","detail":"cities1=d.cities||[] prevents map crash on missing field","expected":"Renders empty state gracefully"},{"id":"T013","name":"Site Selection — radar/bar fallback","status":"pass","detail":"window.innerWidth<500 switches radar to horizontal bar chart","expected":"No chart overflow on mobile"},{"id":"T014","name":"Business Plan — nested guards","status":"pass","detail":"executive_summary, company_overview, market_analysis all guarded with ||{}","expected":"No TypeError on undefined nested access"},{"id":"T015","name":"Code Review — demo data current","status":"pass","detail":"Demo JSON reflects resolved CRs; CR-007 resolved — grade A, health 96","expected":"No stale resolved issues shown"},{"id":"T016","name":"Financial — 3 scenarios present","status":"pass","detail":"Conservative/Base/Optimistic with monthly_revenue and breakeven_months","expected":"All 3 scenarios rendered"},{"id":"T017","name":"ctx() context extraction","status":"pass","detail":"All inter-agent passing uses ctx() field extraction, not raw substrings","expected":"Downstream agents receive structured key fields"},{"id":"T018","name":"Demo mode parsing","status":"pass","detail":"Demo parses from Return ONLY: marker — ctx() embedded JSON no longer confuses parseJSON","expected":"Demo mode returns full template JSON, not partial ctx data"}]},{"suite":"UX & Rendering","tests":[{"id":"T019","name":"Per-agent timers","status":"pass","detail":"setDot('running') starts setInterval showing elapsed seconds; cleared on done/error","expected":"Each running agent shows live timer in header"},{"id":"T020","name":"Export JSON","status":"pass","detail":"exportResults() downloads R{} as timestamped .json file","expected":"File downloads with all agent data"},{"id":"T021","name":"Print Report","status":"pass","detail":"printReport() opens new window with formatted summary and triggers print dialog","expected":"Print-friendly page with key sections"},{"id":"T022","name":"Raw drill-down","status":"pass","detail":"showRaw(n) renders JSON with copy button, key count, 400px scrollable panel","expected":"Click toggles raw panel open/close"},{"id":"T023","name":"All agent tabs functional","status":"pass","detail":"tab() correctly toggles .active class on panels","expected":"Tab content switches without errors"},{"id":"T024","name":"API key guidance","status":"pass","detail":"Usage limits link shown below key input for Anthropic provider","expected":"Link to console.anthropic.com/settings/keys visible"},{"id":"T025","name":"Modular build system","status":"pass","detail":"src/ has 22 JS modules + styles.css + template.html; build.mjs concatenates to public/index.html","expected":"node build.mjs produces valid, identical public/index.html"}]}],"data_validation":{"fields_checked":58,"fields_passed":57,"fields_warned":1,"fields_failed":0,"critical_issues":[],"warnings":["Agent 9/10 prompts still large — CR-003 open"],"by_agent":[{"agent":"Demographics","fields_ok":9,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Compliance","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Competitive Intel","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Gap Analysis","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Site Selection","fields_ok":10,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Real Estate","fields_ok":9,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Financial","fields_ok":8,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Executive Summary","fields_ok":5,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Business Plan","fields_ok":10,"fields_warn":1,"fields_fail":0,"score":92},{"agent":"Project Plan","fields_ok":9,"fields_warn":1,"fields_fail":0,"score":92},{"agent":"Market Map","fields_ok":6,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Grant Search","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Competitor Deep-Dive","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"Code Review","fields_ok":6,"fields_warn":0,"fields_fail":0,"score":100},{"agent":"QA Testing","fields_ok":7,"fields_warn":0,"fields_fail":0,"score":100}]},"ux_audit":[{"category":"Cost","title":"Agent 9 and 10 prompts are verbose (CR-003)","severity":"low","detail":"Business Plan and Project Plan include large inline schema examples adding ~800 tokens each.","recommendation":"Replace schema examples with field-name-only references. Save ~$0.06/run."}],"health_score":{"overall":96,"dimensions":[{"label":"API Reliability","score":95,"color":"var(--green)","notes":"Backoff, stop_reason, multi-provider all implemented"},{"label":"Data Accuracy","score":92,"color":"var(--green)","notes":"ctx() extraction; all nested property guards in place"},{"label":"Output Completeness","score":98,"color":"var(--green)","notes":"All 15 agents with fallbacks — pipeline never halts"},{"label":"UX Quality","score":93,"color":"var(--green)","notes":"Timers, export, print, re-run, drill-down all added"},{"label":"Code Quality","score":90,"color":"var(--green)","notes":"CR-007 resolved — src/ modules + build.mjs; only CR-003 remains"},{"label":"Cost Efficiency","score":85,"color":"var(--green)","notes":"$0.41/run; caching makes repeat runs free"},{"label":"Test Coverage","score":96,"color":"var(--green)","notes":"25 tests, 96% pass rate"},{"label":"Error Recovery","score":98,"color":"var(--green)","notes":"Per-agent try/catch + fallbacks for all 15 agents"}]}}`;
+{
+  "summary": "2-3 sentence honest QA summary based on actual results above",
+  "overall_pass_rate": ${passRate},
+  "test_suites": [
+    {
+      "suite": "Suite name",
+      "tests": [
+        {"id":"T001","name":"Test name","status":"pass|fail|warn","detail":"Specific detail from actual data","expected":"What was expected"}
+      ]
+    }
+  ],
+  "data_validation": {
+    "fields_checked": ${totalFields},
+    "fields_passed": ${totalPass},
+    "fields_warned": ${totalWarn},
+    "fields_failed": ${totalFail},
+    "critical_issues": ${JSON.stringify(critIssues)},
+    "warnings": ${JSON.stringify(warnings.slice(0,8))},
+    "by_agent": ${JSON.stringify(byAgent)}
+  },
+  "ux_audit": [
+    {"category":"Category","title":"Finding title","severity":"high|medium|low","detail":"Detail","recommendation":"Fix"}
+  ],
+  "health_score": {
+    "overall": ${Math.max(20, Math.min(100, passRate))},
+    "dimensions": [
+      {"label":"Dimension","score":85,"color":"var(--green)","notes":"Explanation"}
+    ]
+  }
+}
+Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with 4-6 tests each based on actual results above.`;
+
   try {
-    _setDemoKey(15);
-    let d=await claudeJSON(sys,usr);
-    if(!d) { console.warn('Agent 15 fallback'); d=getFallback15(); }
-    R.a15=d;
+    let d = await claudeJSON(sys, usr);
+    if (!d) { console.warn('Agent 15 fallback'); d = getFallback15(); }
+    // Inject real by_agent and counts in case Claude altered them
+    if (d.data_validation) {
+      d.data_validation.by_agent  = byAgent;
+      d.data_validation.fields_checked = totalFields;
+      d.data_validation.fields_passed  = totalPass;
+      d.data_validation.fields_warned  = totalWarn;
+      d.data_validation.fields_failed  = totalFail;
+      d.data_validation.critical_issues = critIssues;
+    }
+    R.a15 = d;
     renderQA(d);
     setDot(15,'done'); showOut(15);
     return JSON.stringify(d);
-  } catch(e){setDot(15,'error');showOut(15);$('15-sum-t').textContent='Error: '+e.message;throw e}
+  } catch(e) { setDot(15,'error'); showOut(15); $('15-sum-t').textContent = 'Error: ' + e.message; throw e; }
 }
 
 function renderQA(d) {
@@ -7526,12 +7492,20 @@ async function runPipeline() {
     // ── Phase 9: Supplemental Analysis (parallel) ───────────
     if (phaseShouldRun(9)) {
       setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
-      await Promise.allSettled([
+      const [res11,res12,res13,res16] = await Promise.allSettled([
         runAgent11(r1,r2,r4),
         runAgent12(r3,r5),
         runAgent13(r6),
         (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
       ]);
+      if(res11.status==='rejected') console.error('Agent 11 failed:',res11.reason?.message);
+      if(res12.status==='rejected') console.error('Agent 12 failed:',res12.reason?.message);
+      if(res13.status==='rejected') console.error('Agent 13 failed:',res13.reason?.message);
+      if(res16.status==='rejected') console.error('Agent 16 failed:',res16.reason?.message);
+      // Apply fallbacks for any phase 9 agent that failed and has no data
+      if(!R.a11) try{R.a11=getFallback11();}catch(e){}
+      if(!R.a12) try{R.a12=getFallback12();}catch(e){}
+      if(!R.a13) try{R.a13=getFallback13();}catch(e){}
     } else {
       setProgress(72,'Phase 9 — skipped');
     }
@@ -14294,34 +14268,6 @@ function v2ScoreVerdict(score) {
   };
 }
 
-function v2GetKPIs() {
-  const kpis = [];
-  if (typeof R === 'undefined') return kpis;
-
-  if (R.a7) {
-    const sc = _toArr(R.a7.scenarios);
-    const base = sc.find(s=>(s.name||'').toLowerCase().includes('base'))||sc[1]||{};
-    if (base.breakeven_months) kpis.push({ ico:'📅', val:`${base.breakeven_months} mo`, lbl:'Break-Even' });
-    if (base.monthly_revenue)  kpis.push({ ico:'💵', val:`$${Math.round(base.monthly_revenue/1000)}K/mo`, lbl:'Base Revenue' });
-    if (base.roi_3yr!=null)    kpis.push({ ico:'📈', val:`${base.roi_3yr>0?'+':''}${base.roi_3yr}%`, lbl:'3yr ROI' });
-  }
-  const startupCost = R.a7?.total_startup_cost || R.a7?.startup_cost ||
-    _toArr(R.a7?.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||b.cost||0),0);
-  if (startupCost)
-    kpis.push({ ico:'💰', val:`$${Math.round(startupCost/1000)}K`, lbl:'Startup Cost' });
-
-  if (R.a2?.cities?.length) {
-    const top = [...R.a2.cities].sort((a,b)=>(b.gap_score||0)-(a.gap_score||0))[0];
-    if (top) kpis.push({ ico:'🏆', val:top.city||'—', lbl:'Top City' });
-    kpis.push({ ico:'🎯', val:`${top?.gap_score||0}/10`, lbl:'Gap Score' });
-  }
-
-  if (R.a5?.total_timeline_months)
-    kpis.push({ ico:'⏱', val:`${R.a5.total_timeline_months} mo`, lbl:'Permit Timeline' });
-
-  return kpis.slice(0, 6);
-}
-
 function v2GetRisks() {
   if (typeof R === 'undefined' || !R.a8) return [];
   const raw = R.a8.risks || R.a8.risk_factors || R.a8.key_risks || [];
@@ -14780,104 +14726,6 @@ function v2RenderDashboard(run) {
     // 3. Pre-init community charts (lazy — only if panel is visible later)
     setTimeout(() => v2InitCommunityCharts(), 600);
   });
-}
-
-// ── SCORE BREAKDOWN ───────────────────────────────────────────────────────
-function v2RenderScoreBreakdown(score) {
-  const components = v2GetScoreBreakdown();
-  const totalEarned = components.reduce((s, c) => s + c.earned, 0);
-  const totalMax    = components.reduce((s, c) => s + c.max,    0);
-  const dataComponents = components.filter(c => !c.missing);
-  const missingCount   = components.filter(c =>  c.missing).length;
-
-  // Bar color based on pct
-  const barColor = pct =>
-    pct >= 0.8 ? 'var(--v2-green)' :
-    pct >= 0.5 ? 'var(--v2-amber)' : 'var(--v2-red)';
-
-  const compRows = components.map(c => {
-    if (c.missing) return `
-      <div class="v2-bkd-row missing">
-        <div class="v2-bkd-ico">${c.ico}</div>
-        <div class="v2-bkd-col">
-          <div class="v2-bkd-label">${c.label}</div>
-          <div class="v2-bkd-agent">${c.agent}</div>
-        </div>
-        <div class="v2-bkd-pts missing">—&nbsp;/&nbsp;${c.max}<span class="v2-bkd-unit">pts</span></div>
-      </div>`;
-
-    const fillPct = Math.round(c.pct * 100);
-    const color   = barColor(c.pct);
-
-    const subRows = c.subPts ? c.subPts.map(sp => `
-      <div class="v2-bkd-subrow">
-        <span class="v2-bkd-sub-label">${sp.label}</span>
-        <span class="v2-bkd-sub-pts" style="color:${barColor(sp.pts/sp.maxPts)}">${sp.pts}/${sp.maxPts}</span>
-      </div>`).join('') : '';
-
-    return `
-      <div class="v2-bkd-row">
-        <div class="v2-bkd-ico">${c.ico}</div>
-        <div class="v2-bkd-col">
-          <div class="v2-bkd-top">
-            <div>
-              <div class="v2-bkd-label">${c.label}</div>
-              <div class="v2-bkd-agent">${c.agent}</div>
-            </div>
-            <div class="v2-bkd-pts" style="color:${color}">
-              ${c.earned}<span style="color:var(--v2-t3);font-weight:400">&nbsp;/&nbsp;${c.max}</span><span class="v2-bkd-unit">pts</span>
-            </div>
-          </div>
-          <div class="v2-bkd-bar-track">
-            <div class="v2-bkd-bar-fill" style="width:${fillPct}%;background:${color}"></div>
-          </div>
-          <div class="v2-bkd-detail">${c.detail}</div>
-          ${subRows ? `<div class="v2-bkd-subreasons">${subRows}</div>` : ''}
-          ${c.tip ? `<div class="v2-bkd-tip">💡 ${c.tip}</div>` : ''}
-        </div>
-      </div>`;
-  }).join('<div class="v2-bkd-divider"></div>');
-
-  const weightNote = missingCount > 0
-    ? `<div class="v2-bkd-weight-note">⚠️ ${missingCount} component${missingCount>1?'s':''} not yet analyzed — score normalized to ${totalMax - components.filter(c=>c.missing).reduce((s,c)=>s+c.max,0)} available points</div>`
-    : '';
-
-  return `
-    <div class="v2-card v2-bkd-card" id="v2-score-breakdown">
-      <div class="v2-bkd-header" onclick="v2ToggleBreakdown()" role="button" aria-expanded="false" id="v2-bkd-header">
-        <div class="v2-bkd-header-left">
-          <span class="v2-bkd-header-ico">🔬</span>
-          <div>
-            <div class="v2-bkd-header-title">How this score was calculated</div>
-            <div class="v2-bkd-header-sub">${dataComponents.length} of 5 components · ${totalEarned} points earned</div>
-          </div>
-        </div>
-        <div class="v2-bkd-header-right">
-          <div class="v2-bkd-pill" style="background:${score>=70?'rgba(34,197,94,.12)':score>=45?'rgba(245,158,11,.12)':'rgba(239,68,68,.12)'};color:${score>=70?'var(--v2-green)':score>=45?'var(--v2-amber)':'var(--v2-red)'}">
-            ${score}/100
-          </div>
-          <span class="v2-bkd-chevron" id="v2-bkd-chevron">▼</span>
-        </div>
-      </div>
-      <div class="v2-bkd-body" id="v2-bkd-body">
-        ${weightNote}
-        <div class="v2-bkd-rows">${compRows}</div>
-        <div class="v2-bkd-footer">
-          <div class="v2-bkd-footer-note">Score formula: Gap (25) + Financials (25) + AI Verdict (20) + Competition (15) + Compliance (15) = 100 pts max</div>
-          ${missingCount === 0 ? `<button class="v2-btn ghost sm" onclick="v2DashTab('financials',document.querySelector('[onclick*=financials]'));event.stopPropagation()">Improve Score →</button>` : ''}
-        </div>
-      </div>
-    </div>`;
-}
-
-function v2ToggleBreakdown() {
-  const body    = document.getElementById('v2-bkd-body');
-  const chevron = document.getElementById('v2-bkd-chevron');
-  const header  = document.getElementById('v2-bkd-header');
-  if (!body) return;
-  const open = body.classList.toggle('open');
-  if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
-  if (header)  header.setAttribute('aria-expanded', open);
 }
 
 // ── AGENT SIDENAV ─────────────────────────────────────────────────────────
@@ -16998,12 +16846,18 @@ If data is missing, say so briefly and suggest what to run.`;
       // Gemini — non-streaming fallback with history context
       await _v2GeminiFallback(apiKey, sys, historySlice, bubbleText);
     }
-    // Record AI response in history
-    _v2ChatHistory.push({ role: 'assistant', content: bubbleText?.innerHTML || '' });
+    // Record AI response in history (only on success)
+    const assistantContent = bubbleText?.innerHTML || '';
+    if (assistantContent) _v2ChatHistory.push({ role: 'assistant', content: assistantContent });
     bubbleText?.classList.remove('v2-streaming');
   } catch(e) {
+    // Do NOT push error message into history — it would corrupt subsequent API calls
     if (bubbleText) { bubbleText.innerHTML = `⚠️ ${e.message || 'Connection error. Check your API key.'}`; }
     bubbleText?.classList.remove('v2-streaming');
+    // Remove the user message we already pushed, since there's no valid assistant reply
+    if (_v2ChatHistory.length && _v2ChatHistory[_v2ChatHistory.length - 1].role === 'user') {
+      _v2ChatHistory.pop();
+    }
   }
   if (msgs) msgs.scrollTop = msgs.scrollHeight;
 }
@@ -19175,10 +19029,11 @@ function v2GetKPIs() {
   if (R_data.a5?.total_timeline_months)
     kpis.push({ ico:'⏱',  val:`${R_data.a5.total_timeline_months} mo`, lbl:'Permit Timeline', key: null });
 
-  return kpis.map(k => ({
-    ...k,
-    trendArrow: k.key ? v2GetKPITrendArrow(k.key, k.raw, industry) : '',
-  }));
+  return kpis.map(k => {
+    const arrow = k.key ? v2GetKPITrendArrow(k.key, k.raw, industry) : '';
+    const dir   = arrow === '↑' ? 'up' : arrow === '↓' ? 'down' : 'flat';
+    return { ...k, trend: arrow, trendDir: dir };
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
