@@ -149,13 +149,13 @@ function renderBusinessPlan(d) {
   let opsHtml=`<div class="bp-section">
     <h3>Facility Layout Plan</h3>
     <div class="bp-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${ops.facility.total_sqft.toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Indoor / Child</div><div class="bp-stat-val">${ops.facility.indoor_sqft_per_child}</div><div class="bp-stat-sub">sq ft (GA min: 35)</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Child</div><div class="bp-stat-val">${ops.facility.outdoor_sqft_per_child}</div><div class="bp-stat-sub">sq ft (GA min: 75)</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${(ops.facility.total_sqft||0).toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Indoor / Unit</div><div class="bp-stat-val">${ops.facility.indoor_sqft_per_child||ops.facility.indoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Unit</div><div class="bp-stat-val">${ops.facility.outdoor_sqft_per_child||ops.facility.outdoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
     </div>
     <div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr><th>Room</th><th>Sq Ft</th><th>Capacity</th><th>Ratio</th></tr></thead><tbody>`;
   (ops.facility?.rooms||[]).forEach(r=>{
-    opsHtml+=`<tr><td>${r.name}</td><td>${r.sqft.toLocaleString()}</td><td>${r.capacity||'—'}</td><td>${r.ratio}</td></tr>`;
+    opsHtml+=`<tr><td>${r.name||'—'}</td><td>${(r.sqft||0).toLocaleString()}</td><td>${r.capacity||'—'}</td><td>${r.ratio||'—'}</td></tr>`;
   });
   opsHtml+=`</tbody></table></div>
     <h4>Operating Hours</h4><div class="bp-prose">${ops.hours}</div>

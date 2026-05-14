@@ -5602,150 +5602,7 @@ Return ONLY:
 // ══════════════════════════════════════════════════════════
 
 
-async function _legacyRunAgent7(a3,a4,a5) {
-  setDot(7,'running');
-  const ind=industry();
-  const sys=`You are a ${ind.unit} financial analyst. Respond JSON only with realistic numbers.`;
-  const usr=`Build a financial model for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) near ZIP ${zip()}.
-
-SITE RECOMMENDATIONS: ${ctx(a3,['summary','locations'])}
-REAL ESTATE: ${ctx(a4,['summary','listings','by_city_summary'])}
-REGULATORY: ${ctx(a5,['summary','requirements','timeline_phases'])}
-
-Return ONLY:
-{
-  "summary": "4-5 sentence financial assessment",
-  "total_startup_cost": 542000,
-  "startup_breakdown": [
-    {"item":"Lease Deposit (3 mo)","amount":39000,"category":"Real Estate"},
-    {"item":"Build-Out / Renovation","amount":185000,"category":"Construction"},
-    {"item":"Playground Equipment","amount":48000,"category":"Equipment"},
-    {"item":"Indoor FF&E","amount":92000,"category":"Equipment"},
-    {"item":"Technology & Security","amount":12000,"category":"Technology"},
-    {"item":"Licensing & Permits","amount":9500,"category":"Legal"},
-    {"item":"Legal & Professional","amount":14000,"category":"Legal"},
-    {"item":"Liability Insurance (yr 1)","amount":9600,"category":"Insurance"},
-    {"item":"Initial Marketing","amount":22000,"category":"Marketing"},
-    {"item":"Working Capital (6 mo)","amount":111000,"category":"Operations"}
-  ],
-  "monthly_ops": [
-    {"item":"Rent","amount":13000},
-    {"item":"Director (1)","amount":6800},
-    {"item":"Lead Teachers (6 FT)","amount":23400},
-    {"item":"Assistants (4 PT)","amount":9200},
-    {"item":"Payroll Taxes & Benefits (24%)","amount":9504},
-    {"item":"Food / CACFP","amount":3400},
-    {"item":"Utilities","amount":3100},
-    {"item":"Insurance","amount":850},
-    {"item":"Supplies & Curriculum","amount":2400},
-    {"item":"Marketing & Digital","amount":1800},
-    {"item":"Admin / Software","amount":950},
-    {"item":"Loan Payment (est.)","amount":5200}
-  ],
-  "scenarios": [
-    {
-      "name":"Conservative","label":"60% Capacity","enrolled":45,
-      "revenue_infant":4,"revenue_toddler":14,"revenue_preschool":18,"revenue_prek":9,
-      "avg_tuition":1650,"monthly_revenue":74250,"monthly_expenses":79604,"monthly_net":-5354,
-      "annual_net":-64248,"breakeven_months":26,"roi_3yr":-8,
-      "color":"var(--red)"
-    },
-    {
-      "name":"Base Case","label":"78% Capacity","enrolled":58,
-      "revenue_infant":5,"revenue_toddler":18,"revenue_preschool":22,"revenue_prek":13,
-      "avg_tuition":1680,"monthly_revenue":97440,"monthly_expenses":79604,"monthly_net":17836,
-      "annual_net":214032,"breakeven_months":18,"roi_3yr":24,
-      "color":"var(--amber)"
-    },
-    {
-      "name":"Optimistic","label":"93% Capacity","enrolled":70,
-      "revenue_infant":7,"revenue_toddler":21,"revenue_preschool":27,"revenue_prek":15,
-      "avg_tuition":1720,"monthly_revenue":120400,"monthly_expenses":79604,"monthly_net":40796,
-      "annual_net":489552,"breakeven_months":13,"roi_3yr":58,
-      "color":"var(--green)"
-    }
-  ],
-  "projections": [
-    {"month":"M1","rev":12000,"exp":79604,"cum":-67604},
-    {"month":"M3","rev":42000,"exp":79604,"cum":-192412},
-    {"month":"M6","rev":68000,"exp":79604,"cum":-316836},
-    {"month":"M9","rev":85000,"exp":79604,"cum":-358248},
-    {"month":"M12","rev":92000,"exp":80500,"cum":-372748},
-    {"month":"M15","rev":97000,"exp":81000,"cum":-298748},
-    {"month":"M18","rev":100000,"exp":81500,"cum":-187748},
-    {"month":"M21","rev":104000,"exp":82000,"cum":-31748},
-    {"month":"M24","rev":108000,"exp":83000,"cum":154252},
-    {"month":"M30","rev":112000,"exp":84000,"cum":574252}
-  ],
-  "by_city_financials": [
-    {"city":"Suwanee","monthly_rent":13000,"avg_infant_tuition":2050,"break_even_enrolled":52,"yr1_net":-180000,"yr3_net":310000},
-    {"city":"Sugar Hill","monthly_rent":9500,"avg_infant_tuition":1900,"break_even_enrolled":46,"yr1_net":-120000,"yr3_net":380000},
-    {"city":"Johns Creek","monthly_rent":12000,"avg_infant_tuition":2200,"break_even_enrolled":50,"yr1_net":-160000,"yr3_net":410000},
-    {"city":"Buford","monthly_rent":8500,"avg_infant_tuition":1750,"break_even_enrolled":45,"yr1_net":-100000,"yr3_net":340000},
-    {"city":"Cumming","monthly_rent":10000,"avg_infant_tuition":1850,"break_even_enrolled":49,"yr1_net":-140000,"yr3_net":360000},
-    {"city":"Winder (Barrow)","monthly_rent":5800,"avg_infant_tuition":1400,"break_even_enrolled":44,"yr1_net":-85000,"yr3_net":290000},
-    {"city":"Auburn (Barrow)","monthly_rent":5200,"avg_infant_tuition":1350,"break_even_enrolled":42,"yr1_net":-75000,"yr3_net":275000}
-  ],
-  "funding": [
-    {"source":"SBA 7(a) Loan","amount":400000,"terms":"10yr @ ~7.75%","monthly_payment":4800,"notes":"Primary — most childcare startups use this"},
-    {"source":"Founder Equity","amount":100000,"terms":"Your investment","monthly_payment":0,"notes":"25-35% down typical"},
-    {"source":"USDA Rural Dev.","amount":50000,"terms":"Low interest grant/loan","monthly_payment":0,"notes":"If site qualifies as rural-adjacent"},
-    {"source":"Georgia SBIC","amount":75000,"terms":"Variable equity","monthly_payment":0,"notes":"Georgia Small Business Inv. Corp"},
-    {"source":"Angel/Friends","amount":50000,"terms":"Negotiated","monthly_payment":0,"notes":"Friends-and-family round"}
-  ]
-}`;
-  try {
-    let d=await claudeJSON(sys,usr);
-    if(!d) { console.warn('Agent 7 fallback'); d=getFallback7(); }
-    R.a7=d;
-    $('7-s-t').textContent=d.summary;
-    // Scenarios
-    const ind7=industry();
-    let sc=`<div class="scenario-grid">`;
-    _toArr(d.scenarios).forEach(s=>{
-      if(!s) return;
-      const sColor=s.color||'var(--text)';
-      const sNet=s.monthly_net||0;
-      const sRev=s.monthly_revenue||0;
-      const sAnn=s.annual_net||0;
-      sc+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
-        <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">${s.name||''}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${s.label||''} · ${s.enrolled||0} enrolled</div>
-        <div style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:${sColor};margin-bottom:10px">$${sNet>=0?'+':''}${sNet.toLocaleString()}<span style="font-size:12px">/mo</span></div>
-        <div style="display:grid;gap:4px;font-size:11px">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Monthly revenue</span><strong>$${sRev.toLocaleString()}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Break-even</span><strong>${s.breakeven_months||'—'} months</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">3yr ROI</span><strong style="color:${sColor}">${(s.roi_3yr||0)>0?'+':''}${s.roi_3yr||0}%</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Annual net</span><strong style="color:${sColor}">$${sAnn>=0?'+':''}${sAnn.toLocaleString()}</strong></div>
-        </div>
-      </div>`;
-    });
-    sc+=`</div>`;
-    $('7-sc-c').innerHTML=sc;
-    // P&L Chart
-    killChart('ch-7');
-    const ctx=$('ch-7').getContext('2d');
-    const proj7=d.projections||[];
-    charts['ch-7']=new Chart(ctx,{type:'line',data:{
-      labels:proj7.map(p=>p.month),
-      datasets:[
-        {label:'Revenue',data:proj7.map(p=>p.rev),borderColor:'#3dd68c',tension:0.4,fill:false,pointRadius:3,borderWidth:2},
-        {label:'Expenses',data:proj7.map(p=>p.exp),borderColor:'#ff5f5f',tension:0.4,fill:false,pointRadius:3,borderWidth:2},
-        {label:'Cumulative P&L',data:proj7.map(p=>p.cum),borderColor:'#4a9eff',tension:0.4,fill:true,backgroundColor:'rgba(74,158,255,0.08)',pointRadius:3,borderWidth:2,yAxisID:'y2'}
-      ]
-    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8d96',font:{size:11}}}},scales:{x:{ticks:{color:'#8a8d96',font:{size:9}},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96',callback:v=>'$'+(v/1000).toFixed(0)+'k'},grid:{color:'#2a2d35'},position:'left'},y2:{ticks:{color:'#4a9eff',callback:v=>'$'+(v/1000).toFixed(0)+'k'},grid:{display:false},position:'right'}}}});
-    // By city table
-    let tbl=`<table class="tbl"><thead><tr><th>City</th><th>Monthly Rent</th><th>Avg ${ind7.price_label_primary}</th><th>Break-Even Enrolled</th><th>Yr 1 Net</th><th>Yr 3 Net</th></tr></thead><tbody>`;
-    (d.by_city_financials||[]).forEach(c=>{
-      const n3b=(c.yr3_net||0)>=0?'b-green':'b-red';
-      tbl+=`<tr><td><strong>${c.city}</strong></td><td>$${(c.monthly_rent||0).toLocaleString()}</td><td>$${(c.avg_infant_tuition||c.avg_primary_rate||0).toLocaleString()}</td><td>${c.break_even_enrolled||'—'}</td><td style="color:${(c.yr1_net||0)>=0?'var(--green)':'var(--red)'}">$${(c.yr1_net||0).toLocaleString()}</td><td><span class="badge ${n3b}">$${(c.yr3_net||0).toLocaleString()}</span></td></tr>`;
-    });
-    tbl+=`</tbody></table>`;
-    $('7-t-c').innerHTML=tbl;
-    setDot(7,'done'); showOut(7);
-    return JSON.stringify(d);
-  } catch(e){setDot(7,'error');showOut(7);$('7-s-t').textContent='Error: '+e.message;throw e}
-}
+// Legacy single-call runAgent7 removed — active version is in 26-agent-fin-subs.js (3 sub-calls)
 
 // ══════════════════════════════════════════════════════════
 // AGENT 8 — Executive Report
@@ -5976,13 +5833,13 @@ function renderBusinessPlan(d) {
   let opsHtml=`<div class="bp-section">
     <h3>Facility Layout Plan</h3>
     <div class="bp-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${ops.facility.total_sqft.toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Indoor / Child</div><div class="bp-stat-val">${ops.facility.indoor_sqft_per_child}</div><div class="bp-stat-sub">sq ft (GA min: 35)</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Child</div><div class="bp-stat-val">${ops.facility.outdoor_sqft_per_child}</div><div class="bp-stat-sub">sq ft (GA min: 75)</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${(ops.facility.total_sqft||0).toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Indoor / Unit</div><div class="bp-stat-val">${ops.facility.indoor_sqft_per_child||ops.facility.indoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Unit</div><div class="bp-stat-val">${ops.facility.outdoor_sqft_per_child||ops.facility.outdoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
     </div>
     <div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr><th>Room</th><th>Sq Ft</th><th>Capacity</th><th>Ratio</th></tr></thead><tbody>`;
   (ops.facility?.rooms||[]).forEach(r=>{
-    opsHtml+=`<tr><td>${r.name}</td><td>${r.sqft.toLocaleString()}</td><td>${r.capacity||'—'}</td><td>${r.ratio}</td></tr>`;
+    opsHtml+=`<tr><td>${r.name||'—'}</td><td>${(r.sqft||0).toLocaleString()}</td><td>${r.capacity||'—'}</td><td>${r.ratio||'—'}</td></tr>`;
   });
   opsHtml+=`</tbody></table></div>
     <h4>Operating Hours</h4><div class="bp-prose">${ops.hours}</div>
@@ -6046,13 +5903,9 @@ async function runAgent10(a3,a4,a5,a7,a9) {
   setDot(10,'running');
   $('10-gantt-c').innerHTML = subProgress(1,3,'Starting project plan sub-agents…');
   // Sub-call approach — see 25-agent-10-parts.js
-  // Old single-call prompt removed to prevent max_tokens truncation
-  const _unused_marker = `[old template removed — sub-calls handle prompt generation in 25-agent-10-parts.js]
-{
-  "project_name": "Bright Futures Early Learning Center — Launch",
-  "total_duration_months": 18,
-  "target_open_date": "Month 19 from project start",
-  "phases": [
+  // (Old single-call template removed — sub-calls handle prompt generation)
+  /* REMOVED: old single-call template (see 25-agent-10-parts.js for active prompts)
+  "phases_PLACEHOLDER": [
     {
       "phase": "Phase 1: Foundation & Funding",
       "months": "1-3",
@@ -6288,8 +6141,7 @@ async function runAgent10(a3,a4,a5,a7,a9) {
       ]
     }
   ]
-}`;
-  // (prompt removed — replaced by sub-call approach below)
+  */ // end removed template
   try {
     let d = await runAgent10Parts(a3,a4,a5,a7,a9);
     if(!d || !d.phases) { console.warn('Agent 10 fallback'); d=getFallback10(); }
@@ -7013,7 +6865,7 @@ function buildCompDeepDive(d) {
       <div class="pain-title">${p.pain}</div>
       <div class="pain-freq">In ${p.frequency_pct}% of negative reviews</div>
       <div class="pain-bar"><div class="pain-bar-fill" style="width:${p.frequency_pct}%;background:${col}"></div></div>
-      <div style="font-size:10px;color:var(--faint);margin-bottom:6px">Affects: ${p.competitors_affected.join(', ')}</div>
+      <div style="font-size:10px;color:var(--faint);margin-bottom:6px">Affects: ${(p.competitors_affected||[]).join(', ')}</div>
       <div class="pain-opp">→ ${p.your_solution}</div>
     </div>`;
   });
@@ -7978,7 +7830,7 @@ async function runAgent9Parts(a1,a2,a3,a4,a5,a6,a7,a8) {
   const ctx7 = ctx(a7,['summary','scenarios','startup_breakdown','monthly_ops','by_city_financials']);
   const ctx8 = ctx(a8,['verdict','verdict_rationale','assessment','success_factors','risks','next_steps']);
 
-  if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(9);if(_d){R.a9=_d;try{renderAgent9(_d);}catch(e){}setDot(9,'done');showOut(9);return JSON.stringify(_d);}}
+  if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(9);if(_d){R.a9=_d;try{renderBusinessPlan(_d);}catch(e){}setDot(9,'done');showOut(9);return _d;}}
   // ── Part 1 of 4: Executive Summary + Company Overview ───
   setDot(9,'running'); $('9-ov-c').innerHTML = subProgress(1,4,'Executive Summary & Company Overview');
   const sys1 = `You are a senior business plan writer. Return JSON only. No extra text.`;
@@ -12449,15 +12301,16 @@ async function safeClaudeJSON(system, user, agentNum) {
   }
 }
 
-// ── AGENT 13 — COMPETITOR DEEP DIVE (2-PASS) ─────────────────────────────────
+// ── AGENT 13 — COMPETITOR DEEP DIVE (3-PASS) ─────────────────────────────────
 /**
- * Agent 13 override: splits the massive single call into:
- *  - Pass A: Get 3 competitor profiles (core data)
- *  - Pass B: Get pain point analysis + differentiation strategy + messaging
- *  - Merge both passes into a single R.a13 object
+ * Agent 13 canonical implementation (3 sub-calls via safeClaudeJSON):
+ *  - Pass A: 4-5 competitor profiles (with google_search_url, yelp_url, tuition)
+ *  - Pass B: Pain point analysis + differentiation strategy
+ *  - Pass C: Messaging guide (separate to avoid output truncation)
  *
- * This prevents max_tokens from cutting off mid-response (5+ competitor profiles
- * × 10+ fields each = 3000–4000+ output tokens in one shot).
+ * NOTE: This definition overrides the one in 19-render-13.js because this file
+ * loads last in the bundle. The 19-render-13.js version is kept for reference
+ * but is inactive. This version uses safeClaudeJSON for all passes.
  */
 const _origRunAgent13 = typeof runAgent13 === 'function' ? runAgent13 : null;
 async function runAgent13(a6) {
@@ -12474,76 +12327,102 @@ async function runAgent13(a6) {
     }
   }
 
-  const ind  = industry();
-  const compCtx = ctx(a6, ['summary', 'cities', 'top_chains'], 600);
+  const ind = industry();
+  const compCtx = ctx(a6, ['summary', 'cities', 'top_chains'], 800);
 
   try {
     // ── Pass A: Competitor Profiles ─────────────────────────────────────────
-    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 1/2: Analyzing competitor profiles…');
+    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 1/3: Analyzing competitor profiles…');
 
-    const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Respond JSON only.`;
-    const usrA = `Analyze the top 3 direct competitors for a new ${ind.unit} near ZIP ${zip()}.
-Known competitors: ${ind.competitors}
-Market context: ${compCtx}
-
-Return ONLY this JSON (exactly 3 competitor_profiles):
+    const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Search Google, Yelp, Facebook reviews for real customer data. Respond JSON only.`;
+    const usrA = `Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
+Competitor market context: ${compCtx}
+Return ONLY:
 {
-  "summary": "2-sentence competitive landscape summary",
+  "summary": "string",
   "competitor_profiles": [
     {
       "name": "string",
       "type": "Corporate Franchise|Corporate Chain|Independent|Regional",
-      "avg_rating": 4.1,
-      "review_count_est": 200,
-      "monthly_primary_rate": 1800,
-      "locations_nearby": 3,
-      "top_positive_themes": ["theme1","theme2","theme3"],
-      "top_complaint_themes": ["complaint1","complaint2","complaint3"],
-      "sample_complaints": ["quote1","quote2"],
-      "differentiation_opportunity": "1 sentence"
+      "avg_rating": 0.0,
+      "review_count_est": 0,
+      "monthly_tuition_infant": 0,
+      "locations_nearby": 0,
+      "google_search_url": "https://www.google.com/search?q=...",
+      "yelp_url": "https://www.yelp.com/search?...",
+      "top_positive_themes": ["string","string","string"],
+      "top_complaint_themes": ["string","string","string"],
+      "sample_complaints": ["string","string"],
+      "differentiation_opportunity": "string"
     }
   ]
-}`;
+}
+Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
     const passA = await safeClaudeJSON(sysA, usrA, '13a');
 
-    // ── Pass B: Pain Points + Strategy ──────────────────────────────────────
-    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 2/2: Building differentiation strategy…');
+    // ── Pass B: Pain Points + Differentiation ───────────────────────────────
+    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 2/3: Building pain point analysis…');
 
-    const profileSummary = (passA?.competitor_profiles || [])
-      .map(c => `${c.name}: ${c.top_complaint_themes?.slice(0,2).join(', ')}`)
-      .join(' | ');
-
-    const sysB = `You are a brand strategist for ${ind.unit} startups. Respond JSON only.`;
-    const usrB = `Create a differentiation strategy for a new ${ind.unit} near ZIP ${zip()}.
-Industry: ${ind.unit} | Competitors: ${profileSummary}
-
+    const competitorNames = (passA?.competitor_profiles || []).map(c => c.name).join(', ') || ind.competitors;
+    const sysB = `You are a ${ind.unit} market strategist. Respond JSON only.`;
+    const usrB = `Competitors near ZIP ${zip()}: ${competitorNames}
 Return ONLY:
 {
   "pain_point_analysis": [
-    {"pain":"string","frequency_pct":50,"your_solution":"string","marketing_angle":"string"}
+    {
+      "pain": "string",
+      "frequency_pct": 0,
+      "competitors_affected": ["string"],
+      "your_solution": "string",
+      "marketing_angle": "string"
+    }
   ],
   "differentiation_strategy": [
-    {"pillar":"string","description":"string","marketing_hook":"string"}
-  ],
-  "messaging_guide": [
-    {"audience":"string","headline":"string","body":"string","cta":"string","channel":"string"}
+    {
+      "pillar": "string",
+      "description": "string",
+      "competitors_this_beats": ["string"],
+      "marketing_hook": "string"
+    }
   ]
-}`;
+}
+Include 6-8 pain points and 5-6 differentiation pillars.`;
 
     const passB = await safeClaudeJSON(sysB, usrB, '13b');
 
-    // ── Merge both passes ────────────────────────────────────────────────────
+    // ── Pass C: Messaging Guide ──────────────────────────────────────────────
+    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 3/3: Creating messaging guide…');
+
+    const sysC = `You are a ${ind.unit} marketing strategist. Respond JSON only.`;
+    const usrC = `New ${ind.unit} near ZIP ${zip()} competing against: ${competitorNames}
+Return ONLY:
+{
+  "messaging_guide": [
+    {
+      "audience": "string",
+      "headline": "string",
+      "body": "string",
+      "cta": "string",
+      "channel": "string"
+    }
+  ]
+}
+Include 5 distinct audience segments with messaging tailored to specific competitor frustrations.`;
+
+    const passC = await safeClaudeJSON(sysC, usrC, '13c');
+
+    // ── Merge all 3 passes ───────────────────────────────────────────────────
     const merged = {
       summary:                  passA?.summary || `Competitor analysis for ${ind.unit} near ZIP ${zip()}.`,
       competitor_profiles:      passA?.competitor_profiles || [],
       pain_point_analysis:      passB?.pain_point_analysis || [],
       differentiation_strategy: passB?.differentiation_strategy || [],
-      messaging_guide:          passB?.messaging_guide || [],
+      messaging_guide:          passC?.messaging_guide || [],
     };
 
     if (!merged.competitor_profiles.length && !merged.pain_point_analysis.length) {
-      console.warn('Agent 13: both passes returned empty, using fallback');
+      console.warn('Agent 13: all passes empty — using fallback');
       const fallback = typeof getFallback13 === 'function' ? getFallback13() : {};
       R.a13 = fallback;
       buildCompDeepDive(fallback);
@@ -12626,7 +12505,7 @@ window._v2StressTestReport = function() {
       { agent: 'A8  Exec Summary',    input_risk: 'High',     output_risk: 'Medium',   mitigation: 'Streaming (claudeStreamJSON) ✅' },
       { agent: 'A9  Business Plan',   input_risk: 'Medium',   output_risk: 'High',     mitigation: '4 sub-agents (24-agent-09-parts) ✅' },
       { agent: 'A10 Project Plan',    input_risk: 'Medium',   output_risk: 'High',     mitigation: '3 sub-agents (25-agent-10-parts) ✅' },
-      { agent: 'A13 Comp Deep Dive',  input_risk: 'Low',      output_risk: 'CRITICAL', mitigation: '2-pass sub-agents (41-stress-guard) 🔴→✅' },
+      { agent: 'A13 Comp Deep Dive',  input_risk: 'Low',      output_risk: 'CRITICAL', mitigation: '3-pass sub-agents via safeClaudeJSON (41-stress-guard) 🔴→✅' },
       { agent: 'A14 Code Review',     input_risk: 'CRITICAL', output_risk: 'Low',      mitigation: 'R object slimmed to summaries only (41-stress-guard) 🔴→✅' },
       { agent: 'A1–A6, A11, A12',    input_risk: 'Low',      output_risk: 'Low/Med',  mitigation: 'claudeJSON patch: size monitor + auto-retry ✅' },
     ],

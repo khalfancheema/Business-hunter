@@ -157,7 +157,7 @@ function buildCompDeepDive(d) {
       <div class="pain-title">${p.pain}</div>
       <div class="pain-freq">In ${p.frequency_pct}% of negative reviews</div>
       <div class="pain-bar"><div class="pain-bar-fill" style="width:${p.frequency_pct}%;background:${col}"></div></div>
-      <div style="font-size:10px;color:var(--faint);margin-bottom:6px">Affects: ${p.competitors_affected.join(', ')}</div>
+      <div style="font-size:10px;color:var(--faint);margin-bottom:6px">Affects: ${(p.competitors_affected||[]).join(', ')}</div>
       <div class="pain-opp">→ ${p.your_solution}</div>
     </div>`;
   });

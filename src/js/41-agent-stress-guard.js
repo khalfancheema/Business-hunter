@@ -95,15 +95,16 @@ async function safeClaudeJSON(system, user, agentNum) {
   }
 }
 
-// ── AGENT 13 — COMPETITOR DEEP DIVE (2-PASS) ─────────────────────────────────
+// ── AGENT 13 — COMPETITOR DEEP DIVE (3-PASS) ─────────────────────────────────
 /**
- * Agent 13 override: splits the massive single call into:
- *  - Pass A: Get 3 competitor profiles (core data)
- *  - Pass B: Get pain point analysis + differentiation strategy + messaging
- *  - Merge both passes into a single R.a13 object
+ * Agent 13 canonical implementation (3 sub-calls via safeClaudeJSON):
+ *  - Pass A: 4-5 competitor profiles (with google_search_url, yelp_url, tuition)
+ *  - Pass B: Pain point analysis + differentiation strategy
+ *  - Pass C: Messaging guide (separate to avoid output truncation)
  *
- * This prevents max_tokens from cutting off mid-response (5+ competitor profiles
- * × 10+ fields each = 3000–4000+ output tokens in one shot).
+ * NOTE: This definition overrides the one in 19-render-13.js because this file
+ * loads last in the bundle. The 19-render-13.js version is kept for reference
+ * but is inactive. This version uses safeClaudeJSON for all passes.
  */
 const _origRunAgent13 = typeof runAgent13 === 'function' ? runAgent13 : null;
 async function runAgent13(a6) {
@@ -120,76 +121,102 @@ async function runAgent13(a6) {
     }
   }
 
-  const ind  = industry();
-  const compCtx = ctx(a6, ['summary', 'cities', 'top_chains'], 600);
+  const ind = industry();
+  const compCtx = ctx(a6, ['summary', 'cities', 'top_chains'], 800);
 
   try {
     // ── Pass A: Competitor Profiles ─────────────────────────────────────────
-    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 1/2: Analyzing competitor profiles…');
+    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 1/3: Analyzing competitor profiles…');
 
-    const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Respond JSON only.`;
-    const usrA = `Analyze the top 3 direct competitors for a new ${ind.unit} near ZIP ${zip()}.
-Known competitors: ${ind.competitors}
-Market context: ${compCtx}
-
-Return ONLY this JSON (exactly 3 competitor_profiles):
+    const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Search Google, Yelp, Facebook reviews for real customer data. Respond JSON only.`;
+    const usrA = `Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
+Competitor market context: ${compCtx}
+Return ONLY:
 {
-  "summary": "2-sentence competitive landscape summary",
+  "summary": "string",
   "competitor_profiles": [
     {
       "name": "string",
       "type": "Corporate Franchise|Corporate Chain|Independent|Regional",
-      "avg_rating": 4.1,
-      "review_count_est": 200,
-      "monthly_primary_rate": 1800,
-      "locations_nearby": 3,
-      "top_positive_themes": ["theme1","theme2","theme3"],
-      "top_complaint_themes": ["complaint1","complaint2","complaint3"],
-      "sample_complaints": ["quote1","quote2"],
-      "differentiation_opportunity": "1 sentence"
+      "avg_rating": 0.0,
+      "review_count_est": 0,
+      "monthly_tuition_infant": 0,
+      "locations_nearby": 0,
+      "google_search_url": "https://www.google.com/search?q=...",
+      "yelp_url": "https://www.yelp.com/search?...",
+      "top_positive_themes": ["string","string","string"],
+      "top_complaint_themes": ["string","string","string"],
+      "sample_complaints": ["string","string"],
+      "differentiation_opportunity": "string"
     }
   ]
-}`;
+}
+Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
     const passA = await safeClaudeJSON(sysA, usrA, '13a');
 
-    // ── Pass B: Pain Points + Strategy ──────────────────────────────────────
-    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 2/2: Building differentiation strategy…');
+    // ── Pass B: Pain Points + Differentiation ───────────────────────────────
+    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 2/3: Building pain point analysis…');
 
-    const profileSummary = (passA?.competitor_profiles || [])
-      .map(c => `${c.name}: ${c.top_complaint_themes?.slice(0,2).join(', ')}`)
-      .join(' | ');
-
-    const sysB = `You are a brand strategist for ${ind.unit} startups. Respond JSON only.`;
-    const usrB = `Create a differentiation strategy for a new ${ind.unit} near ZIP ${zip()}.
-Industry: ${ind.unit} | Competitors: ${profileSummary}
-
+    const competitorNames = (passA?.competitor_profiles || []).map(c => c.name).join(', ') || ind.competitors;
+    const sysB = `You are a ${ind.unit} market strategist. Respond JSON only.`;
+    const usrB = `Competitors near ZIP ${zip()}: ${competitorNames}
 Return ONLY:
 {
   "pain_point_analysis": [
-    {"pain":"string","frequency_pct":50,"your_solution":"string","marketing_angle":"string"}
+    {
+      "pain": "string",
+      "frequency_pct": 0,
+      "competitors_affected": ["string"],
+      "your_solution": "string",
+      "marketing_angle": "string"
+    }
   ],
   "differentiation_strategy": [
-    {"pillar":"string","description":"string","marketing_hook":"string"}
-  ],
-  "messaging_guide": [
-    {"audience":"string","headline":"string","body":"string","cta":"string","channel":"string"}
+    {
+      "pillar": "string",
+      "description": "string",
+      "competitors_this_beats": ["string"],
+      "marketing_hook": "string"
+    }
   ]
-}`;
+}
+Include 6-8 pain points and 5-6 differentiation pillars.`;
 
     const passB = await safeClaudeJSON(sysB, usrB, '13b');
 
-    // ── Merge both passes ────────────────────────────────────────────────────
+    // ── Pass C: Messaging Guide ──────────────────────────────────────────────
+    $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 3/3: Creating messaging guide…');
+
+    const sysC = `You are a ${ind.unit} marketing strategist. Respond JSON only.`;
+    const usrC = `New ${ind.unit} near ZIP ${zip()} competing against: ${competitorNames}
+Return ONLY:
+{
+  "messaging_guide": [
+    {
+      "audience": "string",
+      "headline": "string",
+      "body": "string",
+      "cta": "string",
+      "channel": "string"
+    }
+  ]
+}
+Include 5 distinct audience segments with messaging tailored to specific competitor frustrations.`;
+
+    const passC = await safeClaudeJSON(sysC, usrC, '13c');
+
+    // ── Merge all 3 passes ───────────────────────────────────────────────────
     const merged = {
       summary:                  passA?.summary || `Competitor analysis for ${ind.unit} near ZIP ${zip()}.`,
       competitor_profiles:      passA?.competitor_profiles || [],
       pain_point_analysis:      passB?.pain_point_analysis || [],
       differentiation_strategy: passB?.differentiation_strategy || [],
-      messaging_guide:          passB?.messaging_guide || [],
+      messaging_guide:          passC?.messaging_guide || [],
     };
 
     if (!merged.competitor_profiles.length && !merged.pain_point_analysis.length) {
-      console.warn('Agent 13: both passes returned empty, using fallback');
+      console.warn('Agent 13: all passes empty — using fallback');
       const fallback = typeof getFallback13 === 'function' ? getFallback13() : {};
       R.a13 = fallback;
       buildCompDeepDive(fallback);
@@ -272,7 +299,7 @@ window._v2StressTestReport = function() {
       { agent: 'A8  Exec Summary',    input_risk: 'High',     output_risk: 'Medium',   mitigation: 'Streaming (claudeStreamJSON) ✅' },
       { agent: 'A9  Business Plan',   input_risk: 'Medium',   output_risk: 'High',     mitigation: '4 sub-agents (24-agent-09-parts) ✅' },
       { agent: 'A10 Project Plan',    input_risk: 'Medium',   output_risk: 'High',     mitigation: '3 sub-agents (25-agent-10-parts) ✅' },
-      { agent: 'A13 Comp Deep Dive',  input_risk: 'Low',      output_risk: 'CRITICAL', mitigation: '2-pass sub-agents (41-stress-guard) 🔴→✅' },
+      { agent: 'A13 Comp Deep Dive',  input_risk: 'Low',      output_risk: 'CRITICAL', mitigation: '3-pass sub-agents via safeClaudeJSON (41-stress-guard) 🔴→✅' },
       { agent: 'A14 Code Review',     input_risk: 'CRITICAL', output_risk: 'Low',      mitigation: 'R object slimmed to summaries only (41-stress-guard) 🔴→✅' },
       { agent: 'A1–A6, A11, A12',    input_risk: 'Low',      output_risk: 'Low/Med',  mitigation: 'claudeJSON patch: size monitor + auto-retry ✅' },
     ],
