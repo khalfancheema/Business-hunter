@@ -5240,9 +5240,9 @@ For pricing, cross-reference NDCP county median rates to validate recommendation
     $('2-r-c').innerHTML=ranks;
     // Chart
     killChart('ch-2');
-    const ctx=$('ch-2').getContext('2d');
+    const ctx2=$('ch-2').getContext('2d');
     const ageGaps2=d.age_gaps||[];
-    charts['ch-2']=new Chart(ctx,{type:'bar',data:{
+    charts['ch-2']=new Chart(ctx2,{type:'bar',data:{
       labels:ageGaps2.map(a=>a.age),
       datasets:[
         {label:'Demand Index',data:ageGaps2.map(a=>a.demand_idx),backgroundColor:'rgba(74,158,255,0.7)',borderWidth:0,borderRadius:3},
