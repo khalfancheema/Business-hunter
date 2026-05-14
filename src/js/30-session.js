@@ -40,7 +40,23 @@ function _sessionAutoSave() {
       html:     agentHtml,
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(snap));
-  } catch(e) { console.warn('Session auto-save failed:', e.message); }
+  } catch(e) {
+    console.warn('Session auto-save failed:', e.message);
+    // Likely localStorage quota — clear oldest session and retry once with HTML stripped
+    if (/quota|exceed/i.test(e.message || '')) {
+      try {
+        const minimal = JSON.stringify({
+          ts: Date.now(),
+          zip: $('zip')?.value || '',
+          industry: $('industrySelect')?.value || '',
+          R: R,
+          html: {},
+        });
+        localStorage.setItem(SESSION_KEY, minimal);
+        console.info('Session saved without rendered HTML (quota exceeded).');
+      } catch(e2) { /* nothing we can do */ }
+    }
+  }
 }
 
 // ── Session restore ──────────────────────────────────────────

@@ -92,17 +92,29 @@ function fullPipelineExport() {
     const outEl = $('out-' + n);
     if (!outEl || !outEl.innerHTML.trim()) return;
 
-    // Swap canvas elements → captured PNG images
-    let content = outEl.innerHTML;
-    content = content.replace(/<canvas([^>]*)id="([^"]*)"([^>]*)><\/canvas>/g, (match, pre, cid, post) => {
-      if (chartImgs[cid]) {
-        return `<img src="${chartImgs[cid]}" class="fp-chart-img" alt="Chart ${cid}" />`;
+    // Clone via DOM (not regex) so nested-div stripping is structurally
+    // correct and chart canvases swap cleanly to captured PNGs.
+    const cloneNode = outEl.cloneNode(true);
+    // Strip export dropdowns / re-run / raw-data / drilldown overlays
+    cloneNode.querySelectorAll('.export-dropdown,.rerun-btn,.raw-toggle,.raw-data-wrap,.expand-btn,.modal-overlay')
+      .forEach(el => el.remove());
+    // Swap canvas → PNG image
+    cloneNode.querySelectorAll('canvas').forEach(c => {
+      const cid = c.id;
+      let replacement;
+      if (cid && chartImgs[cid]) {
+        replacement = document.createElement('img');
+        replacement.src = chartImgs[cid];
+        replacement.className = 'fp-chart-img';
+        replacement.alt = 'Chart ' + cid;
+      } else {
+        replacement = document.createElement('div');
+        replacement.className = 'fp-chart-missing';
+        replacement.textContent = 'Chart not available (re-run agent to regenerate)';
       }
-      return `<div class="fp-chart-missing">Chart not available (re-run agent to regenerate)</div>`;
+      c.parentNode && c.parentNode.replaceChild(replacement, c);
     });
-
-    // Strip export dropdown menus and drill-down overlays from content
-    content = content.replace(/<div class="export-dropdown[^"]*"[^>]*>[\s\S]*?<\/div>/g, '');
+    const content = cloneNode.innerHTML;
 
     const label = _FULL_EXPORT_LABELS[n] || ('Agent ' + n);
     sections.push(`
@@ -228,4 +240,5 @@ function fullPipelineExport() {
 
   w.document.write(fullDoc);
   w.document.close();
+  try { w.focus(); } catch(e) {}
 }

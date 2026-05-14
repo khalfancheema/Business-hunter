@@ -58,9 +58,9 @@ function updateScenario() {
   const cap    = container._capacity || 75;
   const nrExp  = container._nonRentExp || 60000;
 
-  const occ    = parseInt($('sb-occ')?.value || 75);
-  const tuition= parseInt($('sb-t1')?.value  || 1800);
-  const rent   = parseInt($('sb-rent')?.value || 10000);
+  const occ    = parseInt($('sb-occ')?.value || 75, 10);
+  const tuition= parseInt($('sb-t1')?.value  || 1800, 10);
+  const rent   = parseInt($('sb-rent')?.value || 10000, 10);
 
   if ($('sb-occ-val'))  $('sb-occ-val').textContent  = occ + '%';
   if ($('sb-t1-val'))   $('sb-t1-val').textContent   = '$' + tuition.toLocaleString();

@@ -25,12 +25,15 @@ async function runAgent17() {
   const ind = industry();
 
   // ── Collect partial data from completed agents ──────────
+  // Cap each agent snippet to ~500 chars so total context stays well under
+  // the input window even when all 16 upstream agents have completed.
+  // (16 agents × 1200 chars = ~19KB was excessive for an audit summary.)
   function safeStr(key) {
     try {
       const v = R[key];
       if (!v) return '';
       const s = typeof v === 'string' ? v : JSON.stringify(v);
-      return s.substring(0, 1200);
+      return s.substring(0, 500);
     } catch (e) { return ''; }
   }
 

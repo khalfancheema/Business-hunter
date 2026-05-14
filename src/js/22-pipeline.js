@@ -183,7 +183,8 @@ function exportResults() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `pipeline-results-${zip()}-${Date.now()}.json`;
-  a.click();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
 function printReport() {

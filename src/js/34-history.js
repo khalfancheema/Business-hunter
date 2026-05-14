@@ -48,10 +48,13 @@ function historySave() {
     };
 
     const history = historyLoad();
-    // Remove duplicate (same ZIP + industry + same day)
-    const today = entry.date.slice(0, 10);
+    // Remove duplicate (same ZIP + industry + same local day)
+    // Use the local-date string instead of ISO UTC slice to avoid the
+    // "two runs same day but different timezone" dedup miss.
+    const _localDay = d => { const x = new Date(d); return x.getFullYear()+'-'+(x.getMonth()+1)+'-'+x.getDate(); };
+    const today = _localDay(entry.date);
     const filtered = history.filter(h =>
-      !(h.zip === entry.zip && h.industry === entry.industry && h.date.slice(0, 10) === today)
+      !(h.zip === entry.zip && h.industry === entry.industry && _localDay(h.date) === today)
     );
     filtered.unshift(entry);
     const trimmed = filtered.slice(0, HISTORY_LIMIT);
@@ -134,7 +137,7 @@ function historyRenderPanel() {
     return Math.round(h / 24) + 'd ago';
   };
   const ind = id => {
-    const found = Object.values(INDUSTRIES || {}).find((_, i) => Object.keys(INDUSTRIES)[i] === id);
+    const found = (typeof INDUSTRIES !== 'undefined') ? INDUSTRIES[id] : null;
     return found ? found.emoji + ' ' + found.label : id;
   };
 

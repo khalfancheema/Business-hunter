@@ -214,8 +214,13 @@ function v2ShowApiKey() {
 async function v2DetectOllamaModels() {
   const btn = document.getElementById('v2-ollama-btn');
   if (!btn) return;
+  // AbortSignal.timeout polyfill for Safari < 16
+  const _toSig = (ms) => {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+    const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal;
+  };
   try {
-    const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(1500) });
+    const r = await fetch('http://localhost:11434/api/tags', { signal: _toSig(1500) });
     if (!r.ok) throw new Error();
     const data = await r.json();
     const models = (data.models || []).map(m => m.name);
@@ -292,8 +297,13 @@ async function v2DetectOpenRouterModels() {
   if (savedKey && btn) btn.disabled = false;
 
   // Fetch live free models from OpenRouter public API
+  // Reuse polyfill helper from v2DetectOllamaModels scope-equivalent
+  const _toSig2 = (ms) => {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+    const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal;
+  };
   try {
-    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: AbortSignal.timeout(4000) });
+    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: _toSig2(4000) });
     if (!r.ok) throw new Error();
     const d = await r.json();
     const free = (d.data || [])

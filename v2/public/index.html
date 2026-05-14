@@ -7437,7 +7437,8 @@ function exportResults() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `pipeline-results-${zip()}-${Date.now()}.json`;
-  a.click();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
 function printReport() {
@@ -7754,7 +7755,7 @@ function modalShowRaw(n) {
 function saveAgentJSON() {
   var overlay = document.getElementById('agentModalOverlay');
   if (!overlay) return;
-  var n = parseInt(overlay.dataset.agentN);
+  var n = parseInt(overlay.dataset.agentN, 10);
   var data = R['a'+n];
   if (!data) return;
   var meta = AGENT_META[n] || { name:'agent-'+n };
@@ -7763,13 +7764,14 @@ function saveAgentJSON() {
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'agent-' + n + '-' + name + '-' + Date.now() + '.json';
-  a.click();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
 }
 
 function printAgentData() {
   var overlay = document.getElementById('agentModalOverlay');
   if (!overlay) return;
-  var n    = parseInt(overlay.dataset.agentN);
+  var n    = parseInt(overlay.dataset.agentN, 10);
   var data = R['a'+n];
   var meta = AGENT_META[n] || { name:'Agent '+n, ico:'🤖' };
   var srcOut = document.getElementById('out-'+n);
@@ -8889,12 +8891,15 @@ async function runAgent17() {
   const ind = industry();
 
   // ── Collect partial data from completed agents ──────────
+  // Cap each agent snippet to ~500 chars so total context stays well under
+  // the input window even when all 16 upstream agents have completed.
+  // (16 agents × 1200 chars = ~19KB was excessive for an audit summary.)
   function safeStr(key) {
     try {
       const v = R[key];
       if (!v) return '';
       const s = typeof v === 'string' ? v : JSON.stringify(v);
-      return s.substring(0, 1200);
+      return s.substring(0, 500);
     } catch (e) { return ''; }
   }
 
@@ -9562,7 +9567,23 @@ function _sessionAutoSave() {
       html:     agentHtml,
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(snap));
-  } catch(e) { console.warn('Session auto-save failed:', e.message); }
+  } catch(e) {
+    console.warn('Session auto-save failed:', e.message);
+    // Likely localStorage quota — clear oldest session and retry once with HTML stripped
+    if (/quota|exceed/i.test(e.message || '')) {
+      try {
+        const minimal = JSON.stringify({
+          ts: Date.now(),
+          zip: $('zip')?.value || '',
+          industry: $('industrySelect')?.value || '',
+          R: R,
+          html: {},
+        });
+        localStorage.setItem(SESSION_KEY, minimal);
+        console.info('Session saved without rendered HTML (quota exceeded).');
+      } catch(e2) { /* nothing we can do */ }
+    }
+  }
 }
 
 // ── Session restore ──────────────────────────────────────────
@@ -9807,17 +9828,29 @@ function fullPipelineExport() {
     const outEl = $('out-' + n);
     if (!outEl || !outEl.innerHTML.trim()) return;
 
-    // Swap canvas elements → captured PNG images
-    let content = outEl.innerHTML;
-    content = content.replace(/<canvas([^>]*)id="([^"]*)"([^>]*)><\/canvas>/g, (match, pre, cid, post) => {
-      if (chartImgs[cid]) {
-        return `<img src="${chartImgs[cid]}" class="fp-chart-img" alt="Chart ${cid}" />`;
+    // Clone via DOM (not regex) so nested-div stripping is structurally
+    // correct and chart canvases swap cleanly to captured PNGs.
+    const cloneNode = outEl.cloneNode(true);
+    // Strip export dropdowns / re-run / raw-data / drilldown overlays
+    cloneNode.querySelectorAll('.export-dropdown,.rerun-btn,.raw-toggle,.raw-data-wrap,.expand-btn,.modal-overlay')
+      .forEach(el => el.remove());
+    // Swap canvas → PNG image
+    cloneNode.querySelectorAll('canvas').forEach(c => {
+      const cid = c.id;
+      let replacement;
+      if (cid && chartImgs[cid]) {
+        replacement = document.createElement('img');
+        replacement.src = chartImgs[cid];
+        replacement.className = 'fp-chart-img';
+        replacement.alt = 'Chart ' + cid;
+      } else {
+        replacement = document.createElement('div');
+        replacement.className = 'fp-chart-missing';
+        replacement.textContent = 'Chart not available (re-run agent to regenerate)';
       }
-      return `<div class="fp-chart-missing">Chart not available (re-run agent to regenerate)</div>`;
+      c.parentNode && c.parentNode.replaceChild(replacement, c);
     });
-
-    // Strip export dropdown menus and drill-down overlays from content
-    content = content.replace(/<div class="export-dropdown[^"]*"[^>]*>[\s\S]*?<\/div>/g, '');
+    const content = cloneNode.innerHTML;
 
     const label = _FULL_EXPORT_LABELS[n] || ('Agent ' + n);
     sections.push(`
@@ -9943,6 +9976,7 @@ function fullPipelineExport() {
 
   w.document.write(fullDoc);
   w.document.close();
+  try { w.focus(); } catch(e) {}
 }
 
 
@@ -10345,10 +10379,13 @@ function historySave() {
     };
 
     const history = historyLoad();
-    // Remove duplicate (same ZIP + industry + same day)
-    const today = entry.date.slice(0, 10);
+    // Remove duplicate (same ZIP + industry + same local day)
+    // Use the local-date string instead of ISO UTC slice to avoid the
+    // "two runs same day but different timezone" dedup miss.
+    const _localDay = d => { const x = new Date(d); return x.getFullYear()+'-'+(x.getMonth()+1)+'-'+x.getDate(); };
+    const today = _localDay(entry.date);
     const filtered = history.filter(h =>
-      !(h.zip === entry.zip && h.industry === entry.industry && h.date.slice(0, 10) === today)
+      !(h.zip === entry.zip && h.industry === entry.industry && _localDay(h.date) === today)
     );
     filtered.unshift(entry);
     const trimmed = filtered.slice(0, HISTORY_LIMIT);
@@ -10431,7 +10468,7 @@ function historyRenderPanel() {
     return Math.round(h / 24) + 'd ago';
   };
   const ind = id => {
-    const found = Object.values(INDUSTRIES || {}).find((_, i) => Object.keys(INDUSTRIES)[i] === id);
+    const found = (typeof INDUSTRIES !== 'undefined') ? INDUSTRIES[id] : null;
     return found ? found.emoji + ' ' + found.label : id;
   };
 
@@ -11970,9 +12007,9 @@ function updateScenario() {
   const cap    = container._capacity || 75;
   const nrExp  = container._nonRentExp || 60000;
 
-  const occ    = parseInt($('sb-occ')?.value || 75);
-  const tuition= parseInt($('sb-t1')?.value  || 1800);
-  const rent   = parseInt($('sb-rent')?.value || 10000);
+  const occ    = parseInt($('sb-occ')?.value || 75, 10);
+  const tuition= parseInt($('sb-t1')?.value  || 1800, 10);
+  const rent   = parseInt($('sb-rent')?.value || 10000, 10);
 
   if ($('sb-occ-val'))  $('sb-occ-val').textContent  = occ + '%';
   if ($('sb-t1-val'))   $('sb-t1-val').textContent   = '$' + tuition.toLocaleString();
@@ -12082,12 +12119,22 @@ function _showLocalGuide() {
 
 // ── Classic View: Ollama ──────────────────────────────────
 
+// Polyfill AbortSignal.timeout for Safari < 16
+function _abortTimeoutSignal(ms) {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(ms);
+  }
+  const ctrl = new AbortController();
+  setTimeout(() => ctrl.abort(), ms);
+  return ctrl.signal;
+}
+
 async function _detectOllamaModelsClassic() {
   const btn    = document.getElementById('cl-ollama-btn');
   const status = document.getElementById('cl-ollama-status');
   const sel    = document.getElementById('cl-ollama-model-sel');
   try {
-    const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(1500) });
+    const r = await fetch('http://localhost:11434/api/tags', { signal: _abortTimeoutSignal(1500) });
     if (!r.ok) throw new Error();
     const data = await r.json();
     const models = (data.models || []).map(m => m.name);
@@ -12163,7 +12210,7 @@ async function _detectOpenRouterModelsClassic() {
   if (savedKey && btn) btn.disabled = false;
 
   try {
-    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: AbortSignal.timeout(4000) });
+    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: _abortTimeoutSignal(4000) });
     if (!r.ok) throw new Error();
     const d = await r.json();
     const free = (d.data || [])
@@ -12787,8 +12834,13 @@ function v2ShowApiKey() {
 async function v2DetectOllamaModels() {
   const btn = document.getElementById('v2-ollama-btn');
   if (!btn) return;
+  // AbortSignal.timeout polyfill for Safari < 16
+  const _toSig = (ms) => {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+    const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal;
+  };
   try {
-    const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(1500) });
+    const r = await fetch('http://localhost:11434/api/tags', { signal: _toSig(1500) });
     if (!r.ok) throw new Error();
     const data = await r.json();
     const models = (data.models || []).map(m => m.name);
@@ -12865,8 +12917,13 @@ async function v2DetectOpenRouterModels() {
   if (savedKey && btn) btn.disabled = false;
 
   // Fetch live free models from OpenRouter public API
+  // Reuse polyfill helper from v2DetectOllamaModels scope-equivalent
+  const _toSig2 = (ms) => {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+    const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal;
+  };
   try {
-    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: AbortSignal.timeout(4000) });
+    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: _toSig2(4000) });
     if (!r.ok) throw new Error();
     const d = await r.json();
     const free = (d.data || [])

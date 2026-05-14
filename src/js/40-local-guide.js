@@ -35,12 +35,22 @@ function _showLocalGuide() {
 
 // ── Classic View: Ollama ──────────────────────────────────
 
+// Polyfill AbortSignal.timeout for Safari < 16
+function _abortTimeoutSignal(ms) {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(ms);
+  }
+  const ctrl = new AbortController();
+  setTimeout(() => ctrl.abort(), ms);
+  return ctrl.signal;
+}
+
 async function _detectOllamaModelsClassic() {
   const btn    = document.getElementById('cl-ollama-btn');
   const status = document.getElementById('cl-ollama-status');
   const sel    = document.getElementById('cl-ollama-model-sel');
   try {
-    const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(1500) });
+    const r = await fetch('http://localhost:11434/api/tags', { signal: _abortTimeoutSignal(1500) });
     if (!r.ok) throw new Error();
     const data = await r.json();
     const models = (data.models || []).map(m => m.name);
@@ -116,7 +126,7 @@ async function _detectOpenRouterModelsClassic() {
   if (savedKey && btn) btn.disabled = false;
 
   try {
-    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: AbortSignal.timeout(4000) });
+    const r = await fetch('https://openrouter.ai/api/v1/models', { signal: _abortTimeoutSignal(4000) });
     if (!r.ok) throw new Error();
     const d = await r.json();
     const free = (d.data || [])

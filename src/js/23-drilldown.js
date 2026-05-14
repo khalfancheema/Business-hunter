@@ -162,7 +162,7 @@ function modalShowRaw(n) {
 function saveAgentJSON() {
   var overlay = document.getElementById('agentModalOverlay');
   if (!overlay) return;
-  var n = parseInt(overlay.dataset.agentN);
+  var n = parseInt(overlay.dataset.agentN, 10);
   var data = R['a'+n];
   if (!data) return;
   var meta = AGENT_META[n] || { name:'agent-'+n };
@@ -171,13 +171,14 @@ function saveAgentJSON() {
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'agent-' + n + '-' + name + '-' + Date.now() + '.json';
-  a.click();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
 }
 
 function printAgentData() {
   var overlay = document.getElementById('agentModalOverlay');
   if (!overlay) return;
-  var n    = parseInt(overlay.dataset.agentN);
+  var n    = parseInt(overlay.dataset.agentN, 10);
   var data = R['a'+n];
   var meta = AGENT_META[n] || { name:'Agent '+n, ico:'🤖' };
   var srcOut = document.getElementById('out-'+n);
