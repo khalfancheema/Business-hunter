@@ -48,7 +48,7 @@ Return ONLY:
     let d = await claudeStreamJSON(sys, usr, '8-s-t');
     if(!d) { console.warn('Agent 8 fallback'); d=getFallback8(); }
     R.a8=d;
-    $('8-s-t').textContent=d.verdict+' — '+d.verdict_rationale;
+    $('8-s-t').textContent=(d.verdict||'')+(d.verdict_rationale?' — '+d.verdict_rationale:'');
     // Final report
     const vl=(d.verdict||'').toLowerCase();
     const vc=vl==='go'?'v-go':vl.includes('caution')?'v-caution':'v-nogo';
@@ -59,8 +59,8 @@ Return ONLY:
     $('f-risks').textContent=(d.risks||[]).map(r=>`[${r.severity}] ${r.risk}\n→ ${r.mitigation}`).join('\n\n');
     $('f-steps').innerHTML=(d.next_steps||[]).map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div>${s}</div></div>`).join('');
     $('finalBox').className='final-box show';
-    populateLocationDropdown();
-    loadSavedProfile();
+    if(typeof populateLocationDropdown==='function') populateLocationDropdown();
+    if(typeof loadSavedProfile==='function') loadSavedProfile();
     setDot(8,'done'); showOut(8);
     return JSON.stringify(d);
   } catch(e){setDot(8,'error');showOut(8);$('8-s-t').textContent='Error: '+e.message;throw e}

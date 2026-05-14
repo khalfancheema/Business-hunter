@@ -197,7 +197,7 @@ function buildMap(d) {
 
 function buildMapLegend(d) {
   let html=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rank</th><th>City</th><th>County</th><th>Gap Score</th><th>Priority</th><th>Unserved</th><th>Median Income</th><th>Competitors</th><th>Recommendation</th><th>Listings</th></tr></thead><tbody>`;
-  [...(d.cities||[])].sort((a,b)=>b.gap_score-a.gap_score).forEach((c,i)=>{
+  [...(d.cities||[])].sort((a,b)=>(b.gap_score||0)-(a.gap_score||0)).forEach((c,i)=>{
     html+=`<tr>
       <td><strong style="color:var(--blue)">#${i+1}</strong></td>
       <td><strong>${c.name}</strong></td>
@@ -206,7 +206,7 @@ function buildMapLegend(d) {
       <td style="font-size:11px">${c.priority}</td>
       <td>${(c.unserved_children||0).toLocaleString()}</td>
       <td>$${((c.median_income||0)/1000).toFixed(0)}k</td>
-      <td>${c.competitor_count}</td>
+      <td>${c.competitor_count||0}</td>
       <td style="font-size:11px;color:var(--green);font-weight:600">${c.recommended_action}</td>
       <td><a href="${c.real_estate_url}" target="_blank" class="link-btn primary-btn" style="font-size:10px;padding:3px 7px">↗</a></td>
     </tr>`;

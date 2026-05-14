@@ -76,7 +76,7 @@ function renderBusinessPlan(d) {
   $('9-mkt-c').innerHTML=mkt;
 
   // Financials tab
-  const fp=d.financial_plan;
+  const fp=d.financial_plan||{};
   // Support both new one_time_costs structure and legacy use_of_funds
   const oneTimeCosts = fp.one_time_costs || fp.use_of_funds || [];
   const fixedCosts   = fp.fixed_monthly_costs || [];
@@ -123,7 +123,7 @@ function renderBusinessPlan(d) {
       const url=l.includes('http')||l.includes('www')||l.includes('.gov')||l.includes('.bank')||l.includes('.com')?`<a href="https://${l.replace(/^https?:\/\//,'').split(':')[0]}" target="_blank" class="link-btn" style="font-size:10px;padding:2px 7px;margin-bottom:3px">${l}</a>`:`<div style="font-size:10px;color:var(--muted)">${l}</div>`;
       return url;
     }).join('');
-    fin+=`<tr><td><strong>${s.source}</strong></td><td style="color:var(--green)">$${s.amount.toLocaleString()}</td><td>${s.pct}%</td><td style="font-size:11px;color:var(--muted)">${s.terms}</td><td>${links}</td></tr>`;
+    fin+=`<tr><td><strong>${s.source}</strong></td><td style="color:var(--green)">$${(s.amount||0).toLocaleString()}</td><td>${s.pct||0}%</td><td style="font-size:11px;color:var(--muted)">${s.terms||''}</td><td>${links}</td></tr>`;
   });
   fin+=`</tbody></table></div>
     <h4>3-Year Financial Projections</h4>
@@ -138,37 +138,38 @@ function renderBusinessPlan(d) {
   });
   fin+=`</tbody></table></div>
     <div class="bp-grid" style="margin-top:12px">
-      <div class="bp-stat"><div class="bp-stat-label">Break-Even Analysis</div><div class="bp-stat-sub">${fp.breakeven_analysis}</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Debt Service Coverage Ratio</div><div class="bp-stat-val">${fp.debt_service_coverage}</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Collateral Offered</div><div class="bp-stat-sub">${fp.collateral}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Break-Even Analysis</div><div class="bp-stat-sub">${fp.breakeven_analysis||''}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Debt Service Coverage Ratio</div><div class="bp-stat-val">${fp.debt_service_coverage||''}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Collateral Offered</div><div class="bp-stat-sub">${fp.collateral||''}</div></div>
     </div></div>`;
   $('9-fin-c').innerHTML=fin;
 
   // Operations tab
-  const ops=d.operations_plan;
+  const ops=d.operations_plan||{};
+  const fac=ops.facility||{};
   let opsHtml=`<div class="bp-section">
     <h3>Facility Layout Plan</h3>
     <div class="bp-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${(ops.facility.total_sqft||0).toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Indoor / Unit</div><div class="bp-stat-val">${ops.facility.indoor_sqft_per_child||ops.facility.indoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Unit</div><div class="bp-stat-val">${ops.facility.outdoor_sqft_per_child||ops.facility.outdoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${(fac.total_sqft||0).toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Indoor / Unit</div><div class="bp-stat-val">${fac.indoor_sqft_per_child||fac.indoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Unit</div><div class="bp-stat-val">${fac.outdoor_sqft_per_child||fac.outdoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
     </div>
     <div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr><th>Room</th><th>Sq Ft</th><th>Capacity</th><th>Ratio</th></tr></thead><tbody>`;
-  (ops.facility?.rooms||[]).forEach(r=>{
+  (fac.rooms||[]).forEach(r=>{
     opsHtml+=`<tr><td>${r.name||'—'}</td><td>${(r.sqft||0).toLocaleString()}</td><td>${r.capacity||'—'}</td><td>${r.ratio||'—'}</td></tr>`;
   });
   opsHtml+=`</tbody></table></div>
-    <h4>Operating Hours</h4><div class="bp-prose">${ops.hours}</div>
+    <h4>Operating Hours</h4><div class="bp-prose">${ops.hours||''}</div>
     <h4>Staffing Plan</h4>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Role</th><th>Headcount</th><th>Annual Salary</th><th>Annual Cost</th><th>Requirements</th></tr></thead><tbody>`;
   let totalStaff=0,totalCost=0;
   (ops.staffing_plan||[]).forEach(s=>{
-    const cost=s.count*s.salary;totalStaff+=s.count;totalCost+=cost;
-    opsHtml+=`<tr><td><strong>${s.role}</strong></td><td>${s.count}</td><td>$${s.salary.toLocaleString()}</td><td>$${cost.toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${s.requirement}</td></tr>`;
+    const cost=(s.count||0)*(s.salary||0);totalStaff+=(s.count||0);totalCost+=cost;
+    opsHtml+=`<tr><td><strong>${s.role}</strong></td><td>${s.count||0}</td><td>$${(s.salary||0).toLocaleString()}</td><td>$${cost.toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${s.requirement||''}</td></tr>`;
   });
   opsHtml+=`<tr><td><strong>Total</strong></td><td><strong>${totalStaff}</strong></td><td>—</td><td style="color:var(--amber);font-weight:700">$${totalCost.toLocaleString()}</td><td>—</td></tr>`;
   opsHtml+=`</tbody></table></div>
-    <h4>Curriculum &amp; Assessment</h4><div class="bp-prose">${ops.curriculum}</div>
+    <h4>Curriculum &amp; Assessment</h4><div class="bp-prose">${ops.curriculum||''}</div>
     <h4>Technology Stack</h4>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">`;
   (ops.technology||[]).forEach(t=>{
@@ -183,7 +184,7 @@ function renderBusinessPlan(d) {
       Complete all items below before submitting to your SBA lender. Recommended lenders: Truist Bank, Regions Bank, Live Oak Bank (childcare specialist), TD Bank.
     </div>`;
   (d.sba_checklist||[]).forEach(item=>{
-    const sb=item.status==='Required'?'b-red':item.status==='This Document'?'b-green':item.status.includes('N/A')?'b-blue':'b-amber';
+    const sb=(item.status||'')==='Required'?'b-red':(item.status||'')==='This Document'?'b-green':(item.status||'').includes('N/A')?'b-blue':'b-amber';
     sba+=`<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
       <span class="badge ${sb}" style="margin-top:1px;flex-shrink:0">${item.status}</span>
       <div style="flex:1">

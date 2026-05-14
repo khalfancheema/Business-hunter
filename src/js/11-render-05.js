@@ -38,7 +38,7 @@ Return ONLY:
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 3 fallback'); d=getFallback3(); }
     R.a3=d;
-    $('3-s-t').textContent=d.summary;
+    $('3-s-t').textContent=d.summary||'';
     // Option cards
     const ind3=industry();
     const colors=['var(--green)','var(--blue)','var(--amber)','var(--purple)','var(--teal)','var(--pink)'];
@@ -108,7 +108,7 @@ Return ONLY:
         labels:['Demand','Competition','Demographics','Real Estate','Regulatory'],
         datasets:(d.locations||[]).map((loc,i)=>({
           label:loc.city,
-          data:dims.map(k=>loc.scores[k]),
+          data:dims.map(k=>(loc.scores||{})[k]||0),
           borderColor:['#4a9eff','#3dd68c','#f5a623','#a78bfa','#2dd4bf'][i],
           backgroundColor:['rgba(74,158,255,0.08)','rgba(61,214,140,0.08)','rgba(245,166,35,0.08)','rgba(167,139,250,0.08)','rgba(45,212,191,0.08)'][i],
           borderWidth:2,pointRadius:3

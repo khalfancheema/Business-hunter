@@ -170,7 +170,7 @@ function buildGrants(d) {
   if(qr) {
     lh+=`<h3 style="margin-top:16px">${qr.program}</h3>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Level</th><th>Key Benefits</th><th>Extra Per Unit/Day</th></tr></thead><tbody>`;
-    (qr.benefits_by_star||[]).forEach(s=>{lh+=`<tr><td>${'★'.repeat(s.stars)}</td><td style="font-size:12px">${s.benefits}</td><td style="color:var(--green)">+$${s.additional_per_child}/day</td></tr>`;});
+    (qr.benefits_by_star||[]).forEach(s=>{lh+=`<tr><td>${'★'.repeat(Math.max(0,parseInt(s.stars)||0))}</td><td style="font-size:12px">${s.benefits}</td><td style="color:var(--green)">+$${s.additional_per_child}/day</td></tr>`;});
     lh+=`</tbody></table></div>${qr.website?`<div style="margin-top:8px"><a href="${qr.website}" target="_blank" class="link-btn primary-btn">↗ Program Portal</a></div>`:''}`;
   }
   lh+=`</div>`;

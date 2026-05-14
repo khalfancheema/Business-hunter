@@ -253,7 +253,7 @@ async function runAgent10(a3,a4,a5,a7,a9) {
 
 function renderProjectPlan(d) {
   // Gantt
-  const totalMonths = d.total_duration_months;
+  const totalMonths = d.total_duration_months || 18;
   let gantt = `<div class="gantt-wrap"><div class="gantt">
     <div class="gantt-header">
       <div class="gantt-task-col">Task</div>
@@ -297,8 +297,8 @@ function renderProjectPlan(d) {
   </div>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Category</th><th>Budgeted</th><th>Phase</th><th>Due</th><th>% of Total</th></tr></thead><tbody>`;
   (d.budget_tracker||[]).forEach(b=>{
-    const pct=(b.budgeted/total*100).toFixed(1);
-    bud+=`<tr><td>${b.category}</td><td style="color:var(--amber)">$${b.budgeted.toLocaleString()}</td><td><span class="badge b-blue">${b.phase}</span></td><td style="font-size:11px;color:var(--muted)">${b.due}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;min-width:80px"><div style="width:${Math.min(100,pct/35*100)}%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:10px;width:36px">${pct}%</span></div></td></tr>`;
+    const pct=total?(b.budgeted/total*100).toFixed(1):'0.0';
+    bud+=`<tr><td>${b.category}</td><td style="color:var(--amber)">$${(b.budgeted||0).toLocaleString()}</td><td><span class="badge b-blue">${b.phase}</span></td><td style="font-size:11px;color:var(--muted)">${b.due}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;min-width:80px"><div style="width:${Math.min(100,pct/35*100)}%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:10px;width:36px">${pct}%</span></div></td></tr>`;
   });
   bud+=`</tbody></table></div>`;
   $('10-budget-c').innerHTML=bud;

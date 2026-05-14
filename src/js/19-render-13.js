@@ -99,7 +99,7 @@ Include 5 distinct audience segments with messaging tailored to their specific c
       partC || {}
     );
 
-    if (!d.summary && !d.competitor_profiles.length) {
+    if (!d.summary && !_toArr(d.competitor_profiles).length) {
       console.warn('Agent 13 all parts failed — using fallback');
       const fb = getFallback13();
       R.a13 = fb; buildCompDeepDive(fb); setDot(13,'done'); showOut(13);

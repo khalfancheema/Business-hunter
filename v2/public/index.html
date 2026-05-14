@@ -5367,7 +5367,7 @@ Return ONLY:
     let d=await claudeJSON(sys,usr);
     if(!d) { console.warn('Agent 3 fallback'); d=getFallback3(); }
     R.a3=d;
-    $('3-s-t').textContent=d.summary;
+    $('3-s-t').textContent=d.summary||'';
     // Option cards
     const ind3=industry();
     const colors=['var(--green)','var(--blue)','var(--amber)','var(--purple)','var(--teal)','var(--pink)'];
@@ -5437,7 +5437,7 @@ Return ONLY:
         labels:['Demand','Competition','Demographics','Real Estate','Regulatory'],
         datasets:(d.locations||[]).map((loc,i)=>({
           label:loc.city,
-          data:dims.map(k=>loc.scores[k]),
+          data:dims.map(k=>(loc.scores||{})[k]||0),
           borderColor:['#4a9eff','#3dd68c','#f5a623','#a78bfa','#2dd4bf'][i],
           backgroundColor:['rgba(74,158,255,0.08)','rgba(61,214,140,0.08)','rgba(245,166,35,0.08)','rgba(167,139,250,0.08)','rgba(45,212,191,0.08)'][i],
           borderWidth:2,pointRadius:3
@@ -5659,7 +5659,7 @@ Return ONLY:
     let d = await claudeStreamJSON(sys, usr, '8-s-t');
     if(!d) { console.warn('Agent 8 fallback'); d=getFallback8(); }
     R.a8=d;
-    $('8-s-t').textContent=d.verdict+' — '+d.verdict_rationale;
+    $('8-s-t').textContent=(d.verdict||'')+(d.verdict_rationale?' — '+d.verdict_rationale:'');
     // Final report
     const vl=(d.verdict||'').toLowerCase();
     const vc=vl==='go'?'v-go':vl.includes('caution')?'v-caution':'v-nogo';
@@ -5670,8 +5670,8 @@ Return ONLY:
     $('f-risks').textContent=(d.risks||[]).map(r=>`[${r.severity}] ${r.risk}\n→ ${r.mitigation}`).join('\n\n');
     $('f-steps').innerHTML=(d.next_steps||[]).map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div>${s}</div></div>`).join('');
     $('finalBox').className='final-box show';
-    populateLocationDropdown();
-    loadSavedProfile();
+    if(typeof populateLocationDropdown==='function') populateLocationDropdown();
+    if(typeof loadSavedProfile==='function') loadSavedProfile();
     setDot(8,'done'); showOut(8);
     return JSON.stringify(d);
   } catch(e){setDot(8,'error');showOut(8);$('8-s-t').textContent='Error: '+e.message;throw e}
@@ -5760,7 +5760,7 @@ function renderBusinessPlan(d) {
   $('9-mkt-c').innerHTML=mkt;
 
   // Financials tab
-  const fp=d.financial_plan;
+  const fp=d.financial_plan||{};
   // Support both new one_time_costs structure and legacy use_of_funds
   const oneTimeCosts = fp.one_time_costs || fp.use_of_funds || [];
   const fixedCosts   = fp.fixed_monthly_costs || [];
@@ -5807,7 +5807,7 @@ function renderBusinessPlan(d) {
       const url=l.includes('http')||l.includes('www')||l.includes('.gov')||l.includes('.bank')||l.includes('.com')?`<a href="https://${l.replace(/^https?:\/\//,'').split(':')[0]}" target="_blank" class="link-btn" style="font-size:10px;padding:2px 7px;margin-bottom:3px">${l}</a>`:`<div style="font-size:10px;color:var(--muted)">${l}</div>`;
       return url;
     }).join('');
-    fin+=`<tr><td><strong>${s.source}</strong></td><td style="color:var(--green)">$${s.amount.toLocaleString()}</td><td>${s.pct}%</td><td style="font-size:11px;color:var(--muted)">${s.terms}</td><td>${links}</td></tr>`;
+    fin+=`<tr><td><strong>${s.source}</strong></td><td style="color:var(--green)">$${(s.amount||0).toLocaleString()}</td><td>${s.pct||0}%</td><td style="font-size:11px;color:var(--muted)">${s.terms||''}</td><td>${links}</td></tr>`;
   });
   fin+=`</tbody></table></div>
     <h4>3-Year Financial Projections</h4>
@@ -5822,37 +5822,38 @@ function renderBusinessPlan(d) {
   });
   fin+=`</tbody></table></div>
     <div class="bp-grid" style="margin-top:12px">
-      <div class="bp-stat"><div class="bp-stat-label">Break-Even Analysis</div><div class="bp-stat-sub">${fp.breakeven_analysis}</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Debt Service Coverage Ratio</div><div class="bp-stat-val">${fp.debt_service_coverage}</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Collateral Offered</div><div class="bp-stat-sub">${fp.collateral}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Break-Even Analysis</div><div class="bp-stat-sub">${fp.breakeven_analysis||''}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Debt Service Coverage Ratio</div><div class="bp-stat-val">${fp.debt_service_coverage||''}</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Collateral Offered</div><div class="bp-stat-sub">${fp.collateral||''}</div></div>
     </div></div>`;
   $('9-fin-c').innerHTML=fin;
 
   // Operations tab
-  const ops=d.operations_plan;
+  const ops=d.operations_plan||{};
+  const fac=ops.facility||{};
   let opsHtml=`<div class="bp-section">
     <h3>Facility Layout Plan</h3>
     <div class="bp-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${(ops.facility.total_sqft||0).toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Indoor / Unit</div><div class="bp-stat-val">${ops.facility.indoor_sqft_per_child||ops.facility.indoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
-      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Unit</div><div class="bp-stat-val">${ops.facility.outdoor_sqft_per_child||ops.facility.outdoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Total Sq Ft</div><div class="bp-stat-val">${(fac.total_sqft||0).toLocaleString()}</div><div class="bp-stat-sub">sq ft</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Indoor / Unit</div><div class="bp-stat-val">${fac.indoor_sqft_per_child||fac.indoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
+      <div class="bp-stat"><div class="bp-stat-label">Outdoor / Unit</div><div class="bp-stat-val">${fac.outdoor_sqft_per_child||fac.outdoor_sqft_per_unit||'—'}</div><div class="bp-stat-sub">sq ft per unit</div></div>
     </div>
     <div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr><th>Room</th><th>Sq Ft</th><th>Capacity</th><th>Ratio</th></tr></thead><tbody>`;
-  (ops.facility?.rooms||[]).forEach(r=>{
+  (fac.rooms||[]).forEach(r=>{
     opsHtml+=`<tr><td>${r.name||'—'}</td><td>${(r.sqft||0).toLocaleString()}</td><td>${r.capacity||'—'}</td><td>${r.ratio||'—'}</td></tr>`;
   });
   opsHtml+=`</tbody></table></div>
-    <h4>Operating Hours</h4><div class="bp-prose">${ops.hours}</div>
+    <h4>Operating Hours</h4><div class="bp-prose">${ops.hours||''}</div>
     <h4>Staffing Plan</h4>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Role</th><th>Headcount</th><th>Annual Salary</th><th>Annual Cost</th><th>Requirements</th></tr></thead><tbody>`;
   let totalStaff=0,totalCost=0;
   (ops.staffing_plan||[]).forEach(s=>{
-    const cost=s.count*s.salary;totalStaff+=s.count;totalCost+=cost;
-    opsHtml+=`<tr><td><strong>${s.role}</strong></td><td>${s.count}</td><td>$${s.salary.toLocaleString()}</td><td>$${cost.toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${s.requirement}</td></tr>`;
+    const cost=(s.count||0)*(s.salary||0);totalStaff+=(s.count||0);totalCost+=cost;
+    opsHtml+=`<tr><td><strong>${s.role}</strong></td><td>${s.count||0}</td><td>$${(s.salary||0).toLocaleString()}</td><td>$${cost.toLocaleString()}</td><td style="font-size:11px;color:var(--muted)">${s.requirement||''}</td></tr>`;
   });
   opsHtml+=`<tr><td><strong>Total</strong></td><td><strong>${totalStaff}</strong></td><td>—</td><td style="color:var(--amber);font-weight:700">$${totalCost.toLocaleString()}</td><td>—</td></tr>`;
   opsHtml+=`</tbody></table></div>
-    <h4>Curriculum &amp; Assessment</h4><div class="bp-prose">${ops.curriculum}</div>
+    <h4>Curriculum &amp; Assessment</h4><div class="bp-prose">${ops.curriculum||''}</div>
     <h4>Technology Stack</h4>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">`;
   (ops.technology||[]).forEach(t=>{
@@ -5867,7 +5868,7 @@ function renderBusinessPlan(d) {
       Complete all items below before submitting to your SBA lender. Recommended lenders: Truist Bank, Regions Bank, Live Oak Bank (childcare specialist), TD Bank.
     </div>`;
   (d.sba_checklist||[]).forEach(item=>{
-    const sb=item.status==='Required'?'b-red':item.status==='This Document'?'b-green':item.status.includes('N/A')?'b-blue':'b-amber';
+    const sb=(item.status||'')==='Required'?'b-red':(item.status||'')==='This Document'?'b-green':(item.status||'').includes('N/A')?'b-blue':'b-amber';
     sba+=`<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
       <span class="badge ${sb}" style="margin-top:1px;flex-shrink:0">${item.status}</span>
       <div style="flex:1">
@@ -6154,7 +6155,7 @@ async function runAgent10(a3,a4,a5,a7,a9) {
 
 function renderProjectPlan(d) {
   // Gantt
-  const totalMonths = d.total_duration_months;
+  const totalMonths = d.total_duration_months || 18;
   let gantt = `<div class="gantt-wrap"><div class="gantt">
     <div class="gantt-header">
       <div class="gantt-task-col">Task</div>
@@ -6198,8 +6199,8 @@ function renderProjectPlan(d) {
   </div>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Category</th><th>Budgeted</th><th>Phase</th><th>Due</th><th>% of Total</th></tr></thead><tbody>`;
   (d.budget_tracker||[]).forEach(b=>{
-    const pct=(b.budgeted/total*100).toFixed(1);
-    bud+=`<tr><td>${b.category}</td><td style="color:var(--amber)">$${b.budgeted.toLocaleString()}</td><td><span class="badge b-blue">${b.phase}</span></td><td style="font-size:11px;color:var(--muted)">${b.due}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;min-width:80px"><div style="width:${Math.min(100,pct/35*100)}%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:10px;width:36px">${pct}%</span></div></td></tr>`;
+    const pct=total?(b.budgeted/total*100).toFixed(1):'0.0';
+    bud+=`<tr><td>${b.category}</td><td style="color:var(--amber)">$${(b.budgeted||0).toLocaleString()}</td><td><span class="badge b-blue">${b.phase}</span></td><td style="font-size:11px;color:var(--muted)">${b.due}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;min-width:80px"><div style="width:${Math.min(100,pct/35*100)}%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:10px;width:36px">${pct}%</span></div></td></tr>`;
   });
   bud+=`</tbody></table></div>`;
   $('10-budget-c').innerHTML=bud;
@@ -6469,7 +6470,7 @@ function buildMap(d) {
 
 function buildMapLegend(d) {
   let html=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rank</th><th>City</th><th>County</th><th>Gap Score</th><th>Priority</th><th>Unserved</th><th>Median Income</th><th>Competitors</th><th>Recommendation</th><th>Listings</th></tr></thead><tbody>`;
-  [...(d.cities||[])].sort((a,b)=>b.gap_score-a.gap_score).forEach((c,i)=>{
+  [...(d.cities||[])].sort((a,b)=>(b.gap_score||0)-(a.gap_score||0)).forEach((c,i)=>{
     html+=`<tr>
       <td><strong style="color:var(--blue)">#${i+1}</strong></td>
       <td><strong>${c.name}</strong></td>
@@ -6478,7 +6479,7 @@ function buildMapLegend(d) {
       <td style="font-size:11px">${c.priority}</td>
       <td>${(c.unserved_children||0).toLocaleString()}</td>
       <td>$${((c.median_income||0)/1000).toFixed(0)}k</td>
-      <td>${c.competitor_count}</td>
+      <td>${c.competitor_count||0}</td>
       <td style="font-size:11px;color:var(--green);font-weight:600">${c.recommended_action}</td>
       <td><a href="${c.real_estate_url}" target="_blank" class="link-btn primary-btn" style="font-size:10px;padding:3px 7px">↗</a></td>
     </tr>`;
@@ -6680,7 +6681,7 @@ function buildGrants(d) {
   if(qr) {
     lh+=`<h3 style="margin-top:16px">${qr.program}</h3>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Level</th><th>Key Benefits</th><th>Extra Per Unit/Day</th></tr></thead><tbody>`;
-    (qr.benefits_by_star||[]).forEach(s=>{lh+=`<tr><td>${'★'.repeat(s.stars)}</td><td style="font-size:12px">${s.benefits}</td><td style="color:var(--green)">+$${s.additional_per_child}/day</td></tr>`;});
+    (qr.benefits_by_star||[]).forEach(s=>{lh+=`<tr><td>${'★'.repeat(Math.max(0,parseInt(s.stars)||0))}</td><td style="font-size:12px">${s.benefits}</td><td style="color:var(--green)">+$${s.additional_per_child}/day</td></tr>`;});
     lh+=`</tbody></table></div>${qr.website?`<div style="margin-top:8px"><a href="${qr.website}" target="_blank" class="link-btn primary-btn">↗ Program Portal</a></div>`:''}`;
   }
   lh+=`</div>`;
@@ -6807,7 +6808,7 @@ Include 5 distinct audience segments with messaging tailored to their specific c
       partC || {}
     );
 
-    if (!d.summary && !d.competitor_profiles.length) {
+    if (!d.summary && !_toArr(d.competitor_profiles).length) {
       console.warn('Agent 13 all parts failed — using fallback');
       const fb = getFallback13();
       R.a13 = fb; buildCompDeepDive(fb); setDot(13,'done'); showOut(13);
@@ -7010,7 +7011,7 @@ Identify 3-6 real issues based on the actual pipeline state. Completion rate, fa
 }
 
 function renderCodeReview(d) {
-  $('14-sum-t').textContent=d.summary+'\n\nOverall Grade: '+d.overall_grade;
+  $('14-sum-t').textContent=(d.summary||'')+'\n\nOverall Grade: '+(d.overall_grade||'N/A');
   const sevIcons={critical:'🔴',high:'🟠',medium:'🟡',low:'🔵'};
   const sevOrder={critical:0,high:1,medium:2,low:3};
   const sorted=[...(d.issues||[])].sort((a,b)=>(sevOrder[a.severity]||4)-(sevOrder[b.severity]||4));
@@ -7233,7 +7234,7 @@ function renderQA(d) {
   const r=58,cx=70,cy=70,circ=2*Math.PI*r;
   const offset=circ*(1-(hs.overall||0)/100);
   const sc=hs.overall>=85?'#3dd68c':hs.overall>=70?'#f5a623':'#ff5f5f';
-  let score=`<div class="health-score-wrap"><div class="health-score-ring"><svg width="140" height="140" viewBox="0 0 140 140"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="10"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${sc}" stroke-width="10" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"/></svg><div class="health-score-num"><span>${hs.overall||0}</span><small>/100</small></div></div><div class="health-score-label" style="color:${sc}">${(hs.overall||0)>=85?'Healthy':'Needs Attention'}</div><div class="health-score-sub">${d.overall_pass_rate}% pass rate · ${d.data_validation.fields_checked} fields validated</div></div><div class="health-dims">`;
+  let score=`<div class="health-score-wrap"><div class="health-score-ring"><svg width="140" height="140" viewBox="0 0 140 140"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="10"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${sc}" stroke-width="10" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"/></svg><div class="health-score-num"><span>${hs.overall||0}</span><small>/100</small></div></div><div class="health-score-label" style="color:${sc}">${(hs.overall||0)>=85?'Healthy':'Needs Attention'}</div><div class="health-score-sub">${d.overall_pass_rate||0}% pass rate · ${(d.data_validation||{}).fields_checked||0} fields validated</div></div><div class="health-dims">`;
   _toArr(hs.dimensions).forEach(dim=>{
     if(!dim) return;
     const dc=dim.score>=85?'var(--green)':dim.score>=70?'var(--amber)':'var(--red)';
@@ -14439,7 +14440,6 @@ function v2RenderDashboard(run) {
         <div class="v2-score-ring-wrap">${ring}</div>
         <div class="v2-score-verdict" style="color:${ringColor};font-size:20px">${verdict.title}</div>
         <div class="v2-score-reason" style="font-size:11px;margin-top:4px">Gap · Financials · Verdict<br>Competition · Compliance</div>
-        ${v2RenderScoreBreakdown()}
       </div>
       <div class="v2-card" style="padding:20px;min-width:0">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">

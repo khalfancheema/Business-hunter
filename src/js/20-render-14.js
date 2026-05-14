@@ -100,7 +100,7 @@ Identify 3-6 real issues based on the actual pipeline state. Completion rate, fa
 }
 
 function renderCodeReview(d) {
-  $('14-sum-t').textContent=d.summary+'\n\nOverall Grade: '+d.overall_grade;
+  $('14-sum-t').textContent=(d.summary||'')+'\n\nOverall Grade: '+(d.overall_grade||'N/A');
   const sevIcons={critical:'🔴',high:'🟠',medium:'🟡',low:'🔵'};
   const sevOrder={critical:0,high:1,medium:2,low:3};
   const sorted=[...(d.issues||[])].sort((a,b)=>(sevOrder[a.severity]||4)-(sevOrder[b.severity]||4));

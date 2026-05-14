@@ -125,7 +125,6 @@ function v2RenderDashboard(run) {
         <div class="v2-score-ring-wrap">${ring}</div>
         <div class="v2-score-verdict" style="color:${ringColor};font-size:20px">${verdict.title}</div>
         <div class="v2-score-reason" style="font-size:11px;margin-top:4px">Gap · Financials · Verdict<br>Competition · Compliance</div>
-        ${v2RenderScoreBreakdown()}
       </div>
       <div class="v2-card" style="padding:20px;min-width:0">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
