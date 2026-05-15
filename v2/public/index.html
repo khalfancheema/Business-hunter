@@ -21928,6 +21928,13 @@ function _v2DemoMarkAgentsDone() {
 
 // ── Demo agent data — provides structured output for each of the 17 agents ──────
 function getDemoData(agentNum, industry) {
+  // Resolve industry from dropdown if not explicitly passed (v1 runAgentN
+  // calls getDemoData(N) without industry — must honor the dropdown choice)
+  if (!industry && typeof _demoIndKey === 'function') {
+    try { industry = _demoIndKey(); } catch(e) { industry = 'daycare'; }
+  }
+  if (!industry) industry = 'daycare';
+
   // Medical Practice demo data
   if (industry === 'medical_practice') {
     const _medDemo = {
@@ -22163,9 +22170,9 @@ function getDemoData(agentNum, industry) {
     7: { // Financials
       total_startup_cost: 526500,
       scenarios: [
-        { name: 'Conservative', monthly_net:  8200, monthly_revenue: 62000, breakeven_months: 28, roi_3yr:  42, enrollment_pct: 65 },
-        { name: 'Base Case',    monthly_net: 12400, monthly_revenue: 78000, breakeven_months: 18, roi_3yr:  67, enrollment_pct: 82 },
-        { name: 'Optimistic',   monthly_net: 19800, monthly_revenue: 96000, breakeven_months: 12, roi_3yr: 112, enrollment_pct: 96 },
+        { name: 'Conservative', monthly_net:  8200, monthly_revenue: 62000, monthly_expenses:  53800, breakeven_months: 28, roi_3yr:  42, enrollment_pct: 65 },
+        { name: 'Base Case',    monthly_net: 12400, monthly_revenue: 78000, monthly_expenses:  65600, breakeven_months: 18, roi_3yr:  67, enrollment_pct: 82 },
+        { name: 'Optimistic',   monthly_net: 19800, monthly_revenue: 96000, monthly_expenses:  76200, breakeven_months: 12, roi_3yr: 112, enrollment_pct: 96 },
       ],
       startup_breakdown: [
         { item: 'Lease Deposit (6 mo)',      amount: 54000 },
@@ -22173,6 +22180,33 @@ function getDemoData(agentNum, industry) {
         { item: 'Equipment & Furniture',     amount: 82000 },
         { item: 'Licensing & Permits',       amount:  8500 },
         { item: 'Working Capital (6 mo)',    amount: 197000 },
+      ],
+      // 36-month ramp projection — enables the enrollment ramp + lease
+      // sensitivity sliders in the Financials dashboard panel.
+      projections: (() => {
+        const arr = [];
+        const baseRev = 78000, baseExp = 65600;
+        let cum = -526500; // start at -startup capital
+        for (let m = 1; m <= 36; m++) {
+          const ramp = Math.min(1, 0.3 + (m - 1) * 0.04); // 30% → 100% by month 19
+          const rev = Math.round(baseRev * ramp);
+          const exp = baseExp + (m <= 3 ? 12000 : 0); // pre-open extra
+          const net = rev - exp;
+          cum += net;
+          arr.push({ month: 'M' + m, rev, exp, net, cum });
+        }
+        return arr;
+      })(),
+      monthly_ops: [
+        { item: 'Lease',           amount: 10800 },
+        { item: 'Staff Wages',     amount: 32400 },
+        { item: 'Utilities',       amount:  3200 },
+        { item: 'Food & Supplies', amount:  6800 },
+        { item: 'Insurance',       amount:  2400 },
+        { item: 'Marketing',       amount:  3000 },
+        { item: 'Software & Tech', amount:  1200 },
+        { item: 'Maintenance',     amount:  1500 },
+        { item: 'Misc',            amount:  4300 },
       ],
     },
     8: { // Executive Summary
