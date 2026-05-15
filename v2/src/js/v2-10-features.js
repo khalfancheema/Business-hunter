@@ -346,7 +346,7 @@ function v2RenderOnboardStep() {
   const steps = [
     {
       title: 'Welcome to Business Hunter 👋',
-      sub:   'AI-powered business analysis · 17 agents · Full plans in minutes',
+      sub:   'AI-powered business analysis · 17 agents · 30 focused AI calls · Full plans in minutes',
       body:  `
         <div style="text-align:center;margin-bottom:20px">
           <div style="font-size:52px;margin-bottom:8px">🚀</div>
