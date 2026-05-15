@@ -642,10 +642,15 @@ const V2_WHATIF_VARS = [
 
 function v2CalcScoreForRun(fakeRun) {
   const base       = v2CalcScore();
-  const budget     = parseInt(fakeRun.budget   || 600000);
-  const capacity   = parseInt(fakeRun.capacity || 75);
-  const budFactor  = Math.min(1.2, Math.max(0.7,  budget   / 600000));
-  const capFactor  = Math.min(1.1, Math.max(0.85, capacity / 75));
+  // Anchor scaling against the ACTUAL run inputs (not hardcoded $600k/75),
+  // so what-if deltas reflect proportional change from the user's baseline.
+  const run        = V2?.run || {};
+  const realBudget = parseInt(run.budget) || parseInt(fakeRun.budget) || 1;
+  const realCap    = parseInt(run.capacity) || parseInt(fakeRun.capacity) || 1;
+  const budget     = parseInt(fakeRun.budget)   || realBudget;
+  const capacity   = parseInt(fakeRun.capacity) || realCap;
+  const budFactor  = Math.min(1.2, Math.max(0.7,  budget   / realBudget));
+  const capFactor  = Math.min(1.1, Math.max(0.85, capacity / realCap));
   return Math.min(100, Math.max(0, Math.round(base * (budFactor * 0.6 + capFactor * 0.4))));
 }
 

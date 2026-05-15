@@ -96,7 +96,19 @@ CRITICAL — DATA INTEGRITY (strictly enforced):
     • "Information not available" — for longer descriptive string fields
 - Do NOT substitute a plausible-sounding made-up value. Do NOT use 0 when the real value is unknown. Do NOT generate fake phone numbers, fake URLs, fake business names, fake addresses, or fake statistics.
 - If you found real data from a search, state the source. If you could not find it, return null/"N/A".
-- It is far better to return null than to return fabricated data.`;
+- It is far better to return null than to return fabricated data.
+
+CRITICAL — CROSS-AGENT CONSISTENCY:
+- When upstream agent context is provided (e.g. demographics, gap analysis, site selection), USE those numbers exactly. Do not re-estimate or contradict them.
+- Example: if upstream says median household income is $112,400, your downstream pricing and revenue projections must be consistent with that income level — do not silently assume a different income tier.
+- If you reference an upstream value, state which agent it came from (e.g. "per Agent 1 demographics: median income $112,400").
+
+CRITICAL — NUMERIC PRECISION:
+- Round all currency to whole dollars (no cents). $1,234.56 → 1235.
+- Round percentages to one decimal place max.
+- Round large counts (population, sqft) to nearest 100.
+- Integer fields like counts and units must be integers, not floats.
+- Do NOT pad numbers with .00 or fake precision.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');

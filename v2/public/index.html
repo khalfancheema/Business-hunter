@@ -4197,7 +4197,19 @@ CRITICAL — DATA INTEGRITY (strictly enforced):
     • "Information not available" — for longer descriptive string fields
 - Do NOT substitute a plausible-sounding made-up value. Do NOT use 0 when the real value is unknown. Do NOT generate fake phone numbers, fake URLs, fake business names, fake addresses, or fake statistics.
 - If you found real data from a search, state the source. If you could not find it, return null/"N/A".
-- It is far better to return null than to return fabricated data.`;
+- It is far better to return null than to return fabricated data.
+
+CRITICAL — CROSS-AGENT CONSISTENCY:
+- When upstream agent context is provided (e.g. demographics, gap analysis, site selection), USE those numbers exactly. Do not re-estimate or contradict them.
+- Example: if upstream says median household income is $112,400, your downstream pricing and revenue projections must be consistent with that income level — do not silently assume a different income tier.
+- If you reference an upstream value, state which agent it came from (e.g. "per Agent 1 demographics: median income $112,400").
+
+CRITICAL — NUMERIC PRECISION:
+- Round all currency to whole dollars (no cents). $1,234.56 → 1235.
+- Round percentages to one decimal place max.
+- Round large counts (population, sqft) to nearest 100.
+- Integer fields like counts and units must be integers, not floats.
+- Do NOT pad numbers with .00 or fake precision.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
@@ -7323,7 +7335,7 @@ async function runPipeline() {
     setProgress(40, phaseShouldRun(5)?'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…':'Phase 5 — skipped');
     let r7=best(7);
     if (phaseShouldRun(5)) {
-      try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
+      try { r7=await runAgent7(r3,r4,r5,r1,r2); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7433,7 +7445,7 @@ async function reRunAgent(n) {
     else if(n===4) { await runAgent4(s(3),s(5)); }
     else if(n===5) { await runAgent5(); }
     else if(n===6) { await runAgent6(); }
-    else if(n===7) { await runAgent7(s(3),s(4),s(5)); }
+    else if(n===7) { await runAgent7(s(3),s(4),s(5),s(1),s(2)); }
     else if(n===8) { await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7)); }
     else if(n===9) { await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8)); }
     else if(n===10){ await runAgent10(s(3),s(4),s(5),s(7),s(9)); }
@@ -8184,7 +8196,7 @@ Risk register: 8-10 risks with probability (High/Medium/Low) and impact (Critica
 // calling renderAgent7(d).
 // ══════════════════════════════════════════════════════════
 
-async function runAgent7(a3, a4, a5) {
+async function runAgent7(a3, a4, a5, a1, a2) {
   setDot(7, 'running');
   if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(7);if(_d){R.a7=_d;try{renderAgent7(_d);}catch(e){}setDot(7,'done');showOut(7);return JSON.stringify(_d);}}
   const ind = industry();
@@ -8192,6 +8204,10 @@ async function runAgent7(a3, a4, a5) {
   const ctx3 = ctx(a3, ['summary', 'locations']);
   const ctx4 = ctx(a4, ['summary', 'listings', 'by_city_summary']);
   const ctx5 = ctx(a5, ['summary', 'requirements', 'timeline_phases']);
+  // Pass demographics + gap analysis so pricing/revenue projections match
+  // local income and demand levels (cross-agent consistency).
+  const ctx1 = a1 ? ctx(a1, ['summary', 'cities'], 600) : '';
+  const ctx2 = a2 ? ctx(a2, ['summary', 'cities', 'overall_opportunity_score'], 500) : '';
 
   // ── Sub-call A: Revenue Model ───────────────────────────
   $('7-s-t').textContent = '';
@@ -8199,6 +8215,8 @@ async function runAgent7(a3, a4, a5) {
 
   const sysA = `You are a financial analyst specializing in ${ind.unit} revenue modeling. Return JSON only.`;
   const usrA = `Build a detailed revenue model for a ${base}.
+DEMOGRAPHICS (use median income for pricing realism): ${ctx1}
+GAP ANALYSIS (use demand strength for capacity): ${ctx2}
 SITE RECOMMENDATIONS: ${ctx3}
 REAL ESTATE: ${ctx4}
 
@@ -19251,10 +19269,15 @@ const V2_WHATIF_VARS = [
 
 function v2CalcScoreForRun(fakeRun) {
   const base       = v2CalcScore();
-  const budget     = parseInt(fakeRun.budget   || 600000);
-  const capacity   = parseInt(fakeRun.capacity || 75);
-  const budFactor  = Math.min(1.2, Math.max(0.7,  budget   / 600000));
-  const capFactor  = Math.min(1.1, Math.max(0.85, capacity / 75));
+  // Anchor scaling against the ACTUAL run inputs (not hardcoded $600k/75),
+  // so what-if deltas reflect proportional change from the user's baseline.
+  const run        = V2?.run || {};
+  const realBudget = parseInt(run.budget) || parseInt(fakeRun.budget) || 1;
+  const realCap    = parseInt(run.capacity) || parseInt(fakeRun.capacity) || 1;
+  const budget     = parseInt(fakeRun.budget)   || realBudget;
+  const capacity   = parseInt(fakeRun.capacity) || realCap;
+  const budFactor  = Math.min(1.2, Math.max(0.7,  budget   / realBudget));
+  const capFactor  = Math.min(1.1, Math.max(0.85, capacity / realCap));
   return Math.min(100, Math.max(0, Math.round(base * (budFactor * 0.6 + capFactor * 0.4))));
 }
 
@@ -19911,8 +19934,11 @@ function v2RenderEnrollmentRamp() {
   const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
   const cons = scenarios.find(s => (s.name||'').toLowerCase().includes('cons')) || {};
   const opt  = scenarios.find(s => (s.name||'').toLowerCase().includes('opt'))  || {};
+  // Skip render if we don't have real expense data — better to hide than
+  // anchor the chart on a fabricated $108,400 fixed-cost line
+  if (!base.monthly_expenses) return '';
   const maxRev = Math.max(...projs.map(p => p.rev||0), base.monthly_revenue||0) * 1.1;
-  const fixedCost = (base.monthly_expenses || 108400);
+  const fixedCost = base.monthly_expenses;
 
   const W=560, H=180, padL=60, padR=20, padT=16, padB=32;
   const cW=W-padL-padR, cH=H-padT-padB;
@@ -19992,21 +20018,25 @@ function v2RenderLeaseSlider(a7) {
   if (!a7) { const R_data = typeof R !== 'undefined' ? R : {}; a7 = R_data.a7 || {}; }
   const ops = a7.monthly_ops || [];
   const leaseItem = ops.find(o => (o.item||'').toLowerCase().includes('lease'));
-  const baseLease = leaseItem ? leaseItem.amount : 10800;
+  const scenarios = a7.scenarios || [];
+  const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
+  // Skip render if we don't have real lease + revenue + expense data —
+  // fabricated baseline numbers ($10800/$138000/$108400) produced misleading
+  // sensitivity readings detached from the actual scenario.
+  if (!leaseItem || !base.monthly_revenue || !base.monthly_expenses) return '';
+  const baseLease = leaseItem.amount;
+  const baseRev   = base.monthly_revenue;
+  const baseExp   = base.monthly_expenses;
+  const startup   = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
+    || (typeof V2 !== 'undefined' && V2.run?.budget)
+    || null;
+  if (!startup) return '';
+  // Assumed footprint — sqft not in financial model. Document as estimate.
   const sqft = 6000;
   const basePsfRaw = baseLease / sqft * 12;
-  // Auto-extend slider range so the actual base rent always fits
   const minPsf = Math.min(8, Math.floor(basePsfRaw * 0.7));
   const maxPsf = Math.max(28, Math.ceil(basePsfRaw * 1.4));
   const basePsf = basePsfRaw.toFixed(2);
-  const scenarios = a7.scenarios || [];
-  const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
-  const baseRev = base.monthly_revenue || 138000;
-  const baseExp = base.monthly_expenses || 108400;
-  // Use real startup cost when available so break-even sensitivity is meaningful
-  const startup = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
-    || (typeof V2 !== 'undefined' && V2.run?.budget)
-    || 600000;
 
   return `
     <div style="margin-top:16px;padding:14px;background:rgba(99,102,241,.06);border-radius:10px;border:1px solid rgba(99,102,241,.15)">
@@ -20029,14 +20059,15 @@ function _v2LeaseCalcHTML(psf, sqft, baseRev, baseExp, baseLease, startup) {
   const delta = newLease - baseLease;
   const newExp = baseExp + delta;
   const newNet = baseRev - newExp;
-  const cap = startup || 600000;
-  const beMonths = newNet > 0 ? Math.round(cap / newNet) : 99;
+  // startup must be a real number — caller guards. Don't default to 600k.
+  const cap = (typeof startup === 'number' && startup > 0) ? startup : null;
+  const beMonths = (cap && newNet > 0) ? Math.round(cap / newNet) : null;
   const deltaColor = delta > 0 ? '#ef4444' : '#22c55e';
   return `
     <div class="v2-lease-stat"><div class="v2-stat-mini-label">Lease/mo</div><div class="v2-stat-mini-val">$${newLease.toLocaleString()}</div></div>
     <div class="v2-lease-stat"><div class="v2-stat-mini-label">vs Base</div><div class="v2-stat-mini-val" style="color:${deltaColor}">${delta>=0?'+':''}$${delta.toLocaleString()}</div></div>
     <div class="v2-lease-stat"><div class="v2-stat-mini-label">Monthly Net</div><div class="v2-stat-mini-val" style="color:${newNet>0?'#22c55e':'#ef4444'}">$${newNet.toLocaleString()}</div></div>
-    <div class="v2-lease-stat"><div class="v2-stat-mini-label">Break-Even</div><div class="v2-stat-mini-val">Mo.${beMonths > 60 ? '60+' : beMonths}</div></div>`;
+    <div class="v2-lease-stat"><div class="v2-stat-mini-label">Break-Even</div><div class="v2-stat-mini-val">${beMonths == null ? '—' : 'Mo.' + (beMonths > 60 ? '60+' : beMonths)}</div></div>`;
 }
 
 function v2UpdateLeaseCalc(psf, sqft, baseRev, baseExp, baseLease, startup) {
@@ -20161,20 +20192,15 @@ function v2RenderRealEstatePanel() {
   const cities = a11.cities || [];
   if (!pins.length && !cities.length) return `<div class="v2-empty-panel">Run Agent 11 for real estate data</div>`;
 
-  // Score each listing
+  // Score each listing — only real pins from Agent 11. Synthetic
+  // "Estimated availability" listings were fabricated from
+  // median_income/12*0.09 with hardcoded sqft → removed for accuracy.
   const scored = pins.map((p, i) => {
     const city = cities.find(c => c.name === p.city) || {};
     return _v2ScoreListing(p, city, i);
   });
 
-  // Add synthetic additional listings if we have city data
-  const synth = cities.filter(c => !pins.find(p => p.city === c.name)).slice(0,3).map((city,i) => ({
-    label: `${city.name} — Available Retail Space`,
-    city: city.name, sqft: 5800+i*400, monthly_rent: Math.round((city.median_income||85000)/12*0.09),
-    type: 'Mixed-Use', lat: city.lat, lng: city.lng, _synthetic: true,
-  })).map((p,i) => _v2ScoreListing(p, cities.find(c=>c.name===p.city)||{}, pins.length+i));
-
-  const all = [...scored, ...synth].sort((a,b) => b.totalScore - a.totalScore);
+  const all = scored.sort((a,b) => b.totalScore - a.totalScore);
 
   return `
     <div style="margin-top:0">
@@ -20185,7 +20211,7 @@ function v2RenderRealEstatePanel() {
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
             <div>
               <div style="font-size:13px;font-weight:600">${l.label}</div>
-              <div style="font-size:11px;color:var(--v2-t3);margin-top:2px">${l.city} · ${l.sqft?.toLocaleString()} sqft · ${l.type}${l._synthetic?' · <em>Estimated availability</em>':''}</div>
+              <div style="font-size:11px;color:var(--v2-t3);margin-top:2px">${l.city} · ${l.sqft?.toLocaleString()} sqft · ${l.type}</div>
             </div>
             <div style="text-align:right;flex-shrink:0;margin-left:12px">
               <div style="font-size:18px;font-weight:700;color:${l.totalScore>=75?'#22c55e':l.totalScore>=55?'#f59e0b':'#ef4444'}">${l.totalScore}</div>
@@ -20215,14 +20241,16 @@ function v2RenderRealEstatePanel() {
 }
 
 function _v2ScoreListing(p, city, idx) {
-  const gap = city.gap_score || 7;
-  const income = city.median_income || 85000;
-  const compCount = city.competitor_count || 3;
+  // Use null-aware fallbacks — score signals fall back to "neutral 5/10"
+  // when city data is missing, not anchored to a fake $85k median
+  const gap = (typeof city.gap_score === 'number') ? city.gap_score : null;
+  const income = (typeof city.median_income === 'number') ? city.median_income : null;
+  const compCount = (typeof city.competitor_count === 'number') ? city.competitor_count : null;
   // Synthesize scores from available data
   const zoningScore = p.type === 'Freestanding' ? 9 : p.type === 'Strip Anchor' ? 7 : 6;
   const adaScore = p.sqft >= 6000 ? 8 : p.sqft >= 5000 ? 7 : 5;
-  const schoolScore = Math.min(10, Math.round(gap * 1.0));
-  const densityScore = Math.min(10, Math.round(income / 12000));
+  const schoolScore  = gap != null    ? Math.min(10, Math.round(gap * 1.0)) : 5;
+  const densityScore = income != null ? Math.min(10, Math.round(income / 12000)) : 5;
   const parkingScore = p.type === 'Freestanding' ? 9 : p.type === 'Strip Anchor' ? 7 : 5;
   const totalScore = Math.round((zoningScore + adaScore + schoolScore + densityScore + parkingScore) / 5 * 10);
 
@@ -20231,9 +20259,9 @@ function _v2ScoreListing(p, city, idx) {
   else flags.push({label:'⚠️ Verify Zoning', type:'amber'});
   if (adaScore >= 7) flags.push({label:'♿ ADA Compliant', type:'green'});
   else flags.push({label:'⚠️ ADA Review Needed', type:'amber'});
-  if (gap >= 8) flags.push({label:'🎯 High-Demand Area', type:'green'});
+  if (gap != null && gap >= 8) flags.push({label:'🎯 High-Demand Area', type:'green'});
   if (parkingScore >= 8) flags.push({label:'🅿 Adequate Parking', type:'green'});
-  if (compCount <= 2) flags.push({label:'🏆 Low Competition', type:'green'});
+  if (compCount != null && compCount <= 2) flags.push({label:'🏆 Low Competition', type:'green'});
 
   return { ...p, zoningScore, adaScore, schoolScore, densityScore, parkingScore, totalScore, flags };
 }
@@ -20265,7 +20293,12 @@ function v2RenderGrantLinkedWaterfall() {
   }).filter(g => g.amount > 0);
 
   const totalGrants = grantItems.reduce((s,g)=>s+g.amount,0);
-  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0) || 527000;
+  // Use real startup total from Agent 7 — skip render if not present
+  // (was defaulting to $527k which mismatched the actual scenarios)
+  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0)
+    || a7.total_startup_cost
+    || 0;
+  if (!startup) return '';
   const netStartup = startup - totalGrants;
 
   return `
@@ -20765,8 +20798,15 @@ function v2ExportSBAPackage() {
   const a10 = R_data.a10 || {};
   const base = (a7.scenarios||[]).find(s=>(s.name||'').toLowerCase().includes('base'))||(a7.scenarios||[])[0]||{};
   const grants = [...((R_data.a12||{}).federal_grants||[]),...((R_data.a12||{}).state_grants||[])].slice(0,5);
-  const totalGrants = 120000;
-  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0)||527000;
+  // Sum real grant amounts when available; otherwise zero (don't fabricate $120k)
+  const totalGrants = grants.reduce((s, g) => {
+    const amt = parseInt(String(g.amount||g.max_award||'').replace(/[$,]/g,'')) || 0;
+    return s + amt;
+  }, 0);
+  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0)
+    || a7.total_startup_cost
+    || (typeof run.budget === 'string' ? parseInt(run.budget) : run.budget)
+    || 0;
 
   const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
@@ -21117,14 +21157,18 @@ function v2RenderWageSlider(a7) {
   if (!a7) { const R_data = typeof R !== 'undefined' ? R : {}; a7 = R_data.a7 || {}; }
   const scenarios = a7.scenarios || [];
   const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
-  const baseExp = base.monthly_expenses || 108400;
-  const baseRev  = base.monthly_revenue  || 138000;
-  // Wages estimated at ~52% of operating costs (industry benchmark)
-  const wageBase = Math.round(baseExp * 0.52);
-  // Use real startup cost when available so break-even is meaningful
+  // Require real data — skip render if Agent 7 hasn't produced scenarios
+  if (!base.monthly_expenses || !base.monthly_revenue) return '';
+  const baseExp = base.monthly_expenses;
+  const baseRev = base.monthly_revenue;
+  // Prefer explicit wage line from monthly_ops; else use 52% industry benchmark
+  const ops = a7.monthly_ops || [];
+  const wageItem = ops.find(o => /wage|salary|payroll|staff/i.test(o.item||''));
+  const wageBase = wageItem ? wageItem.amount : Math.round(baseExp * 0.52);
   const startup = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
     || (typeof V2 !== 'undefined' && V2.run?.budget)
-    || 600000;
+    || null;
+  if (!startup) return '';
 
   return `
     <div style="margin-top:12px;padding:14px;background:rgba(139,92,246,.06);border-radius:10px;border:1px solid rgba(139,92,246,.15)">
@@ -21150,8 +21194,8 @@ function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp, startup) {
   const yr3WageIncrease  = Math.round(wageBase * ((Math.pow(1 + pct/100, 3) - 1)));
   const yr1Expenses = baseExp + yr1WageIncrease;
   const yr1Net  = baseRev - yr1Expenses;
-  const cap = startup || 600000;
-  const beMonths = yr1Net > 0 ? Math.round(cap / yr1Net) : 99;
+  const cap = (typeof startup === 'number' && startup > 0) ? startup : null;
+  const beMonths = (cap && yr1Net > 0) ? Math.round(cap / yr1Net) : null;
   const deltaColor = yr1WageIncrease > 0 ? '#ef4444' : '#22c55e';
   return `
     <div class="v2-lease-stat">
@@ -21168,7 +21212,7 @@ function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp, startup) {
     </div>
     <div class="v2-lease-stat">
       <div class="v2-stat-mini-label">Break-Even</div>
-      <div class="v2-stat-mini-val">Mo ${beMonths > 36 ? '36+' : beMonths}</div>
+      <div class="v2-stat-mini-val">${beMonths == null ? '—' : 'Mo ' + (beMonths > 36 ? '36+' : beMonths)}</div>
     </div>`;
 }
 

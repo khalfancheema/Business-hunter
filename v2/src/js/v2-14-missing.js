@@ -109,14 +109,18 @@ function v2RenderWageSlider(a7) {
   if (!a7) { const R_data = typeof R !== 'undefined' ? R : {}; a7 = R_data.a7 || {}; }
   const scenarios = a7.scenarios || [];
   const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
-  const baseExp = base.monthly_expenses || 108400;
-  const baseRev  = base.monthly_revenue  || 138000;
-  // Wages estimated at ~52% of operating costs (industry benchmark)
-  const wageBase = Math.round(baseExp * 0.52);
-  // Use real startup cost when available so break-even is meaningful
+  // Require real data — skip render if Agent 7 hasn't produced scenarios
+  if (!base.monthly_expenses || !base.monthly_revenue) return '';
+  const baseExp = base.monthly_expenses;
+  const baseRev = base.monthly_revenue;
+  // Prefer explicit wage line from monthly_ops; else use 52% industry benchmark
+  const ops = a7.monthly_ops || [];
+  const wageItem = ops.find(o => /wage|salary|payroll|staff/i.test(o.item||''));
+  const wageBase = wageItem ? wageItem.amount : Math.round(baseExp * 0.52);
   const startup = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
     || (typeof V2 !== 'undefined' && V2.run?.budget)
-    || 600000;
+    || null;
+  if (!startup) return '';
 
   return `
     <div style="margin-top:12px;padding:14px;background:rgba(139,92,246,.06);border-radius:10px;border:1px solid rgba(139,92,246,.15)">
@@ -142,8 +146,8 @@ function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp, startup) {
   const yr3WageIncrease  = Math.round(wageBase * ((Math.pow(1 + pct/100, 3) - 1)));
   const yr1Expenses = baseExp + yr1WageIncrease;
   const yr1Net  = baseRev - yr1Expenses;
-  const cap = startup || 600000;
-  const beMonths = yr1Net > 0 ? Math.round(cap / yr1Net) : 99;
+  const cap = (typeof startup === 'number' && startup > 0) ? startup : null;
+  const beMonths = (cap && yr1Net > 0) ? Math.round(cap / yr1Net) : null;
   const deltaColor = yr1WageIncrease > 0 ? '#ef4444' : '#22c55e';
   return `
     <div class="v2-lease-stat">
@@ -160,7 +164,7 @@ function _v2WageCalcHTML(pct, wageBase, baseRev, baseExp, startup) {
     </div>
     <div class="v2-lease-stat">
       <div class="v2-stat-mini-label">Break-Even</div>
-      <div class="v2-stat-mini-val">Mo ${beMonths > 36 ? '36+' : beMonths}</div>
+      <div class="v2-stat-mini-val">${beMonths == null ? '—' : 'Mo ' + (beMonths > 36 ? '36+' : beMonths)}</div>
     </div>`;
 }
 

@@ -6,7 +6,7 @@
 // calling renderAgent7(d).
 // ══════════════════════════════════════════════════════════
 
-async function runAgent7(a3, a4, a5) {
+async function runAgent7(a3, a4, a5, a1, a2) {
   setDot(7, 'running');
   if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(7);if(_d){R.a7=_d;try{renderAgent7(_d);}catch(e){}setDot(7,'done');showOut(7);return JSON.stringify(_d);}}
   const ind = industry();
@@ -14,6 +14,10 @@ async function runAgent7(a3, a4, a5) {
   const ctx3 = ctx(a3, ['summary', 'locations']);
   const ctx4 = ctx(a4, ['summary', 'listings', 'by_city_summary']);
   const ctx5 = ctx(a5, ['summary', 'requirements', 'timeline_phases']);
+  // Pass demographics + gap analysis so pricing/revenue projections match
+  // local income and demand levels (cross-agent consistency).
+  const ctx1 = a1 ? ctx(a1, ['summary', 'cities'], 600) : '';
+  const ctx2 = a2 ? ctx(a2, ['summary', 'cities', 'overall_opportunity_score'], 500) : '';
 
   // ── Sub-call A: Revenue Model ───────────────────────────
   $('7-s-t').textContent = '';
@@ -21,6 +25,8 @@ async function runAgent7(a3, a4, a5) {
 
   const sysA = `You are a financial analyst specializing in ${ind.unit} revenue modeling. Return JSON only.`;
   const usrA = `Build a detailed revenue model for a ${base}.
+DEMOGRAPHICS (use median income for pricing realism): ${ctx1}
+GAP ANALYSIS (use demand strength for capacity): ${ctx2}
 SITE RECOMMENDATIONS: ${ctx3}
 REAL ESTATE: ${ctx4}
 

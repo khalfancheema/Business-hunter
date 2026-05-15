@@ -61,7 +61,7 @@ async function runPipeline() {
     setProgress(40, phaseShouldRun(5)?'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…':'Phase 5 — skipped');
     let r7=best(7);
     if (phaseShouldRun(5)) {
-      try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
+      try { r7=await runAgent7(r3,r4,r5,r1,r2); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -171,7 +171,7 @@ async function reRunAgent(n) {
     else if(n===4) { await runAgent4(s(3),s(5)); }
     else if(n===5) { await runAgent5(); }
     else if(n===6) { await runAgent6(); }
-    else if(n===7) { await runAgent7(s(3),s(4),s(5)); }
+    else if(n===7) { await runAgent7(s(3),s(4),s(5),s(1),s(2)); }
     else if(n===8) { await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7)); }
     else if(n===9) { await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8)); }
     else if(n===10){ await runAgent10(s(3),s(4),s(5),s(7),s(9)); }

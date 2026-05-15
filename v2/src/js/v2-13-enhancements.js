@@ -243,8 +243,11 @@ function v2RenderEnrollmentRamp() {
   const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
   const cons = scenarios.find(s => (s.name||'').toLowerCase().includes('cons')) || {};
   const opt  = scenarios.find(s => (s.name||'').toLowerCase().includes('opt'))  || {};
+  // Skip render if we don't have real expense data — better to hide than
+  // anchor the chart on a fabricated $108,400 fixed-cost line
+  if (!base.monthly_expenses) return '';
   const maxRev = Math.max(...projs.map(p => p.rev||0), base.monthly_revenue||0) * 1.1;
-  const fixedCost = (base.monthly_expenses || 108400);
+  const fixedCost = base.monthly_expenses;
 
   const W=560, H=180, padL=60, padR=20, padT=16, padB=32;
   const cW=W-padL-padR, cH=H-padT-padB;
@@ -324,21 +327,25 @@ function v2RenderLeaseSlider(a7) {
   if (!a7) { const R_data = typeof R !== 'undefined' ? R : {}; a7 = R_data.a7 || {}; }
   const ops = a7.monthly_ops || [];
   const leaseItem = ops.find(o => (o.item||'').toLowerCase().includes('lease'));
-  const baseLease = leaseItem ? leaseItem.amount : 10800;
+  const scenarios = a7.scenarios || [];
+  const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
+  // Skip render if we don't have real lease + revenue + expense data —
+  // fabricated baseline numbers ($10800/$138000/$108400) produced misleading
+  // sensitivity readings detached from the actual scenario.
+  if (!leaseItem || !base.monthly_revenue || !base.monthly_expenses) return '';
+  const baseLease = leaseItem.amount;
+  const baseRev   = base.monthly_revenue;
+  const baseExp   = base.monthly_expenses;
+  const startup   = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
+    || (typeof V2 !== 'undefined' && V2.run?.budget)
+    || null;
+  if (!startup) return '';
+  // Assumed footprint — sqft not in financial model. Document as estimate.
   const sqft = 6000;
   const basePsfRaw = baseLease / sqft * 12;
-  // Auto-extend slider range so the actual base rent always fits
   const minPsf = Math.min(8, Math.floor(basePsfRaw * 0.7));
   const maxPsf = Math.max(28, Math.ceil(basePsfRaw * 1.4));
   const basePsf = basePsfRaw.toFixed(2);
-  const scenarios = a7.scenarios || [];
-  const base = scenarios.find(s => (s.name||'').toLowerCase().includes('base')) || scenarios[0] || {};
-  const baseRev = base.monthly_revenue || 138000;
-  const baseExp = base.monthly_expenses || 108400;
-  // Use real startup cost when available so break-even sensitivity is meaningful
-  const startup = (typeof R !== 'undefined' && R.a7?.total_startup_cost)
-    || (typeof V2 !== 'undefined' && V2.run?.budget)
-    || 600000;
 
   return `
     <div style="margin-top:16px;padding:14px;background:rgba(99,102,241,.06);border-radius:10px;border:1px solid rgba(99,102,241,.15)">
@@ -361,14 +368,15 @@ function _v2LeaseCalcHTML(psf, sqft, baseRev, baseExp, baseLease, startup) {
   const delta = newLease - baseLease;
   const newExp = baseExp + delta;
   const newNet = baseRev - newExp;
-  const cap = startup || 600000;
-  const beMonths = newNet > 0 ? Math.round(cap / newNet) : 99;
+  // startup must be a real number — caller guards. Don't default to 600k.
+  const cap = (typeof startup === 'number' && startup > 0) ? startup : null;
+  const beMonths = (cap && newNet > 0) ? Math.round(cap / newNet) : null;
   const deltaColor = delta > 0 ? '#ef4444' : '#22c55e';
   return `
     <div class="v2-lease-stat"><div class="v2-stat-mini-label">Lease/mo</div><div class="v2-stat-mini-val">$${newLease.toLocaleString()}</div></div>
     <div class="v2-lease-stat"><div class="v2-stat-mini-label">vs Base</div><div class="v2-stat-mini-val" style="color:${deltaColor}">${delta>=0?'+':''}$${delta.toLocaleString()}</div></div>
     <div class="v2-lease-stat"><div class="v2-stat-mini-label">Monthly Net</div><div class="v2-stat-mini-val" style="color:${newNet>0?'#22c55e':'#ef4444'}">$${newNet.toLocaleString()}</div></div>
-    <div class="v2-lease-stat"><div class="v2-stat-mini-label">Break-Even</div><div class="v2-stat-mini-val">Mo.${beMonths > 60 ? '60+' : beMonths}</div></div>`;
+    <div class="v2-lease-stat"><div class="v2-stat-mini-label">Break-Even</div><div class="v2-stat-mini-val">${beMonths == null ? '—' : 'Mo.' + (beMonths > 60 ? '60+' : beMonths)}</div></div>`;
 }
 
 function v2UpdateLeaseCalc(psf, sqft, baseRev, baseExp, baseLease, startup) {
@@ -493,20 +501,15 @@ function v2RenderRealEstatePanel() {
   const cities = a11.cities || [];
   if (!pins.length && !cities.length) return `<div class="v2-empty-panel">Run Agent 11 for real estate data</div>`;
 
-  // Score each listing
+  // Score each listing — only real pins from Agent 11. Synthetic
+  // "Estimated availability" listings were fabricated from
+  // median_income/12*0.09 with hardcoded sqft → removed for accuracy.
   const scored = pins.map((p, i) => {
     const city = cities.find(c => c.name === p.city) || {};
     return _v2ScoreListing(p, city, i);
   });
 
-  // Add synthetic additional listings if we have city data
-  const synth = cities.filter(c => !pins.find(p => p.city === c.name)).slice(0,3).map((city,i) => ({
-    label: `${city.name} — Available Retail Space`,
-    city: city.name, sqft: 5800+i*400, monthly_rent: Math.round((city.median_income||85000)/12*0.09),
-    type: 'Mixed-Use', lat: city.lat, lng: city.lng, _synthetic: true,
-  })).map((p,i) => _v2ScoreListing(p, cities.find(c=>c.name===p.city)||{}, pins.length+i));
-
-  const all = [...scored, ...synth].sort((a,b) => b.totalScore - a.totalScore);
+  const all = scored.sort((a,b) => b.totalScore - a.totalScore);
 
   return `
     <div style="margin-top:0">
@@ -517,7 +520,7 @@ function v2RenderRealEstatePanel() {
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
             <div>
               <div style="font-size:13px;font-weight:600">${l.label}</div>
-              <div style="font-size:11px;color:var(--v2-t3);margin-top:2px">${l.city} · ${l.sqft?.toLocaleString()} sqft · ${l.type}${l._synthetic?' · <em>Estimated availability</em>':''}</div>
+              <div style="font-size:11px;color:var(--v2-t3);margin-top:2px">${l.city} · ${l.sqft?.toLocaleString()} sqft · ${l.type}</div>
             </div>
             <div style="text-align:right;flex-shrink:0;margin-left:12px">
               <div style="font-size:18px;font-weight:700;color:${l.totalScore>=75?'#22c55e':l.totalScore>=55?'#f59e0b':'#ef4444'}">${l.totalScore}</div>
@@ -547,14 +550,16 @@ function v2RenderRealEstatePanel() {
 }
 
 function _v2ScoreListing(p, city, idx) {
-  const gap = city.gap_score || 7;
-  const income = city.median_income || 85000;
-  const compCount = city.competitor_count || 3;
+  // Use null-aware fallbacks — score signals fall back to "neutral 5/10"
+  // when city data is missing, not anchored to a fake $85k median
+  const gap = (typeof city.gap_score === 'number') ? city.gap_score : null;
+  const income = (typeof city.median_income === 'number') ? city.median_income : null;
+  const compCount = (typeof city.competitor_count === 'number') ? city.competitor_count : null;
   // Synthesize scores from available data
   const zoningScore = p.type === 'Freestanding' ? 9 : p.type === 'Strip Anchor' ? 7 : 6;
   const adaScore = p.sqft >= 6000 ? 8 : p.sqft >= 5000 ? 7 : 5;
-  const schoolScore = Math.min(10, Math.round(gap * 1.0));
-  const densityScore = Math.min(10, Math.round(income / 12000));
+  const schoolScore  = gap != null    ? Math.min(10, Math.round(gap * 1.0)) : 5;
+  const densityScore = income != null ? Math.min(10, Math.round(income / 12000)) : 5;
   const parkingScore = p.type === 'Freestanding' ? 9 : p.type === 'Strip Anchor' ? 7 : 5;
   const totalScore = Math.round((zoningScore + adaScore + schoolScore + densityScore + parkingScore) / 5 * 10);
 
@@ -563,9 +568,9 @@ function _v2ScoreListing(p, city, idx) {
   else flags.push({label:'⚠️ Verify Zoning', type:'amber'});
   if (adaScore >= 7) flags.push({label:'♿ ADA Compliant', type:'green'});
   else flags.push({label:'⚠️ ADA Review Needed', type:'amber'});
-  if (gap >= 8) flags.push({label:'🎯 High-Demand Area', type:'green'});
+  if (gap != null && gap >= 8) flags.push({label:'🎯 High-Demand Area', type:'green'});
   if (parkingScore >= 8) flags.push({label:'🅿 Adequate Parking', type:'green'});
-  if (compCount <= 2) flags.push({label:'🏆 Low Competition', type:'green'});
+  if (compCount != null && compCount <= 2) flags.push({label:'🏆 Low Competition', type:'green'});
 
   return { ...p, zoningScore, adaScore, schoolScore, densityScore, parkingScore, totalScore, flags };
 }
@@ -597,7 +602,12 @@ function v2RenderGrantLinkedWaterfall() {
   }).filter(g => g.amount > 0);
 
   const totalGrants = grantItems.reduce((s,g)=>s+g.amount,0);
-  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0) || 527000;
+  // Use real startup total from Agent 7 — skip render if not present
+  // (was defaulting to $527k which mismatched the actual scenarios)
+  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0)
+    || a7.total_startup_cost
+    || 0;
+  if (!startup) return '';
   const netStartup = startup - totalGrants;
 
   return `
@@ -1097,8 +1107,15 @@ function v2ExportSBAPackage() {
   const a10 = R_data.a10 || {};
   const base = (a7.scenarios||[]).find(s=>(s.name||'').toLowerCase().includes('base'))||(a7.scenarios||[])[0]||{};
   const grants = [...((R_data.a12||{}).federal_grants||[]),...((R_data.a12||{}).state_grants||[])].slice(0,5);
-  const totalGrants = 120000;
-  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0)||527000;
+  // Sum real grant amounts when available; otherwise zero (don't fabricate $120k)
+  const totalGrants = grants.reduce((s, g) => {
+    const amt = parseInt(String(g.amount||g.max_award||'').replace(/[$,]/g,'')) || 0;
+    return s + amt;
+  }, 0);
+  const startup = (a7.startup_breakdown||[]).reduce((s,b)=>s+(b.amount||0),0)
+    || a7.total_startup_cost
+    || (typeof run.budget === 'string' ? parseInt(run.budget) : run.budget)
+    || 0;
 
   const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">

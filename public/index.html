@@ -1974,7 +1974,19 @@ CRITICAL — DATA INTEGRITY (strictly enforced):
     • "Information not available" — for longer descriptive string fields
 - Do NOT substitute a plausible-sounding made-up value. Do NOT use 0 when the real value is unknown. Do NOT generate fake phone numbers, fake URLs, fake business names, fake addresses, or fake statistics.
 - If you found real data from a search, state the source. If you could not find it, return null/"N/A".
-- It is far better to return null than to return fabricated data.`;
+- It is far better to return null than to return fabricated data.
+
+CRITICAL — CROSS-AGENT CONSISTENCY:
+- When upstream agent context is provided (e.g. demographics, gap analysis, site selection), USE those numbers exactly. Do not re-estimate or contradict them.
+- Example: if upstream says median household income is $112,400, your downstream pricing and revenue projections must be consistent with that income level — do not silently assume a different income tier.
+- If you reference an upstream value, state which agent it came from (e.g. "per Agent 1 demographics: median income $112,400").
+
+CRITICAL — NUMERIC PRECISION:
+- Round all currency to whole dollars (no cents). $1,234.56 → 1235.
+- Round percentages to one decimal place max.
+- Round large counts (population, sqft) to nearest 100.
+- Integer fields like counts and units must be integers, not floats.
+- Do NOT pad numbers with .00 or fake precision.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
@@ -5100,7 +5112,7 @@ async function runPipeline() {
     setProgress(40, phaseShouldRun(5)?'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…':'Phase 5 — skipped');
     let r7=best(7);
     if (phaseShouldRun(5)) {
-      try { r7=await runAgent7(r3,r4,r5); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
+      try { r7=await runAgent7(r3,r4,r5,r1,r2); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -5210,7 +5222,7 @@ async function reRunAgent(n) {
     else if(n===4) { await runAgent4(s(3),s(5)); }
     else if(n===5) { await runAgent5(); }
     else if(n===6) { await runAgent6(); }
-    else if(n===7) { await runAgent7(s(3),s(4),s(5)); }
+    else if(n===7) { await runAgent7(s(3),s(4),s(5),s(1),s(2)); }
     else if(n===8) { await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7)); }
     else if(n===9) { await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8)); }
     else if(n===10){ await runAgent10(s(3),s(4),s(5),s(7),s(9)); }
@@ -5961,7 +5973,7 @@ Risk register: 8-10 risks with probability (High/Medium/Low) and impact (Critica
 // calling renderAgent7(d).
 // ══════════════════════════════════════════════════════════
 
-async function runAgent7(a3, a4, a5) {
+async function runAgent7(a3, a4, a5, a1, a2) {
   setDot(7, 'running');
   if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(7);if(_d){R.a7=_d;try{renderAgent7(_d);}catch(e){}setDot(7,'done');showOut(7);return JSON.stringify(_d);}}
   const ind = industry();
@@ -5969,6 +5981,10 @@ async function runAgent7(a3, a4, a5) {
   const ctx3 = ctx(a3, ['summary', 'locations']);
   const ctx4 = ctx(a4, ['summary', 'listings', 'by_city_summary']);
   const ctx5 = ctx(a5, ['summary', 'requirements', 'timeline_phases']);
+  // Pass demographics + gap analysis so pricing/revenue projections match
+  // local income and demand levels (cross-agent consistency).
+  const ctx1 = a1 ? ctx(a1, ['summary', 'cities'], 600) : '';
+  const ctx2 = a2 ? ctx(a2, ['summary', 'cities', 'overall_opportunity_score'], 500) : '';
 
   // ── Sub-call A: Revenue Model ───────────────────────────
   $('7-s-t').textContent = '';
@@ -5976,6 +5992,8 @@ async function runAgent7(a3, a4, a5) {
 
   const sysA = `You are a financial analyst specializing in ${ind.unit} revenue modeling. Return JSON only.`;
   const usrA = `Build a detailed revenue model for a ${base}.
+DEMOGRAPHICS (use median income for pricing realism): ${ctx1}
+GAP ANALYSIS (use demand strength for capacity): ${ctx2}
 SITE RECOMMENDATIONS: ${ctx3}
 REAL ESTATE: ${ctx4}
 
