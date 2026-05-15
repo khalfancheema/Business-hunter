@@ -1055,6 +1055,17 @@ function v2ExportDashboardHTML() {
     try { return Array.from(ss.cssRules).map(r=>r.cssText).join('\n'); } catch(e) { return ''; }
   }).join('\n');
 
+  // Strip event-handler attrs + <script> tags BEFORE serializing — running
+  // a strip script AFTER innerHTML parse is too late: <img onerror> would
+  // already have fired in the popup.
+  const cleanClone = dashWrap.cloneNode(true);
+  cleanClone.querySelectorAll('script').forEach(el => el.remove());
+  cleanClone.querySelectorAll('*').forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.toLowerCase().startsWith('on')) el.removeAttribute(attr.name);
+    });
+  });
+
   const html = `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1064,10 +1075,8 @@ function v2ExportDashboardHTML() {
 <div style="max-width:1100px;margin:0 auto">
 <h1 style="font-size:22px;margin-bottom:4px">${ind.emoji} ${ind.label} Analysis</h1>
 <p style="color:#94a3b8;margin-bottom:24px">ZIP ${run.zip||'—'} · Score ${score}/100 · Exported ${timestamp}</p>
-${dashWrap.innerHTML}
+${cleanClone.innerHTML}
 </div>
-<script>document.querySelectorAll('.v2-dash-tab').forEach(t=>t.onclick=null);
-document.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));<\/script>
 </body></html>`;
 
   const blob = new Blob([html], {type:'text/html'});
