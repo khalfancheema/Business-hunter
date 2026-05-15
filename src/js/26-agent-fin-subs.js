@@ -216,6 +216,8 @@ function renderAgent7(d) {
 
   // ── Summary text ───────────────────────────────────────
   $('7-s-t').textContent = d.summary || '';
+  // Inject real economic data provenance badge
+  if (typeof rdRenderFinancialBadge === 'function') rdRenderFinancialBadge('7-s-t');
 
   // ── Selected Site callout ──────────────────────────────
   const site = d.selected_site || {};

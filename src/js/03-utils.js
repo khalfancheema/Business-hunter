@@ -8,7 +8,9 @@ const radius = () => $('radius').value||'40';
 const grades = () => $('grades').value||INDUSTRIES[($('industrySelect')||{value:'daycare'}).value||'daycare'].tiers[0];
 const capacity = () => $('capacity').value||'75';
 const budget = () => $('budget').value||'600000';
-const industry = () => INDUSTRIES[$('industrySelect')?.value||'daycare'];
+const industry    = () => INDUSTRIES[$('industrySelect')?.value||'daycare'];
+// industryKey() returns the raw key string ('daycare','gas_station',…)
+const industryKey = () => $('industrySelect')?.value || 'daycare';
 
 function onIndustryChange() {
   const ind = industry();

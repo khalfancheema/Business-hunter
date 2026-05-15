@@ -21,8 +21,10 @@ async function runPipeline() {
     // gets real Census/BLS/OSM/Grants data injected verbatim.
     if (typeof prefetchRealData === 'function' && !demoMode) {
       setProgress(2, 'Prefetching real data (Census · BLS · OSM · Grants.gov · FEMA)…');
-      try { await prefetchRealData(zip(), industry(), capacity(), budget()); }
-      catch(e) { console.warn('Real data prefetch failed (non-fatal):', e.message); }
+      try {
+        await prefetchRealData(zip(), industryKey(), capacity(), budget());
+        if (typeof rdShowDataStatus === 'function') rdShowDataStatus();
+      } catch(e) { console.warn('Real data prefetch failed (non-fatal):', e.message); }
     }
 
     // ── Phase 1: Foundation Research (parallel) ─────────────

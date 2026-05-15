@@ -698,3 +698,99 @@ const _RD_FIPS = {
   'WI':'55','WY':'56','DC':'11',
 };
 function _rdStateFips(abbr) { return _RD_FIPS[abbr] || null; }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PHASE C — Provenance UI helpers
+// rdShowDataStatus()      → inject status strip after pipeline progress bar
+// rdRenderRealDataBadge() → inject verified-data card above any agent output
+// rdRenderFinancialBadge()→ inject financial-data badge above Agent 7 summary
+// ══════════════════════════════════════════════════════════════════════════════
+
+function rdShowDataStatus() {
+  if (!R || !R.real) return;
+  const d = R.real;
+  const badges = [
+    { key:'demographics',    label:'ACS',        icon:'👥' },
+    { key:'business_density',label:'ZBP',        icon:'🏢' },
+    { key:'wages',           label:'BLS',        icon:'💰' },
+    { key:'macro',           label:'FRED',       icon:'📈' },
+    { key:'rents',           label:'HUD',        icon:'🏠' },
+    { key:'competitors_osm', label:'OSM',        icon:'🗺' },
+    { key:'grants_gov',      label:'Grants.gov', icon:'💵' },
+    { key:'flood',           label:'FEMA',       icon:'🌊' },
+    { key:'energy_rates',    label:'NREL',       icon:'⚡' },
+    { key:'crime',           label:'FBI',        icon:'🚔' },
+    { key:'regulations',     label:'eCFR',       icon:'📜' },
+    { key:'sba',             label:'SBA',        icon:'🏦' },
+  ];
+  const loaded = badges.filter(b => d[b.key]);
+  const failed = badges.filter(b => !d[b.key]);
+  const pct    = Math.round(loaded.length / badges.length * 100);
+  const html = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:8px;font-size:11px;margin-top:6px"><span style="font-weight:700;color:var(--green,#22c55e)">🛰 Live Data ${pct}%</span>${loaded.map(b=>`<span title="${b.label}" style="background:rgba(34,197,94,0.15);padding:2px 6px;border-radius:4px;color:var(--green,#22c55e)">${b.icon} ${b.label}</span>`).join('')}${failed.length ? `<span style="color:var(--text-dim,#666);margin-left:4px">(${failed.map(b=>b.label).join(', ')}: unavailable)</span>` : ''}</div>`;
+  let el = document.getElementById('realDataStatus');
+  if (!el) {
+    const anchor = document.getElementById('progressText')?.parentElement || document.getElementById('progressRow');
+    if (anchor) {
+      el = document.createElement('div');
+      el.id = 'realDataStatus';
+      if (anchor.after) anchor.after(el);
+      else anchor.parentElement && anchor.parentElement.insertBefore(el, anchor.nextSibling);
+    }
+  }
+  if (el) el.innerHTML = html;
+}
+
+function rdRenderRealDataBadge(elId, keys) {
+  if (!R || !R.real) return;
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const d = R.real;
+  const rows = [];
+  if ((!keys || keys.includes('demographics')) && d.demographics) {
+    const dem = d.demographics;
+    if (dem.population)    rows.push(['Population',    dem.population.toLocaleString(),        'ACS 2022']);
+    if (dem.median_income) rows.push(['Median HH Income', '$'+dem.median_income.toLocaleString(), 'ACS 2022']);
+    if (dem.households)    rows.push(['Households',    dem.households.toLocaleString(),        'ACS 2022']);
+    if (dem.renter_pct != null) rows.push(['Renter %', dem.renter_pct+'%', 'ACS 2022']);
+  }
+  if ((!keys || keys.includes('business_density')) && d.business_density) {
+    const biz = d.business_density;
+    rows.push(['Competitors in ZIP (NAICS '+biz.naics+')', biz.count+' establishments', 'Census ZBP 2021']);
+  }
+  if ((!keys || keys.includes('macro')) && d.macro) {
+    const m = d.macro;
+    if (m.fed_funds_rate != null) rows.push(['Fed Funds Rate', m.fed_funds_rate+'%', 'FRED']);
+    if (m.unemployment != null)   rows.push(['Unemployment Rate', m.unemployment+'%', 'FRED']);
+  }
+  if ((!keys || keys.includes('crime')) && d.crime && d.crime.violent_per_100k != null) {
+    rows.push(['Violent Crime per 100k (state)', String(d.crime.violent_per_100k), 'FBI CDE '+d.crime.year]);
+  }
+  if ((!keys || keys.includes('flood')) && d.flood) {
+    rows.push(['Flood Zone', d.flood.flood_zone+' — '+d.flood.zone_description, 'FEMA NFHL']);
+  }
+  if (!rows.length) return;
+  const pulledAt = d._pulled_at ? new Date(d._pulled_at).toLocaleTimeString() : '';
+  const card = document.createElement('div');
+  card.style.cssText = 'background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;';
+  card.innerHTML = '<div style="font-weight:700;color:#22c55e;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em">✅ Verified Real Data — '+rows.length+' fields from live government APIs'+(pulledAt ? ' · pulled '+pulledAt : '')+'</div><div style="display:flex;flex-wrap:wrap;gap:6px 16px">'+rows.map(function(r){return '<div><span style="color:#64748b;font-size:10px">'+r[0]+'</span><br><span style="font-weight:600">'+r[1]+'</span><span style="color:#22c55e;font-size:10px;margin-left:4px">['+r[2]+']</span></div>';}).join('')+'</div>';
+  el.insertBefore(card, el.firstChild);
+}
+
+function rdRenderFinancialBadge(elId) {
+  if (!R || !R.real) return;
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const d = R.real;
+  const rows = [];
+  if (d.wages && d.wages.avg_weekly_wage)             rows.push(['Avg Weekly Wage (state)', '$'+Math.round(d.wages.avg_weekly_wage).toLocaleString(), 'BLS QCEW']);
+  if (d.macro && d.macro.fed_funds_rate != null)      rows.push(['Fed Funds Rate', d.macro.fed_funds_rate+'%', 'FRED']);
+  if (d.macro && d.macro.prime_rate != null)          rows.push(['Prime Rate', d.macro.prime_rate+'%', 'FRED+3%']);
+  if (d.rents && d.rents.fmr_2br)                    rows.push(['HUD FMR 2BR', '$'+d.rents.fmr_2br+'/mo', 'HUD FY2024']);
+  if (d.energy_rates && d.energy_rates.commercial_rate_kwh) rows.push(['Commercial kWh', '$'+d.energy_rates.commercial_rate_kwh, 'NREL']);
+  if (d.flood && d.flood.flood_zone)                  rows.push(['Flood Zone', d.flood.flood_zone, 'FEMA NFHL']);
+  if (!rows.length) return;
+  const card = document.createElement('div');
+  card.style.cssText = 'background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;';
+  card.innerHTML = '<div style="font-weight:700;color:#3b82f6;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em">📊 Real Market Data Used in Financial Model</div><div style="display:flex;flex-wrap:wrap;gap:6px 16px">'+rows.map(function(r){return '<div><span style="color:#64748b;font-size:10px">'+r[0]+'</span><br><span style="font-weight:600">'+r[1]+'</span><span style="color:#3b82f6;font-size:10px;margin-left:4px">['+r[2]+']</span></div>';}).join('')+'</div>';
+  el.insertBefore(card, el.firstChild);
+}

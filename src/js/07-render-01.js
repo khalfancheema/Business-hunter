@@ -180,6 +180,11 @@ Return ONLY this JSON:
     }
     $('1-s-t').textContent=summaryHtml;
 
+    // ── Inject verified ACS numbers above summary ────────────
+    if (typeof rdRenderRealDataBadge === 'function') {
+      rdRenderRealDataBadge('1-s-t', ['demographics','business_density','macro','crime']);
+    }
+
     // Heatmap — now with more dimensions
     const ind=industry();
     const cities1=d.cities||[];
