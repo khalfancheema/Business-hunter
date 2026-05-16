@@ -557,6 +557,57 @@
       }
     }
 
+    // ══ Phase H: more verifier checks ══
+
+    // ── A1 pop growth vs Census PEP ──────────────────────────────
+    const pep = R.real.census_pep;
+    if (pep && pep.pop_growth_1yr_pct != null && a1) {
+      const aiGrowth = _get(a1, 'metro_overview.pop_growth_pct_1yr');
+      if (aiGrowth != null) {
+        checks.push({
+          agent: 'A1', field: 'Population Growth 1yr',
+          real: pep.pop_growth_1yr_pct, ai: aiGrowth,
+          realFmt: _fmt(pep.pop_growth_1yr_pct, '', '%'),
+          aiFmt: _fmt(aiGrowth, '', '%'),
+          acc: _accRate(aiGrowth, pep.pop_growth_1yr_pct, 2),
+          source: 'Census PEP 2023',
+        });
+      }
+    }
+
+    // ── A1 net migration vs ACS B07001 ───────────────────────────
+    const mig = R.real.acs_migration;
+    if (mig && mig.newcomers_1yr_pct != null && a1) {
+      const aiMig = _get(a1, 'metro_overview.net_migration_annual_pct');
+      if (aiMig != null && aiMig > 0) {
+        checks.push({
+          agent: 'A1', field: 'Newcomer % (vs ACS movers)',
+          real: mig.newcomers_1yr_pct, ai: aiMig,
+          realFmt: _fmt(mig.newcomers_1yr_pct, '', '%'),
+          aiFmt: _fmt(aiMig, '', '%'),
+          acc: _accRate(aiMig, mig.newcomers_1yr_pct, 8),
+          source: 'ACS B07001',
+        });
+      }
+    }
+
+    // ── A1 BEA per capita personal income ────────────────────────
+    const bea = R.real.bea_income;
+    if (bea && bea.per_capita_personal_income && a1) {
+      const aiPCPI = _get(a1, 'metro_overview.per_capita_personal_income')
+                  || _get(a1, 'metro_overview.per_capita_income');
+      if (aiPCPI && aiPCPI > 0) {
+        checks.push({
+          agent: 'A1', field: 'Per Capita Personal Income',
+          real: bea.per_capita_personal_income, ai: aiPCPI,
+          realFmt: _fmt(bea.per_capita_personal_income, '$'),
+          aiFmt: _fmt(aiPCPI, '$'),
+          acc: _acc(aiPCPI, bea.per_capita_personal_income),
+          source: 'BEA CAINC1',
+        });
+      }
+    }
+
     // ── Need at least 2 valid checks to display ──────────────────
     const valid = checks.filter(c => c.acc !== null && !isNaN(c.acc));
     if (valid.length < 2) {

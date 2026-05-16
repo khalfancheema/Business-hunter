@@ -192,6 +192,18 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     _rdFetchACSIndustryMix(zipCode),
   ]);
 
+  // Phase H batch
+  const [
+    hpsaR, beaR, migR, quakeR, airR, pepR,
+  ] = await Promise.allSettled([
+    (stateFips && countyFips) ? _rdFetchHRSAHPSA(stateFips, countyFips) : Promise.resolve(null),
+    (stateFips && countyFips) ? _rdFetchBEAIncome(stateFips, countyFips) : Promise.resolve(null),
+    _rdFetchACSMigration(zipCode),
+    lat && lng ? _rdFetchUSGSQuakes(lat, lng) : Promise.resolve(null),
+    _rdFetchEPAAirNow(zipCode),
+    (stateFips && countyFips) ? _rdFetchCensusPEP(stateFips, countyFips) : Promise.resolve(null),
+  ]);
+
   const v = r => r.status === 'fulfilled' ? r.value : null;
 
   R.real = {
@@ -237,6 +249,13 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     hud_income:       v(hudIncR),
     building_permits: v(bpsR),
     acs_industry_mix: v(acsImR),
+    // Phase H batch
+    hrsa_hpsa:        v(hpsaR),
+    bea_income:       v(beaR),
+    acs_migration:    v(migR),
+    seismic:          v(quakeR),
+    air_quality:      v(airR),
+    census_pep:       v(pepR),
   };
 
   // ── Phase D: Industry-specific APIs (healthcare NPI) ─────────
@@ -566,6 +585,63 @@ function buildRealDataCtx(keys) {
     if (i.edu_healthcare_pct != null)  lines.push(`  edu_healthcare_pct: ${i.edu_healthcare_pct}%`);
     if (i.arts_entertain_pct != null)  lines.push(`  arts_entertain_pct: ${i.arts_entertain_pct}%`);
     if (i.per_capita_income)           lines.push(`  per_capita_income: $${i.per_capita_income.toLocaleString()} (B19301)`);
+  }
+
+  // ── Phase H: more accuracy data ───────────────────────────────────────────
+  if (want('hrsa_hpsa') && d.hrsa_hpsa) {
+    const h = d.hrsa_hpsa;
+    lines.push(`⚕ HRSA SHORTAGE AREA [${h.source}]`);
+    lines.push(`  health_shortage_designations: ${h.designations_count}`);
+    if (h.avg_hpsa_score) lines.push(`  avg_hpsa_score: ${h.avg_hpsa_score} (max ${h.score_max}, higher=worse)`);
+    if (h.population_underserved) lines.push(`  underserved_population: ${h.population_underserved.toLocaleString()}`);
+    if (h.ftes_needed)     lines.push(`  primary_care_ftes_needed: ${h.ftes_needed}`);
+  }
+
+  if (want('bea_income') && d.bea_income) {
+    const b = d.bea_income;
+    lines.push(`📈 BEA REGIONAL INCOME [${b.source}]`);
+    if (b.per_capita_personal_income) lines.push(`  per_capita_personal_income_${b.year}: $${b.per_capita_personal_income.toLocaleString()}`);
+    if (b.growth_5yr_pct != null)     lines.push(`  income_growth_5yr_pct: ${b.growth_5yr_pct}%`);
+    if (b.county_name)                lines.push(`  area: ${b.county_name}`);
+  }
+
+  if (want('acs_migration') && d.acs_migration) {
+    const m = d.acs_migration;
+    lines.push(`🚚 ACS MIGRATION/MOBILITY [${m.source}]`);
+    if (m.same_house_pct != null)           lines.push(`  same_house_1yr_pct: ${m.same_house_pct}%`);
+    if (m.newcomers_1yr_pct != null)        lines.push(`  newcomers_within_1yr_pct: ${m.newcomers_1yr_pct}%`);
+    if (m.from_outside_county_pct != null)  lines.push(`  from_outside_county_pct: ${m.from_outside_county_pct}%`);
+    if (m.from_different_state_pct != null) lines.push(`  from_different_state_pct: ${m.from_different_state_pct}%`);
+    if (m.international_movers_pct != null) lines.push(`  international_movers_pct: ${m.international_movers_pct}%`);
+  }
+
+  if (want('seismic') && d.seismic) {
+    const s = d.seismic;
+    lines.push(`🌋 USGS SEISMIC RISK [${s.source}]`);
+    lines.push(`  earthquakes_50yr_within_100km: ${s.quakes_50yr_within_100km}`);
+    if (s.max_magnitude != null) lines.push(`  max_historical_magnitude: M${s.max_magnitude}`);
+    if (s.quakes_m5_plus != null) lines.push(`  significant_quakes_m5+: ${s.quakes_m5_plus}`);
+    if (s.most_recent_major) lines.push(`  most_recent_major_quake: ${s.most_recent_major}`);
+    lines.push(`  seismic_risk_tier: ${s.seismic_risk}`);
+  }
+
+  if (want('air_quality') && d.air_quality) {
+    const a = d.air_quality;
+    lines.push(`🌫 EPA AIR QUALITY [${a.source}]`);
+    if (a.reporting_area)  lines.push(`  reporting_area: ${a.reporting_area}, ${a.state}`);
+    if (a.aqi_ozone)       lines.push(`  aqi_ozone: ${a.aqi_ozone}`);
+    if (a.aqi_pm25)        lines.push(`  aqi_pm25: ${a.aqi_pm25}`);
+    if (a.aqi_pm10)        lines.push(`  aqi_pm10: ${a.aqi_pm10}`);
+    if (a.worst_category)  lines.push(`  worst_category: ${a.worst_category}`);
+  }
+
+  if (want('census_pep') && d.census_pep) {
+    const p = d.census_pep;
+    lines.push(`📊 CENSUS POPULATION ESTIMATES [${p.source}]`);
+    if (p.county_name)       lines.push(`  county: ${p.county_name}`);
+    if (p.pop_2023)          lines.push(`  population_2023: ${p.pop_2023.toLocaleString()}`);
+    if (p.pop_growth_1yr_pct != null) lines.push(`  population_growth_1yr_pct: ${p.pop_growth_1yr_pct}%`);
+    if (p.pop_growth_3yr_pct != null) lines.push(`  population_growth_3yr_pct: ${p.pop_growth_3yr_pct}%`);
   }
 
   lines.push('══ END REAL DATA — cite each figure with its bracketed source tag ══\n');
@@ -1725,6 +1801,210 @@ async function _rdFetchACSIndustryMix(zip) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// PHASE H — ACCURACY UPGRADE BATCH 4 (added 2026-05-16)
+// HRSA HPSA · BEA · ACS Migration · USGS Earthquakes · EPA AirNow · Census PEP
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── HRSA HPSA — Health Professional Shortage Areas ───────────────────────────
+async function _rdFetchHRSAHPSA(stateFips, countyFips) {
+  if (!stateFips || !countyFips) return null;
+  const fips = `${stateFips}${countyFips}`;
+  const k = 'rdhpsa:'+fips;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // HRSA ArcGIS REST — HPSA Primary Care + Mental Health + Dental
+    const url = `https://services.arcgis.com/qWZ7BaZXaP5isnfT/arcgis/rest/services/HPSA_PC_2024/FeatureServer/0/query?where=COUNTY_EQUIVALENT_FIPS_CODE='${fips}'&outFields=*&returnGeometry=false&f=json&resultRecordCount=10`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const feats = d.features || [];
+    if (!feats.length) return null;
+    const designations = feats.map(f => f.attributes || {});
+    const totalScore = designations.reduce((s, a) => s + (a.HPSA_SCORE || 0), 0);
+    const avgScore = designations.length ? Math.round(totalScore / designations.length) : null;
+    const popUnderserved = designations.reduce((s, a) => s + (a.HPSA_DESIGNATION_POPULATION || 0), 0);
+    const ftesNeeded = designations.reduce((s, a) => s + (a.HPSA_FTE || 0), 0);
+    const result = {
+      designations_count:    designations.length,
+      avg_hpsa_score:        avgScore,
+      score_max:             Math.max(...designations.map(d => d.HPSA_SCORE || 0)),
+      population_underserved: popUnderserved,
+      ftes_needed:           Math.round(ftesNeeded * 10) / 10,
+      is_shortage_area:      true,
+      source:                'HRSA HPSA Primary Care 2024',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] HRSA HPSA failed:', e.message); return null; }
+}
+
+// ── BEA Regional Per Capita Personal Income (county) ────────────────────────
+async function _rdFetchBEAIncome(stateFips, countyFips) {
+  if (!stateFips || !countyFips) return null;
+  const fips = `${stateFips}${countyFips}`;
+  const k = 'rdbea:'+fips;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  const beaKey = (typeof window !== 'undefined' && window.BEA_API_KEY) ? window.BEA_API_KEY : null;
+  if (!beaKey) return null;
+  try {
+    // BEA CAINC1 - Per Capita Personal Income (county)
+    const url = `https://apps.bea.gov/api/data?UserID=${beaKey}&method=GetData&datasetname=Regional&TableName=CAINC1&LineCode=3&GeoFIPS=${fips}&Year=LAST5&ResultFormat=JSON`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const rows = d.BEAAPI?.Results?.Data || [];
+    if (!rows.length) return null;
+    // Get most recent year
+    rows.sort((a, b) => parseInt(b.TimePeriod) - parseInt(a.TimePeriod));
+    const latest = rows[0];
+    const oldest = rows[rows.length - 1];
+    const latestVal = parseFloat((latest.DataValue || '').replace(/,/g, ''));
+    const oldestVal = parseFloat((oldest.DataValue || '').replace(/,/g, ''));
+    const growth5yr = oldestVal > 0 ? Math.round((latestVal / oldestVal - 1) * 1000) / 10 : null;
+    const result = {
+      per_capita_personal_income: latestVal || null,
+      year:                       latest.TimePeriod,
+      growth_5yr_pct:             growth5yr,
+      county_name:                latest.GeoName,
+      source:                     'BEA Regional CAINC1',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] BEA failed:', e.message); return null; }
+}
+
+// ── ACS Migration Flows (B07001) — mover stats ───────────────────────────────
+async function _rdFetchACSMigration(zip) {
+  const k = 'rdmig:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // B07001_001 = total pop 1yr+; _017 = same house 1yr ago; _033 = same county;
+    // _049 = different county same state; _065 = different state; _081 = abroad
+    const vars = 'B07001_001E,B07001_017E,B07001_033E,B07001_049E,B07001_065E,B07001_081E';
+    const url = `https://api.census.gov/data/2022/acs/acs5?get=${vars}&for=zip%20code%20tabulation%20area:${zip}`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (!d || d.length < 2) return null;
+    const row = d[1];
+    const total = parseInt(row[0]) || 0;
+    const sameH = parseInt(row[1]) || 0;
+    const newcomers = total - sameH;
+    const fromOutCounty = (parseInt(row[3]) || 0) + (parseInt(row[4]) || 0) + (parseInt(row[5]) || 0);
+    const pct = n => total > 0 ? Math.round(n / total * 1000) / 10 : null;
+    const result = {
+      population_1yr_plus:      total > 0 ? total : null,
+      same_house_pct:           pct(sameH),
+      newcomers_1yr_pct:        pct(newcomers),
+      from_outside_county_pct:  pct(fromOutCounty),
+      from_different_state_pct: pct(parseInt(row[4]) || 0),
+      international_movers_pct: pct(parseInt(row[5]) || 0),
+      source:                   'ACS 5-Year 2022 (B07001)',
+      zip,
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] ACS migration failed:', e.message); return null; }
+}
+
+// ── USGS Earthquakes — historical seismic activity ───────────────────────────
+async function _rdFetchUSGSQuakes(lat, lng) {
+  if (!lat || !lng) return null;
+  const k = `rdusgs:${lat.toFixed(2)}:${lng.toFixed(2)}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // USGS Earthquake catalog API — past 50 years, M3.0+, within 100km
+    const startDate = `${new Date().getFullYear() - 50}-01-01`;
+    const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startDate}&latitude=${lat}&longitude=${lng}&maxradiuskm=100&minmagnitude=3.0&limit=200`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const quakes = d.features || [];
+    if (!quakes.length) {
+      return { quakes_50yr_within_100km: 0, max_magnitude: null, seismic_risk: 'Low', source: 'USGS' };
+    }
+    const mags = quakes.map(q => q.properties?.mag || 0);
+    const maxMag = Math.max(...mags);
+    const lastMaj = quakes.find(q => (q.properties?.mag || 0) >= 5);
+    const result = {
+      quakes_50yr_within_100km: quakes.length,
+      max_magnitude:           Math.round(maxMag * 10) / 10,
+      quakes_m5_plus:          quakes.filter(q => (q.properties?.mag || 0) >= 5).length,
+      most_recent_major:       lastMaj ? new Date(lastMaj.properties.time).toISOString().slice(0, 10) : null,
+      seismic_risk:            maxMag >= 6 ? 'High' : maxMag >= 5 ? 'Moderate' : maxMag >= 4 ? 'Low-Moderate' : 'Low',
+      source:                  'USGS Earthquake Catalog',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] USGS quakes failed:', e.message); return null; }
+}
+
+// ── EPA AirNow — current air quality index ───────────────────────────────────
+async function _rdFetchEPAAirNow(zip) {
+  if (!zip) return null;
+  const k = 'rdairnow:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  const airKey = (typeof window !== 'undefined' && window.AIRNOW_API_KEY) ? window.AIRNOW_API_KEY : null;
+  // AirNow needs key but free; without key, try OpenAQ fallback
+  if (!airKey) {
+    try {
+      // OpenAQ v2 location measurement endpoint (no key required)
+      const url = `https://api.openaq.org/v2/latest?limit=10&country=US&radius=10000&order_by=lastUpdated&sort=desc`;
+      const res = await fetch(url, { signal:_rdAbortTimeout(8000) });
+      if (!res.ok) return null;
+      // We don't have coords; bail. OpenAQ needs lat/lon for radius search.
+      return null;
+    } catch { return null; }
+  }
+  try {
+    const url = `https://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode=${zip}&distance=25&API_KEY=${airKey}`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) return null;
+    const ozone = data.find(d => d.ParameterName === 'O3');
+    const pm25  = data.find(d => d.ParameterName === 'PM2.5');
+    const pm10  = data.find(d => d.ParameterName === 'PM10');
+    const result = {
+      reporting_area: data[0].ReportingArea,
+      state:          data[0].StateCode,
+      observed_date:  data[0].DateObserved,
+      aqi_ozone:      ozone?.AQI || null,
+      aqi_pm25:       pm25?.AQI || null,
+      aqi_pm10:       pm10?.AQI || null,
+      worst_category: data.reduce((w, d) => (d.AQI > (w?.AQI || 0) ? d : w), null)?.Category?.Name || null,
+      source:         'EPA AirNow',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] AirNow failed:', e.message); return null; }
+}
+
+// ── Census Population Estimates Program (PEP) — newer than ACS 5-year ───────
+async function _rdFetchCensusPEP(stateFips, countyFips) {
+  if (!stateFips || !countyFips) return null;
+  const k = `rdpep:${stateFips}${countyFips}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // Population Estimates 2023 county-level
+    const url = `https://api.census.gov/data/2023/pep/population?get=POP_2023,POP_2022,POP_2020,NAME&for=county:${countyFips}&in=state:${stateFips}`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (!d || d.length < 2) return null;
+    const row = d[1];
+    const pop2023 = parseInt(row[0]) || null;
+    const pop2022 = parseInt(row[1]) || null;
+    const pop2020 = parseInt(row[2]) || null;
+    const growth1yr = (pop2023 && pop2022 && pop2022 > 0) ? Math.round((pop2023 / pop2022 - 1) * 1000) / 10 : null;
+    const growth3yr = (pop2023 && pop2020 && pop2020 > 0) ? Math.round((pop2023 / pop2020 - 1) * 1000) / 10 : null;
+    const result = {
+      county_name:     row[3],
+      pop_2023:        pop2023,
+      pop_growth_1yr_pct: growth1yr,
+      pop_growth_3yr_pct: growth3yr,
+      source:          'Census PEP 2023',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] Census PEP failed:', e.message); return null; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // PHASE C — Provenance UI helpers
 // rdShowDataStatus()      → inject status strip after pipeline progress bar
 // rdRenderRealDataBadge() → inject verified-data card above any agent output
@@ -1773,6 +2053,13 @@ function rdShowDataStatus() {
     { key:'hud_income',      label:'HUD Inc',    icon:'💰' },
     { key:'building_permits',label:'BPS',        icon:'🏗' },
     { key:'acs_industry_mix',label:'ACS Ind',    icon:'🏭' },
+    // Phase H additions
+    { key:'hrsa_hpsa',       label:'HRSA',       icon:'⚕' },
+    { key:'bea_income',      label:'BEA',        icon:'📈' },
+    { key:'acs_migration',   label:'ACS Mig',    icon:'🚚' },
+    { key:'seismic',         label:'USGS',       icon:'🌋' },
+    { key:'air_quality',     label:'AirNow',     icon:'🌫' },
+    { key:'census_pep',      label:'PEP',        icon:'📊' },
   ];
   const loaded = badges.filter(b => d[b.key]);
   const failed = badges.filter(b => !d[b.key]);

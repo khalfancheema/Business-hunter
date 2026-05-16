@@ -9,7 +9,7 @@ async function runAgent5() {
 
   // ── Real regulatory + environmental data ─────────────────
   const _rdCtx5 = typeof buildRealDataCtx === 'function'
-    ? buildRealDataCtx(['regulations','flood','crime','energy_rates','epa_echo','rural_urban','fema_disasters'])
+    ? buildRealDataCtx(['regulations','flood','crime','energy_rates','epa_echo','rural_urban','fema_disasters','seismic','air_quality','hrsa_hpsa'])
     : '';
 
   // ── Part A: Requirements metadata + timeline ────────────────

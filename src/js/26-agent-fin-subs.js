@@ -21,7 +21,7 @@ async function runAgent7(a3, a4, a5, a1, a2) {
 
   // ── Real economic data injection ──────────────────────────
   const _rdCtx7 = typeof buildRealDataCtx === 'function'
-    ? buildRealDataCtx(['demographics','wages','macro','rents','energy_rates','energy_state','flood','climate','sba','acs_expanded','hud_fmr','bls_oes','cbp_county','ndcp_county','rural_urban','local_unemp','hud_vacancy','acs_home_value','fema_disasters','hud_income','building_permits','acs_industry_mix'])
+    ? buildRealDataCtx(['demographics','wages','macro','rents','energy_rates','energy_state','flood','climate','sba','acs_expanded','hud_fmr','bls_oes','cbp_county','ndcp_county','rural_urban','local_unemp','hud_vacancy','acs_home_value','fema_disasters','hud_income','building_permits','acs_industry_mix','bea_income','acs_migration','census_pep'])
     : '';
 
   // ── Sub-call A: Revenue Model ───────────────────────────
