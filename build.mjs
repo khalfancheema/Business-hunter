@@ -15,7 +15,7 @@
  * All variables remain global — just split for readability and maintainability.
  */
 
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 
 const JS_FILES = [
   'src/js/01-config.js',
@@ -73,9 +73,12 @@ const css = CSS_FILES.map(f => readFileSync(f, 'utf8')).join('\n');
 // Use a function as the replacement to avoid special $-patterns in String.replace
 html = html.replace('<!-- BUILD:CSS -->', () => `<style>\n${css}\n</style>`);
 
-// Inline JS
-const js = JS_FILES.map(f => readFileSync(f, 'utf8')).join('\n\n');
+// Inline JS — local-keys.js loaded FIRST if present (gitignored personal keys)
+const LOCAL_KEYS = 'src/js/local-keys.js';
+const ALL_JS_FILES = existsSync(LOCAL_KEYS) ? [LOCAL_KEYS, ...JS_FILES] : JS_FILES;
+const js = ALL_JS_FILES.map(f => readFileSync(f, 'utf8')).join('\n\n');
 html = html.replace('<!-- BUILD:JS -->', () => `<script>\n${js}\n</script>`);
+if (existsSync(LOCAL_KEYS)) console.log(`  → injected local-keys.js (gitignored)`);
 
 writeFileSync('public/index.html', html);
 console.log(`Built public/index.html (${Buffer.byteLength(html)} bytes, ${html.split('\n').length} lines)`);

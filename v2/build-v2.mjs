@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -84,8 +84,12 @@ const v1BodyMatch = v1Template.match(/<body>([\s\S]*?)<\/body>/i);
 const v1Body = v1BodyMatch ? v1BodyMatch[1].trim() : '';
 html = html.replace('<!-- BUILD:V1 -->', () => v1Body);
 
-const js = [...V1_JS, ...V2_JS].map(f => readFileSync(f, 'utf8')).join('\n\n');
+// Inject local-keys.js FIRST if present (gitignored personal keys)
+const LOCAL_KEYS = join(ROOT, 'src/js/local-keys.js');
+const ALL_JS = existsSync(LOCAL_KEYS) ? [LOCAL_KEYS, ...V1_JS, ...V2_JS] : [...V1_JS, ...V2_JS];
+const js = ALL_JS.map(f => readFileSync(f, 'utf8')).join('\n\n');
 html = html.replace('<!-- BUILD:JS -->', () => `<script>\n${js}\n</script>`);
+if (existsSync(LOCAL_KEYS)) console.log('  → injected local-keys.js (gitignored)');
 
 mkdirSync(join(ROOT, 'v2/public'), { recursive: true });
 writeFileSync(join(ROOT, 'v2/public/index.html'), html);
