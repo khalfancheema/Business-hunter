@@ -53,7 +53,7 @@ Return ONLY:
 
   // (No _setDemoKey here — demo path already returned above. Live path uses
   // real claudeJSON calls for all three sub-agents.)
-  const listingsData = await claudeJSON(sysA, usrA);
+  const listingsData = await claudeJSON(sysA, usrA, {webSearch:true});
 
   // ── Sub-call B: Build Analysis ──────────────────────────
   if (outEl) {

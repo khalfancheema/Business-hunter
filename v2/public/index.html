@@ -6388,7 +6388,9 @@ Return ONLY this JSON:
 }
 Use REAL coordinates for all cities. Cap at 8 cities, 4 real estate pins at top locations, 5 driving directions. LoopNet URLs must use actual city slugs (e.g. suwanee-ga not generic). Hard cap on counts prevents max_tokens truncation.`;
   try {
-    let d=await claudeJSON(sys,usr);
+    const _rdCtx11 = (typeof buildRealDataCtx === 'function') ? buildRealDataCtx(['demographics','business_density','wages']) : '';
+    const usrWithCtx = _rdCtx11 ? _rdCtx11 + '\n\n' + usr : usr;
+    let d=await claudeJSON(sys, usrWithCtx, {webSearch:true});
     if(!d) { console.warn('Agent 11 fallback'); d=getFallback11(); }
     R.a11=d;
     buildMap(d);
@@ -6795,8 +6797,9 @@ async function runAgent13(a6) {
   try {
     // ── Part A: Summary + Competitor Profiles ───────────────
     $('13-sum-t').textContent = 'Analyzing competitor profiles…';
+    const _rdCtx13 = (typeof buildRealDataCtx === 'function') ? buildRealDataCtx(['competitors_osm','business_density']) : '';
     const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Search Google, Yelp, Facebook reviews for real customer data. Respond JSON only.`;
-    const usrA = `Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
+    const usrA = `${_rdCtx13 ? _rdCtx13 + '\n\n' : ''}Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
 Competitor market context: ${compCtx}
 Return ONLY:
 {
@@ -6820,7 +6823,7 @@ Return ONLY:
 }
 Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
-    const partA = await claudeJSON(sysA, usrA);
+    const partA = await claudeJSON(sysA, usrA, {webSearch:true});
 
     // ── Part B: Pain Points + Differentiation ───────────────
     const competitorNames = (partA?.competitor_profiles || []).map(c => c.name).join(', ');
@@ -6848,7 +6851,7 @@ Return ONLY:
 }
 Include 6-8 pain points (with real frequency estimates from review data) and 5-6 differentiation pillars.`;
 
-    const partB = await claudeJSON(sysB, usrB);
+    const partB = await claudeJSON(sysB, usrB, {webSearch:true});
 
     // ── Part C: Messaging Guide ──────────────────────────────
     const sysC = `You are a ${ind.unit} marketing strategist. Respond JSON only.`;
@@ -6885,6 +6888,7 @@ Include 5 distinct audience segments with messaging tailored to their specific c
     }
 
     R.a13 = d;
+    if (typeof rdRenderRealDataBadge === 'function') rdRenderRealDataBadge('13-sum-t', ['competitors_osm','business_density']);
     buildCompDeepDive(d);
     setDot(13,'done'); showOut(13);
     return JSON.stringify(d);
@@ -8682,7 +8686,7 @@ Return ONLY:
 
   // (No _setDemoKey here — demo path already returned above. Live path uses
   // real claudeJSON calls for all three sub-agents.)
-  const listingsData = await claudeJSON(sysA, usrA);
+  const listingsData = await claudeJSON(sysA, usrA, {webSearch:true});
 
   // ── Sub-call B: Build Analysis ──────────────────────────
   if (outEl) {
@@ -12455,7 +12459,7 @@ function _estimateTokens(text) {
  *    "summary only" fallback request
  *  - Progress label update so user knows when a retry is happening
  */
-async function safeClaudeJSON(system, user, agentNum) {
+async function safeClaudeJSON(system, user, agentNum, opts={}) {
   const INPUT_CHAR_LIMIT = 80000;  // ~20k tokens — well under 200k context
   const MAX_RETRY_PROMPT = 40000;  // Smaller prompt for retry
 
@@ -12469,7 +12473,7 @@ async function safeClaudeJSON(system, user, agentNum) {
   }
 
   try {
-    const result = await claudeJSON(system, activeUser);
+    const result = await claudeJSON(system, activeUser, opts);
     if (result) return result;
     throw new Error('Null result');
   } catch (e) {
@@ -12497,7 +12501,7 @@ async function safeClaudeJSON(system, user, agentNum) {
       '\n\n[Context condensed. Return a SHORTER JSON with the same schema — use concise 1-sentence strings instead of detailed paragraphs. Schema structure must be preserved exactly.]';
 
     try {
-      const retryResult = await claudeJSON(system, shortUser);
+      const retryResult = await claudeJSON(system, shortUser, {}); // no webSearch on retry (condensed prompt)
       if (retryResult) return retryResult;
     } catch (retryErr) {
       console.error(`[StressGuard] Agent ${agentNum}: retry also failed:`, retryErr.message);
@@ -12540,8 +12544,9 @@ async function runAgent13(a6) {
     // ── Pass A: Competitor Profiles ─────────────────────────────────────────
     $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 1/3: Analyzing competitor profiles…');
 
+    const _rdCtx13sg = (typeof buildRealDataCtx === 'function') ? buildRealDataCtx(['competitors_osm','business_density']) : '';
     const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Search Google, Yelp, Facebook reviews for real customer data. Respond JSON only.`;
-    const usrA = `Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
+    const usrA = `${_rdCtx13sg ? _rdCtx13sg + '\n\n' : ''}Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
 Competitor market context: ${compCtx}
 Return ONLY:
 {
@@ -12565,7 +12570,7 @@ Return ONLY:
 }
 Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
-    const passA = await safeClaudeJSON(sysA, usrA, '13a');
+    const passA = await safeClaudeJSON(sysA, usrA, '13a', {webSearch:true});
 
     // ── Pass B: Pain Points + Differentiation ───────────────────────────────
     $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 2/3: Building pain point analysis…');
@@ -12595,7 +12600,7 @@ Return ONLY:
 }
 Include 6-8 pain points and 5-6 differentiation pillars.`;
 
-    const passB = await safeClaudeJSON(sysB, usrB, '13b');
+    const passB = await safeClaudeJSON(sysB, usrB, '13b', {webSearch:true});
 
     // ── Pass C: Messaging Guide ──────────────────────────────────────────────
     $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 3/3: Creating messaging guide…');
@@ -12637,6 +12642,7 @@ Include 5 distinct audience segments with messaging tailored to specific competi
     }
 
     R.a13 = merged;
+    if (typeof rdRenderRealDataBadge === 'function') rdRenderRealDataBadge('13-sum-t', ['competitors_osm','business_density']);
     buildCompDeepDive(merged);
     setDot(13, 'done'); showOut(13);
     return JSON.stringify(merged);

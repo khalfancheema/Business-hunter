@@ -43,7 +43,7 @@ function _estimateTokens(text) {
  *    "summary only" fallback request
  *  - Progress label update so user knows when a retry is happening
  */
-async function safeClaudeJSON(system, user, agentNum) {
+async function safeClaudeJSON(system, user, agentNum, opts={}) {
   const INPUT_CHAR_LIMIT = 80000;  // ~20k tokens — well under 200k context
   const MAX_RETRY_PROMPT = 40000;  // Smaller prompt for retry
 
@@ -57,7 +57,7 @@ async function safeClaudeJSON(system, user, agentNum) {
   }
 
   try {
-    const result = await claudeJSON(system, activeUser);
+    const result = await claudeJSON(system, activeUser, opts);
     if (result) return result;
     throw new Error('Null result');
   } catch (e) {
@@ -85,7 +85,7 @@ async function safeClaudeJSON(system, user, agentNum) {
       '\n\n[Context condensed. Return a SHORTER JSON with the same schema — use concise 1-sentence strings instead of detailed paragraphs. Schema structure must be preserved exactly.]';
 
     try {
-      const retryResult = await claudeJSON(system, shortUser);
+      const retryResult = await claudeJSON(system, shortUser, {}); // no webSearch on retry (condensed prompt)
       if (retryResult) return retryResult;
     } catch (retryErr) {
       console.error(`[StressGuard] Agent ${agentNum}: retry also failed:`, retryErr.message);
@@ -128,8 +128,9 @@ async function runAgent13(a6) {
     // ── Pass A: Competitor Profiles ─────────────────────────────────────────
     $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 1/3: Analyzing competitor profiles…');
 
+    const _rdCtx13sg = (typeof buildRealDataCtx === 'function') ? buildRealDataCtx(['competitors_osm','business_density']) : '';
     const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Search Google, Yelp, Facebook reviews for real customer data. Respond JSON only.`;
-    const usrA = `Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
+    const usrA = `${_rdCtx13sg ? _rdCtx13sg + '\n\n' : ''}Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
 Competitor market context: ${compCtx}
 Return ONLY:
 {
@@ -153,7 +154,7 @@ Return ONLY:
 }
 Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
-    const passA = await safeClaudeJSON(sysA, usrA, '13a');
+    const passA = await safeClaudeJSON(sysA, usrA, '13a', {webSearch:true});
 
     // ── Pass B: Pain Points + Differentiation ───────────────────────────────
     $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 2/3: Building pain point analysis…');
@@ -183,7 +184,7 @@ Return ONLY:
 }
 Include 6-8 pain points and 5-6 differentiation pillars.`;
 
-    const passB = await safeClaudeJSON(sysB, usrB, '13b');
+    const passB = await safeClaudeJSON(sysB, usrB, '13b', {webSearch:true});
 
     // ── Pass C: Messaging Guide ──────────────────────────────────────────────
     $('13-sum-t') && ($('13-sum-t').textContent = 'Sub-agent 3/3: Creating messaging guide…');
@@ -225,6 +226,7 @@ Include 5 distinct audience segments with messaging tailored to specific competi
     }
 
     R.a13 = merged;
+    if (typeof rdRenderRealDataBadge === 'function') rdRenderRealDataBadge('13-sum-t', ['competitors_osm','business_density']);
     buildCompDeepDive(merged);
     setDot(13, 'done'); showOut(13);
     return JSON.stringify(merged);

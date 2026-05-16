@@ -17,8 +17,9 @@ async function runAgent13(a6) {
   try {
     // ── Part A: Summary + Competitor Profiles ───────────────
     $('13-sum-t').textContent = 'Analyzing competitor profiles…';
+    const _rdCtx13 = (typeof buildRealDataCtx === 'function') ? buildRealDataCtx(['competitors_osm','business_density']) : '';
     const sysA = `You are a competitive intelligence analyst for ${ind.unit} markets. Search Google, Yelp, Facebook reviews for real customer data. Respond JSON only.`;
-    const usrA = `Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
+    const usrA = `${_rdCtx13 ? _rdCtx13 + '\n\n' : ''}Search Google Maps and Yelp for reviews of ${ind.units} near ZIP ${zip()} (${radius()} mi radius). Known competitors: ${ind.competitors}.
 Competitor market context: ${compCtx}
 Return ONLY:
 {
@@ -42,7 +43,7 @@ Return ONLY:
 }
 Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
-    const partA = await claudeJSON(sysA, usrA);
+    const partA = await claudeJSON(sysA, usrA, {webSearch:true});
 
     // ── Part B: Pain Points + Differentiation ───────────────
     const competitorNames = (partA?.competitor_profiles || []).map(c => c.name).join(', ');
@@ -70,7 +71,7 @@ Return ONLY:
 }
 Include 6-8 pain points (with real frequency estimates from review data) and 5-6 differentiation pillars.`;
 
-    const partB = await claudeJSON(sysB, usrB);
+    const partB = await claudeJSON(sysB, usrB, {webSearch:true});
 
     // ── Part C: Messaging Guide ──────────────────────────────
     const sysC = `You are a ${ind.unit} marketing strategist. Respond JSON only.`;
@@ -107,6 +108,7 @@ Include 5 distinct audience segments with messaging tailored to their specific c
     }
 
     R.a13 = d;
+    if (typeof rdRenderRealDataBadge === 'function') rdRenderRealDataBadge('13-sum-t', ['competitors_osm','business_density']);
     buildCompDeepDive(d);
     setDot(13,'done'); showOut(13);
     return JSON.stringify(d);
