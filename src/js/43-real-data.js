@@ -81,6 +81,11 @@ const _RD_ECFR = {
   coffee_shop:      { title:21, part:110, name:'Food Manufacturing GMP' },
   medical_practice: { title:45, part:164, name:'HIPAA Security Rule' },
   optometry:        { title:16, part:315, name:'Ophthalmic Practice Rules (FTC)' },
+  laundromat:       { title:40, part:122, name:'NPDES Permit Program (Wastewater)' },
+  gym:              { title:29, part:1910,name:'OSHA General Industry Standards' },
+  tutoring:         { title:34, part:99,  name:'FERPA — Student Privacy' },
+  barbershop:       { title:29, part:1910,name:'OSHA Bloodborne Pathogens Standard' },
+  coworking:        { title:29, part:1904,name:'OSHA Recordkeeping Requirements' },
 };
 
 // ── State full name → abbreviation ──────────────────────────────────────────
@@ -137,7 +142,7 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     _rdFetchZBP(zipCode, naics),
     _rdFetchBLSWages(stateAbbr),
     _rdFetchFRED(),
-    _rdFetchHUDRents(zipCode),
+    _rdFetchHUDRents(zipCode, stateAbbr),
     lat && lng ? _rdFetchClimate(lat, lng)                            : Promise.resolve(null),
     city && stateAbbr ? _rdFetchCDC(city, stateAbbr)                 : Promise.resolve(null),
     lat && lng && osmTags.length ? _rdFetchOSMCompetitors(lat, lng, osmTags) : Promise.resolve(null),
@@ -486,9 +491,33 @@ async function _rdFetchFRED() {
   } catch(e) { console.warn('[RealData] FRED failed:', e.message); return null; }
 }
 
-async function _rdFetchHUDRents(zip) {
-  if (typeof v2FetchHUDRents === 'function') return v2FetchHUDRents(zip);
-  return null; // HUD auth requires state → county FIPS; delegate to v2-16
+async function _rdFetchHUDRents(zip, stateAbbr) {
+  const fips = _rdStateFips(stateAbbr);
+  if (!fips) return null;
+  const k = `rdhud:${fips}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // HUD FMR statedata endpoint — no API key required for this public endpoint
+    const url = `https://www.huduser.gov/hudapi/public/fmr/statedata/${fips}`;
+    const res = await fetch(url, { signal: _rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    // Parse: find first entry (closest/largest metro) or use state-level
+    const rows = (data?.data?.basicdata || data?.basicdata || []);
+    if (!rows.length) return null;
+    // Pick first row (typically metro for state capital / largest MSA)
+    const row = rows[0];
+    const result = {
+      fmr_1br: row['One-Bedroom']   || row.onebr   || null,
+      fmr_2br: row['Two-Bedroom']   || row.twobr   || null,
+      fmr_3br: row['Three-Bedroom'] || row.threebr || null,
+      fmr_eff: row['Efficiency']    || row.eff     || null,
+      area:    row.AreaName || row.areaname || stateAbbr,
+      year:    row.year || '2024',
+      source:  'HUD FMR FY2024',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] HUD rents failed:', e.message); return null; }
 }
 
 async function _rdFetchClimate(lat, lng) {
