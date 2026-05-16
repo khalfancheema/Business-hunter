@@ -61,7 +61,7 @@ Return ONLY:
   }
 
   const _rdCtx16 = (typeof buildRealDataCtx === 'function')
-    ? buildRealDataCtx(['rents','wages','macro'])
+    ? buildRealDataCtx(['rents','wages','macro','hud_fmr','bls_oes','rural_urban'])
     : '';
 
   const sysB = `You are a business strategy consultant specializing in ${ind.unit} startups and acquisitions. Return JSON only.`;

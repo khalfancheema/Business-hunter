@@ -318,6 +318,117 @@
       }
     }
 
+    // ══ Phase E: NEW verifier checks for accuracy upgrade sources ══
+
+    // ── A1 female labor force participation vs ACS S2301 ─────────
+    const acsX = R.real.acs_expanded;
+    if (acsX && acsX.female_lfp_pct != null && a1) {
+      const city0lfp = (a1.cities || [])[0] || {};
+      const aiFemLFP = city0lfp.women_25_44_lfp_pct;
+      if (aiFemLFP != null && aiFemLFP > 0) {
+        checks.push({
+          agent: 'A1', field: 'Female Labor Force Participation',
+          real: acsX.female_lfp_pct, ai: aiFemLFP,
+          realFmt: _fmt(acsX.female_lfp_pct, '', '%'), aiFmt: _fmt(aiFemLFP, '', '%'),
+          acc: _accRate(aiFemLFP, acsX.female_lfp_pct, 12),
+          source: 'ACS S2301',
+        });
+      }
+    }
+
+    // ── A1 poverty rate vs ACS B17001 ────────────────────────────
+    if (acsX && acsX.poverty_pct != null && a1) {
+      const city0p = (a1.cities || [])[0] || {};
+      const aiPov = city0p.poverty_rate_pct || _get(a1, 'metro_overview.poverty_rate_pct');
+      if (aiPov != null && aiPov > 0) {
+        checks.push({
+          agent: 'A1', field: 'Poverty Rate',
+          real: acsX.poverty_pct, ai: aiPov,
+          realFmt: _fmt(acsX.poverty_pct, '', '%'), aiFmt: _fmt(aiPov, '', '%'),
+          acc: _accRate(aiPov, acsX.poverty_pct, 8),
+          source: 'ACS B17001',
+        });
+      }
+    }
+
+    // ── A4 rent vs HUD FMR or ACS median gross rent ──────────────
+    const a4v = R.a4;
+    const hudFmr = R.real.hud_fmr;
+    const acsRentBenchmark = (hudFmr && hudFmr.fmr_2br) || (acsX && acsX.median_gross_rent);
+    if (acsRentBenchmark && a4v) {
+      const byCity = a4v.by_city_summary || [];
+      const c0 = byCity[0] || {};
+      // Estimate monthly rent from $/sqft × typical 2000sqft commercial space
+      const aiSqftCost = c0.avg_rent_sqft || c0.avg_rent_per_sqft;
+      if (aiSqftCost && aiSqftCost > 0) {
+        const aiMonthly = aiSqftCost * 2000 / 12; // annual rent/sqft × 2000sqft / 12 mo
+        // Use 1.5× residential as commercial floor benchmark
+        const benchmark = acsRentBenchmark * 1.5;
+        checks.push({
+          agent: 'A4', field: 'Commercial Rent (vs HUD/ACS×1.5)',
+          real: benchmark, ai: aiMonthly,
+          realFmt: _fmt(benchmark, '$', '/mo'), aiFmt: _fmt(aiMonthly, '$', '/mo'),
+          acc: Math.max(0, 1 - Math.abs(aiMonthly - benchmark) / (benchmark * 1.5)),
+          source: hudFmr ? 'HUD FMR' : 'ACS B25064',
+        });
+      }
+    }
+
+    // ── A6 competitor count vs CBP county (NAICS-specific) ──────
+    const cbp = R.real.cbp_county;
+    const a6v = R.a6;
+    if (cbp && cbp.establishments > 0 && a6v) {
+      const aiTotal = a6v.total_licensed_estimated;
+      if (aiTotal && aiTotal > 0) {
+        checks.push({
+          agent: 'A6', field: 'Competitor Count (CBP county)',
+          real: cbp.establishments, ai: aiTotal,
+          realFmt: _fmt(cbp.establishments, '', ' establishments'),
+          aiFmt: _fmt(aiTotal, '', ' estimated'),
+          acc: Math.max(0, 1 - Math.abs(aiTotal - cbp.establishments) / (cbp.establishments * 2)),
+          source: 'Census CBP',
+        });
+      }
+    }
+
+    // ── A7 staff wages vs BLS OES occupation median ──────────────
+    const oes = R.real.bls_oes;
+    if (oes && oes.median_annual_wage && a7v) {
+      // Look for staff wage in monthly_ops or scenarios
+      const opsItems = a7v.monthly_ops || [];
+      const staffLine = opsItems.find(i => /staff|wages|salaries|labor|payroll/i.test(i.item || ''));
+      if (staffLine && staffLine.amount > 0) {
+        // Estimate annual per-staff: monthly staff cost / typical staff count for industry
+        const aiAnnual = staffLine.amount * 12;
+        // Tolerance: ±50% since one-line staff cost ≠ single-occupation wage
+        const acc = Math.max(0, 1 - Math.abs(aiAnnual / oes.median_annual_wage - 1) / 2);
+        checks.push({
+          agent: 'A7', field: `${oes.occupation} Wage`,
+          real: oes.median_annual_wage, ai: aiAnnual,
+          realFmt: _fmt(oes.median_annual_wage, '$', '/yr median'),
+          aiFmt: _fmt(aiAnnual, '$', '/yr total payroll'),
+          acc, source: 'BLS OES',
+        });
+      }
+    }
+
+    // ── A2 NDCP infant rate vs DOL NDCP county data (daycare only) ─
+    const ndcp = R.real.ndcp_county;
+    const a2v = R.a2;
+    if (ndcp && ndcp.median_infant_center && a2v) {
+      const aiInfant = a2v.ndcp_median_infant_rate;
+      if (aiInfant && aiInfant > 0) {
+        checks.push({
+          agent: 'A2', field: 'NDCP Infant Rate',
+          real: ndcp.median_infant_center, ai: aiInfant,
+          realFmt: _fmt(ndcp.median_infant_center, '$', '/mo'),
+          aiFmt: _fmt(aiInfant, '$', '/mo'),
+          acc: _acc(aiInfant, ndcp.median_infant_center),
+          source: 'DOL NDCP',
+        });
+      }
+    }
+
     // ── Need at least 2 valid checks to display ──────────────────
     const valid = checks.filter(c => c.acc !== null && !isNaN(c.acc));
     if (valid.length < 2) {

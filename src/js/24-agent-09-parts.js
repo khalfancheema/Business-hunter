@@ -14,7 +14,7 @@ async function runAgent9Parts(a1,a2,a3,a4,a5,a6,a7,a8) {
   const ctx8 = ctx(a8,['verdict','verdict_rationale','assessment','success_factors','risks','next_steps']);
   // Verified real data for financial grounding
   const _rdCtx9 = typeof buildRealDataCtx === 'function'
-    ? buildRealDataCtx(['demographics','wages','macro','rents'])
+    ? buildRealDataCtx(['demographics','wages','macro','rents','acs_expanded','hud_fmr','bls_oes','cbp_county'])
     : '';
 
   if(demoMode&&typeof getDemoData==='function'){const _d=getDemoData(9);if(_d){R.a9=_d;try{renderBusinessPlan(_d);}catch(e){}setDot(9,'done');showOut(9);return _d;}}

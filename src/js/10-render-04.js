@@ -3,7 +3,7 @@ async function runAgent2(a1,a5,a6) {
   const ind=industry();
   // Inject verified ZBP business count + ACS demographics before gap analysis
   const _rdCtx2 = typeof buildRealDataCtx === 'function'
-    ? buildRealDataCtx(['business_density','demographics','macro'])
+    ? buildRealDataCtx(['business_density','demographics','macro','acs_expanded','cbp_county','ndcp_county'])
     : '';
 
   const sys=`You are a senior market gap analyst specializing in small business feasibility studies. You cross-reference federal, state, and local data sources to quantify supply-demand imbalances. You always cite your sources with specific table numbers, database names, and retrieval methods. Respond JSON only.`;

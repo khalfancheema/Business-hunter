@@ -133,10 +133,14 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
   const city      = geo?.city || '';
 
   // Step 2: fire all sources in parallel, never block pipeline on failure
+  const stateFips  = geo?.state_fips || (stateAbbr ? _rdStateFips(stateAbbr) : null);
+  const countyFips = geo?.county_fips || null;
   const [
     acsR, zbpR, blsR, fredR, hudR,
     climateR, cdcR, osmR, grantsR,
     samR, femaR, fbiR, nrelR, ecfrR, sbaR, eiaR,
+    // Phase E: accuracy upgrades
+    acsXR, hudFmrR, echoR, ruralR, cbpR, oesR, ndcpR,
   ] = await Promise.allSettled([
     _rdFetchACS(zipCode),
     _rdFetchZBP(zipCode, naics),
@@ -154,6 +158,14 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     ecfr ? _rdFetchECFR(ecfr)                                        : Promise.resolve(null),
     _rdFetchSBA(zipCode, industryKey),
     stateAbbr ? _rdFetchEIA(stateAbbr)                               : Promise.resolve(null),
+    // Phase E
+    _rdFetchACSExpanded(zipCode),
+    _rdFetchHUDFMR(zipCode, stateAbbr),
+    _rdFetchEPAEcho(zipCode),
+    (stateFips && countyFips) ? _rdFetchUSDARural(stateFips, countyFips) : Promise.resolve(null),
+    (stateFips && countyFips) ? _rdFetchCBPCounty(stateFips, countyFips, naics) : Promise.resolve(null),
+    stateAbbr ? _rdFetchBLSOES(stateAbbr, industryKey) : Promise.resolve(null),
+    (stateFips && countyFips) ? _rdFetchNDCP(stateFips, countyFips, industryKey) : Promise.resolve(null),
   ]);
 
   const v = r => r.status === 'fulfilled' ? r.value : null;
@@ -180,6 +192,14 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     regulations:      v(ecfrR),
     sba:              v(sbaR),
     energy_state:     v(eiaR),
+    // Phase E: accuracy upgrades
+    acs_expanded:     v(acsXR),
+    hud_fmr:          v(hudFmrR),
+    epa_echo:         v(echoR),
+    rural_urban:      v(ruralR),
+    cbp_county:       v(cbpR),
+    bls_oes:          v(oesR),
+    ndcp_county:      v(ndcpR),
   };
 
   // ── Phase D: Industry-specific APIs (healthcare NPI) ─────────
@@ -354,6 +374,71 @@ function buildRealDataCtx(keys) {
     if (cl.peakWetMonth)   lines.push(`  peak_wet_month: ${cl.peakWetMonth}`);
   }
 
+  // ── Phase E: Accuracy upgrade blocks ─────────────────────────────────────
+  if (want('acs_expanded') && d.acs_expanded) {
+    const x = d.acs_expanded;
+    lines.push(`📊 ACS EXPANDED [${x.source}]`);
+    if (x.female_lfp_pct != null)         lines.push(`  female_labor_force_participation: ${x.female_lfp_pct}% (S2301)`);
+    if (x.poverty_pct != null)            lines.push(`  poverty_rate: ${x.poverty_pct}% (B17001)`);
+    if (x.married_w_children_pct != null) lines.push(`  married_with_children_pct: ${x.married_w_children_pct}% (B11003)`);
+    if (x.median_gross_rent != null)      lines.push(`  median_gross_rent: $${x.median_gross_rent}/mo (B25064)`);
+    if (x.vacancy_pct != null)            lines.push(`  housing_vacancy_pct: ${x.vacancy_pct}% (B25002)`);
+    if (x.long_commute_pct != null)       lines.push(`  long_commute_60min_pct: ${x.long_commute_pct}% (B08303)`);
+  }
+
+  if (want('hud_fmr') && d.hud_fmr) {
+    const f = d.hud_fmr;
+    lines.push(`🏠 HUD FAIR MARKET RENT [${f.source}]`);
+    lines.push(`  area: ${f.area_name}`);
+    if (f.fmr_studio) lines.push(`  fmr_studio: $${f.fmr_studio}/mo`);
+    if (f.fmr_1br)    lines.push(`  fmr_1br: $${f.fmr_1br}/mo`);
+    if (f.fmr_2br)    lines.push(`  fmr_2br: $${f.fmr_2br}/mo`);
+    if (f.fmr_3br)    lines.push(`  fmr_3br: $${f.fmr_3br}/mo`);
+    if (f.fmr_4br)    lines.push(`  fmr_4br: $${f.fmr_4br}/mo`);
+  }
+
+  if (want('epa_echo') && d.epa_echo) {
+    const e = d.epa_echo;
+    lines.push(`🏭 EPA ECHO ENVIRONMENTAL [${e.source}]`);
+    lines.push(`  regulated_facilities_in_zip: ${e.total_regulated}`);
+    lines.push(`  facilities_with_violations: ${e.with_violations}`);
+    if (e.facility_names.length) lines.push(`  facility_examples: ${e.facility_names.slice(0, 3).join(', ')}`);
+  }
+
+  if (want('rural_urban') && d.rural_urban) {
+    const r = d.rural_urban;
+    lines.push(`🌾 USDA RURAL-URBAN [${r.source}]`);
+    lines.push(`  county: ${r.county_name}`);
+    lines.push(`  rucc_code: ${r.rucc_code} — ${r.classification}`);
+    lines.push(`  description: ${r.description}`);
+  }
+
+  if (want('cbp_county') && d.cbp_county) {
+    const c = d.cbp_county;
+    lines.push(`🏢 COUNTY BUSINESS PATTERNS [${c.source}]`);
+    lines.push(`  county_establishments (NAICS ${c.naics}): ${c.establishments}`);
+    if (c.employees) lines.push(`  county_industry_employees: ${c.employees.toLocaleString()}`);
+    if (c.annual_payroll) lines.push(`  county_annual_payroll: $${(c.annual_payroll * 1000).toLocaleString()}`);
+  }
+
+  if (want('bls_oes') && d.bls_oes && d.bls_oes.median_annual_wage) {
+    const o = d.bls_oes;
+    lines.push(`💵 BLS OCCUPATION WAGES [${o.source}]`);
+    lines.push(`  occupation: ${o.occupation} (SOC ${o.soc_code})`);
+    lines.push(`  median_annual_wage_state: $${o.median_annual_wage.toLocaleString()}`);
+    lines.push(`  median_hourly_wage_state: $${o.median_hourly_wage}/hr`);
+  }
+
+  if (want('ndcp_county') && d.ndcp_county) {
+    const n = d.ndcp_county;
+    lines.push(`👶 DOL NDCP CHILDCARE PRICES [${n.source}]`);
+    if (n.median_infant_center)     lines.push(`  median_infant_center_monthly: $${n.median_infant_center}`);
+    if (n.median_toddler_center)    lines.push(`  median_toddler_center_monthly: $${n.median_toddler_center}`);
+    if (n.median_preschool_center)  lines.push(`  median_preschool_center_monthly: $${n.median_preschool_center}`);
+    if (n.median_school_age_center) lines.push(`  median_school_age_center_monthly: $${n.median_school_age_center}`);
+    if (n.median_family_care)       lines.push(`  median_family_care_monthly: $${n.median_family_care}`);
+  }
+
   lines.push('══ END REAL DATA — cite each figure with its bracketed source tag ══\n');
   return lines.length > 3 ? lines.join('\n') : '';
 }
@@ -365,7 +450,22 @@ function buildRealDataCtx(keys) {
 
 async function _rdGeocodeZip(zip) {
   if (typeof v2GeocodeAddress === 'function') {
-    return v2GeocodeAddress(zip);
+    const r = await v2GeocodeAddress(zip);
+    // Augment with county_fips if missing (needed by CBP, USDA, NDCP fetchers)
+    if (r && !r.county_fips && r.lat && r.lng) {
+      try {
+        const fcc = await fetch(`https://geo.fcc.gov/api/census/area?lat=${r.lat}&lon=${r.lng}&format=json`, { signal:_rdAbortTimeout(6000) });
+        if (fcc.ok) {
+          const fd = await fcc.json();
+          const block = fd?.results?.[0];
+          if (block) {
+            r.county_fips = (block.county_fips || '').slice(-3);
+            r.state_fips  = (block.state_fips  || '').padStart(2, '0');
+          }
+        }
+      } catch {}
+    }
+    return r;
   }
   const k = 'rdgeo:'+zip;
   if (_rdCacheGet(k)) return _rdCacheGet(k);
@@ -378,12 +478,28 @@ async function _rdGeocodeZip(zip) {
     const d = await res.json();
     if (!d?.length) return null;
     const a = d[0].address||{};
+    const lat = parseFloat(d[0].lat);
+    const lng = parseFloat(d[0].lon);
+    // FCC lookup for county FIPS (free, no key)
+    let countyFips = null, stateFips = null;
+    try {
+      const fcc = await fetch(`https://geo.fcc.gov/api/census/area?lat=${lat}&lon=${lng}&format=json`, { signal:_rdAbortTimeout(6000) });
+      if (fcc.ok) {
+        const fd = await fcc.json();
+        const block = fd?.results?.[0];
+        if (block) {
+          countyFips = (block.county_fips || '').slice(-3);
+          stateFips  = (block.state_fips  || '').padStart(2, '0');
+        }
+      }
+    } catch {}
     const result = {
-      lat:        parseFloat(d[0].lat),
-      lng:        parseFloat(d[0].lon),
-      city:       a.city||a.town||a.county||'',
-      state:      a.state||'',
-      state_abbr: _rdStateAbbr(a.state||''),
+      lat, lng,
+      city:        a.city||a.town||a.county||'',
+      state:       a.state||'',
+      state_abbr:  _rdStateAbbr(a.state||''),
+      county_fips: countyFips,
+      state_fips:  stateFips,
       zip,
     };
     return _rdCacheSet(k, result);
@@ -894,6 +1010,257 @@ async function _rdFetchCMSNPI(city, stateAbbr, industryKey) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// PHASE E — ACCURACY UPGRADE FETCHERS (added 2026-05-16)
+// All free, no key required (or graceful no-key fallback)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── BLS SOC codes for occupation-specific wages ──────────────────────────────
+const _RD_OES_SOC = {
+  daycare:          { code:'39-9011', label:'Childcare Workers' },
+  gas_station:      { code:'41-2011', label:'Cashiers' },
+  laundromat:       { code:'37-2012', label:'Maids/Housekeeping Cleaners' },
+  car_wash:         { code:'53-7062', label:'Laborers/Material Movers' },
+  restaurant:       { code:'35-3031', label:'Waiters/Waitresses' },
+  gym:              { code:'39-9031', label:'Fitness Trainers' },
+  indoor_play:      { code:'39-3091', label:'Amusement/Recreation Attendants' },
+  dry_cleaning:     { code:'51-6011', label:'Laundry/Dry-Cleaning Workers' },
+  senior_care:      { code:'31-1121', label:'Home Health Aides' },
+  tutoring:         { code:'25-3000', label:'Other Teachers/Instructors' },
+  urgent_care:      { code:'29-1141', label:'Registered Nurses' },
+  coffee_shop:      { code:'35-3023', label:'Fast Food/Counter Workers' },
+  barbershop:       { code:'39-5012', label:'Hairdressers/Cosmetologists' },
+  coworking:        { code:'43-4171', label:'Receptionists/Information Clerks' },
+  medical_practice: { code:'29-1141', label:'Registered Nurses' },
+  optometry:        { code:'29-1041', label:'Optometrists' },
+};
+
+// ── ACS Expanded: pull additional tables in single endpoint call ──────────────
+async function _rdFetchACSExpanded(zip) {
+  const k = 'rdacs2:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // S2301_C04_001E = female LFP rate; B17001_002E = below poverty count; B17001_001E = total for poverty calc
+    // B11003_001E = total households with children; B11003_002E = married couple w/ children
+    // B25064_001E = median gross rent; B25002_003E = vacant housing units; B25002_001E = total housing units
+    // B08303_001E = total commuters; B08303_013E = commuters 60+ min
+    const vars = 'S2301_C04_001E,B17001_001E,B17001_002E,B11003_001E,B11003_002E,B25064_001E,B25002_001E,B25002_003E,B08303_001E,B08303_013E';
+    // Subject tables (S) must use /subject endpoint
+    const subjUrl = `https://api.census.gov/data/2022/acs/acs5/subject?get=S2301_C04_001E&for=zip%20code%20tabulation%20area:${zip}`;
+    const detUrl  = `https://api.census.gov/data/2022/acs/acs5?get=B17001_001E,B17001_002E,B11003_001E,B11003_002E,B25064_001E,B25002_001E,B25002_003E,B08303_001E,B08303_013E&for=zip%20code%20tabulation%20area:${zip}`;
+    const [sR, dR] = await Promise.allSettled([
+      fetch(subjUrl, { signal:_rdAbortTimeout(10000) }).then(r => r.ok ? r.json() : null),
+      fetch(detUrl,  { signal:_rdAbortTimeout(10000) }).then(r => r.ok ? r.json() : null),
+    ]);
+    const s = sR.status === 'fulfilled' ? sR.value : null;
+    const d = dR.status === 'fulfilled' ? dR.value : null;
+    if (!s && !d) return null;
+    const sRow = s && s.length > 1 ? s[1] : null;
+    const dRow = d && d.length > 1 ? d[1] : null;
+    const femaleLFP    = sRow ? parseFloat(sRow[0]) : null;
+    const povTotal     = dRow ? parseInt(dRow[0])   : null;
+    const povBelow     = dRow ? parseInt(dRow[1])   : null;
+    const hhAll        = dRow ? parseInt(dRow[2])   : null;
+    const hhMarried    = dRow ? parseInt(dRow[3])   : null;
+    const medGrossRent = dRow ? parseInt(dRow[4])   : null;
+    const housingTotal = dRow ? parseInt(dRow[5])   : null;
+    const housingVac   = dRow ? parseInt(dRow[6])   : null;
+    const commuteTotal = dRow ? parseInt(dRow[7])   : null;
+    const commute60Plus= dRow ? parseInt(dRow[8])   : null;
+    const result = {
+      female_lfp_pct:       femaleLFP > 0 ? Math.round(femaleLFP*10)/10 : null,
+      poverty_pct:          (povBelow > 0 && povTotal > 0) ? Math.round(povBelow/povTotal*1000)/10 : null,
+      married_w_children_pct: (hhMarried > 0 && hhAll > 0) ? Math.round(hhMarried/hhAll*1000)/10 : null,
+      median_gross_rent:    medGrossRent > 0 ? medGrossRent : null,
+      vacancy_pct:          (housingVac > 0 && housingTotal > 0) ? Math.round(housingVac/housingTotal*1000)/10 : null,
+      long_commute_pct:     (commute60Plus > 0 && commuteTotal > 0) ? Math.round(commute60Plus/commuteTotal*1000)/10 : null,
+      source: 'ACS 5-Year 2022 (S2301, B17001, B11003, B25064, B25002, B08303)',
+      zip,
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] ACS Expanded failed:', e.message); return null; }
+}
+
+// ── HUD Fair Market Rent ──────────────────────────────────────────────────────
+// Free public token: register at huduser.gov/portal/dataset/fmr-api.html
+// Without token: gracefully fail (returns null). With token in window.HUD_TOKEN: returns FMR.
+async function _rdFetchHUDFMR(zip, stateAbbr) {
+  const token = (typeof window !== 'undefined' && window.HUD_TOKEN) ? window.HUD_TOKEN : null;
+  if (!token || !zip) return null;
+  const k = 'rdhudfmr:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // First try ZIP-level Small Area FMR endpoint
+    const url = `https://www.huduser.gov/hudapi/public/fmr/data/${zip}99999`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      signal: _rdAbortTimeout(10000),
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const data = d.data || d;
+    const result = {
+      fmr_studio: data.basicdata?.['Efficiency'] || data.fmr_0 || null,
+      fmr_1br:    data.basicdata?.['One-Bedroom'] || data.fmr_1 || null,
+      fmr_2br:    data.basicdata?.['Two-Bedroom'] || data.fmr_2 || null,
+      fmr_3br:    data.basicdata?.['Three-Bedroom'] || data.fmr_3 || null,
+      fmr_4br:    data.basicdata?.['Four-Bedroom'] || data.fmr_4 || null,
+      area_name:  data.metroname || data.area_name || stateAbbr,
+      year:       data.year || '2026',
+      source:     'HUD FMR FY2026',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] HUD FMR failed:', e.message); return null; }
+}
+
+// ── EPA ECHO — Hazardous facilities by ZIP ──────────────────────────────────
+async function _rdFetchEPAEcho(zip) {
+  if (!zip) return null;
+  const k = 'rdecho:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    const url = `https://echodata.epa.gov/echo/echo_rest_services.get_facilities?output=JSON&p_zip=${zip}&p_act=Y&qcolumns=1,4,12,19`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const facs = d?.Results?.Facilities || [];
+    const violators = facs.filter(f => (f.CWAFormalActionCount > 0 || f.CAAFormalActionCount > 0 || f.RCRA3yrFormalActionCount > 0));
+    const result = {
+      total_regulated: facs.length,
+      with_violations: violators.length,
+      facility_names: facs.slice(0, 5).map(f => f.FacName || f.RegistryID).filter(Boolean),
+      source: 'EPA ECHO',
+      zip,
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] EPA ECHO failed:', e.message); return null; }
+}
+
+// ── USDA Rural-Urban Continuum Code (2023) ──────────────────────────────────
+// Returns 1-3 = metro, 4-9 = nonmetro/rural
+async function _rdFetchUSDARural(stateFips, countyFips) {
+  if (!stateFips || !countyFips) return null;
+  const fips = `${stateFips}${countyFips}`;
+  const k = 'rdusda:'+fips;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    const url = `https://gisportal.ers.usda.gov/server/rest/services/Economics/RuralUrbanContinuumCodes2023/MapServer/0/query?where=FIPS%3D%27${fips}%27&outFields=FIPS,RUCC_2023,Description,County_Name&f=json`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const feat = d.features?.[0]?.attributes;
+    if (!feat) return null;
+    const code = parseInt(feat.RUCC_2023);
+    const result = {
+      rucc_code: code,
+      classification: code <= 3 ? 'metro' : 'rural/nonmetro',
+      description: feat.Description,
+      county_name: feat.County_Name,
+      source: 'USDA ERS Rural-Urban Continuum 2023',
+      fips,
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] USDA Rural failed:', e.message); return null; }
+}
+
+// ── Census CBP — County-level NAICS-specific establishment counts ────────────
+async function _rdFetchCBPCounty(stateFips, countyFips, naics) {
+  if (!stateFips || !countyFips || !naics) return null;
+  const k = `rdcbp:${stateFips}${countyFips}:${naics}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    const url = `https://api.census.gov/data/2022/cbp?get=ESTAB,EMP,PAYANN&for=county:${countyFips}&in=state:${stateFips}&NAICS2017=${naics}`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (!d || d.length < 2) return null;
+    const row = d[1];
+    const result = {
+      establishments: parseInt(row[0]) || 0,
+      employees:      parseInt(row[1]) || 0,
+      annual_payroll: parseInt(row[2]) || 0,
+      naics,
+      source: 'Census CBP 2022 (county-level)',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] CBP County failed:', e.message); return null; }
+}
+
+// ── BLS OES — Occupation-specific median wages by state ─────────────────────
+// Uses BLS public API v2 with key (already used by _rdFetchBLSWages) or no-key (25 series/day limit)
+async function _rdFetchBLSOES(stateAbbr, industryKey) {
+  if (!stateAbbr) return null;
+  const soc = _RD_OES_SOC[industryKey];
+  if (!soc) return null;
+  const stateFips = _rdStateFips(stateAbbr);
+  if (!stateFips) return null;
+  const k = `rdoes:${stateAbbr}:${soc.code}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // OEUS series: OEUS + state(2) + areatype(M=state, etc) + areacode(00000) + industry + SOC(7) + datatype(04=annual median)
+    const socClean = soc.code.replace('-', '');
+    const seriesId = `OEUS${stateFips}00000000000${socClean}04`;
+    const blsKey = (typeof window !== 'undefined' && window.BLS_API_KEY) ? window.BLS_API_KEY : null;
+    const body = blsKey
+      ? { seriesid:[seriesId], registrationkey:blsKey, latest:true }
+      : { seriesid:[seriesId], latest:true };
+    const res = await fetch('https://api.bls.gov/publicAPI/v2/timeseries/data/', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(body),
+      signal: _rdAbortTimeout(10000),
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const series = d.Results?.series?.[0];
+    const latest = series?.data?.[0];
+    if (!latest || latest.value === '-') return null;
+    const annualMedian = parseInt(latest.value);
+    const result = {
+      occupation:        soc.label,
+      soc_code:          soc.code,
+      median_annual_wage: annualMedian > 0 ? annualMedian : null,
+      median_hourly_wage: annualMedian > 0 ? Math.round(annualMedian / 2080 * 100) / 100 : null,
+      state:             stateAbbr,
+      year:              latest.year,
+      source:            'BLS OES (May 2024)',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] BLS OES failed:', e.message); return null; }
+}
+
+// ── DOL NDCP — Childcare prices by county (for daycare only) ─────────────────
+async function _rdFetchNDCP(stateFips, countyFips, industryKey) {
+  if (industryKey !== 'daycare') return null;
+  if (!stateFips || !countyFips) return null;
+  const fips = `${stateFips}${countyFips}`;
+  const k = 'rdndcp:'+fips;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // Data.gov NDCP endpoint (latest 2022 dataset)
+    const url = `https://www.dol.gov/sites/dolgov/files/WB/NDCP/nationaldatabaseofchildcareprices.csv`;
+    // CSV is large (~5MB); skip large fetch in browser unless cached server-side
+    // Use the simpler DOL data.gov JSON endpoint if available
+    const altUrl = `https://data.dol.gov/get/childcare-prices/limit/1/filter/county_fips_code:${fips}`;
+    const res = await fetch(altUrl, { signal:_rdAbortTimeout(8000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const row = Array.isArray(d) ? d[0] : (d?.results?.[0] || d?.data?.[0]);
+    if (!row) return null;
+    const result = {
+      county_fips:       fips,
+      median_infant_center:    parseInt(row.mc_infant) || null,
+      median_toddler_center:   parseInt(row.mc_toddler) || null,
+      median_preschool_center: parseInt(row.mc_preschool) || null,
+      median_school_age_center:parseInt(row.mc_schoolage) || null,
+      median_family_care:      parseInt(row.mfc_infant) || null,
+      study_year:        row.studyyear || '2022',
+      source:            'DOL Womens Bureau NDCP 2022',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] NDCP failed:', e.message); return null; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // PHASE C — Provenance UI helpers
 // rdShowDataStatus()      → inject status strip after pipeline progress bar
 // rdRenderRealDataBadge() → inject verified-data card above any agent output
@@ -921,6 +1288,14 @@ function rdShowDataStatus() {
     { key:'health',          label:'CDC',        icon:'🩺' },
     { key:'climate',         label:'Climate',    icon:'🌤' },
     { key:'npi_providers',   label:'CMS NPI',    icon:'🏥' },
+    // Phase E additions
+    { key:'acs_expanded',    label:'ACS+',       icon:'📊' },
+    { key:'hud_fmr',         label:'HUD FMR',    icon:'🏠' },
+    { key:'epa_echo',        label:'EPA ECHO',   icon:'🏭' },
+    { key:'rural_urban',     label:'USDA RUCC',  icon:'🌾' },
+    { key:'cbp_county',      label:'CBP',        icon:'🏢' },
+    { key:'bls_oes',         label:'BLS OES',    icon:'💵' },
+    { key:'ndcp_county',     label:'NDCP',       icon:'👶' },
   ];
   const loaded = badges.filter(b => d[b.key]);
   const failed = badges.filter(b => !d[b.key]);
