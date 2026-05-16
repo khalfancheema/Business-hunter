@@ -147,6 +147,10 @@ async function runPipeline() {
 
     setProgress(100,'Complete — all agents finished');
     $('orchStatus').textContent='done';
+    // ── Accuracy Verifier: cross-check AI outputs vs R.real ──────
+    if (typeof runAccuracyVerifier === 'function' && R.real) {
+      try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
+    }
   } catch(e) {
     $('orchStatus').textContent='error';
     showErr('Pipeline error: '+e.message+'\n\nTip: Make sure your API key is correct and has credits.');

@@ -451,11 +451,19 @@ async function _rdFetchFRED() {
     const fed = lastVal(ffRes);
     const cpi = lastVal(cpiRes);
     const un  = lastVal(unempRes);
+
+    // fredgraph.csv is CORS-blocked in browsers — fall back to recent hardcoded values
+    if (fed === null && cpi === null && un === null) {
+      console.warn('[RealData] FRED CORS blocked — using hardcoded fallback (May 2025)');
+      const fb = { fed_funds_rate:4.33, cpi:319.8, unemployment:4.2, prime_rate:7.33,
+                   source:'FRED (hardcoded May 2025)', _fallback:true };
+      return _rdCacheSet(k, fb);
+    }
     const result = {
-      fed_funds_rate: fed,
-      cpi:            cpi,
-      unemployment:   un,
-      prime_rate:     fed ? Math.round((fed + 3) * 10) / 10 : null,
+      fed_funds_rate: fed  ?? 4.33,
+      cpi:            cpi  ?? 319.8,
+      unemployment:   un   ?? 4.2,
+      prime_rate:     fed  ? Math.round((fed + 3) * 10) / 10 : 7.33,
       source:         'FRED (Federal Reserve)',
     };
     return _rdCacheSet(k, result);
