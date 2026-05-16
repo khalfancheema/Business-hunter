@@ -2335,7 +2335,7 @@ Return ONLY this JSON:
 
   // Prepend verified Census ACS data so agent anchors to real numbers
   const _rdCtx1 = typeof buildRealDataCtx === 'function'
-    ? buildRealDataCtx(['demographics','business_density','macro','crime','health','acs_expanded','rural_urban','cbp_county','food_access','local_unemp','crime_city','schools','acs_home_value'])
+    ? buildRealDataCtx(['demographics','business_density','macro','crime','health','acs_expanded','rural_urban','cbp_county','food_access','local_unemp','crime_city','schools','acs_home_value','cdc_svi','hud_income','acs_industry_mix','building_permits'])
     : '';
   const usrWithReal = _rdCtx1 ? _rdCtx1 + '\n\nNow complete the full demographic analysis:\n' + usr : usr;
 
@@ -2458,7 +2458,7 @@ async function runAgent5() {
 
   // ── Real regulatory + environmental data ─────────────────
   const _rdCtx5 = typeof buildRealDataCtx === 'function'
-    ? buildRealDataCtx(['regulations','flood','crime','energy_rates','epa_echo','rural_urban'])
+    ? buildRealDataCtx(['regulations','flood','crime','energy_rates','epa_echo','rural_urban','fema_disasters'])
     : '';
 
   // ── Part A: Requirements metadata + timeline ────────────────
@@ -3171,7 +3171,7 @@ async function runAgent3(a1,a2,a5) {
   setDot(3,'running');
   const ind=industry();
   const _rdCtx3 = (typeof buildRealDataCtx === 'function')
-    ? buildRealDataCtx(['demographics','business_density','competitors_osm','rents','crime','acs_expanded','rural_urban','hud_fmr','food_access','schools','crime_city','hud_vacancy','acs_home_value'])
+    ? buildRealDataCtx(['demographics','business_density','competitors_osm','rents','crime','acs_expanded','rural_urban','hud_fmr','food_access','schools','crime_city','hud_vacancy','acs_home_value','cdc_svi','fema_disasters','building_permits'])
     : '';
   const sys=`You are a ${ind.unit} site selection consultant with deep knowledge of demographics, zoning, and real estate. You cite specific data sources. Respond JSON only.`;
   const usr=(_rdCtx3 ? _rdCtx3 + '\n\n' : '') +
@@ -3464,7 +3464,7 @@ async function runAgent8(a1,a2,a3,a4,a5,a6,a7) {
 
   // Inject verified real data so executive summary cites accurate numbers
   const _rdCtx8 = (typeof buildRealDataCtx === 'function')
-    ? buildRealDataCtx(['demographics','wages','macro','rents','competitors_osm','npi_providers','flood','sba','acs_expanded','hud_fmr','rural_urban','cbp_county','bls_oes','ndcp_county','epa_echo','food_access','local_unemp','hud_vacancy','crime_city','schools','acs_home_value'])
+    ? buildRealDataCtx(['demographics','wages','macro','rents','competitors_osm','npi_providers','flood','sba','acs_expanded','hud_fmr','rural_urban','cbp_county','bls_oes','ndcp_county','epa_echo','food_access','local_unemp','hud_vacancy','crime_city','schools','acs_home_value','cdc_svi','fema_disasters','hud_income','building_permits','acs_industry_mix'])
     : '';
 
   const usr=`${_rdCtx8 ? _rdCtx8 + '\n\n' : ''}Write a final executive report for opening a ${ind.unit} (${ind.capacity_label}: ${capacity()}, $${parseInt(budget()).toLocaleString()} budget) near ZIP ${zip()}.
@@ -6082,7 +6082,7 @@ async function runAgent7(a3, a4, a5, a1, a2) {
 
   // ── Real economic data injection ──────────────────────────
   const _rdCtx7 = typeof buildRealDataCtx === 'function'
-    ? buildRealDataCtx(['demographics','wages','macro','rents','energy_rates','energy_state','flood','climate','sba','acs_expanded','hud_fmr','bls_oes','cbp_county','ndcp_county','rural_urban','local_unemp','hud_vacancy','acs_home_value'])
+    ? buildRealDataCtx(['demographics','wages','macro','rents','energy_rates','energy_state','flood','climate','sba','acs_expanded','hud_fmr','bls_oes','cbp_county','ndcp_county','rural_urban','local_unemp','hud_vacancy','acs_home_value','fema_disasters','hud_income','building_permits','acs_industry_mix'])
     : '';
 
   // ── Sub-call A: Revenue Model ───────────────────────────
@@ -10734,6 +10734,18 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     _rdFetchACSHomeValue(zipCode),
   ]);
 
+  // Phase G batch
+  const countyName = geo?.county || geo?.county_name || '';
+  const [
+    sviR, femaDeclR, hudIncR, bpsR, acsImR,
+  ] = await Promise.allSettled([
+    lat && lng ? _rdFetchCDCSVI(lat, lng) : Promise.resolve(null),
+    (stateAbbr && countyName) ? _rdFetchOpenFEMA(stateAbbr, countyName) : Promise.resolve(null),
+    stateAbbr ? _rdFetchHUDIncome(stateAbbr) : Promise.resolve(null),
+    (stateFips && countyFips) ? _rdFetchBuildingPermits(stateFips, countyFips) : Promise.resolve(null),
+    _rdFetchACSIndustryMix(zipCode),
+  ]);
+
   const v = r => r.status === 'fulfilled' ? r.value : null;
 
   R.real = {
@@ -10773,6 +10785,12 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     crime_city:       v(fbiCityR),
     schools:          v(ncesR),
     acs_home_value:   v(acsHvR),
+    // Phase G batch
+    cdc_svi:          v(sviR),
+    fema_disasters:   v(femaDeclR),
+    hud_income:       v(hudIncR),
+    building_permits: v(bpsR),
+    acs_industry_mix: v(acsImR),
   };
 
   // ── Phase D: Industry-specific APIs (healthcare NPI) ─────────
@@ -11059,6 +11077,51 @@ function buildRealDataCtx(keys) {
     if (hv.median_monthly_costs) lines.push(`  median_monthly_housing_costs: $${hv.median_monthly_costs}`);
   }
 
+  // ── Phase G: more accuracy data ───────────────────────────────────────────
+  if (want('cdc_svi') && d.cdc_svi && d.cdc_svi.svi_overall != null) {
+    const s = d.cdc_svi;
+    lines.push(`⚠ CDC SOCIAL VULNERABILITY [${s.source}]`);
+    lines.push(`  svi_overall_percentile: ${s.svi_overall} (tier: ${s.vulnerability_tier})`);
+    if (s.socioeconomic_status != null) lines.push(`  socioeconomic_pctile: ${s.socioeconomic_status}`);
+    if (s.household_chars != null)      lines.push(`  household_composition_pctile: ${s.household_chars}`);
+    if (s.housing_transport != null)    lines.push(`  housing_transport_pctile: ${s.housing_transport}`);
+  }
+
+  if (want('fema_disasters') && d.fema_disasters) {
+    const f = d.fema_disasters;
+    lines.push(`⛈ FEMA DISASTERS [${f.source}]`);
+    lines.push(`  declared_disasters_10yr: ${f.disasters_10yr} (${f.county})`);
+    if (f.most_recent_type) lines.push(`  most_recent: ${f.most_recent_type} (${f.most_recent_date?.slice(0,10) || 'unknown'})`);
+    const topTypes = Object.entries(f.types || {}).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    if (topTypes.length) lines.push(`  top_types: ${topTypes.map(([t, n]) => `${t} (${n})`).join(', ')}`);
+  }
+
+  if (want('hud_income') && d.hud_income) {
+    const h = d.hud_income;
+    lines.push(`💰 HUD INCOME LIMITS [${h.source}]`);
+    if (h.median_family_income) lines.push(`  median_family_income: $${h.median_family_income.toLocaleString()}`);
+    if (h.low_income_4_person)  lines.push(`  low_income_threshold_4p: $${h.low_income_4_person.toLocaleString()}`);
+    if (h.very_low_income_4p)   lines.push(`  very_low_income_threshold_4p: $${h.very_low_income_4p.toLocaleString()}`);
+  }
+
+  if (want('building_permits') && d.building_permits) {
+    const b = d.building_permits;
+    lines.push(`🏗 CENSUS BUILDING PERMITS [${b.source}]`);
+    if (b.permits_total) lines.push(`  total_permits_${b.year}: ${b.permits_total.toLocaleString()}`);
+    if (b.units_total)   lines.push(`  total_housing_units_${b.year}: ${b.units_total.toLocaleString()}`);
+  }
+
+  if (want('acs_industry_mix') && d.acs_industry_mix) {
+    const i = d.acs_industry_mix;
+    lines.push(`🏭 ACS INDUSTRY MIX [${i.source}]`);
+    if (i.total_workers) lines.push(`  total_workers_in_zip: ${i.total_workers.toLocaleString()}`);
+    if (i.retail_pct != null)          lines.push(`  retail_pct: ${i.retail_pct}%`);
+    if (i.prof_scientific_pct != null) lines.push(`  prof_scientific_pct: ${i.prof_scientific_pct}%`);
+    if (i.edu_healthcare_pct != null)  lines.push(`  edu_healthcare_pct: ${i.edu_healthcare_pct}%`);
+    if (i.arts_entertain_pct != null)  lines.push(`  arts_entertain_pct: ${i.arts_entertain_pct}%`);
+    if (i.per_capita_income)           lines.push(`  per_capita_income: $${i.per_capita_income.toLocaleString()} (B19301)`);
+  }
+
   lines.push('══ END REAL DATA — cite each figure with its bracketed source tag ══\n');
   return lines.length > 3 ? lines.join('\n') : '';
 }
@@ -11116,6 +11179,7 @@ async function _rdGeocodeZip(zip) {
     const result = {
       lat, lng,
       city:        a.city||a.town||a.county||'',
+      county:      a.county||'',
       state:       a.state||'',
       state_abbr:  _rdStateAbbr(a.state||''),
       county_fips: countyFips,
@@ -12060,6 +12124,161 @@ async function _rdFetchACSHomeValue(zip) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// PHASE G — ACCURACY UPGRADE BATCH 3 (added 2026-05-16)
+// CDC SVI · OpenFEMA · HUD Income Limits · Building Permits · Industry/Occ ACS
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── CDC SVI — Social Vulnerability Index by census tract ─────────────────────
+async function _rdFetchCDCSVI(lat, lng) {
+  if (!lat || !lng) return null;
+  const k = `rdsvi:${lat.toFixed(3)}:${lng.toFixed(3)}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // CDC SVI 2022 ArcGIS feature service — point-in-tract query
+    const url = `https://services3.arcgis.com/0H2dKpzCAR1efkVR/arcgis/rest/services/Overall_2022_Tracts/FeatureServer/0/query?geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=FIPS,RPL_THEMES,RPL_THEME1,RPL_THEME2,RPL_THEME3,RPL_THEME4&returnGeometry=false&f=json`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const a = d.features?.[0]?.attributes;
+    if (!a) return null;
+    const result = {
+      tract_fips:           a.FIPS,
+      svi_overall:          parseFloat(a.RPL_THEMES),
+      socioeconomic_status: parseFloat(a.RPL_THEME1),
+      household_chars:      parseFloat(a.RPL_THEME2),
+      racial_ethnic:        parseFloat(a.RPL_THEME3),
+      housing_transport:    parseFloat(a.RPL_THEME4),
+      vulnerability_tier:   parseFloat(a.RPL_THEMES) >= 0.75 ? 'High' : parseFloat(a.RPL_THEMES) >= 0.5 ? 'Medium-High' : parseFloat(a.RPL_THEMES) >= 0.25 ? 'Medium-Low' : 'Low',
+      source:               'CDC SVI 2022',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] CDC SVI failed:', e.message); return null; }
+}
+
+// ── OpenFEMA — Disaster declarations by county ───────────────────────────────
+async function _rdFetchOpenFEMA(stateAbbr, countyName) {
+  if (!stateAbbr || !countyName) return null;
+  const k = `rdfema:${stateAbbr}:${countyName}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // OpenFEMA v2 DisasterDeclarationsSummaries — last 10 years
+    const cutoff = `${new Date().getFullYear() - 10}-01-01T00:00:00.000Z`;
+    const cnClean = countyName.replace(/\s+(County|Parish|Borough)$/i, '');
+    const url = `https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries?$filter=state eq '${stateAbbr}' and incidentBeginDate ge '${cutoff}' and designatedArea eq '${cnClean} (County)'&$select=disasterNumber,declarationDate,incidentType,declarationTitle&$top=20`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const events = d.DisasterDeclarationsSummaries || [];
+    const byType = {};
+    events.forEach(e => {
+      const t = e.incidentType || 'Other';
+      byType[t] = (byType[t] || 0) + 1;
+    });
+    const result = {
+      county:              countyName,
+      state:               stateAbbr,
+      disasters_10yr:      events.length,
+      types:               byType,
+      most_recent_date:    events[0]?.declarationDate || null,
+      most_recent_type:    events[0]?.incidentType || null,
+      most_recent_title:   events[0]?.declarationTitle || null,
+      source:              'OpenFEMA Disaster Declarations',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] OpenFEMA failed:', e.message); return null; }
+}
+
+// ── HUD Income Limits — Section 8 / LIHTC thresholds ─────────────────────────
+async function _rdFetchHUDIncome(stateAbbr) {
+  const token = (typeof window !== 'undefined' && window.HUD_TOKEN) ? window.HUD_TOKEN : null;
+  if (!token || !stateAbbr) return null;
+  const k = 'rdhudinc:'+stateAbbr;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    const url = `https://www.huduser.gov/hudapi/public/il/data/${stateAbbr}`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      signal: _rdAbortTimeout(10000),
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const data = d.data || d;
+    const result = {
+      state:                stateAbbr,
+      median_family_income: data.median_income || null,
+      low_income_4_person:  data.low?.l50_4 || data.l50_4 || null,
+      very_low_income_4p:   data.very_low?.l30_4 || data.l30_4 || null,
+      extremely_low_4p:     data.extremely_low?.l30_4 || null,
+      year:                 data.year || '2025',
+      source:               'HUD Income Limits 2025',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] HUD Income failed:', e.message); return null; }
+}
+
+// ── Census Building Permits Survey — recent residential permits ──────────────
+async function _rdFetchBuildingPermits(stateFips, countyFips) {
+  if (!stateFips || !countyFips) return null;
+  const k = `rdbps:${stateFips}${countyFips}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // Census BPS county-level annual; latest year typically year-1
+    const yr = new Date().getFullYear() - 1;
+    const url = `https://api.census.gov/data/timeseries/eits/bps?get=permits,units_total&for=county:${countyFips}&in=state:${stateFips}&time=${yr}`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (!d || d.length < 2) return null;
+    const row = d[1];
+    const result = {
+      permits_total:    parseInt(row[0]) || null,
+      units_total:      parseInt(row[1]) || null,
+      year:             yr,
+      source:           `Census BPS ${yr}`,
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] Building permits failed:', e.message); return null; }
+}
+
+// ── ACS Industry / Occupation mix (C24050, C24010) ──────────────────────────
+async function _rdFetchACSIndustryMix(zip) {
+  const k = 'rdacsim:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // C24050 Industry by occupation; pull total + top categories
+    // C24050_001 total, _002 ag/mining/construction, _003 manufacturing, _004 wholesale,
+    // _005 retail, _006 transport/util, _007 information, _008 finance, _009 prof/sci,
+    // _010 educational/health, _011 arts/entertainment, _012 other svc, _013 public admin
+    const vars = 'C24050_001E,C24050_005E,C24050_009E,C24050_010E,C24050_011E,B19301_001E';
+    // B19301_001E = per capita income
+    const url = `https://api.census.gov/data/2022/acs/acs5?get=${vars}&for=zip%20code%20tabulation%20area:${zip}`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (!d || d.length < 2) return null;
+    const row = d[1];
+    const total = parseInt(row[0]) || 0;
+    const retail = parseInt(row[1]) || 0;
+    const profsci = parseInt(row[2]) || 0;
+    const eduhealth = parseInt(row[3]) || 0;
+    const artsent = parseInt(row[4]) || 0;
+    const perCapInc = parseInt(row[5]) || null;
+    const pct = n => total > 0 ? Math.round(n / total * 1000) / 10 : null;
+    const result = {
+      total_workers:       total > 0 ? total : null,
+      retail_pct:          pct(retail),
+      prof_scientific_pct: pct(profsci),
+      edu_healthcare_pct:  pct(eduhealth),
+      arts_entertain_pct:  pct(artsent),
+      per_capita_income:   perCapInc,
+      source:              'ACS 5-Year 2022 (C24050, B19301)',
+      zip,
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] ACS industry mix failed:', e.message); return null; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // PHASE C — Provenance UI helpers
 // rdShowDataStatus()      → inject status strip after pipeline progress bar
 // rdRenderRealDataBadge() → inject verified-data card above any agent output
@@ -12102,6 +12321,12 @@ function rdShowDataStatus() {
     { key:'crime_city',      label:'FBI City',   icon:'🚔' },
     { key:'schools',         label:'NCES',       icon:'🎓' },
     { key:'acs_home_value',  label:'ACS HV',     icon:'🏡' },
+    // Phase G additions
+    { key:'cdc_svi',         label:'CDC SVI',    icon:'⚠' },
+    { key:'fema_disasters',  label:'FEMA Decl',  icon:'⛈' },
+    { key:'hud_income',      label:'HUD Inc',    icon:'💰' },
+    { key:'building_permits',label:'BPS',        icon:'🏗' },
+    { key:'acs_industry_mix',label:'ACS Ind',    icon:'🏭' },
   ];
   const loaded = badges.filter(b => d[b.key]);
   const failed = badges.filter(b => !d[b.key]);
@@ -12687,6 +12912,58 @@ function rdRenderFinancialBadge(elId) {
           aiFmt: _fmt(aiVac, '', ' listings'),
           acc: realFlag === aiFlag ? 0.9 : 0.5,
           source: 'HUD USPS',
+        });
+      }
+    }
+
+    // ══ Phase G: more verifier checks ══
+
+    // ── A1 building permits vs Census BPS ────────────────────────
+    const bps = R.real.building_permits;
+    if (bps && bps.permits_total && a1) {
+      const aiPermits = _get(a1, 'housing_market_summary.new_permits_issued_2023')
+                     || _get(a1, 'housing_market_summary.new_permits_issued');
+      if (aiPermits != null && aiPermits > 0) {
+        checks.push({
+          agent: 'A1', field: 'Annual Building Permits',
+          real: bps.permits_total, ai: aiPermits,
+          realFmt: _fmt(bps.permits_total),
+          aiFmt: _fmt(aiPermits),
+          acc: _acc(aiPermits, bps.permits_total),
+          source: 'Census BPS',
+        });
+      }
+    }
+
+    // ── A1 median family income vs HUD Income Limits ─────────────
+    const hudInc = R.real.hud_income;
+    if (hudInc && hudInc.median_family_income && a1) {
+      const aiMFI = _get(a1, 'metro_overview.median_family_income')
+                 || _get(a1, 'metro_overview.median_hh_income_metro');
+      if (aiMFI && aiMFI > 0) {
+        checks.push({
+          agent: 'A1', field: 'Median Family Income (state)',
+          real: hudInc.median_family_income, ai: aiMFI,
+          realFmt: _fmt(hudInc.median_family_income, '$'),
+          aiFmt: _fmt(aiMFI, '$'),
+          acc: _acc(aiMFI, hudInc.median_family_income),
+          source: 'HUD Income Limits',
+        });
+      }
+    }
+
+    // ── A1 per capita income vs ACS B19301 ───────────────────────
+    const acsIm = R.real.acs_industry_mix;
+    if (acsIm && acsIm.per_capita_income && a1) {
+      const aiPCI = _get(a1, 'metro_overview.per_capita_income');
+      if (aiPCI && aiPCI > 0) {
+        checks.push({
+          agent: 'A1', field: 'Per Capita Income',
+          real: acsIm.per_capita_income, ai: aiPCI,
+          realFmt: _fmt(acsIm.per_capita_income, '$'),
+          aiFmt: _fmt(aiPCI, '$'),
+          acc: _acc(aiPCI, acsIm.per_capita_income),
+          source: 'ACS B19301',
         });
       }
     }

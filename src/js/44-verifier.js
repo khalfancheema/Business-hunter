@@ -505,6 +505,58 @@
       }
     }
 
+    // ══ Phase G: more verifier checks ══
+
+    // ── A1 building permits vs Census BPS ────────────────────────
+    const bps = R.real.building_permits;
+    if (bps && bps.permits_total && a1) {
+      const aiPermits = _get(a1, 'housing_market_summary.new_permits_issued_2023')
+                     || _get(a1, 'housing_market_summary.new_permits_issued');
+      if (aiPermits != null && aiPermits > 0) {
+        checks.push({
+          agent: 'A1', field: 'Annual Building Permits',
+          real: bps.permits_total, ai: aiPermits,
+          realFmt: _fmt(bps.permits_total),
+          aiFmt: _fmt(aiPermits),
+          acc: _acc(aiPermits, bps.permits_total),
+          source: 'Census BPS',
+        });
+      }
+    }
+
+    // ── A1 median family income vs HUD Income Limits ─────────────
+    const hudInc = R.real.hud_income;
+    if (hudInc && hudInc.median_family_income && a1) {
+      const aiMFI = _get(a1, 'metro_overview.median_family_income')
+                 || _get(a1, 'metro_overview.median_hh_income_metro');
+      if (aiMFI && aiMFI > 0) {
+        checks.push({
+          agent: 'A1', field: 'Median Family Income (state)',
+          real: hudInc.median_family_income, ai: aiMFI,
+          realFmt: _fmt(hudInc.median_family_income, '$'),
+          aiFmt: _fmt(aiMFI, '$'),
+          acc: _acc(aiMFI, hudInc.median_family_income),
+          source: 'HUD Income Limits',
+        });
+      }
+    }
+
+    // ── A1 per capita income vs ACS B19301 ───────────────────────
+    const acsIm = R.real.acs_industry_mix;
+    if (acsIm && acsIm.per_capita_income && a1) {
+      const aiPCI = _get(a1, 'metro_overview.per_capita_income');
+      if (aiPCI && aiPCI > 0) {
+        checks.push({
+          agent: 'A1', field: 'Per Capita Income',
+          real: acsIm.per_capita_income, ai: aiPCI,
+          realFmt: _fmt(acsIm.per_capita_income, '$'),
+          aiFmt: _fmt(aiPCI, '$'),
+          acc: _acc(aiPCI, acsIm.per_capita_income),
+          source: 'ACS B19301',
+        });
+      }
+    }
+
     // ── Need at least 2 valid checks to display ──────────────────
     const valid = checks.filter(c => c.acc !== null && !isNaN(c.acc));
     if (valid.length < 2) {
