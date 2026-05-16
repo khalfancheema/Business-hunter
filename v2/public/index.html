@@ -10723,7 +10723,7 @@ Return ONLY this JSON:
 Include these metrics: Population, Children Under 5 / Primary Demographic, Median HH Income, Income Growth %, Dual-Income HH %, Competitor Count, Real Estate Cost, Opportunity Score (1-10).`;
 
   try {
-    const d = await claudeJSON(sys, usr);
+    const d = await claudeJSON(sys, usr, {webSearch:true});
     if (!d) throw new Error('No comparison data returned');
     renderZipComparisonPanel(d, zip1, zip2);
   } catch(e) {
