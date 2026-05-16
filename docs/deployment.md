@@ -89,17 +89,27 @@ netlify deploy --dir=public --prod
 
 ## Option 5: Vercel
 
+The live production deployment uses **v2** (`vercel.json` in repo root):
+
+```json
+{
+  "buildCommand": "node v2/build-v2.mjs",
+  "outputDirectory": "v2/public"
+}
+```
+
 1. Connect your GitHub repo to Vercel
-2. Set:
-```
-Framework preset: Other
-Output directory: public
-Build command:    node build.mjs
-```
+2. The `vercel.json` is auto-detected — no manual settings needed
 
 Or deploy with the CLI:
 ```bash
 vercel --prod
+```
+
+**To deploy v1 instead**, override in the Vercel dashboard:
+```
+Build command:    node build.mjs
+Output directory: public
 ```
 
 ---

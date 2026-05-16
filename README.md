@@ -215,6 +215,11 @@ Errors appear inline as red tips under each field. The pipeline will not launch 
 - **Optional-chaining guards** — all nested property accesses on AI output use optional chaining (`?.`) so missing fields render as empty strings rather than crashing the renderer
 - **Sub-agent null-coalesce** — Financial Feasibility sub-agent results (Revenue Model, Cost Model) are null-coalesced to `{}` before merging, so a partial API failure doesn't crash the consolidation step
 
+### 🔬 Real Data Pipeline
+Before any agent runs, `43-real-data.js` prefetches **17 live government APIs** — Census ACS, BLS QCEW, FRED, EIA, FEMA/NFIP, SBA FOIA, FBI CDE, CDC PLACES, Open-Meteo, OSM Overpass, OpenStreetMap NPI, and others — into `R.real`. The `buildRealDataCtx(keys)` function injects a verified block of real numbers directly into agent prompts, grounding AI outputs in authoritative data.
+
+After the pipeline completes, `44-verifier.js` cross-checks **15 specific fields** from AI outputs against `R.real` (median income, population, rents, competitor counts, SBA loan amounts, revenue projections, and more) and renders a scored accuracy card in the UI. A badge panel shows which data sources loaded successfully. If a source fails, the relevant agent falls back to live webSearch for that data category.
+
 ### 🏭 Dynamic Agent UI per Industry
 Every agent card subtitle updates automatically when you switch industry — no need to re-run:
 - **Agent 1** subtitle reflects the demographic focus (e.g. "Children Under 5 · Family Income" for Daycare, "Traffic Counts (AADT) · Vehicle Ownership" for Gas Station)
@@ -386,7 +391,15 @@ daycare-agent-system/
 │       ├── 37-runs.js          ← Persistent named pipeline runs (save/restore/delete)
 │       ├── 38-dag.js           ← Agent dependency graph (SVG DAG, live status)
 │       ├── 39-scenario.js      ← Interactive financial scenario builder (Agent 7)
-│       └── 40-local-guide.js   ← Ollama/local LLM guide + data freshness badges
+│       ├── 40-local-guide.js   ← Ollama/local LLM guide + data freshness badges
+│       ├── 41-agent-stress-guard.js ← Stress-guard: max_tokens truncation detection, JSON repair, retry
+│       ├── 43-real-data.js     ← Real data pipeline: prefetch 17 gov APIs → R.real; buildRealDataCtx()
+│       └── 44-verifier.js      ← Accuracy verifier: 15 cross-checks AI outputs vs R.real
+├── v2/
+│   ├── src/js/                 ← v2-only JS additions (v2-01-state.js … v2-16-free-apis.js)
+│   ├── public/
+│   │   └── index.html          ← v2 built output (current Vercel deployment target)
+│   └── build-v2.mjs            ← v2 build: concatenates src/js/ + v2/src/js/ → v2/public/index.html
 ├── test-all.mjs                ← 180-assertion test suite (Node.js, zero deps)
 ├── .claude/
 │   └── launch.json             ← Dev server configurations for preview_start
@@ -402,10 +415,15 @@ daycare-agent-system/
 ### Building from Source
 
 ```bash
-# Build (no npm install needed — zero dependencies)
+# v1 build (no npm install needed — zero dependencies)
 node build.mjs
+# → public/index.html
 # or
 npm run build
+
+# v2 build (uses both src/js/ and v2/src/js/)
+node v2/build-v2.mjs
+# → v2/public/index.html  (current Vercel deployment target)
 
 # Dev server options
 npm run serve      # npx serve public → http://localhost:8080
@@ -416,7 +434,7 @@ npm run dev        # build + serve in one step
 npm test           # 180 assertions, Node.js 18+
 ```
 
-The build script concatenates all 40 JS files and inlines the CSS into a single `public/index.html`. No bundler, no transpilation — just concatenation.
+The v1 build concatenates all JS files in `src/js/` and inlines the CSS into a single `public/index.html`. The v2 build additionally includes all files in `v2/src/js/` and outputs to `v2/public/index.html`. No bundler, no transpilation — just concatenation.
 
 ---
 

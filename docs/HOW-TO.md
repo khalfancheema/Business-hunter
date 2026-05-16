@@ -30,6 +30,7 @@
 22. [Understanding Data Quality & "N/A" Values](#22-understanding-data-quality--na-values)
 23. [Building from Source](#23-building-from-source)
 24. [Troubleshooting](#24-troubleshooting)
+25. [Real Data Accuracy Verification](#25-real-data-accuracy-verification)
 
 ---
 
@@ -695,3 +696,49 @@ Your browser is blocking the export window. Click the pop-up notification in the
 
 ### Data looks wrong / AI seems to be making things up
 Click **{ } Raw** on the agent — if you see `null` values for fields that should have data, the AI correctly admitted it couldn't find the information. If you see suspiciously specific numbers where you'd expect nulls, check the **Sources & Citations** agent (Agent 17) which will flag unsourced claims.
+
+---
+
+## 25. Real Data Accuracy Verification
+
+The system fetches live government data **before** any agent runs, grounding AI outputs in authoritative numbers.
+
+### How It Works
+
+Before the pipeline starts, `43-real-data.js` calls **17 government APIs** and stores results in `R.real`:
+
+| Source | What it provides |
+|--------|-----------------|
+| Census ACS | Population, income, age breakdown, households, owner/renter split, education |
+| BLS QCEW | Weekly wages by industry |
+| FRED | GDP growth, CPI, mortgage rates |
+| EIA Electric Power Monthly | Commercial & residential electricity rates |
+| FEMA/NFIP | Flood zone risk and claim history |
+| SBA FOIA | Loan counts, average amounts, approval rates |
+| FBI CDE | State violent crime rate |
+| CDC PLACES | Uninsured %, diabetes %, obesity % |
+| Open-Meteo | 20-year climate normals (temperature, precipitation) |
+| OSM Overpass | Nearby competitor counts |
+| OpenStreetMap NPI | Healthcare provider counts |
+
+The verified data is injected directly into agent prompts as a mandatory block — agents are instructed to use these exact numbers verbatim and cite each figure with its source tag.
+
+### Data Source Status Panel
+
+A badge panel in the UI shows which data sources loaded successfully for your ZIP and industry. Green = loaded, yellow = partial, red = failed (agent will use webSearch as fallback for that data category).
+
+### Accuracy Verifier
+
+After the pipeline completes, the accuracy verifier cross-checks **15 specific fields** from AI outputs against `R.real`:
+
+- **Agent 1:** median income vs Census ACS, population vs ACS, renter % vs ACS, bachelors+ % vs ACS B15003
+- **Agent 4:** rent/sqft vs Census gross rent
+- **Agent 6:** competitor count vs OSM Overpass
+- **Agent 7:** electricity rates vs EIA, SBA loan amount vs SBA FOIA, flood risk vs NFIP
+- **Cross-agent:** Agent 9 year-1 revenue vs Agent 7 base-case (should closely match)
+
+An accuracy score card renders in the UI after completion. Fields within tolerance show green; out-of-tolerance fields show orange with the expected vs. actual values. A passing score is 80%+.
+
+### When Data Sources Fail
+
+If a government API is unreachable (network error, service outage), the pipeline continues normally. Agents that would have used that source instead have `webSearch:true` passed to their API call, allowing them to retrieve similar data via Claude's web search tool.
