@@ -2,7 +2,7 @@ async function runAgent4(a3,a5) {
   setDot(4,'running');
   const ind=industry();
   const _rdCtx4 = (typeof buildRealDataCtx === 'function')
-    ? buildRealDataCtx(['rents','energy_rates','flood','demographics','hud_fmr','acs_expanded','rural_urban'])
+    ? buildRealDataCtx(['rents','energy_rates','flood','demographics','hud_fmr','acs_expanded','rural_urban','hud_vacancy','acs_home_value'])
     : '';
   const sys=`You are a commercial real estate analyst. Search LoopNet, BizBuySell, CoStar, Crexi, Zillow Commercial, and PropertyShark for real available listings. Always construct the most specific search URL possible with filters (city, sqft range, property type). Respond JSON only.`;
   const usr=(_rdCtx4 ? _rdCtx4 + '\n\n' : '') +

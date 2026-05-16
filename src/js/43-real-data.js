@@ -168,6 +168,18 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     (stateFips && countyFips) ? _rdFetchNDCP(stateFips, countyFips, industryKey) : Promise.resolve(null),
   ]);
 
+  // Phase F batch — separate await chain to keep Promise.allSettled positional aligned
+  const [
+    faraR, fredLocalR, hudVacR, fbiCityR, ncesR, acsHvR,
+  ] = await Promise.allSettled([
+    lat && lng ? _rdFetchUSDAFARA(lat, lng) : Promise.resolve(null),
+    (stateFips && countyFips) ? _rdFetchFREDLocal(stateFips, countyFips) : Promise.resolve(null),
+    _rdFetchHUDVacancy(zipCode),
+    city && stateAbbr ? _rdFetchFBICityCrime(city, stateAbbr) : Promise.resolve(null),
+    lat && lng ? _rdFetchNCESSchools(lat, lng) : Promise.resolve(null),
+    _rdFetchACSHomeValue(zipCode),
+  ]);
+
   const v = r => r.status === 'fulfilled' ? r.value : null;
 
   R.real = {
@@ -200,6 +212,13 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     cbp_county:       v(cbpR),
     bls_oes:          v(oesR),
     ndcp_county:      v(ndcpR),
+    // Phase F batch
+    food_access:      v(faraR),
+    local_unemp:      v(fredLocalR),
+    hud_vacancy:      v(hudVacR),
+    crime_city:       v(fbiCityR),
+    schools:          v(ncesR),
+    acs_home_value:   v(acsHvR),
   };
 
   // ── Phase D: Industry-specific APIs (healthcare NPI) ─────────
@@ -437,6 +456,53 @@ function buildRealDataCtx(keys) {
     if (n.median_preschool_center)  lines.push(`  median_preschool_center_monthly: $${n.median_preschool_center}`);
     if (n.median_school_age_center) lines.push(`  median_school_age_center_monthly: $${n.median_school_age_center}`);
     if (n.median_family_care)       lines.push(`  median_family_care_monthly: $${n.median_family_care}`);
+  }
+
+  // ── Phase F: more accuracy data ──────────────────────────────────────────
+  if (want('food_access') && d.food_access) {
+    const f = d.food_access;
+    lines.push(`🥕 USDA FOOD ACCESS [${f.source}]`);
+    lines.push(`  is_food_desert: ${f.is_food_desert}`);
+    lines.push(`  urban_tract: ${f.urban_flag}`);
+    if (f.low_access_pop_pct != null)    lines.push(`  low_access_pop_pct: ${f.low_access_pop_pct}%`);
+    if (f.low_vehicle_access_pct != null) lines.push(`  low_vehicle_access_pct: ${f.low_vehicle_access_pct}%`);
+    if (f.snap_households)               lines.push(`  snap_households_in_tract: ${f.snap_households.toLocaleString()}`);
+  }
+
+  if (want('local_unemp') && d.local_unemp) {
+    const u = d.local_unemp;
+    lines.push(`📉 LOCAL UNEMPLOYMENT [${u.source}]`);
+    lines.push(`  county_unemployment_rate: ${u.unemployment_rate}% (${u.period})`);
+  }
+
+  if (want('hud_vacancy') && d.hud_vacancy) {
+    const h = d.hud_vacancy;
+    lines.push(`🏚 HUD USPS VACANCY [${h.source}]`);
+    if (h.vacancy_pct_resid != null) lines.push(`  residential_vacancy_pct: ${h.vacancy_pct_resid}%`);
+    if (h.vacancy_pct_biz != null)   lines.push(`  business_vacancy_pct: ${h.vacancy_pct_biz}%`);
+  }
+
+  if (want('crime_city') && d.crime_city && d.crime_city.violent_per_100k != null) {
+    const cc = d.crime_city;
+    lines.push(`🚔 CITY-LEVEL CRIME [${cc.source} ${cc.year||''}]`);
+    lines.push(`  violent_crime_per_100k_city: ${cc.violent_per_100k} (${cc.city})`);
+    lines.push(`  agency: ${cc.agency}, population: ${cc.population.toLocaleString()}`);
+  }
+
+  if (want('schools') && d.schools) {
+    const s = d.schools;
+    lines.push(`🎓 NCES PUBLIC SCHOOLS [${s.source}]`);
+    lines.push(`  public_schools_within_5mi: ${s.total_public_schools_5mi}`);
+    if (s.elementary_count) lines.push(`  elementary: ${s.elementary_count}, middle: ${s.middle_count}, high: ${s.high_count}`);
+    if (s.total_enrollment) lines.push(`  total_enrollment_5mi: ${s.total_enrollment.toLocaleString()}`);
+    if (s.example_names.length) lines.push(`  examples: ${s.example_names.slice(0, 3).join(', ')}`);
+  }
+
+  if (want('acs_home_value') && d.acs_home_value) {
+    const hv = d.acs_home_value;
+    lines.push(`🏡 ACS HOUSING VALUE [${hv.source}]`);
+    if (hv.median_home_value)    lines.push(`  median_home_value: $${hv.median_home_value.toLocaleString()}`);
+    if (hv.median_monthly_costs) lines.push(`  median_monthly_housing_costs: $${hv.median_monthly_costs}`);
   }
 
   lines.push('══ END REAL DATA — cite each figure with its bracketed source tag ══\n');
@@ -1261,6 +1327,185 @@ async function _rdFetchNDCP(stateFips, countyFips, industryKey) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// PHASE F — ACCURACY UPGRADE BATCH 2 (added 2026-05-16)
+// More free sources, no new auth required
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── USDA FARA — Food Access Research Atlas (food desert flag) ────────────────
+async function _rdFetchUSDAFARA(lat, lng) {
+  if (!lat || !lng) return null;
+  const k = `rdfara:${lat.toFixed(3)}:${lng.toFixed(3)}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // FARA 2019 layer hosted by USDA ERS — point-in-polygon query
+    const url = `https://gisportal.ers.usda.gov/server/rest/services/FoodAccessResearchAtlas/FARA_2019/MapServer/0/query?geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const a = d.features?.[0]?.attributes;
+    if (!a) return null;
+    const result = {
+      tract_fips:        a.CensusTract || a.TractFIPS,
+      is_food_desert:    a.LILATracts_1And10 === 1 || a.LILATracts_halfAnd10 === 1,
+      low_income_low_access: a.LILATracts_1And10 === 1,
+      low_access_pop_pct:  a.lapophalfshare != null ? Math.round(a.lapophalfshare * 10) / 10 : null,
+      snap_households:    a.TractSNAP,
+      low_vehicle_access_pct: a.lalowihalfshare != null ? Math.round(a.lalowihalfshare * 10) / 10 : null,
+      urban_flag:         a.Urban === 1,
+      source:             'USDA FARA 2019',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] USDA FARA failed:', e.message); return null; }
+}
+
+// ── FRED LAUC — Local Area Unemployment by county ────────────────────────────
+async function _rdFetchFREDLocal(stateFips, countyFips) {
+  if (!stateFips || !countyFips) return null;
+  const fips = `${stateFips}${countyFips}`;
+  const k = 'rdfredl:'+fips;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  const fredKey = (typeof window !== 'undefined' && window.FRED_API_KEY) ? window.FRED_API_KEY : null;
+  if (!fredKey) return null;
+  try {
+    // LAUCN{fips}0000000003 = unemployment rate, LAUCN{fips}0000000005 = civilian labor force
+    const series = `LAUCN${fips}0000000003`;
+    const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${series}&api_key=${fredKey}&file_type=json&sort_order=desc&limit=1`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const obs = d.observations?.[0];
+    if (!obs || obs.value === '.') return null;
+    const result = {
+      unemployment_rate: parseFloat(obs.value),
+      period:            obs.date,
+      county_fips:       fips,
+      source:            'FRED LAUS (county-level BLS)',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] FRED local failed:', e.message); return null; }
+}
+
+// ── HUD USPS Vacancy Crosswalk ───────────────────────────────────────────────
+async function _rdFetchHUDVacancy(zip) {
+  if (!zip) return null;
+  const token = (typeof window !== 'undefined' && window.HUD_TOKEN) ? window.HUD_TOKEN : null;
+  if (!token) return null;
+  const k = 'rdhudvac:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // USPS Vacancy data via HUD; type=1 = ZIP→county crosswalk with vacancy
+    const url = `https://www.huduser.gov/hudapi/public/usps?type=1&query=${zip}&year=2024&quarter=4`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      signal: _rdAbortTimeout(10000),
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const data = d.data?.results?.[0] || d.results?.[0];
+    if (!data) return null;
+    const result = {
+      total_residential:   parseInt(data.res || data.tot_ratio) || null,
+      total_business:      parseInt(data.bus || data.bus_ratio) || null,
+      residential_vacant:  parseFloat(data.vac_3_res) || null,
+      business_vacant:     parseFloat(data.vac_3_bus) || null,
+      vacancy_pct_resid:   data.vac_3_res != null ? Math.round(parseFloat(data.vac_3_res) * 1000) / 10 : null,
+      vacancy_pct_biz:     data.vac_3_bus != null ? Math.round(parseFloat(data.vac_3_bus) * 1000) / 10 : null,
+      source:              'HUD USPS Crosswalk Q4 2024',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] HUD vacancy failed:', e.message); return null; }
+}
+
+// ── FBI city-level violent crime ─────────────────────────────────────────────
+async function _rdFetchFBICityCrime(city, stateAbbr) {
+  if (!city || !stateAbbr) return null;
+  const k = `rdfbic:${stateAbbr}:${city}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // FBI CDE agency-level endpoint by state — find matching ORI
+    const url = `https://cde.ucr.cjis.gov/LATEST/webapp/public/api/data/summary/agencies/${stateAbbr}?from=2022&to=2022`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const agencies = Array.isArray(d) ? d : (d.data || []);
+    const cityNorm = city.toLowerCase().replace(/\s+(city|town|village)$/i, '').trim();
+    const match = agencies.find(a => {
+      const n = (a.agency_name || a.ori_name || '').toLowerCase();
+      return n.includes(cityNorm) && /police|sheriff|dept/i.test(n);
+    });
+    if (!match) return null;
+    const pop = match.population || 1;
+    const vc  = match.violent_crime || match.actual_violent || 0;
+    const result = {
+      city:             city,
+      state:            stateAbbr,
+      violent_per_100k: vc ? Math.round(vc / pop * 100000) : null,
+      year:             match.data_year || 2022,
+      population:       pop,
+      agency:           match.agency_name || match.ori_name,
+      source:           'FBI CDE (city)',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] FBI city crime failed:', e.message); return null; }
+}
+
+// ── NCES Schools by location (within radius) ─────────────────────────────────
+async function _rdFetchNCESSchools(lat, lng) {
+  if (!lat || !lng) return null;
+  const k = `rdnces:${lat.toFixed(3)}:${lng.toFixed(3)}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // NCES EDGE ArcGIS REST service — public schools layer; 5-mile buffer
+    // Public Schools Composite layer ID may vary; use SDE schools layer
+    const url = `https://services1.arcgis.com/Ua5sjt3LWTPigjyD/arcgis/rest/services/Public_School_Locations_Current/FeatureServer/0/query?geometry=${lng},${lat}&geometryType=esriGeometryPoint&distance=8047&units=esriSRUnit_Meter&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=NAME,SCH_NAME,LEVEL,ENROLLMENT&returnGeometry=false&f=json&resultRecordCount=15`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const feats = d.features || [];
+    if (!feats.length) return null;
+    const schools = feats.map(f => f.attributes || {});
+    const elementary = schools.filter(s => /elem|primary/i.test(s.LEVEL || ''));
+    const middle     = schools.filter(s => /mid/i.test(s.LEVEL || ''));
+    const high       = schools.filter(s => /high|secondary/i.test(s.LEVEL || ''));
+    const totalEnroll = schools.reduce((s, x) => s + (parseInt(x.ENROLLMENT) || 0), 0);
+    const result = {
+      total_public_schools_5mi: schools.length,
+      elementary_count:    elementary.length,
+      middle_count:        middle.length,
+      high_count:          high.length,
+      total_enrollment:    totalEnroll,
+      example_names:       schools.slice(0, 5).map(s => s.SCH_NAME || s.NAME).filter(Boolean),
+      source:              'NCES EDGE Public School Locations',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] NCES schools failed:', e.message); return null; }
+}
+
+// ── Census ACS Home Value (B25077) — supplements existing ACS Expanded ──────
+async function _rdFetchACSHomeValue(zip) {
+  const k = 'rdacshv:'+zip;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    // B25077_001E = median value of owner-occupied housing units
+    // B25104_001E = monthly housing costs (median) — owner+renter combined
+    const url = `https://api.census.gov/data/2022/acs/acs5?get=B25077_001E,B25104_001E,B25088_001E&for=zip%20code%20tabulation%20area:${zip}`;
+    const res = await fetch(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (!d || d.length < 2) return null;
+    const row = d[1];
+    const result = {
+      median_home_value:        parseInt(row[0]) || null,
+      median_monthly_costs:     parseInt(row[1]) || null,
+      median_mortgage_payment:  parseInt(row[2]) || null,
+      source:                   'ACS 5-Year 2022 (B25077, B25104, B25088)',
+      zip,
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] ACS home value failed:', e.message); return null; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // PHASE C — Provenance UI helpers
 // rdShowDataStatus()      → inject status strip after pipeline progress bar
 // rdRenderRealDataBadge() → inject verified-data card above any agent output
@@ -1296,6 +1541,13 @@ function rdShowDataStatus() {
     { key:'cbp_county',      label:'CBP',        icon:'🏢' },
     { key:'bls_oes',         label:'BLS OES',    icon:'💵' },
     { key:'ndcp_county',     label:'NDCP',       icon:'👶' },
+    // Phase F additions
+    { key:'food_access',     label:'FARA',       icon:'🥕' },
+    { key:'local_unemp',     label:'LAUS',       icon:'📉' },
+    { key:'hud_vacancy',     label:'USPS Vac',   icon:'🏚' },
+    { key:'crime_city',      label:'FBI City',   icon:'🚔' },
+    { key:'schools',         label:'NCES',       icon:'🎓' },
+    { key:'acs_home_value',  label:'ACS HV',     icon:'🏡' },
   ];
   const loaded = badges.filter(b => d[b.key]);
   const failed = badges.filter(b => !d[b.key]);

@@ -429,6 +429,82 @@
       }
     }
 
+    // ══ Phase F: more verifier checks ══
+
+    // ── A1 county unemployment vs FRED LAUS ──────────────────────
+    const localUnemp = R.real.local_unemp;
+    if (localUnemp && localUnemp.unemployment_rate != null && a1) {
+      const aiCountyUnemp = _get(a1, 'metro_overview.unemployment_rate_pct');
+      if (aiCountyUnemp != null) {
+        checks.push({
+          agent: 'A1', field: 'County Unemployment',
+          real: localUnemp.unemployment_rate, ai: aiCountyUnemp,
+          realFmt: _fmt(localUnemp.unemployment_rate, '', '%'),
+          aiFmt: _fmt(aiCountyUnemp, '', '%'),
+          acc: _accRate(aiCountyUnemp, localUnemp.unemployment_rate, 2),
+          source: 'FRED LAUS',
+        });
+      }
+    }
+
+    // ── A1 median home value vs ACS B25077 ───────────────────────
+    const acsHv = R.real.acs_home_value;
+    if (acsHv && acsHv.median_home_value && a1) {
+      const aiHv = _get(a1, 'housing_market_summary.median_home_value');
+      if (aiHv && aiHv > 0) {
+        checks.push({
+          agent: 'A1', field: 'Median Home Value',
+          real: acsHv.median_home_value, ai: aiHv,
+          realFmt: _fmt(acsHv.median_home_value, '$'),
+          aiFmt: _fmt(aiHv, '$'),
+          acc: _acc(aiHv, acsHv.median_home_value),
+          source: 'ACS B25077',
+        });
+      }
+    }
+
+    // ── A3 schools near sites vs NCES ────────────────────────────
+    const schools = R.real.schools;
+    const a3v = R.a3;
+    if (schools && schools.total_public_schools_5mi > 0 && a3v) {
+      const locs = a3v.locations || [];
+      const loc0 = locs[0] || {};
+      const aiSchools = loc0.schools_within_2mi || loc0.nearby_school_count;
+      if (aiSchools && aiSchools > 0) {
+        // NCES is 5mi count; AI usually reports 2mi — scale: 2mi ≈ 16% of 5mi area
+        const scaled = schools.total_public_schools_5mi * 0.4;
+        checks.push({
+          agent: 'A3', field: 'Schools Within Radius',
+          real: scaled, ai: aiSchools,
+          realFmt: _fmt(scaled, '', ' (NCES scaled)'),
+          aiFmt: _fmt(aiSchools, '', ' (AI 2mi)'),
+          acc: Math.max(0, 1 - Math.abs(aiSchools - scaled) / Math.max(scaled, 1) / 2),
+          source: 'NCES',
+        });
+      }
+    }
+
+    // ── A4 vacancy vs HUD USPS ───────────────────────────────────
+    const hudVac = R.real.hud_vacancy;
+    if (hudVac && hudVac.vacancy_pct_biz != null && a4v) {
+      const c0v = (a4v.by_city_summary || [])[0] || {};
+      const aiVac = c0v.available_listings_est;
+      if (aiVac != null && aiVac > 0 && hudVac.vacancy_pct_biz > 0) {
+        // Loose comparison: AI listings count vs HUD business vacancy %
+        // Just check that both signal non-zero availability in same direction
+        const realFlag = hudVac.vacancy_pct_biz >= 5 ? 'available' : 'tight';
+        const aiFlag   = aiVac >= 10 ? 'available' : 'tight';
+        checks.push({
+          agent: 'A4', field: 'Property Availability',
+          real: hudVac.vacancy_pct_biz, ai: aiVac,
+          realFmt: _fmt(hudVac.vacancy_pct_biz, '', '% biz vacant'),
+          aiFmt: _fmt(aiVac, '', ' listings'),
+          acc: realFlag === aiFlag ? 0.9 : 0.5,
+          source: 'HUD USPS',
+        });
+      }
+    }
+
     // ── Need at least 2 valid checks to display ──────────────────
     const valid = checks.filter(c => c.acc !== null && !isNaN(c.acc));
     if (valid.length < 2) {

@@ -2,7 +2,7 @@ async function runAgent3(a1,a2,a5) {
   setDot(3,'running');
   const ind=industry();
   const _rdCtx3 = (typeof buildRealDataCtx === 'function')
-    ? buildRealDataCtx(['demographics','business_density','competitors_osm','rents','crime','acs_expanded','rural_urban','hud_fmr'])
+    ? buildRealDataCtx(['demographics','business_density','competitors_osm','rents','crime','acs_expanded','rural_urban','hud_fmr','food_access','schools','crime_city','hud_vacancy','acs_home_value'])
     : '';
   const sys=`You are a ${ind.unit} site selection consultant with deep knowledge of demographics, zoning, and real estate. You cite specific data sources. Respond JSON only.`;
   const usr=(_rdCtx3 ? _rdCtx3 + '\n\n' : '') +
