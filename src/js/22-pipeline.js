@@ -20,6 +20,18 @@ async function runPipeline() {
     // Fires all free-API calls BEFORE agents start so every prompt
     // gets real Census/BLS/OSM/Grants data injected verbatim.
     if (typeof prefetchRealData === 'function' && !demoMode) {
+      // One-time nudge: if the user hasn't supplied a Census API key, the entire
+      // ACS demographics layer (the foundation of the pipeline) silently fails.
+      // Surface a non-blocking warning the FIRST time the pipeline runs without it.
+      try {
+        if (!window.CENSUS_API_KEY && !localStorage.getItem('bh:censusKeyDismissed')) {
+          const banner = document.createElement('div');
+          banner.style.cssText = 'background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px;color:#fca5a5;display:flex;gap:10px;align-items:center';
+          banner.innerHTML = `<span style="font-size:18px">🚨</span><div style="flex:1"><strong>Census API key not set.</strong> Demographics, business density, building permits, and 7 other foundational sources will be skipped. Get a free key in ~30 seconds at <a href="https://api.census.gov/data/key_signup.html" target="_blank" rel="noopener" style="color:#fca5a5;text-decoration:underline">api.census.gov</a>, then paste it below.</div><button onclick="rdShowApiKeysPanel && rdShowApiKeysPanel()" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Add Key</button><button onclick="localStorage.setItem('bh:censusKeyDismissed','1');this.parentElement.remove()" style="background:transparent;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 10px;border-radius:5px;font-size:11px;cursor:pointer">Skip</button>`;
+          const anchor = document.getElementById('progressText')?.parentElement || document.getElementById('progressRow');
+          if (anchor) anchor.parentElement && anchor.parentElement.insertBefore(banner, anchor);
+        }
+      } catch {}
       setProgress(2, 'Prefetching real data (Census · BLS · OSM · Grants.gov · FEMA)…');
       try {
         await prefetchRealData(zip(), industryKey(), capacity(), budget());
