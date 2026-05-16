@@ -3169,8 +3169,12 @@ function closeGapDetail() {
 async function runAgent3(a1,a2,a5) {
   setDot(3,'running');
   const ind=industry();
+  const _rdCtx3 = (typeof buildRealDataCtx === 'function')
+    ? buildRealDataCtx(['demographics','business_density','competitors_osm','rents','crime'])
+    : '';
   const sys=`You are a ${ind.unit} site selection consultant with deep knowledge of demographics, zoning, and real estate. You cite specific data sources. Respond JSON only.`;
-  const usr=`Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
+  const usr=(_rdCtx3 ? _rdCtx3 + '\n\n' : '') +
+  `Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
 DEMOGRAPHICS: ${ctx(a1,['summary','cities'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
@@ -3203,7 +3207,7 @@ Return ONLY:
 }`;
   try {
     _setDemoKey(3);
-    let d=await claudeJSON(sys,usr);
+    let d=await claudeJSON(sys, usr, {webSearch:true});
     if(!d) { console.warn('Agent 3 fallback'); d=getFallback3(); }
     R.a3=d;
     $('3-s-t').textContent=d.summary||'';
@@ -3306,8 +3310,12 @@ Return ONLY:
 async function runAgent4(a3,a5) {
   setDot(4,'running');
   const ind=industry();
+  const _rdCtx4 = (typeof buildRealDataCtx === 'function')
+    ? buildRealDataCtx(['rents','energy_rates','flood','demographics'])
+    : '';
   const sys=`You are a commercial real estate analyst. Search LoopNet, BizBuySell, CoStar, Crexi, Zillow Commercial, and PropertyShark for real available listings. Always construct the most specific search URL possible with filters (city, sqft range, property type). Respond JSON only.`;
-  const usr=`Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}, sqft needed: ${ind.real_estate}) near ZIP ${zip()}.
+  const usr=(_rdCtx4 ? _rdCtx4 + '\n\n' : '') +
+  `Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}, sqft needed: ${ind.real_estate}) near ZIP ${zip()}.
 
 CRITICAL: For each listing, try to find the ACTUAL listing URL (e.g. https://www.loopnet.com/listing/123-main-st/12345678/). If you find a specific listing, use that URL. If not, construct the most filtered search URL possible.
 
@@ -3360,7 +3368,7 @@ Return ONLY:
 }`;
   try {
     _setDemoKey(4);
-    let d=await claudeJSON(sys,usr);
+    let d=await claudeJSON(sys, usr, {webSearch:true});
     if(!d) { console.warn('Agent 4 fallback'); d=getFallback4(); }
     R.a4=d;
     $('4-s-t').textContent=d.summary+'\n\nSearch links: LoopNet · BizBuySell · Crexi · CoStar';

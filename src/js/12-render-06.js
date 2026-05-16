@@ -1,8 +1,12 @@
 async function runAgent4(a3,a5) {
   setDot(4,'running');
   const ind=industry();
+  const _rdCtx4 = (typeof buildRealDataCtx === 'function')
+    ? buildRealDataCtx(['rents','energy_rates','flood','demographics'])
+    : '';
   const sys=`You are a commercial real estate analyst. Search LoopNet, BizBuySell, CoStar, Crexi, Zillow Commercial, and PropertyShark for real available listings. Always construct the most specific search URL possible with filters (city, sqft range, property type). Respond JSON only.`;
-  const usr=`Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}, sqft needed: ${ind.real_estate}) near ZIP ${zip()}.
+  const usr=(_rdCtx4 ? _rdCtx4 + '\n\n' : '') +
+  `Search for commercial real estate listings suitable for a ${ind.unit} (capacity: ${capacity()}, sqft needed: ${ind.real_estate}) near ZIP ${zip()}.
 
 CRITICAL: For each listing, try to find the ACTUAL listing URL (e.g. https://www.loopnet.com/listing/123-main-st/12345678/). If you find a specific listing, use that URL. If not, construct the most filtered search URL possible.
 
@@ -55,7 +59,7 @@ Return ONLY:
 }`;
   try {
     _setDemoKey(4);
-    let d=await claudeJSON(sys,usr);
+    let d=await claudeJSON(sys, usr, {webSearch:true});
     if(!d) { console.warn('Agent 4 fallback'); d=getFallback4(); }
     R.a4=d;
     $('4-s-t').textContent=d.summary+'\n\nSearch links: LoopNet · BizBuySell · Crexi · CoStar';

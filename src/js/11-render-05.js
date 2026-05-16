@@ -1,8 +1,12 @@
 async function runAgent3(a1,a2,a5) {
   setDot(3,'running');
   const ind=industry();
+  const _rdCtx3 = (typeof buildRealDataCtx === 'function')
+    ? buildRealDataCtx(['demographics','business_density','competitors_osm','rents','crime'])
+    : '';
   const sys=`You are a ${ind.unit} site selection consultant with deep knowledge of demographics, zoning, and real estate. You cite specific data sources. Respond JSON only.`;
-  const usr=`Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
+  const usr=(_rdCtx3 ? _rdCtx3 + '\n\n' : '') +
+  `Recommend the top 5 specific locations for a ${ind.unit} (${ind.capacity_label}: ${capacity()}, budget $${parseInt(budget()).toLocaleString()}) within ${radius()} miles of ZIP ${zip()}.
 
 DEMOGRAPHICS: ${ctx(a1,['summary','cities'],1000)}
 GAP ANALYSIS: ${ctx(a2,['summary','cities','overall_opportunity_score'])}
@@ -35,7 +39,7 @@ Return ONLY:
 }`;
   try {
     _setDemoKey(3);
-    let d=await claudeJSON(sys,usr);
+    let d=await claudeJSON(sys, usr, {webSearch:true});
     if(!d) { console.warn('Agent 3 fallback'); d=getFallback3(); }
     R.a3=d;
     $('3-s-t').textContent=d.summary||'';
