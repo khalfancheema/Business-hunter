@@ -73,10 +73,31 @@ const css = CSS_FILES.map(f => readFileSync(f, 'utf8')).join('\n');
 // Use a function as the replacement to avoid special $-patterns in String.replace
 html = html.replace('<!-- BUILD:CSS -->', () => `<style>\n${css}\n</style>`);
 
-// Inline JS — local-keys.js loaded FIRST if present (gitignored personal keys)
+// API key injection — three sources, in priority order:
+//   1. process.env.<KEY>  (Vercel env vars / CI — for hosted deploys)
+//   2. src/js/local-keys.js (gitignored — for local dev)
+//   3. nothing (user pastes via in-app 🔑 button — localStorage fallback)
+const KEY_NAMES = [
+  'CENSUS_API_KEY','HUD_TOKEN','BEA_API_KEY','NOAA_TOKEN',
+  'AIRNOW_API_KEY','BLS_API_KEY','FRED_API_KEY','SAM_API_KEY',
+  'NREL_API_KEY','FBI_API_KEY',
+];
+const envKeys = Object.fromEntries(
+  KEY_NAMES.filter(n => process.env[n]).map(n => [n, process.env[n]])
+);
+let envInjection = '';
+if (Object.keys(envKeys).length) {
+  const lines = Object.entries(envKeys)
+    .map(([k, v]) => `  window.${k} = ${JSON.stringify(v)};`)
+    .join('\n');
+  envInjection = `// ── Injected from process.env at build time (Vercel) ──\nif (typeof window !== 'undefined') {\n${lines}\n}\n`;
+  console.log(`  → injected ${Object.keys(envKeys).length} key${Object.keys(envKeys).length===1?'':'s'} from process.env`);
+}
+
 const LOCAL_KEYS = 'src/js/local-keys.js';
 const ALL_JS_FILES = existsSync(LOCAL_KEYS) ? [LOCAL_KEYS, ...JS_FILES] : JS_FILES;
-const js = ALL_JS_FILES.map(f => readFileSync(f, 'utf8')).join('\n\n');
+const jsBody = ALL_JS_FILES.map(f => readFileSync(f, 'utf8')).join('\n\n');
+const js = envInjection + jsBody;
 html = html.replace('<!-- BUILD:JS -->', () => `<script>\n${js}\n</script>`);
 if (existsSync(LOCAL_KEYS)) console.log(`  → injected local-keys.js (gitignored)`);
 
