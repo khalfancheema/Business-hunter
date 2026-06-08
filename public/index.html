@@ -2403,6 +2403,36 @@ function _bhComputeProductionScorecard() {
   return scorecard;
 }
 
+function _bhBuildEvidenceLedger() {
+  if (typeof R !== 'object' || !R) return [];
+  const rows = [];
+  (R.accuracy?.checks || []).forEach(c => {
+    rows.push({
+      type: 'verifier_check',
+      agent: c.agent || 'Data',
+      field: c.field,
+      ai_value: c.ai,
+      verified_value: c.real,
+      match_pct: c.acc == null ? null : Math.round(c.acc * 100),
+      source: c.source || null,
+      match_type: c.match_type || null,
+    });
+  });
+  (R.a17?.data_sources || []).forEach(s => {
+    rows.push({
+      type: 'declared_source',
+      agent: s.agent || null,
+      field: s.data_used || s.category || null,
+      source: s.source || null,
+      source_url: s.url || null,
+      reliability: s.reliability || null,
+      last_updated: s.last_updated || null,
+    });
+  });
+  R.evidence_ledger = rows;
+  return rows;
+}
+
 function _bhProductionBlockers() {
   const blockers = [];
   const warnings = [];
@@ -2424,9 +2454,16 @@ function _bhProductionBlockers() {
   const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
   if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
   if (!hasRealData && (R.a1 || R.a2) && (score === undefined || score === null)) warnings.push('No verified real-data score was available for this run.');
+  const buckets = R.accuracy?.buckets || {};
+  if (hasRealData && (buckets.exact || 0) < 5) blockers.push(`Accuracy verifier has only ${buckets.exact || 0} exact-match checks; production requires at least 5.`);
+  const checkedAgents = Array.isArray(R.accuracy?.agents_checked) ? R.accuracy.agents_checked : [];
+  const missingCritical = ['A1','A2','A4','A6','A7'].filter(a => !checkedAgents.includes(a));
+  if (hasRealData && missingCritical.length) blockers.push(`Accuracy verifier did not cover critical agent(s): ${missingCritical.join(', ')}.`);
 
   const unsourced = Array.isArray(R.a17?.unable_to_source) ? R.a17.unable_to_source.length : 0;
   if (unsourced) blockers.push(`${unsourced} claim(s) remain unsourced in Agent 17.`);
+  const ledger = _bhBuildEvidenceLedger();
+  if (hasRealData && ledger.length < 10) blockers.push(`Evidence ledger has only ${ledger.length} row(s); production requires at least 10 verifier/source entries.`);
 
   const scorecard = _bhComputeProductionScorecard();
   if (!scorecard || scorecard.overall == null) blockers.push('Deterministic production scorecard could not be computed from verified agent evidence.');
@@ -14898,6 +14935,7 @@ function rdRenderFinancialBadge(elId) {
 
     // Headline = strict if enough exact checks, else normal
     const pct = (buckets.exact.length >= 3 ? strictPct : normalPct) ?? broadPct ?? 0;
+    const agentsChecked = [...new Set(valid.map(c => c.agent).filter(a => /^A\d+/.test(a || '')))].sort((a,b) => parseInt(a.slice(1),10) - parseInt(b.slice(1),10));
 
     R.accuracy = {
       score: pct,
@@ -14909,6 +14947,7 @@ function rdRenderFinancialBadge(elId) {
       fallback_agents: fallbackAgents,
       dropped_checks:  droppedFallback,
       buckets: Object.fromEntries(Object.entries(buckets).map(([k,v])=>[k,v.length])),
+      agents_checked: agentsChecked,
     };
     if (typeof _bhRecordAccuracyFeedback === 'function') {
       try {

@@ -154,7 +154,7 @@ When a phase is skipped, downstream agents receive context from cached `R` data 
 - **Sequential phases** — phases 2–8, 11, 12 run in sequence; each depends on previous phase outputs
 - **Error isolation** — each agent is wrapped in `try/catch`; failures use `getFallback(n)`, are written to `R.aN`, marked as fallback output, and blocked from downstream dependency use unless Demo Mode is active
 - **Self-learning feedback** — `_bhRecordAgentFeedback()` stores schema, source, and verifier lessons in `R.agent_feedback` plus industry-scoped localStorage memory; `_bhBuildAgentRepairContext()` injects exact verifier failures back into the next run of that agent
-- **Production safety gate** — after Agent 17 and the verifier run, `_bhApplyProductionSafetyGate()` checks fallbacks, schema feedback, a strict 95% verifier target, claim sourcing, unsourced claims, and deterministic scorecard agreement; unsafe Go-style verdicts are downgraded to `Needs Review`
+- **Production safety gate** — after Agent 17 and the verifier run, `_bhApplyProductionSafetyGate()` checks fallbacks, schema feedback, a strict 95% verifier target, minimum exact-check coverage, critical-agent coverage, claim sourcing, unsourced claims, evidence-ledger size, and deterministic scorecard agreement; unsafe Go-style verdicts are downgraded to `Needs Review`
 
 ---
 
@@ -285,7 +285,7 @@ This single injection covers all fixed agent calls through `agentNum` options. `
 - A7: electricity costs vs EIA, SBA loan amounts vs SBA FOIA, flood risk vs NFIP
 - Cross-agent: A9 year-1 revenue consistency vs A7 base-case
 
-If the first verifier pass is below 95%, `_bhRunAccuracyRepairPass()` reruns the affected agents once with exact failed checks injected as repair context, then reruns the verifier and production safety gate. `_bhComputeProductionScorecard()` also derives a deterministic weighted evidence score across demand, competition, compliance, real estate, capital, and execution risk so the final model verdict cannot override contradictory evidence.
+If the first verifier pass is below 95%, `_bhRunAccuracyRepairPass()` reruns the affected agents once with exact failed checks injected as repair context, then reruns the verifier and production safety gate. `_bhBuildEvidenceLedger()` records verifier checks and Agent 17 declared sources into `R.evidence_ledger`, and production readiness requires enough exact checks plus coverage of critical agents A1, A2, A4, A6, and A7. `_bhComputeProductionScorecard()` also derives a deterministic weighted evidence score across demand, competition, compliance, real estate, capital, and execution risk so the final model verdict cannot override contradictory evidence.
 
 ---
 

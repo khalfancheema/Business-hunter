@@ -737,7 +737,7 @@ After the pipeline completes, the accuracy verifier cross-checks specific fields
 - **Agent 7:** electricity rates vs EIA, SBA loan amount vs SBA FOIA, flood risk vs NFIP
 - **Cross-agent:** Agent 9 year-1 revenue vs Agent 7 base-case (should closely match)
 
-An accuracy score card renders in the UI after completion. Fields at 95%+ show green, 85-94% is review-grade, and anything below 85% fails the production gate. If the first verifier pass is below 95%, the pipeline reruns affected agents once with the exact failed fields injected as repair feedback, then reruns the verifier and production safety gate.
+An accuracy score card renders in the UI after completion. Fields at 95%+ show green, 85-94% is review-grade, and anything below 85% fails the production gate. Production readiness also requires at least 5 exact-match checks, coverage of critical agents A1/A2/A4/A6/A7, and at least 10 evidence-ledger rows from verifier checks or declared sources. If the first verifier pass is below 95%, the pipeline reruns affected agents once with the exact failed fields injected as repair feedback, then reruns the verifier and production safety gate.
 
 ### When Data Sources Fail
 

@@ -701,6 +701,7 @@
 
     // Headline = strict if enough exact checks, else normal
     const pct = (buckets.exact.length >= 3 ? strictPct : normalPct) ?? broadPct ?? 0;
+    const agentsChecked = [...new Set(valid.map(c => c.agent).filter(a => /^A\d+/.test(a || '')))].sort((a,b) => parseInt(a.slice(1),10) - parseInt(b.slice(1),10));
 
     R.accuracy = {
       score: pct,
@@ -712,6 +713,7 @@
       fallback_agents: fallbackAgents,
       dropped_checks:  droppedFallback,
       buckets: Object.fromEntries(Object.entries(buckets).map(([k,v])=>[k,v.length])),
+      agents_checked: agentsChecked,
     };
     if (typeof _bhRecordAccuracyFeedback === 'function') {
       try {

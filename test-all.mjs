@@ -386,6 +386,14 @@ test('production gate uses deterministic scorecard and claim citations', () => {
   assert.ok(API_SRC.includes('R.production_scorecard = scorecard'));
   assert.ok(API_SRC.includes('deterministic_weighted_evidence_v1'));
 });
+test('production gate requires verifier coverage and evidence ledger', () => {
+  assert.ok(API_SRC.includes('function _bhBuildEvidenceLedger('));
+  assert.ok(API_SRC.includes('R.evidence_ledger = rows'));
+  assert.ok(API_SRC.includes('production requires at least 5'));
+  assert.ok(API_SRC.includes("['A1','A2','A4','A6','A7']"));
+  assert.ok(API_SRC.includes('production requires at least 10 verifier/source entries'));
+  assert.ok(VERIFIER_SRC.includes('agents_checked: agentsChecked'));
+});
 test('cache distinguishes validated agent outputs and repair context', () => {
   const CACHE_SRC = readFileSync('src/js/02-cache.js', 'utf8');
   assert.ok(CACHE_SRC.includes("CACHE_SCHEMA_VERSION = '3'"));
