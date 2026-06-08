@@ -152,7 +152,9 @@ When a phase is skipped, downstream agents receive context from cached `R` data 
 - **Structured JSON** — all agents emit and consume JSON; no free-text context passing
 - **Parallel execution** — `Promise.allSettled()` for Phase 1 (agents 1+5+6) and Phase 9 (agents 11+12+13+16)
 - **Sequential phases** — phases 2–8, 11, 12 run in sequence; each depends on previous phase outputs
-- **Error isolation** — each agent is wrapped in `try/catch`; failures use `getFallback(n)` and don't halt the pipeline
+- **Error isolation** — each agent is wrapped in `try/catch`; failures use `getFallback(n)`, are marked as fallback output, and are blocked from production-ready status by `_bhApplyProductionSafetyGate()`
+- **Self-learning feedback** — `_bhRecordAgentFeedback()` stores schema, source, and verifier lessons in `R.agent_feedback` plus industry-scoped localStorage memory for downstream prompts
+- **Production safety gate** — after Agent 17 and the verifier run, `_bhApplyProductionSafetyGate()` checks fallbacks, schema feedback, verifier score, and unsourced claims; unsafe Go-style verdicts are downgraded to `Needs Review`
 
 ---
 
@@ -182,7 +184,7 @@ CRITICAL — DATA INTEGRITY:
 - Do NOT use 0 when the real value is unknown
 ```
 
-This single injection covers all 17 agents automatically. The `_nv()` and `_nvNum()` helper functions in `06-ui.js` render `null` / `"N/A"` gracefully in all tables and cards.
+This single injection covers all 17 agents automatically. `_bhValidateAgentSchema()` verifies required fields for each agent, `_bhAttachOutputQuality()` flags weak sourcing or placeholder values, and `_bhBuildAgentFeedbackContext()` feeds those lessons into later agent prompts. The `_nv()`, `_nvNum()`, `_esc()`, `_safeUrl()`, and `_safeHtml()` helper functions in `06-ui.js` render missing and model-originated values safely in tables, cards, citations, and chat output.
 
 ---
 
@@ -193,9 +195,9 @@ This single injection covers all 17 agents automatically. The `_nv()` and `_nvNu
 | `01-config.js` | INDUSTRIES config (14 industries), PROVIDERS config, global state variables, `R.real` init |
 | `02-cache.js` | localStorage response cache, 4-hour TTL, hash-keyed by system+user prompt |
 | `03-utils.js` | DOM helpers: `$()`, `zip()`, `radius()`, `industry()`, `key()`, `setDot()`, `showOut()`, `tab()`, `setProgress()` |
-| `04-api.js` | `claudeJSON()` — multi-provider API call + JSON extraction + `strictSystem` injection; `opts.webSearch` adds `web_search_20250305` tool |
-| `05-fallbacks.js` | `getFallback1()` through `getFallback17()` — demo/error fallback data |
-| `06-ui.js` | `_nv()`, `_nvNum()` null-safe renderers; `renderHmap()` heatmap builder |
+| `04-api.js` | `claudeJSON()` — multi-provider API call + JSON extraction + `strictSystem` injection; schema validation, output-quality feedback, self-learning memory, and production safety gate helpers; `opts.webSearch` adds `web_search_20250305` tool |
+| `05-fallbacks.js` | `getFallback1()` through `getFallback17()` — error fallback data marked `_is_fallback` and blocked from production-ready status |
+| `06-ui.js` | `_nv()`, `_nvNum()` null-safe renderers; `_esc()`, `_safeUrl()`, `_safeHtml()` output safety helpers; `renderHmap()` heatmap builder |
 | `07-render-01.js` | Agent 1 render: Demographics (Census · BLS · 15 sources · metro overview) |
 | `08-render-02.js` | Agent 5 render: Compliance + How to Apply tab |
 | `09-render-03.js` | Agent 6 render: Competitive Intel (NAEYC · QRIS · Winnie · Care.com) |
@@ -327,7 +329,7 @@ user clicks Run
 |-----|-----|---------|
 | `biz_session_v1` | 24 hours | Full session: R object, rendered HTML, inputs |
 | `biz_history_v1` | Permanent (max 5 entries) | Lightweight run summaries (verdict, zip, date, scores) |
-| `biz_cache_v1_*` | 4 hours | Individual agent API responses, keyed by prompt hash |
+| `dh_cache_v2_*` | 4 hours | Individual agent API responses, keyed by prompt hash |
 
 ---
 

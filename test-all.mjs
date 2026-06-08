@@ -92,6 +92,12 @@ test('_nv(42) → "42"', () => assert.equal(ctxEval('_nv(42)'), '42'));
 test('_nv(0, v=>String(v)) → "0" (zero is valid for _nv)', () => assert.equal(ctxEval('_nv(0, v=>String(v))'), '0'));
 test('_nv with formatter', () => assert.equal(ctxEval('_nv(1000, v => "$" + v.toLocaleString())'), '$1,000'));
 test('_nv(NaN) → N/A', () => assert.equal(ctxEval('_nv(NaN)'), 'N/A'));
+test('_esc escapes unsafe HTML', () => assert.equal(ctxEval('_esc("<img src=x onerror=alert(1)>")'), '&lt;img src=x onerror=alert(1)&gt;'));
+test('_nv escapes unformatted strings', () => assert.equal(ctxEval('_nv("<script>alert(1)</script>")'), '&lt;script&gt;alert(1)&lt;/script&gt;'));
+test('_safeUrl rejects javascript URLs', () => assert.equal(ctxEval('_safeUrl("javascript:alert(1)")'), ''));
+test('_safeHtml allows only narrow formatting', () => {
+  assert.equal(ctxEval('_safeHtml("<strong>ok</strong><img src=x>")'), '<strong>ok</strong>&lt;img src=x&gt;');
+});
 
 test('_nvNum(0) → N/A', () => assert.equal(ctxEval('_nvNum(0)'), 'N/A'));
 test('_nvNum(null) → N/A', () => assert.equal(ctxEval('_nvNum(null)'), 'N/A'));
@@ -240,6 +246,7 @@ test('package.json has test script', () => assert.ok(readFileSync('package.json'
 // Production secret handling
 const REAL_DATA_SRC = readFileSync('src/js/43-real-data.js', 'utf8');
 const API_SRC = readFileSync('src/js/04-api.js', 'utf8');
+const UI_SRC = readFileSync('src/js/06-ui.js', 'utf8');
 const PIPELINE_SRC = readFileSync('src/js/22-pipeline.js', 'utf8');
 const STREAMING_SRC = readFileSync('src/js/33-streaming.js', 'utf8');
 const QA_SRC = readFileSync('src/js/21-render-15.js', 'utf8');
@@ -252,6 +259,11 @@ const V2_WIZARD_SRC = readFileSync('v2/src/js/v2-03-wizard.js', 'utf8');
 const V2_FEATURES_SRC = readFileSync('v2/src/js/v2-10-features.js', 'utf8');
 const V2_COPILOT_SRC = readFileSync('v2/src/js/v2-04-copilot.js', 'utf8');
 const V2_ADVANCED_SRC = readFileSync('v2/src/js/v2-11-advanced.js', 'utf8');
+const BUILD_SRC = readFileSync('build.mjs', 'utf8');
+const V2_BUILD_SRC = readFileSync('v2/build-v2.mjs', 'utf8');
+const DEPLOY_DOC = readFileSync('docs/deployment.md', 'utf8');
+const HOWTO_DOC = readFileSync('docs/HOW-TO.md', 'utf8');
+const ARCH_DOC = readFileSync('docs/architecture.md', 'utf8');
 
 test('real-data defaults hosted requests to proxy helper', () => {
   assert.ok(REAL_DATA_SRC.includes('function _rdShouldUseProxy()'));
@@ -343,6 +355,54 @@ test('accuracy verifier sends failed checks into self-learning feedback', () => 
 });
 
 // ═══════════════════════════════════════════════
+test('UI exposes central output escaping and URL sanitization helpers', () => {
+  ['function _esc(', 'function _safeUrl(', 'function _safeHtml('].forEach(sig => assert.ok(UI_SRC.includes(sig), `missing ${sig}`));
+  assert.ok(UI_SRC.includes('return formatter ? formatter(val) : _esc(val)'));
+  assert.ok(UI_SRC.includes("!['http:', 'https:', 'mailto:'].includes(u.protocol)"));
+});
+test('sources renderer escapes model-originated citations and URLs', () => {
+  assert.ok(SOURCES_SRC.includes('const esc = typeof _esc'));
+  assert.ok(SOURCES_SRC.includes('const safeUrl = typeof _safeUrl'));
+  assert.ok(SOURCES_SRC.includes('${esc(d.summary || \'\')}'));
+  assert.ok(SOURCES_SRC.includes('safeUrl(s.url)'));
+  assert.equal(/href="\$\{s\.url\}"/.test(SOURCES_SRC), false);
+});
+test('v2 chat streaming sanitizes model output before innerHTML', () => {
+  assert.ok(V2_ADVANCED_SRC.includes('function _v2RenderAiHtml(text)'));
+  assert.ok(V2_ADVANCED_SRC.includes('bubbleEl.innerHTML = _v2RenderAiHtml(full)'));
+  assert.ok(V2_ADVANCED_SRC.includes('bubbleEl.innerHTML = _v2RenderAiHtml(text)'));
+  assert.ok(V2_ADVANCED_SRC.includes('bubbleText?.textContent'));
+  assert.equal(/bubbleEl\.innerHTML = full/.test(V2_ADVANCED_SRC), false);
+});
+test('schema validation and production safety gate are wired', () => {
+  ['_bhValidateAgentSchema','_bhAttachSchemaValidation','_bhApplyProductionSafetyGate','_bhProductionBlockers'].forEach(fn => {
+    assert.ok(API_SRC.includes(`function ${fn}(`), `missing ${fn}`);
+  });
+  assert.ok(API_SRC.includes('target_accuracy'));
+  assert.ok(API_SRC.includes("R.a8.verdict = 'Needs Review'"));
+  assert.ok(PIPELINE_SRC.includes('_bhApplyProductionSafetyGate()'));
+});
+test('fallbacks cannot appear production-ready', () => {
+  assert.ok(API_SRC.includes('Fallback output was used; this is not production-grade evidence.'));
+  assert.ok(API_SRC.includes('Fallback agent output used'));
+  assert.ok(API_SRC.includes("status: ready ? 'ready' : 'needs_review'"));
+});
+test('build scripts assert fragile global ordering', () => {
+  assert.ok(BUILD_SRC.includes('function assertBuildOrder('));
+  assert.ok(V2_BUILD_SRC.includes('function assertBuildOrder('));
+  ['src/js/04-api.js','src/js/05-fallbacks.js','src/js/06-ui.js','src/js/22-pipeline.js','src/js/44-verifier.js'].forEach(name => {
+    assert.ok(BUILD_SRC.includes(name), `build missing ${name}`);
+    assert.ok(V2_BUILD_SRC.includes(name), `v2 build missing ${name}`);
+  });
+});
+test('docs reflect serverless production, demo data, and safety gate', () => {
+  assert.ok(DEPLOY_DOC.includes('production deployments should use the serverless API routes'));
+  assert.ok(HOWTO_DOC.includes('src/js/36-demo-data.js'));
+  assert.ok(HOWTO_DOC.includes('production safety gate'));
+  assert.ok(ARCH_DOC.includes('_bhApplyProductionSafetyGate()'));
+  assert.ok(ARCH_DOC.includes('dh_cache_v2_*'));
+});
+
 // Results
 // ═══════════════════════════════════════════════
 console.log('\n' + '═'.repeat(50));

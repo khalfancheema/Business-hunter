@@ -65,6 +65,20 @@ const JS_FILES = [
 
 const CSS_FILES = ['src/styles.css'];
 
+function assertBuildOrder(files, before, after) {
+  const beforeIdx = files.findIndex(f => f.endsWith(before));
+  const afterIdx = files.findIndex(f => f.endsWith(after));
+  if (beforeIdx < 0 || afterIdx < 0 || beforeIdx >= afterIdx) {
+    throw new Error(`Build order violation: ${before} must load before ${after}`);
+  }
+}
+
+assertBuildOrder(JS_FILES, 'src/js/04-api.js', 'src/js/22-pipeline.js');
+assertBuildOrder(JS_FILES, 'src/js/05-fallbacks.js', 'src/js/22-pipeline.js');
+assertBuildOrder(JS_FILES, 'src/js/06-ui.js', 'src/js/07-render-01.js');
+assertBuildOrder(JS_FILES, 'src/js/22-pipeline.js', 'src/js/44-verifier.js');
+assertBuildOrder(JS_FILES, 'src/js/43-real-data.js', 'src/js/44-verifier.js');
+
 // Read template HTML
 let html = readFileSync('src/template.html', 'utf8');
 

@@ -143,7 +143,7 @@ function _bhAttachOutputQuality(data, opts={}) {
   if (quality.risk !== 'low') {
     console.warn('[OutputQuality]', quality.risk, quality.warnings.join(' | '), quality.stats);
   }
-  return data;
+  return _bhAttachSchemaValidation(data, opts);
 }
 
 const _BH_AGENT_REQUIRED_KEYS = {
@@ -165,6 +165,49 @@ const _BH_AGENT_REQUIRED_KEYS = {
   16:['summary'],
   17:['summary','data_sources'],
 };
+
+const _BH_AGENT_ARRAY_KEYS = {
+  1:['cities'],
+  2:['cities'],
+  3:['locations'],
+  5:['requirements'],
+  6:['cities'],
+  7:['scenarios'],
+  8:['success_factors','risks'],
+  10:['phases'],
+  13:['competitor_profiles'],
+  17:['data_sources'],
+};
+
+function _bhValidateAgentSchema(agentNum, data) {
+  const issues = [];
+  const n = Number(agentNum);
+  if (!n || !data || typeof data !== 'object') {
+    return { ok: false, issues: ['Output is missing or is not a JSON object.'] };
+  }
+  (_BH_AGENT_REQUIRED_KEYS[n] || []).forEach(k => {
+    const v = data[k];
+    if (v === undefined || v === null || v === '') issues.push(`Missing required field: ${k}`);
+    if (Array.isArray(v) && v.length === 0) issues.push(`Empty required array: ${k}`);
+  });
+  (_BH_AGENT_ARRAY_KEYS[n] || []).forEach(k => {
+    if (data[k] !== undefined && !Array.isArray(data[k])) issues.push(`Field must be an array: ${k}`);
+  });
+  if (data._is_fallback) issues.push('Fallback output was used; this is not production-grade evidence.');
+  return { ok: issues.length === 0, issues: [...new Set(issues)], checked_at: new Date().toISOString() };
+}
+
+function _bhAttachSchemaValidation(data, opts={}) {
+  if (!data || typeof data !== 'object' || !opts.agentNum) return data;
+  const schema = _bhValidateAgentSchema(opts.agentNum, data);
+  try {
+    Object.defineProperty(data, '_schema', { value: schema, enumerable: false, configurable: true });
+  } catch {
+    data._schema = schema;
+  }
+  if (!schema.ok) console.warn('[AgentSchema]', `A${opts.agentNum}`, schema.issues.join(' | '));
+  return data;
+}
 
 function _bhFeedbackStoreKey() {
   let ind = 'business';
@@ -193,6 +236,18 @@ function _bhAgentData(agentNum) {
 function _bhCollectAgentFeedback(agentNum, data) {
   const issues = [];
   const actions = [];
+  const schema = _bhValidateAgentSchema(agentNum, data);
+  if (data && typeof data === 'object') {
+    try {
+      Object.defineProperty(data, '_schema', { value: schema, enumerable: false, configurable: true });
+    } catch {
+      data._schema = schema;
+    }
+  }
+  if (!schema.ok) {
+    schema.issues.forEach(i => issues.push(i));
+    actions.push(`Re-run Agent ${agentNum} with its required JSON schema before trusting downstream recommendations.`);
+  }
   const required = _BH_AGENT_REQUIRED_KEYS[agentNum] || [];
   required.forEach(k => {
     const v = data && data[k];
@@ -334,6 +389,72 @@ function _bhRecordAllAgentFeedback() {
   }
 }
 
+function _bhProductionBlockers() {
+  const blockers = [];
+  const warnings = [];
+  const fallbackAgents = [];
+  for (let i = 1; i <= 17; i++) {
+    const d = _bhAgentData(i);
+    if (d && typeof d === 'object' && d._is_fallback) fallbackAgents.push(i);
+  }
+  if (fallbackAgents.length) blockers.push(`Fallback agent output used: A${fallbackAgents.join(', A')}.`);
+
+  const feedback = (R.agent_feedback?.items || []).filter(i => i.status !== 'ok');
+  if (feedback.length) blockers.push(`${feedback.length} agent feedback item(s) need correction before production use.`);
+
+  const score = R.accuracy?.score;
+  if (score !== undefined && score !== null && Number(score) < 85) blockers.push(`Accuracy verifier score ${Math.round(Number(score))}% is below the 95-100% target.`);
+  const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
+  if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
+  if (!hasRealData && (R.a1 || R.a2) && (score === undefined || score === null)) warnings.push('No verified real-data score was available for this run.');
+
+  const unsourced = Array.isArray(R.a17?.unable_to_source) ? R.a17.unable_to_source.length : 0;
+  if (unsourced) blockers.push(`${unsourced} claim(s) remain unsourced in Agent 17.`);
+
+  return { blockers, warnings, fallbackAgents, feedbackCount: feedback.length, unsourcedClaims: unsourced };
+}
+
+function _bhRenderProductionSafetyBanner(status) {
+  if (typeof document === 'undefined') return;
+  const anchor = $('realDataStatus') || $('finalBox') || $('orchStatus');
+  if (!anchor) return;
+  const old = document.getElementById('productionSafetyStatus');
+  if (old) old.remove();
+  if (!status || status.ready) return;
+  const esc = typeof _esc === 'function' ? _esc : v => String(v ?? '');
+  const div = document.createElement('div');
+  div.id = 'productionSafetyStatus';
+  div.style.cssText = 'margin:10px 0;padding:12px 14px;border-radius:8px;border:1px solid rgba(245,158,11,.55);background:rgba(245,158,11,.12);color:var(--text);font-size:12px;line-height:1.55';
+  div.innerHTML = `<strong style="color:var(--amber)">Production review required.</strong><br>${status.blockers.slice(0, 4).map(esc).join('<br>')}`;
+  anchor.parentElement ? anchor.parentElement.insertBefore(div, anchor.nextSibling) : anchor.appendChild(div);
+}
+
+function _bhApplyProductionSafetyGate() {
+  if (typeof R !== 'object' || !R) return null;
+  const result = _bhProductionBlockers();
+  const ready = result.blockers.length === 0;
+  const status = {
+    ready,
+    status: ready ? 'ready' : 'needs_review',
+    checked_at: new Date().toISOString(),
+    blockers: result.blockers,
+    warnings: result.warnings,
+    target_accuracy: '95-100%',
+    fallback_agents: result.fallbackAgents,
+    feedback_items_needing_attention: result.feedbackCount,
+    unsourced_claims: result.unsourcedClaims,
+  };
+  R.production_status = status;
+  if (!ready && R.a8 && typeof R.a8 === 'object') {
+    const verdict = String(R.a8.verdict || '');
+    if (/^(go|strong go|recommend|yes|approved)/i.test(verdict)) R.a8.verdict = 'Needs Review';
+    const note = `Production safety gate: ${status.blockers.join(' ')}`;
+    R.a8.verdict_rationale = R.a8.verdict_rationale ? `${R.a8.verdict_rationale}\n\n${note}` : note;
+  }
+  _bhRenderProductionSafetyBanner(status);
+  return status;
+}
+
 function _bhBuildAgentFeedbackContext() {
   const live = R.agent_feedback?.items || [];
   const persistent = _bhLoadPersistentLearning();
@@ -420,11 +541,18 @@ CRITICAL - SOURCE COVERAGE:
     }
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
     try {
-      const activeUser = _bhWithAgentFeedback(user, opts) + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : '');
+      const activeUser = _bhWithAgentFeedback(user, opts) + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else. If the previous attempt failed schema validation, include every required field and use [] only when the source truly has no rows.' : '');
       const raw = await claude(strictSystem, activeUser, opts);
       const d = parseJSON(raw);
       if (d) {
         const checked = _bhAttachOutputQuality(d, opts);
+        if (opts.agentNum) {
+          const schema = checked._schema || _bhValidateAgentSchema(opts.agentNum, checked);
+          if (!schema.ok && attempt < 3) {
+            console.warn(`Attempt ${attempt} schema fail.`, schema.issues.join(' | '));
+            continue;
+          }
+        }
         setCache(system, _bhWithAgentFeedback(user, opts), checked, opts);
         return checked;
       }

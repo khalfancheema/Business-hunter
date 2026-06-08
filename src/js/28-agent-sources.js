@@ -111,7 +111,7 @@ Important: Be honest. Flag every number or statistic the AI generated as an esti
 
   try {
     _setDemoKey(17);
-    let d = await claudeJSON(sys, usr, {webSearch:true});
+    let d = await claudeJSON(sys, usr, {webSearch:true, agentNum:17});
     if (!d) { d = _fallbackSources17(agentSummaries); }
 
     R.a17 = d;
@@ -120,7 +120,7 @@ Important: Be honest. Flag every number or statistic the AI generated as an esti
     return JSON.stringify(d);
   } catch (e) {
     setDot(17, 'error');
-    if (out) out.innerHTML = `<div class="prose" style="color:var(--red);padding:16px">Error: ${e.message}</div>`;
+    if (out) out.innerHTML = `<div class="prose" style="color:var(--red);padding:16px">Error: ${typeof _esc === 'function' ? _esc(e.message) : e.message}</div>`;
     throw e;
   }
 }
@@ -139,11 +139,13 @@ function renderAgent17(d) {
   if (!d) return;
   const out = $('out-17');
   if (!out) return;
+  const esc = typeof _esc === 'function' ? _esc : v => String(v ?? '');
+  const safeUrl = typeof _safeUrl === 'function' ? _safeUrl : v => String(v || '');
 
-  const sources    = d.data_sources     || [];
-  const notes      = d.data_quality_notes || [];
-  const claimed    = d.sourced_claims   || [];
-  const unsourced  = d.unable_to_source || [];
+  const sources    = (d.data_sources     || []).map(s => ({...s}));
+  const notes      = (d.data_quality_notes || []).map(n => ({...n}));
+  const claimed    = (d.sourced_claims   || []).map(c => ({...c}));
+  const unsourced  = (d.unable_to_source || []).map(u => ({...u}));
 
   // ── Stats ────────────────────────────────────────────────
   const totalSources  = sources.length;
@@ -179,7 +181,7 @@ function renderAgent17(d) {
 
     <div id="17-sum" class="panel active">
       <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
-        <div style="font-size:13px;line-height:1.7;color:var(--muted)">${d.summary || ''}</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--muted)">${esc(d.summary || '')}</div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
           ${_srcStat17('Total Sources',        totalSources,     'var(--blue)')}
           ${_srcStat17('High Reliability',     highRelPct + '%', highRelPct >= 70 ? 'var(--green)' : 'var(--amber)')}
@@ -189,8 +191,8 @@ function renderAgent17(d) {
         ${notes.length ? `<div style="display:flex;flex-direction:column;gap:6px">
           <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Data Quality Notes</div>
           ${notes.map(n => `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)">
-            <span class="badge ${sevBadge(n.severity)}">${n.severity || 'Info'}</span>
-            <span style="font-size:12px;color:var(--text);line-height:1.6">${n.note || ''}</span>
+            <span class="badge ${sevBadge(n.severity)}">${esc(n.severity || 'Info')}</span>
+            <span style="font-size:12px;color:var(--text);line-height:1.6">${esc(n.note || '')}</span>
           </div>`).join('')}
         </div>` : ''}
       </div>
@@ -201,18 +203,18 @@ function renderAgent17(d) {
         ${Object.keys(grouped).length
           ? Object.entries(grouped).map(([cat, items]) => `
             <div>
-              <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${cat} (${items.length})</div>
+              <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${esc(cat)} (${items.length})</div>
               <div style="display:flex;flex-direction:column;gap:8px">
                 ${items.map(s => `
                   <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:5px">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
-                      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${s.source || ''}</div>
-                      <span class="badge ${relBadge(s.reliability)}">${s.reliability || 'Unknown'}</span>
+                      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${esc(s.source || '')}</div>
+                      <span class="badge ${relBadge(s.reliability)}">${esc(s.reliability || 'Unknown')}</span>
                     </div>
-                    <div style="font-size:11px;color:var(--muted)">${s.agent || ''}</div>
-                    ${s.data_used    ? `<div style="font-size:12px;color:var(--text);line-height:1.6">${s.data_used}</div>` : ''}
-                    ${s.last_updated ? `<div style="font-size:10px;color:var(--muted)">Last updated: ${s.last_updated}</div>` : ''}
-                    ${s.url ? `<a href="${s.url}" target="_blank" class="link-btn" style="font-size:11px;width:fit-content">↗ Open Source</a>` : ''}
+                    <div style="font-size:11px;color:var(--muted)">${esc(s.agent || '')}</div>
+                    ${s.data_used    ? `<div style="font-size:12px;color:var(--text);line-height:1.6">${esc(s.data_used)}</div>` : ''}
+                    ${s.last_updated ? `<div style="font-size:10px;color:var(--muted)">Last updated: ${esc(s.last_updated)}</div>` : ''}
+                    ${s.url && safeUrl(s.url) ? `<a href="${safeUrl(s.url)}" target="_blank" rel="noopener" class="link-btn" style="font-size:11px;width:fit-content">Open Source</a>` : ''}
                   </div>
                 `).join('')}
               </div>
@@ -228,8 +230,8 @@ function renderAgent17(d) {
               <thead><tr><th>Claim</th><th>Source</th><th>Verifiable</th></tr></thead>
               <tbody>
                 ${claimed.map(c => `<tr>
-                  <td style="font-size:12px">${c.claim || ''}</td>
-                  <td style="font-size:12px;color:var(--muted)">${c.source || ''}</td>
+                  <td style="font-size:12px">${esc(c.claim || '')}</td>
+                  <td style="font-size:12px;color:var(--muted)">${esc(c.source || '')}</td>
                   <td><span class="badge ${c.verifiable ? 'b-green' : 'b-amber'}">${c.verifiable ? 'Yes' : 'Partial'}</span></td>
                 </tr>`).join('')}
               </tbody>
@@ -246,9 +248,9 @@ function renderAgent17(d) {
             </div>
             ${unsourced.map(u => `
               <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
-                <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${u.claim || ''}</div>
-                <div style="font-size:11px;color:var(--muted)">${u.agent || ''}</div>
-                <div style="font-size:12px;color:var(--amber)">${u.reason || ''}</div>
+                <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${esc(u.claim || '')}</div>
+                <div style="font-size:11px;color:var(--muted)">${esc(u.agent || '')}</div>
+                <div style="font-size:12px;color:var(--amber)">${esc(u.reason || '')}</div>
               </div>`).join('')}`
           : `<div class="prose" style="color:var(--green)">All claims were successfully sourced.</div>`}
       </div>

@@ -74,6 +74,21 @@ const CSS_FILES = [
   join(ROOT, 'v2/src/styles-v2.css'),
 ];
 
+function assertBuildOrder(files, before, after) {
+  const beforeIdx = files.findIndex(f => f.replaceAll('\\', '/').endsWith(before));
+  const afterIdx = files.findIndex(f => f.replaceAll('\\', '/').endsWith(after));
+  if (beforeIdx < 0 || afterIdx < 0 || beforeIdx >= afterIdx) {
+    throw new Error(`Build order violation: ${before} must load before ${after}`);
+  }
+}
+
+assertBuildOrder(V1_JS, 'src/js/04-api.js', 'src/js/22-pipeline.js');
+assertBuildOrder(V1_JS, 'src/js/05-fallbacks.js', 'src/js/22-pipeline.js');
+assertBuildOrder(V1_JS, 'src/js/06-ui.js', 'src/js/07-render-01.js');
+assertBuildOrder(V1_JS, 'src/js/22-pipeline.js', 'src/js/44-verifier.js');
+assertBuildOrder(V1_JS, 'src/js/43-real-data.js', 'src/js/44-verifier.js');
+assertBuildOrder(V2_JS, 'v2/src/js/v2-04-copilot.js', 'v2/src/js/v2-11-advanced.js');
+
 let html = readFileSync(join(ROOT, 'v2/src/template-v2.html'), 'utf8');
 const css = CSS_FILES.map(f => readFileSync(f, 'utf8')).join('\n');
 html = html.replace('<!-- BUILD:CSS -->', () => `<style>\n${css}\n</style>`);

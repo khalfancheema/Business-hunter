@@ -17,6 +17,16 @@ let _v2ChatHistory = [];
 
 function v2ClearChatHistory() { _v2ChatHistory = []; }
 
+function _v2RenderAiHtml(text) {
+  if (typeof _safeHtml === 'function') return _safeHtml(text);
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Override v2SendChatQuestion to record history
 function v2SendChatQuestion() {
   const inp = document.getElementById('v2-chat-input');
@@ -63,12 +73,12 @@ If data is missing, say so briefly and suggest what to run.`;
       await _v2GeminiFallback(apiKey, sys, historySlice, bubbleText);
     }
     // Record AI response in history (only on success)
-    const assistantContent = bubbleText?.innerHTML || '';
+    const assistantContent = bubbleText?.textContent || '';
     if (assistantContent) _v2ChatHistory.push({ role: 'assistant', content: assistantContent });
     bubbleText?.classList.remove('v2-streaming');
   } catch(e) {
     // Do NOT push error message into history — it would corrupt subsequent API calls
-    if (bubbleText) { bubbleText.innerHTML = `⚠️ ${e.message || 'Connection error. Check your API key.'}`; }
+    if (bubbleText) { bubbleText.innerHTML = _v2RenderAiHtml(`Warning: ${e.message || 'Connection error. Check your API key.'}`); }
     bubbleText?.classList.remove('v2-streaming');
     // Remove the user message we already pushed, since there's no valid assistant reply
     if (_v2ChatHistory.length && _v2ChatHistory[_v2ChatHistory.length - 1].role === 'user') {
@@ -128,7 +138,7 @@ async function _v2StreamAnthropic(apiKey, sys, messages, bubbleEl) {
         if (p.type === 'content_block_delta' && p.delta?.text) {
           full += p.delta.text;
           if (bubbleEl) {
-            bubbleEl.innerHTML = full;
+            bubbleEl.innerHTML = _v2RenderAiHtml(full);
             bubbleEl.closest('.v2-chat-msgs')?.scrollTo(0, 9999);
           }
         }
@@ -165,7 +175,7 @@ async function _v2StreamOpenAI(apiKey, sys, messages, bubbleEl) {
         const text = p.choices?.[0]?.delta?.content;
         if (text) {
           full += text;
-          if (bubbleEl) bubbleEl.innerHTML = full;
+          if (bubbleEl) bubbleEl.innerHTML = _v2RenderAiHtml(full);
         }
       } catch {}
     }
@@ -193,7 +203,7 @@ async function _v2GeminiFallback(apiKey, sys, messages, bubbleEl) {
   if (!res.ok) throw new Error(`Gemini API ${res.status}`);
   const d = await res.json();
   const text = d.candidates?.[0]?.content?.parts?.[0]?.text || 'No response.';
-  if (bubbleEl) bubbleEl.innerHTML = text;
+  if (bubbleEl) bubbleEl.innerHTML = _v2RenderAiHtml(text);
 }
 
 // Offline fallback (no API key) — keyword-based, unchanged from v2-04-copilot.js

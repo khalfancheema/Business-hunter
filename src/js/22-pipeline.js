@@ -184,6 +184,7 @@ async function runPipeline() {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
     }
     if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
+    if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate();
   } catch(e) {
     $('orchStatus').textContent='error';
     showErr('Pipeline error: '+e.message+'\n\nTip: Make sure your API key is correct and has credits.');
@@ -231,6 +232,7 @@ async function reRunAgent(n) {
     else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
     else if(n===17){ await runAgent17(R); }
     try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) {}
+    try { if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate(); } catch(e) {}
   } catch(e) {
     console.error('Re-run agent '+n+' failed:',e.message);
   } finally {

@@ -535,7 +535,7 @@ Run the full pipeline with no API key to see what the system produces.
 3. Click **▶ Run Pipeline** — all 17 agents run using built-in sample data instantly (no API calls)
 4. Click **⚡ Demo Mode** again to turn it off before running a real analysis
 
-Demo Mode uses the hardcoded fallback data in `src/js/05-fallbacks.js`. It's useful for:
+Demo Mode uses deterministic sample data in `src/js/36-demo-data.js`. Error fallbacks in `src/js/05-fallbacks.js` are not production evidence and are flagged by the production safety gate when they are used. Demo Mode is useful for:
 - Exploring the UI before committing to an API key
 - Testing changes during development
 - Showing the system to stakeholders without burning API credits

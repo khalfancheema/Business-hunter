@@ -2083,7 +2083,7 @@ function _bhAttachOutputQuality(data, opts={}) {
   if (quality.risk !== 'low') {
     console.warn('[OutputQuality]', quality.risk, quality.warnings.join(' | '), quality.stats);
   }
-  return data;
+  return _bhAttachSchemaValidation(data, opts);
 }
 
 const _BH_AGENT_REQUIRED_KEYS = {
@@ -2105,6 +2105,49 @@ const _BH_AGENT_REQUIRED_KEYS = {
   16:['summary'],
   17:['summary','data_sources'],
 };
+
+const _BH_AGENT_ARRAY_KEYS = {
+  1:['cities'],
+  2:['cities'],
+  3:['locations'],
+  5:['requirements'],
+  6:['cities'],
+  7:['scenarios'],
+  8:['success_factors','risks'],
+  10:['phases'],
+  13:['competitor_profiles'],
+  17:['data_sources'],
+};
+
+function _bhValidateAgentSchema(agentNum, data) {
+  const issues = [];
+  const n = Number(agentNum);
+  if (!n || !data || typeof data !== 'object') {
+    return { ok: false, issues: ['Output is missing or is not a JSON object.'] };
+  }
+  (_BH_AGENT_REQUIRED_KEYS[n] || []).forEach(k => {
+    const v = data[k];
+    if (v === undefined || v === null || v === '') issues.push(`Missing required field: ${k}`);
+    if (Array.isArray(v) && v.length === 0) issues.push(`Empty required array: ${k}`);
+  });
+  (_BH_AGENT_ARRAY_KEYS[n] || []).forEach(k => {
+    if (data[k] !== undefined && !Array.isArray(data[k])) issues.push(`Field must be an array: ${k}`);
+  });
+  if (data._is_fallback) issues.push('Fallback output was used; this is not production-grade evidence.');
+  return { ok: issues.length === 0, issues: [...new Set(issues)], checked_at: new Date().toISOString() };
+}
+
+function _bhAttachSchemaValidation(data, opts={}) {
+  if (!data || typeof data !== 'object' || !opts.agentNum) return data;
+  const schema = _bhValidateAgentSchema(opts.agentNum, data);
+  try {
+    Object.defineProperty(data, '_schema', { value: schema, enumerable: false, configurable: true });
+  } catch {
+    data._schema = schema;
+  }
+  if (!schema.ok) console.warn('[AgentSchema]', `A${opts.agentNum}`, schema.issues.join(' | '));
+  return data;
+}
 
 function _bhFeedbackStoreKey() {
   let ind = 'business';
@@ -2133,6 +2176,18 @@ function _bhAgentData(agentNum) {
 function _bhCollectAgentFeedback(agentNum, data) {
   const issues = [];
   const actions = [];
+  const schema = _bhValidateAgentSchema(agentNum, data);
+  if (data && typeof data === 'object') {
+    try {
+      Object.defineProperty(data, '_schema', { value: schema, enumerable: false, configurable: true });
+    } catch {
+      data._schema = schema;
+    }
+  }
+  if (!schema.ok) {
+    schema.issues.forEach(i => issues.push(i));
+    actions.push(`Re-run Agent ${agentNum} with its required JSON schema before trusting downstream recommendations.`);
+  }
   const required = _BH_AGENT_REQUIRED_KEYS[agentNum] || [];
   required.forEach(k => {
     const v = data && data[k];
@@ -2274,6 +2329,72 @@ function _bhRecordAllAgentFeedback() {
   }
 }
 
+function _bhProductionBlockers() {
+  const blockers = [];
+  const warnings = [];
+  const fallbackAgents = [];
+  for (let i = 1; i <= 17; i++) {
+    const d = _bhAgentData(i);
+    if (d && typeof d === 'object' && d._is_fallback) fallbackAgents.push(i);
+  }
+  if (fallbackAgents.length) blockers.push(`Fallback agent output used: A${fallbackAgents.join(', A')}.`);
+
+  const feedback = (R.agent_feedback?.items || []).filter(i => i.status !== 'ok');
+  if (feedback.length) blockers.push(`${feedback.length} agent feedback item(s) need correction before production use.`);
+
+  const score = R.accuracy?.score;
+  if (score !== undefined && score !== null && Number(score) < 85) blockers.push(`Accuracy verifier score ${Math.round(Number(score))}% is below the 95-100% target.`);
+  const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
+  if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
+  if (!hasRealData && (R.a1 || R.a2) && (score === undefined || score === null)) warnings.push('No verified real-data score was available for this run.');
+
+  const unsourced = Array.isArray(R.a17?.unable_to_source) ? R.a17.unable_to_source.length : 0;
+  if (unsourced) blockers.push(`${unsourced} claim(s) remain unsourced in Agent 17.`);
+
+  return { blockers, warnings, fallbackAgents, feedbackCount: feedback.length, unsourcedClaims: unsourced };
+}
+
+function _bhRenderProductionSafetyBanner(status) {
+  if (typeof document === 'undefined') return;
+  const anchor = $('realDataStatus') || $('finalBox') || $('orchStatus');
+  if (!anchor) return;
+  const old = document.getElementById('productionSafetyStatus');
+  if (old) old.remove();
+  if (!status || status.ready) return;
+  const esc = typeof _esc === 'function' ? _esc : v => String(v ?? '');
+  const div = document.createElement('div');
+  div.id = 'productionSafetyStatus';
+  div.style.cssText = 'margin:10px 0;padding:12px 14px;border-radius:8px;border:1px solid rgba(245,158,11,.55);background:rgba(245,158,11,.12);color:var(--text);font-size:12px;line-height:1.55';
+  div.innerHTML = `<strong style="color:var(--amber)">Production review required.</strong><br>${status.blockers.slice(0, 4).map(esc).join('<br>')}`;
+  anchor.parentElement ? anchor.parentElement.insertBefore(div, anchor.nextSibling) : anchor.appendChild(div);
+}
+
+function _bhApplyProductionSafetyGate() {
+  if (typeof R !== 'object' || !R) return null;
+  const result = _bhProductionBlockers();
+  const ready = result.blockers.length === 0;
+  const status = {
+    ready,
+    status: ready ? 'ready' : 'needs_review',
+    checked_at: new Date().toISOString(),
+    blockers: result.blockers,
+    warnings: result.warnings,
+    target_accuracy: '95-100%',
+    fallback_agents: result.fallbackAgents,
+    feedback_items_needing_attention: result.feedbackCount,
+    unsourced_claims: result.unsourcedClaims,
+  };
+  R.production_status = status;
+  if (!ready && R.a8 && typeof R.a8 === 'object') {
+    const verdict = String(R.a8.verdict || '');
+    if (/^(go|strong go|recommend|yes|approved)/i.test(verdict)) R.a8.verdict = 'Needs Review';
+    const note = `Production safety gate: ${status.blockers.join(' ')}`;
+    R.a8.verdict_rationale = R.a8.verdict_rationale ? `${R.a8.verdict_rationale}\n\n${note}` : note;
+  }
+  _bhRenderProductionSafetyBanner(status);
+  return status;
+}
+
 function _bhBuildAgentFeedbackContext() {
   const live = R.agent_feedback?.items || [];
   const persistent = _bhLoadPersistentLearning();
@@ -2360,11 +2481,18 @@ CRITICAL - SOURCE COVERAGE:
     }
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
     try {
-      const activeUser = _bhWithAgentFeedback(user, opts) + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : '');
+      const activeUser = _bhWithAgentFeedback(user, opts) + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else. If the previous attempt failed schema validation, include every required field and use [] only when the source truly has no rows.' : '');
       const raw = await claude(strictSystem, activeUser, opts);
       const d = parseJSON(raw);
       if (d) {
         const checked = _bhAttachOutputQuality(d, opts);
+        if (opts.agentNum) {
+          const schema = checked._schema || _bhValidateAgentSchema(opts.agentNum, checked);
+          if (!schema.ok && attempt < 3) {
+            console.warn(`Attempt ${attempt} schema fail.`, schema.issues.join(' | '));
+            continue;
+          }
+        }
         setCache(system, _bhWithAgentFeedback(user, opts), checked, opts);
         return checked;
       }
@@ -2547,20 +2675,50 @@ function showRaw(n) {
 // Pass a formatter function for numbers, e.g.:
 //   _nv(c.median_hh_income, v => '$' + (v/1000).toFixed(0) + 'k')
 // ══════════════════════════════════════════════════════════
+function _esc(val) {
+  if (val === null || val === undefined) return '';
+  return String(val)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function _safeUrl(url) {
+  if (!url) return '';
+  try {
+    const u = new URL(String(url), window.location.origin);
+    if (!['http:', 'https:', 'mailto:'].includes(u.protocol)) return '';
+    return _esc(u.href);
+  } catch {
+    return '';
+  }
+}
+
+function _safeHtml(text) {
+  const raw = _esc(text);
+  return raw
+    .replace(/&lt;br\s*\/?&gt;/gi, '<br>')
+    .replace(/&lt;strong&gt;([\s\S]*?)&lt;\/strong&gt;/gi, '<strong>$1</strong>')
+    .replace(/&lt;b&gt;([\s\S]*?)&lt;\/b&gt;/gi, '<strong>$1</strong>')
+    .replace(/&lt;em&gt;([\s\S]*?)&lt;\/em&gt;/gi, '<em>$1</em>');
+}
+
 function _nv(val, formatter, fallback) {
   if (fallback === undefined) fallback = 'N/A';
   if (val === null || val === undefined) return fallback;
   if (typeof val === 'string') {
     const t = val.trim().toLowerCase();
     if (t === '' || t === 'n/a' || t === 'information not available' || t === 'not available' || t === 'unknown') return fallback;
-    return formatter ? formatter(val) : val;
+    return formatter ? formatter(val) : _esc(val);
   }
   if (typeof val === 'number') {
     if (!isFinite(val)) return fallback;
     // Only treat 0 as N/A when explicitly checking — caller passes formatter for numerics
     return formatter ? formatter(val) : String(val);
   }
-  return formatter ? formatter(val) : String(val);
+  return formatter ? formatter(val) : _esc(val);
 }
 
 // _toArr — safely coerce any value to an array.
@@ -2585,20 +2743,25 @@ function renderHmap(containerId, cities, dims, onCellClick) {
   if(!cities||!cities.length){$(containerId).innerHTML='';return;}
   const maxes=dims.map(dim=>Math.max(...cities.map(c=>c[dim.key]||0)));
   let html=`<div class="hmap-col-row">`;
-  cities.forEach(c=>html+=`<div class="hmap-col">${(c.name||c.city||'').split(' ')[0]}</div>`);
+  cities.forEach(c=>html+=`<div class="hmap-col">${_esc((c.name||c.city||'').split(' ')[0])}</div>`);
   html+=`</div><div class="hmap">`;
   dims.forEach((dim,di)=>{
-    html+=`<div class="hmap-row"><div class="hmap-lbl">${dim.label}</div>`;
+    html+=`<div class="hmap-row"><div class="hmap-lbl">${_esc(dim.label)}</div>`;
     cities.forEach(c=>{
-      const cityName=(c.name||c.city||'').replace(/'/g,'\\x27');
+      const cityRaw=String(c.name||c.city||'');
+      const cityName=cityRaw.replace(/\\/g,'\\\\').replace(/'/g,'\\x27').replace(/\n/g,' ');
       const val=c[dim.key]||0;
       const pct=maxes[di]>0?val/maxes[di]:0;
       const lvl=Math.min(5,Math.round(pct*5));
-      const disp=dim.fmt?dim.fmt(val):val;
+      const rawDisp=dim.fmt?dim.fmt(val):val;
+      const disp=_esc(rawDisp);
+      const title=_esc(`${cityRaw}: ${rawDisp}`);
+      const dimKey=String(dim.key||'').replace(/'/g,'\\x27');
+      const dimLabel=String(dim.label||'').replace(/'/g,'\\x27');
       if(onCellClick){
-        html+=`<div class="hmap-cell h${lvl} clickable" onclick="${onCellClick}('${cityName}','${dim.key}','${dim.label}',${val})" title="${c.name||c.city}: ${disp} — click for details">${disp}</div>`;
+        html+=`<div class="hmap-cell h${lvl} clickable" onclick="${onCellClick}('${cityName}','${dimKey}','${dimLabel}',${Number(val)||0})" title="${title} - click for details">${disp}</div>`;
       } else {
-        html+=`<div class="hmap-cell h${lvl}" title="${c.name||c.city}: ${disp}">${disp}</div>`;
+        html+=`<div class="hmap-cell h${lvl}" title="${title}">${disp}</div>`;
       }
     });
     html+=`</div>`;
@@ -5802,6 +5965,7 @@ async function runPipeline() {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
     }
     if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
+    if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate();
   } catch(e) {
     $('orchStatus').textContent='error';
     showErr('Pipeline error: '+e.message+'\n\nTip: Make sure your API key is correct and has credits.');
@@ -5849,6 +6013,7 @@ async function reRunAgent(n) {
     else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
     else if(n===17){ await runAgent17(R); }
     try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) {}
+    try { if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate(); } catch(e) {}
   } catch(e) {
     console.error('Re-run agent '+n+' failed:',e.message);
   } finally {
@@ -7431,7 +7596,7 @@ Important: Be honest. Flag every number or statistic the AI generated as an esti
 
   try {
     _setDemoKey(17);
-    let d = await claudeJSON(sys, usr, {webSearch:true});
+    let d = await claudeJSON(sys, usr, {webSearch:true, agentNum:17});
     if (!d) { d = _fallbackSources17(agentSummaries); }
 
     R.a17 = d;
@@ -7440,7 +7605,7 @@ Important: Be honest. Flag every number or statistic the AI generated as an esti
     return JSON.stringify(d);
   } catch (e) {
     setDot(17, 'error');
-    if (out) out.innerHTML = `<div class="prose" style="color:var(--red);padding:16px">Error: ${e.message}</div>`;
+    if (out) out.innerHTML = `<div class="prose" style="color:var(--red);padding:16px">Error: ${typeof _esc === 'function' ? _esc(e.message) : e.message}</div>`;
     throw e;
   }
 }
@@ -7459,11 +7624,13 @@ function renderAgent17(d) {
   if (!d) return;
   const out = $('out-17');
   if (!out) return;
+  const esc = typeof _esc === 'function' ? _esc : v => String(v ?? '');
+  const safeUrl = typeof _safeUrl === 'function' ? _safeUrl : v => String(v || '');
 
-  const sources    = d.data_sources     || [];
-  const notes      = d.data_quality_notes || [];
-  const claimed    = d.sourced_claims   || [];
-  const unsourced  = d.unable_to_source || [];
+  const sources    = (d.data_sources     || []).map(s => ({...s}));
+  const notes      = (d.data_quality_notes || []).map(n => ({...n}));
+  const claimed    = (d.sourced_claims   || []).map(c => ({...c}));
+  const unsourced  = (d.unable_to_source || []).map(u => ({...u}));
 
   // ── Stats ────────────────────────────────────────────────
   const totalSources  = sources.length;
@@ -7499,7 +7666,7 @@ function renderAgent17(d) {
 
     <div id="17-sum" class="panel active">
       <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
-        <div style="font-size:13px;line-height:1.7;color:var(--muted)">${d.summary || ''}</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--muted)">${esc(d.summary || '')}</div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
           ${_srcStat17('Total Sources',        totalSources,     'var(--blue)')}
           ${_srcStat17('High Reliability',     highRelPct + '%', highRelPct >= 70 ? 'var(--green)' : 'var(--amber)')}
@@ -7509,8 +7676,8 @@ function renderAgent17(d) {
         ${notes.length ? `<div style="display:flex;flex-direction:column;gap:6px">
           <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Data Quality Notes</div>
           ${notes.map(n => `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)">
-            <span class="badge ${sevBadge(n.severity)}">${n.severity || 'Info'}</span>
-            <span style="font-size:12px;color:var(--text);line-height:1.6">${n.note || ''}</span>
+            <span class="badge ${sevBadge(n.severity)}">${esc(n.severity || 'Info')}</span>
+            <span style="font-size:12px;color:var(--text);line-height:1.6">${esc(n.note || '')}</span>
           </div>`).join('')}
         </div>` : ''}
       </div>
@@ -7521,18 +7688,18 @@ function renderAgent17(d) {
         ${Object.keys(grouped).length
           ? Object.entries(grouped).map(([cat, items]) => `
             <div>
-              <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${cat} (${items.length})</div>
+              <div style="font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">${esc(cat)} (${items.length})</div>
               <div style="display:flex;flex-direction:column;gap:8px">
                 ${items.map(s => `
                   <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:5px">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
-                      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${s.source || ''}</div>
-                      <span class="badge ${relBadge(s.reliability)}">${s.reliability || 'Unknown'}</span>
+                      <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${esc(s.source || '')}</div>
+                      <span class="badge ${relBadge(s.reliability)}">${esc(s.reliability || 'Unknown')}</span>
                     </div>
-                    <div style="font-size:11px;color:var(--muted)">${s.agent || ''}</div>
-                    ${s.data_used    ? `<div style="font-size:12px;color:var(--text);line-height:1.6">${s.data_used}</div>` : ''}
-                    ${s.last_updated ? `<div style="font-size:10px;color:var(--muted)">Last updated: ${s.last_updated}</div>` : ''}
-                    ${s.url ? `<a href="${s.url}" target="_blank" class="link-btn" style="font-size:11px;width:fit-content">↗ Open Source</a>` : ''}
+                    <div style="font-size:11px;color:var(--muted)">${esc(s.agent || '')}</div>
+                    ${s.data_used    ? `<div style="font-size:12px;color:var(--text);line-height:1.6">${esc(s.data_used)}</div>` : ''}
+                    ${s.last_updated ? `<div style="font-size:10px;color:var(--muted)">Last updated: ${esc(s.last_updated)}</div>` : ''}
+                    ${s.url && safeUrl(s.url) ? `<a href="${safeUrl(s.url)}" target="_blank" rel="noopener" class="link-btn" style="font-size:11px;width:fit-content">Open Source</a>` : ''}
                   </div>
                 `).join('')}
               </div>
@@ -7548,8 +7715,8 @@ function renderAgent17(d) {
               <thead><tr><th>Claim</th><th>Source</th><th>Verifiable</th></tr></thead>
               <tbody>
                 ${claimed.map(c => `<tr>
-                  <td style="font-size:12px">${c.claim || ''}</td>
-                  <td style="font-size:12px;color:var(--muted)">${c.source || ''}</td>
+                  <td style="font-size:12px">${esc(c.claim || '')}</td>
+                  <td style="font-size:12px;color:var(--muted)">${esc(c.source || '')}</td>
                   <td><span class="badge ${c.verifiable ? 'b-green' : 'b-amber'}">${c.verifiable ? 'Yes' : 'Partial'}</span></td>
                 </tr>`).join('')}
               </tbody>
@@ -7566,9 +7733,9 @@ function renderAgent17(d) {
             </div>
             ${unsourced.map(u => `
               <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
-                <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${u.claim || ''}</div>
-                <div style="font-size:11px;color:var(--muted)">${u.agent || ''}</div>
-                <div style="font-size:12px;color:var(--amber)">${u.reason || ''}</div>
+                <div style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif">${esc(u.claim || '')}</div>
+                <div style="font-size:11px;color:var(--muted)">${esc(u.agent || '')}</div>
+                <div style="font-size:12px;color:var(--amber)">${esc(u.reason || '')}</div>
               </div>`).join('')}`
           : `<div class="prose" style="color:var(--green)">All claims were successfully sourced.</div>`}
       </div>

@@ -1,6 +1,6 @@
 # Deployment Guide
 
-The app is a single self-contained `public/index.html` file (~500KB). It can be run locally, hosted on any static file server, or deployed to any CDN — no server-side processing required.
+The browser app is still bundled into self-contained HTML, but production deployments should use the serverless API routes in this repo. Hosted production runs call `/api/llm` and `/api/proxy` so LLM and government-data API keys stay in server environment variables. Static-only hosting is suitable for local/demo use or private development with temporary browser-session keys.
 
 ---
 
@@ -19,7 +19,7 @@ xdg-open public/index.html
 
 Or just double-click `public/index.html` in your file manager.
 
-No server, no install. Works entirely offline except for AI API calls.
+No server, no install. Works entirely offline in Demo Mode; real AI/API calls require either temporary browser-session keys or the serverless routes used in production.
 
 ---
 
@@ -60,7 +60,7 @@ node build.mjs
 
 Access at: `https://yourusername.github.io/repository-name`
 
-No build step needed — `public/index.html` is already self-contained.
+No build step needed — `public/index.html` is already self-contained. GitHub Pages is static-only, so treat it as demo/private-dev hosting unless you are comfortable entering temporary browser-session API keys.
 
 > **Shareable URLs work on GitHub Pages.** The `?zip=&industry=&radius=` URL params are handled client-side, so `https://yourusername.github.io/repo/?zip=30097&industry=daycare` loads correctly.
 
