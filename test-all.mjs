@@ -264,6 +264,13 @@ const V2_BUILD_SRC = readFileSync('v2/build-v2.mjs', 'utf8');
 const DEPLOY_DOC = readFileSync('docs/deployment.md', 'utf8');
 const HOWTO_DOC = readFileSync('docs/HOW-TO.md', 'utf8');
 const ARCH_DOC = readFileSync('docs/architecture.md', 'utf8');
+const AGENT_JS_SRC = [
+  'src/js/07-render-01.js','src/js/08-render-02.js','src/js/09-render-03.js','src/js/10-render-04.js',
+  'src/js/11-render-05.js','src/js/12-render-06.js','src/js/14-render-08.js','src/js/17-render-11.js',
+  'src/js/18-render-12.js','src/js/19-render-13.js','src/js/20-render-14.js','src/js/21-render-15.js',
+  'src/js/24-agent-09-parts.js','src/js/25-agent-10-parts.js','src/js/26-agent-fin-subs.js',
+  'src/js/27-agent-buildvsbuy.js','src/js/28-agent-sources.js'
+].map(f => readFileSync(f, 'utf8')).join('\n');
 
 test('real-data defaults hosted requests to proxy helper', () => {
   assert.ok(REAL_DATA_SRC.includes('function _rdShouldUseProxy()'));
@@ -352,6 +359,38 @@ test('accuracy verifier sends failed checks into self-learning feedback', () => 
   assert.ok(VERIFIER_SRC.includes('R.accuracy.feedback_items'));
   assert.ok(API_SRC.includes('accuracy_checks: rows.map'));
   assert.ok(API_SRC.includes('Use verified ${c.source'));
+});
+test('fixed agent LLM calls pass agentNum for schema and repair gates', () => {
+  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].forEach(n => {
+    assert.ok(AGENT_JS_SRC.includes(`agentNum:${n}`), `missing agentNum:${n}`);
+  });
+  assert.ok(AGENT_JS_SRC.includes('claudeStreamJSON(sys, usr') && AGENT_JS_SRC.includes('agentNum:8'));
+});
+test('production accuracy target is strict 95 percent', () => {
+  assert.ok(API_SRC.includes('const _BH_PRODUCTION_ACCURACY_TARGET = 95'));
+  assert.ok(PIPELINE_SRC.includes('score >= 95'));
+  assert.ok(VERIFIER_SRC.includes("pct >= 95 ? 'var(--green)'"));
+  assert.equal(/Number\(score\) < 85/.test(API_SRC), false);
+});
+test('pipeline blocks fallback dependencies and attempts verifier repair', () => {
+  assert.ok(API_SRC.includes('function _bhAssertNoFallbackDeps('));
+  assert.ok(PIPELINE_SRC.includes('const depsOk = (n, deps)'));
+  assert.ok(PIPELINE_SRC.includes('async function _bhRunAccuracyRepairPass()'));
+  assert.ok(PIPELINE_SRC.includes('await _bhRunAccuracyRepairPass()'));
+  assert.ok(PIPELINE_SRC.includes('R.accuracy_repair'));
+});
+test('production gate uses deterministic scorecard and claim citations', () => {
+  assert.ok(API_SRC.includes('function _bhCollectCitationIssues('));
+  assert.ok(API_SRC.includes('Numeric claim ${here} lacks a nearby source/citation/url field.'));
+  assert.ok(API_SRC.includes('function _bhComputeProductionScorecard('));
+  assert.ok(API_SRC.includes('R.production_scorecard = scorecard'));
+  assert.ok(API_SRC.includes('deterministic_weighted_evidence_v1'));
+});
+test('cache distinguishes validated agent outputs and repair context', () => {
+  const CACHE_SRC = readFileSync('src/js/02-cache.js', 'utf8');
+  assert.ok(CACHE_SRC.includes("CACHE_SCHEMA_VERSION = '3'"));
+  assert.ok(CACHE_SRC.includes("'|agent:' + opts.agentNum"));
+  assert.ok(API_SRC.includes('_bhBuildAgentRepairContext(opts.agentNum)'));
 });
 
 // ═══════════════════════════════════════════════

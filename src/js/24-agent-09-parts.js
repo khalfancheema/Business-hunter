@@ -52,7 +52,7 @@ is different; do not echo example numbers.
 }`;
 
   // ── Part 2 of 4: Market Analysis ────────────────────────
-  const p1 = await claudeJSON(sys1, usr1, {webSearch:true});
+  const p1 = await claudeJSON(sys1, usr1, {webSearch:true, agentNum:9});
   $('9-mkt-c').innerHTML = subProgress(2,4,'Market Analysis & Competitive Positioning');
   const sys2 = `You are a market research analyst. Return JSON only.`;
   const usr2 = `Write Part 2 — market analysis — for a ${base}.
@@ -80,7 +80,7 @@ Return ONLY this JSON. All values are placeholders.
 }`;
 
   // ── Part 3 of 4: Operations Plan + Financial Plan ───────
-  const p2 = await claudeJSON(sys2, usr2, {webSearch:true});
+  const p2 = await claudeJSON(sys2, usr2, {webSearch:true, agentNum:9});
   $('9-fin-c').innerHTML = subProgress(3,4,'Operations Plan & Financial Model');
   const sys3 = `You are a ${ind.unit} operations and finance expert. Return JSON only.`;
   const usr3 = `Write Part 3 — operations and financial plan — for a ${base}.
@@ -135,7 +135,7 @@ this schema.
 
   // ── Part 4 of 4: SBA Checklist + Investor Slides ────────
   // webSearch: find real SBA lender contacts and current commercial rent comps
-  const p3 = await claudeJSON(sys3, usr3, {webSearch:true});
+  const p3 = await claudeJSON(sys3, usr3, {webSearch:true, agentNum:9});
   $('9-sba-c').innerHTML = subProgress(4,4,'SBA Package & Investor Deck');
   const sys4 = `You are an SBA loan consultant and startup pitch coach. Return JSON only.`;
   const usr4 = `Write Part 4 — SBA checklist and investor pitch deck — for a ${base}.
@@ -162,7 +162,7 @@ fields must be populated from upstream context, not from this schema.
   ]
 }`;
 
-  const p4 = await claudeJSON(sys4, usr4, {webSearch:true});
+  const p4 = await claudeJSON(sys4, usr4, {webSearch:true, agentNum:9});
 
   // Merge all 4 parts into one object
   const merged = Object.assign(

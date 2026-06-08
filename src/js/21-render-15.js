@@ -127,7 +127,7 @@ Return ONLY this JSON (we will inject data_validation counts from real JS-side s
 Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with 4-6 tests each based on actual results above.`;
 
   try {
-    let d = await claudeJSON(sys, usr);
+    let d = await claudeJSON(sys, usr, {agentNum:15});
     if (!d) { console.warn('Agent 15 fallback'); d = getFallback15(); }
     // Inject real data_validation from JS-side counts (we asked Claude to skip it)
     d.data_validation = {
@@ -204,4 +204,3 @@ function renderQA(d) {
   score+=`</div>`;
   $('15-score-c').innerHTML=score;
 }
-

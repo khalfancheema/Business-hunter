@@ -80,7 +80,7 @@ Use REAL data for ZIP ${zip()}. Revenue model: ${ind.revenue_unit}.`;
 
   try {
     // webSearch=true: Anthropic provider uses live search to find real businesses
-    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true}) : (R.a6 || null);
+    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true, agentNum:6}) : (R.a6 || null);
     // Fallback: if claudeJSON returns null after 3 retries, use baseline data
     if(!d) {
       console.warn('Agent 6: using baseline fallback data');
@@ -201,7 +201,7 @@ Return ONLY this JSON:
   ]
 }`;
   try {
-    const partB = await claudeJSON(sys6b, usr6b, {webSearch:true});
+    const partB = await claudeJSON(sys6b, usr6b, {webSearch:true, agentNum:6});
     if (partB && Array.isArray(partB.cities)) {
       partB.cities.forEach(bc => {
         const cityObj = (data.cities||[]).find(c => c.city === bc.city ||

@@ -1801,7 +1801,7 @@ const memCache = {};
 
 // Cache schema version — bump to invalidate all cached entries after
 // a breaking change to the prompt or response shape.
-const CACHE_SCHEMA_VERSION = '2';
+const CACHE_SCHEMA_VERSION = '3';
 
 function _cacheCtx() {
   // Discriminator: provider + model + schema version. Without these,
@@ -1818,7 +1818,8 @@ function cacheKey(system, user, opts) {
   // materially differs between web-search-enabled and disabled calls.
   const ctx  = _cacheCtx();
   const tool = (opts && opts.webSearch) ? '|websearch' : '';
-  const raw  = ctx + tool + '||' + (system || '') + '||' + (user || '');
+  const agent = opts && opts.agentNum ? '|agent:' + opts.agentNum : '';
+  const raw  = ctx + tool + agent + '||' + (system || '') + '||' + (user || '');
   let h = 5381;
   for (let i = 0; i < raw.length; i++) {
     h = (Math.imul(33, h) ^ raw.charCodeAt(i)) | 0;
@@ -1849,7 +1850,6 @@ function clearAllCache() {
   Object.keys(memCache).forEach(k=>delete memCache[k]);
   Object.keys(localStorage).filter(k=>k.startsWith(CACHE_KEY_PREFIX)).forEach(k=>localStorage.removeItem(k));
 }
-
 
 
 const $ = id => document.getElementById(id);
@@ -2119,6 +2119,42 @@ const _BH_AGENT_ARRAY_KEYS = {
   17:['data_sources'],
 };
 
+const _BH_PRODUCTION_ACCURACY_TARGET = 95;
+const _BH_REVIEW_ACCURACY_FLOOR = 85;
+
+function _bhHasNearbySource(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  return Object.keys(obj).some(k => /source|citation|url|retrieved|verified/i.test(k) && obj[k]);
+}
+
+function _bhCollectCitationIssues(data, agentNum) {
+  const issues = [];
+  const rootHasSource = _bhHasNearbySource(data);
+  const visit = (node, path, parent) => {
+    if (node == null) return;
+    if (Array.isArray(node)) {
+      node.slice(0, 25).forEach((v, i) => visit(v, `${path}[${i}]`, node));
+      return;
+    }
+    if (typeof node !== 'object') return;
+    Object.entries(node).forEach(([k, v]) => {
+      const here = path ? `${path}.${k}` : k;
+      if (typeof v === 'number' && isFinite(v) && Math.abs(v) > 0) {
+        const critical = /cost|price|rate|tuition|revenue|income|rent|count|capacity|score|pct|percent|weeks|months|fee|amount|salary|wage|rating|sqft|slots|beds|employees|population/i.test(k);
+        if (critical && !rootHasSource && !_bhHasNearbySource(node) && !_bhHasNearbySource(parent)) {
+          issues.push(`Numeric claim ${here} lacks a nearby source/citation/url field.`);
+        }
+      }
+      if (typeof v === 'string' && /https?:\/\/(example\.com|localhost|test\.com)|555[-.\s]?01/i.test(v)) {
+        issues.push(`Placeholder or fake contact/URL detected at ${here}.`);
+      }
+      visit(v, here, node);
+    });
+  };
+  visit(data, `A${agentNum}`, null);
+  return [...new Set(issues)].slice(0, 12);
+}
+
 function _bhValidateAgentSchema(agentNum, data) {
   const issues = [];
   const n = Number(agentNum);
@@ -2133,6 +2169,7 @@ function _bhValidateAgentSchema(agentNum, data) {
   (_BH_AGENT_ARRAY_KEYS[n] || []).forEach(k => {
     if (data[k] !== undefined && !Array.isArray(data[k])) issues.push(`Field must be an array: ${k}`);
   });
+  _bhCollectCitationIssues(data, n).forEach(i => issues.push(i));
   if (data._is_fallback) issues.push('Fallback output was used; this is not production-grade evidence.');
   return { ok: issues.length === 0, issues: [...new Set(issues)], checked_at: new Date().toISOString() };
 }
@@ -2250,7 +2287,7 @@ function _bhRecordAccuracyFeedback(checks) {
   if (!R.agent_feedback) R.agent_feedback = { items: [], by_agent: {}, persistent_lessons: _bhLoadPersistentLearning() };
   const poor = checks.filter(c => {
     const m = (c.agent || '').match(/^A(\d+)/);
-    return m && c.acc != null && !isNaN(c.acc) && c.acc < 0.85;
+    return m && c.acc != null && !isNaN(c.acc) && c.acc < (_BH_PRODUCTION_ACCURACY_TARGET / 100);
   });
   if (!poor.length) return [];
   const byAgent = {};
@@ -2329,6 +2366,43 @@ function _bhRecordAllAgentFeedback() {
   }
 }
 
+function _bhFirstNumber() {
+  for (const v of arguments) {
+    const n = Number(v);
+    if (isFinite(n)) return n;
+  }
+  return null;
+}
+
+function _bhClampScore(n) {
+  n = Number(n);
+  if (!isFinite(n)) return null;
+  return Math.max(0, Math.min(100, n));
+}
+
+function _bhComputeProductionScorecard() {
+  if (typeof R !== 'object' || !R) return null;
+  const location = Array.isArray(R.a3?.locations) ? R.a3.locations[0] : null;
+  const scenario = Array.isArray(R.a7?.scenarios) ? (R.a7.scenarios.find(s => /base/i.test(s.name || s.label || '')) || R.a7.scenarios[0]) : null;
+  const riskRows = Array.isArray(R.a8?.risks) ? R.a8.risks : [];
+  const scores = {
+    market_demand: _bhClampScore(_bhFirstNumber(R.a2?.overall_opportunity_score, location?.scores?.demand, location?.overall_score)),
+    competition: _bhClampScore(_bhFirstNumber(location?.scores?.competition, R.a6?.competitive_intensity_score != null ? 100 - Number(R.a6.competitive_intensity_score) * 10 : null)),
+    compliance: _bhClampScore(_bhFirstNumber(location?.scores?.regulatory, R.a5?.total_timeline_months ? 100 - Number(R.a5.total_timeline_months) * 3 : null)),
+    real_estate: _bhClampScore(_bhFirstNumber(location?.scores?.real_estate, location?.overall_score)),
+    capital: _bhClampScore(_bhFirstNumber(scenario?.monthly_net != null && scenario?.monthly_revenue ? Number(scenario.monthly_net) / Number(scenario.monthly_revenue) * 100 + 50 : null, scenario?.roi_3yr)),
+    execution_risk: _bhClampScore(100 - Math.min(60, riskRows.filter(r => /high|critical/i.test(r.severity || '')).length * 20 + riskRows.filter(r => /medium/i.test(r.severity || '')).length * 8)),
+  };
+  const weights = { market_demand:0.24, competition:0.16, compliance:0.14, real_estate:0.14, capital:0.22, execution_risk:0.10 };
+  const parts = Object.entries(scores).filter(([,v]) => v != null);
+  const weightSum = parts.reduce((s,[k]) => s + weights[k], 0);
+  const overall = weightSum ? Math.round(parts.reduce((s,[k,v]) => s + v * weights[k], 0) / weightSum) : null;
+  const recommendation = overall == null ? 'Needs Review' : overall >= 75 ? 'Go' : overall >= 60 ? 'Cautious Go' : 'No Go';
+  const scorecard = { overall, recommendation, scores, weights, generated_at: new Date().toISOString(), method:'deterministic_weighted_evidence_v1' };
+  R.production_scorecard = scorecard;
+  return scorecard;
+}
+
 function _bhProductionBlockers() {
   const blockers = [];
   const warnings = [];
@@ -2343,13 +2417,25 @@ function _bhProductionBlockers() {
   if (feedback.length) blockers.push(`${feedback.length} agent feedback item(s) need correction before production use.`);
 
   const score = R.accuracy?.score;
-  if (score !== undefined && score !== null && Number(score) < 85) blockers.push(`Accuracy verifier score ${Math.round(Number(score))}% is below the 95-100% target.`);
+  if (score !== undefined && score !== null && Number(score) < _BH_PRODUCTION_ACCURACY_TARGET) {
+    blockers.push(`Accuracy verifier score ${Math.round(Number(score))}% is below the ${_BH_PRODUCTION_ACCURACY_TARGET}-100% production target.`);
+    if (Number(score) >= _BH_REVIEW_ACCURACY_FLOOR) warnings.push(`Accuracy score is review-grade but not production-ready: ${Math.round(Number(score))}%.`);
+  }
   const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
   if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
   if (!hasRealData && (R.a1 || R.a2) && (score === undefined || score === null)) warnings.push('No verified real-data score was available for this run.');
 
   const unsourced = Array.isArray(R.a17?.unable_to_source) ? R.a17.unable_to_source.length : 0;
   if (unsourced) blockers.push(`${unsourced} claim(s) remain unsourced in Agent 17.`);
+
+  const scorecard = _bhComputeProductionScorecard();
+  if (!scorecard || scorecard.overall == null) blockers.push('Deterministic production scorecard could not be computed from verified agent evidence.');
+  const modelVerdict = String(R.a8?.verdict || '');
+  if (scorecard?.recommendation && modelVerdict && !/needs review/i.test(modelVerdict)) {
+    const modelGo = /go|recommend|approved|yes/i.test(modelVerdict) && !/no go/i.test(modelVerdict);
+    const cardGo = /go/i.test(scorecard.recommendation) && !/no go/i.test(scorecard.recommendation);
+    if (modelGo !== cardGo) blockers.push(`Final verdict (${modelVerdict}) conflicts with deterministic scorecard (${scorecard.recommendation}, ${scorecard.overall}/100).`);
+  }
 
   return { blockers, warnings, fallbackAgents, feedbackCount: feedback.length, unsourcedClaims: unsourced };
 }
@@ -2409,10 +2495,55 @@ function _bhBuildAgentFeedbackContext() {
   return `\n\nCROSS-AGENT FEEDBACK / SELF-LEARNING MEMORY:\n${rows.map(r => '- ' + r).join('\n')}\nApply these corrections. Do not repeat known weak claims. If upstream data is missing or weak, return null/N/A and explain the limitation in notes or sources.`;
 }
 
+function _bhBuildAgentRepairContext(agentNum) {
+  const fb = R.agent_feedback?.by_agent?.[String(agentNum)];
+  if (!fb || fb.status === 'ok') return '';
+  const checks = (fb.accuracy_checks || []).slice(0, 6).map(c =>
+    `- ${c.field}: replace AI value ${c.aiFmt || c.ai} with verified ${c.realFmt || c.real} from ${c.source || 'verified source'}; previous match ${c.match_pct}%.`
+  );
+  const issues = (fb.issues || []).slice(0, 6).map(i => `- ${i}`);
+  const actions = (fb.actions || []).slice(0, 6).map(a => `- ${a}`);
+  return `\n\nACCURACY REPAIR REQUIRED FOR AGENT ${agentNum}:\n${[...checks, ...issues, ...actions].join('\n')}\nReturn corrected JSON only. Preserve valid sourced fields. Replace unverifiable values with null/N/A.`;
+}
+
 function _bhWithAgentFeedback(user, opts={}) {
   if (opts.skipFeedback) return user;
   const ctx = _bhBuildAgentFeedbackContext();
-  return ctx ? user + ctx : user;
+  const repair = opts.agentNum ? _bhBuildAgentRepairContext(opts.agentNum) : '';
+  return user + (ctx || '') + (repair || '');
+}
+
+function _bhDependencyFallbacks(deps) {
+  if (demoMode) return [];
+  return (deps || []).filter(n => {
+    const d = _bhAgentData(n);
+    return d && typeof d === 'object' && d._is_fallback;
+  });
+}
+
+function _bhAssertNoFallbackDeps(agentNum, deps) {
+  const failed = _bhDependencyFallbacks(deps);
+  if (failed.length) {
+    throw new Error(`Agent ${agentNum} blocked: upstream fallback output from A${failed.join(', A')} must be repaired before downstream analysis.`);
+  }
+}
+
+function _bhAccuracyRepairAgents() {
+  const items = R.agent_feedback?.items || [];
+  const agents = [];
+  items.forEach(i => {
+    if (i.status !== 'ok' && i.agent && !agents.includes(i.agent)) agents.push(i.agent);
+  });
+  if (Array.isArray(R.accuracy?.checks)) {
+    R.accuracy.checks.forEach(c => {
+      const m = (c.agent || '').match(/^A(\d+)/);
+      if (m && c.acc != null && c.acc < (_BH_PRODUCTION_ACCURACY_TARGET / 100)) {
+        const n = parseInt(m[1], 10);
+        if (!agents.includes(n)) agents.push(n);
+      }
+    });
+  }
+  return agents.filter(n => n >= 1 && n <= 17).slice(0, 6);
 }
 
 // Retry an agent call up to 2 times if JSON parse fails
@@ -2467,6 +2598,7 @@ CRITICAL — NUMERIC PRECISION:
 CRITICAL - SOURCE COVERAGE:
 - For every numeric claim in an array row, include a nearby source/source_url/citation field when the schema provides one.
 - If the schema lacks a source field, put the source name in the nearest summary, notes, or data_sources field.
+- Every recommendation-critical value should be emitted as or accompanied by: value, source_name/source, source_url/citation, retrieved_at/last_updated, confidence, and verification_method when the schema has room for it.
 - Never output placeholder URLs, "example.com", fake phone numbers, or sample addresses. Use "N/A" instead.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped
@@ -2933,7 +3065,7 @@ Return ONLY this JSON:
 
   try {
     _setDemoKey(1);
-    let d=await claudeJSON(sys, usrWithReal, {webSearch:true});
+    let d=await claudeJSON(sys, usrWithReal, {webSearch:true, agentNum:1});
     if(!d) { console.warn('Agent 1 Part 1 fallback'); d=getFallback1(); }
     R.a1=d;
 
@@ -3016,7 +3148,7 @@ Return ONLY this JSON:
     if (!demoMode) {
       try {
         const sys2 = `You are a community profile analyst. Return only accurate JSON — no text before or after.`;
-        const cp = await claudeJSON(sys2, usr2, {webSearch:true});
+        const cp = await claudeJSON(sys2, usr2, {webSearch:true, agentNum:1});
         if (cp) {
           // Merge community profile fields into R.a1
           const cpFields = ['age_pyramid','generation_breakdown','multi_radius','consumer_expenditure',
@@ -3115,7 +3247,7 @@ Return ONLY this JSON:
 }
 For each item provide 4-6 numbered steps with SPECIFIC actions (not generic). Include actual form names, website paths, and timing caveats.`;
     try {
-      const partB = await claudeJSON(sysB, usrB, {webSearch:true});
+      const partB = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:5});
       if (partB && Array.isArray(partB.instructions)) {
         partB.instructions.forEach(inst => {
           const req = reqs.find(r => r.item === inst.item ||
@@ -3133,7 +3265,7 @@ For each item provide 4-6 numbered steps with SPECIFIC actions (not generic). In
   }
 
   try {
-    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true}) : (R.a5 || null);
+    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true, agentNum:5}) : (R.a5 || null);
     if(!d) { console.warn('Agent 5 fallback'); d=getFallback5(); }
     R.a5=d;
 
@@ -3336,7 +3468,7 @@ Use REAL data for ZIP ${zip()}. Revenue model: ${ind.revenue_unit}.`;
 
   try {
     // webSearch=true: Anthropic provider uses live search to find real businesses
-    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true}) : (R.a6 || null);
+    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true, agentNum:6}) : (R.a6 || null);
     // Fallback: if claudeJSON returns null after 3 retries, use baseline data
     if(!d) {
       console.warn('Agent 6: using baseline fallback data');
@@ -3457,7 +3589,7 @@ Return ONLY this JSON:
   ]
 }`;
   try {
-    const partB = await claudeJSON(sys6b, usr6b, {webSearch:true});
+    const partB = await claudeJSON(sys6b, usr6b, {webSearch:true, agentNum:6});
     if (partB && Array.isArray(partB.cities)) {
       partB.cities.forEach(bc => {
         const cityObj = (data.cities||[]).find(c => c.city === bc.city ||
@@ -3667,7 +3799,7 @@ Use recommended_tuition_infant as the primary price point and recommended_tuitio
 For pricing, cross-reference NDCP county median rates to validate recommendations (premium operators typically price 10-20% above market median).`;
   try {
     _setDemoKey(2);
-    let d=await claudeJSON(sys,usr,{webSearch:true});
+    let d=await claudeJSON(sys,usr,{webSearch:true, agentNum:2});
     if(!d) { console.warn('Agent 2 fallback'); d=getFallback2(); }
     R.a2=d;
 
@@ -3848,7 +3980,7 @@ Return ONLY:
 }`;
   try {
     _setDemoKey(3);
-    let d=await claudeJSON(sys, usr, {webSearch:true});
+    let d=await claudeJSON(sys, usr, {webSearch:true, agentNum:3});
     if(!d) { console.warn('Agent 3 fallback'); d=getFallback3(); }
     R.a3=d;
     $('3-s-t').textContent=d.summary||'';
@@ -4021,7 +4153,7 @@ ZIP/city/state — do not echo the literal template strings shown here.
 }`;
   try {
     _setDemoKey(4);
-    let d=await claudeJSON(sys, usr, {webSearch:true});
+    let d=await claudeJSON(sys, usr, {webSearch:true, agentNum:4});
     if(!d) { console.warn('Agent 4 fallback'); d=getFallback4(); }
     R.a4=d;
     $('4-s-t').textContent=d.summary+'\n\nSearch links: LoopNet · BizBuySell · Crexi · CoStar';
@@ -4148,7 +4280,7 @@ with values grounded in the user's specific ZIP / industry / KEY FINDINGS data).
     // Show panel early so streaming text is visible immediately
     showOut(8);
     // Stream response into summary prose panel while building
-    let d = await claudeStreamJSON(sys, usr, '8-s-t', {webSearch:true});
+    let d = await claudeStreamJSON(sys, usr, '8-s-t', {webSearch:true, agentNum:8});
     if(!d) { console.warn('Agent 8 fallback'); d=getFallback8(); }
     R.a8=d;
     if (typeof rdRenderRealDataBadge === 'function') rdRenderRealDataBadge('8-s-t', ['demographics','wages','macro','rents','competitors_osm']);
@@ -4819,7 +4951,7 @@ Use REAL coordinates for all cities. Cap at 8 cities, 4 real estate pins at top 
   try {
     const _rdCtx11 = (typeof buildRealDataCtx === 'function') ? buildRealDataCtx(['demographics','business_density','wages']) : '';
     const usrWithCtx = _rdCtx11 ? _rdCtx11 + '\n\n' + usr : usr;
-    let d=await claudeJSON(sys, usrWithCtx, {webSearch:true});
+    let d=await claudeJSON(sys, usrWithCtx, {webSearch:true, agentNum:11});
     if(!d) { console.warn('Agent 11 fallback'); d=getFallback11(); }
     R.a11=d;
     buildMap(d);
@@ -5077,7 +5209,7 @@ Return ONLY:
 }
 Use REAL URLs, phone numbers, and dollar amounts for ZIP ${zip()} state.`;
     try {
-      const partB = await claudeJSON(sysB, usrB, {webSearch:true});
+      const partB = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:12});
       if (!partB) return;
       if (partB.industry_subsidy) data.caps_program = partB.industry_subsidy;
       if (partB.state_program) data.georgia_pre_k = partB.state_program;
@@ -5090,7 +5222,7 @@ Use REAL URLs, phone numbers, and dollar amounts for ZIP ${zip()} state.`;
 
   try {
     // webSearch=true: Claude uses live search to verify grant program details
-    let d = await claudeJSON(sysA, usrA, {webSearch:true});
+    let d = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:12});
     if(!d) { console.warn('Agent 12 fallback'); d=getFallback12(); }
     R.a12 = d;
     buildGrants(d);
@@ -5253,7 +5385,7 @@ Return ONLY:
 }
 Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
-    const partA = await claudeJSON(sysA, usrA, {webSearch:true});
+    const partA = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:13});
 
     // ── Part B: Pain Points + Differentiation ───────────────
     const competitorNames = (partA?.competitor_profiles || []).map(c => c.name).join(', ');
@@ -5281,7 +5413,7 @@ Return ONLY:
 }
 Include 6-8 pain points (with real frequency estimates from review data) and 5-6 differentiation pillars.`;
 
-    const partB = await claudeJSON(sysB, usrB, {webSearch:true});
+    const partB = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:13});
 
     // ── Part C: Messaging Guide ──────────────────────────────
     const sysC = `You are a ${ind.unit} marketing strategist. Respond JSON only.`;
@@ -5300,7 +5432,7 @@ Return ONLY:
 }
 Include 5 distinct audience segments with messaging tailored to their specific competitor frustrations.`;
 
-    const partC = await claudeJSON(sysC, usrC, {webSearch:true});
+    const partC = await claudeJSON(sysC, usrC, {webSearch:true, agentNum:13});
 
     // Merge all 3 parts
     const d = Object.assign(
@@ -5514,10 +5646,10 @@ Return ONLY:
 Include all 15 active agents (1,2,3,4,5,6,7,8,9,10,11,12,13,16,17) with realistic token estimates.`;
 
   try {
-    const partA = await claudeJSON(sysCommon, usrA);
+    const partA = await claudeJSON(sysCommon, usrA, {agentNum:14});
     if (_t14) _t14.innerHTML = subProgress(2, 2, 'Building cost analysis…');
     // webSearch: fetch current Claude API pricing (rates change frequently)
-    const partB = await claudeJSON(sysCommon, usrB, {webSearch:true});
+    const partB = await claudeJSON(sysCommon, usrB, {webSearch:true, agentNum:14});
 
     const d = Object.assign({}, partA || {}, partB || {});
     if (!d.summary && !d.issues) { console.warn('Agent 14 fallback'); Object.assign(d, getFallback14()); }
@@ -5699,7 +5831,7 @@ Return ONLY this JSON (we will inject data_validation counts from real JS-side s
 Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with 4-6 tests each based on actual results above.`;
 
   try {
-    let d = await claudeJSON(sys, usr);
+    let d = await claudeJSON(sys, usr, {agentNum:15});
     if (!d) { console.warn('Agent 15 fallback'); d = getFallback15(); }
     // Inject real data_validation from JS-side counts (we asked Claude to skip it)
     d.data_validation = {
@@ -5778,6 +5910,53 @@ function renderQA(d) {
 }
 
 
+async function _bhRunAgentInternal(n) {
+  const s = k => JSON.stringify(R['a'+k]||{});
+  if(n===1)      return await runAgent1();
+  else if(n===2) return await runAgent2(s(1),s(5),s(6));
+  else if(n===3) return await runAgent3(s(1),s(2),s(5));
+  else if(n===4) return await runAgent4(s(3),s(5));
+  else if(n===5) return await runAgent5();
+  else if(n===6) return await runAgent6();
+  else if(n===7) return await runAgent7(s(3),s(4),s(5),s(1),s(2));
+  else if(n===8) return await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7));
+  else if(n===9) return await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8));
+  else if(n===10)return await runAgent10(s(3),s(4),s(5),s(7),s(9));
+  else if(n===11)return await runAgent11(s(1),s(2),s(4));
+  else if(n===12)return await runAgent12(s(3),s(5));
+  else if(n===13)return await runAgent13(s(6));
+  else if(n===14)return await runAgent14(R);
+  else if(n===15)return await runAgent15(R);
+  else if(n===16 && typeof runAgent16 === 'function') return await runAgent16(s(3),s(4),s(7),s(8));
+  else if(n===17 && typeof runAgent17 === 'function') return await runAgent17(R);
+  return null;
+}
+
+async function _bhRunAccuracyRepairPass() {
+  if (demoMode || typeof _bhAccuracyRepairAgents !== 'function') return [];
+  const score = R.accuracy?.score;
+  const agents = _bhAccuracyRepairAgents().filter(n => n <= 17);
+  if (!agents.length || score == null || score >= 95) return [];
+  R.accuracy_repair = { started_at: Date.now(), agents, before_score: score, attempts: [] };
+  for (const n of agents) {
+    if (stopRequested) break;
+    try {
+      setProgress(98, `Accuracy repair - Agent ${n}...`);
+      await _bhRunAgentInternal(n);
+      if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]);
+      R.accuracy_repair.attempts.push({ agent:n, status:'rerun' });
+    } catch(e) {
+      console.warn(`Accuracy repair failed for A${n}:`, e.message);
+      R.accuracy_repair.attempts.push({ agent:n, status:'failed', error:e.message });
+    }
+  }
+  if (typeof runAccuracyVerifier === 'function' && R.real) {
+    try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed after repair:', e.message); }
+  }
+  R.accuracy_repair.after_score = R.accuracy?.score ?? null;
+  R.accuracy_repair.finished_at = Date.now();
+  return R.accuracy_repair.attempts;
+}
 
 async function runPipeline() {
   if(running) return;
@@ -5794,10 +5973,15 @@ async function runPipeline() {
   $('orchStatus').textContent='orchestrating…';
   $('finalBox').className='final-box';
 
-  const fb     = k => JSON.stringify(window['getFallback'+k]?.() || {});
+  const fb     = k => {
+    const d = window['getFallback'+k]?.() || {};
+    R['a'+k] = d;
+    return JSON.stringify(d);
+  };
   const cached = k => R['a'+k] ? JSON.stringify(R['a'+k]) : null;
   const best   = k => cached(k) || fb(k);
   const learn  = n => { try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) { console.warn('Agent feedback failed for A'+n, e.message); } };
+  const depsOk = (n, deps) => { if (typeof _bhAssertNoFallbackDeps === 'function') _bhAssertNoFallbackDeps(n, deps); };
   try {
     // ── Phase 0: Real Data Prefetch (parallel, non-blocking) ─
     // Fires all free-API calls BEFORE agents start so every prompt
@@ -5847,6 +6031,7 @@ async function runPipeline() {
     setProgress(16, phaseShouldRun(2)?'Phase 2 — Gap Analysis…':'Phase 2 — skipped');
     let r2=best(2);
     if (phaseShouldRun(2)) {
+      depsOk(2, [1,5,6]);
       try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); r2=fb(2); }
       learn(2);
     }
@@ -5856,6 +6041,7 @@ async function runPipeline() {
     setProgress(24, phaseShouldRun(3)?'Phase 3 — Site Selection…':'Phase 3 — skipped');
     let r3=best(3);
     if (phaseShouldRun(3)) {
+      depsOk(3, [1,2,5]);
       try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); r3=fb(3); }
       learn(3);
     }
@@ -5865,6 +6051,7 @@ async function runPipeline() {
     setProgress(32, phaseShouldRun(4)?'Phase 4 — Real Estate Search…':'Phase 4 — skipped');
     let r4=best(4);
     if (phaseShouldRun(4)) {
+      depsOk(4, [3,5]);
       try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); r4=fb(4); }
       learn(4);
     }
@@ -5874,6 +6061,7 @@ async function runPipeline() {
     setProgress(40, phaseShouldRun(5)?'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…':'Phase 5 — skipped');
     let r7=best(7);
     if (phaseShouldRun(5)) {
+      depsOk(7, [1,2,3,4,5]);
       try { r7=await runAgent7(r3,r4,r5,r1,r2); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
       learn(7);
     }
@@ -5883,6 +6071,7 @@ async function runPipeline() {
     setProgress(50, phaseShouldRun(6)?'Phase 6 — Executive Summary & Verdict…':'Phase 6 — skipped');
     let r8=best(8);
     if (phaseShouldRun(6)) {
+      depsOk(8, [1,2,3,4,5,6,7]);
       try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); r8=fb(8); }
       learn(8);
     }
@@ -5892,6 +6081,7 @@ async function runPipeline() {
     setProgress(58, phaseShouldRun(7)?'Phase 7 — Business Plan (4 focused sub-agents)…':'Phase 7 — skipped');
     let r9=best(9);
     if (phaseShouldRun(7)) {
+      depsOk(9, [1,2,3,4,5,6,7,8]);
       try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); r9=fb(9); }
       learn(9);
     }
@@ -5900,7 +6090,8 @@ async function runPipeline() {
     // ── Phase 8: Project Plan (3 sub-calls) ──────────────────
     setProgress(66, phaseShouldRun(8)?'Phase 8 — Project Plan (3 focused sub-agents)…':'Phase 8 — skipped');
     if (phaseShouldRun(8)) {
-      try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+      depsOk(10, [3,4,5,7,9]);
+      try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); fb(10); }
       learn(10);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
@@ -5908,19 +6099,23 @@ async function runPipeline() {
     // ── Phase 9: Supplemental Analysis (dependency-gated) ───
     if (phaseShouldRun(9)) {
       setProgress(72,'Phase 9 — Market map…');
-      try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); }
+      depsOk(11, [1,2,4]);
+      try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); fb(11); }
       learn(11);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(76,'Phase 9 — Grants and incentives…');
-      try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); }
+      depsOk(12, [3,5]);
+      try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); fb(12); }
       learn(12);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(80,'Phase 9 — Competitor deep-dive…');
-      try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); }
+      depsOk(13, [6]);
+      try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); fb(13); }
       learn(13);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(84,'Phase 9 — Build vs buy analysis…');
-      try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); }
+      depsOk(16, [3,4,7,8]);
+      try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); fb(16); }
       learn(16);
       // Apply fallbacks for any phase 9 agent that failed and has no data
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
@@ -5937,10 +6132,10 @@ async function runPipeline() {
     // ── Phase 11: Meta Agents ────────────────────────────────
     if (phaseShouldRun(11)) {
       setProgress(86,'Phase 11 — Code Review · QA Testing…');
-      try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+      try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); fb(14); }
       learn(14);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
-      try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+      try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); fb(15); }
       learn(15);
     } else {
       setProgress(86,'Phase 11 — skipped');
@@ -5953,7 +6148,7 @@ async function runPipeline() {
       try {
         if(typeof runAgent17==='function') await runAgent17(R);
         learn(17);
-      } catch(e) { console.error('Agent 17 failed:',e.message); }
+      } catch(e) { console.error('Agent 17 failed:',e.message); fb(17); }
     } else {
       setProgress(94,'Phase 12 — skipped');
     }
@@ -5964,6 +6159,8 @@ async function runPipeline() {
     if (typeof runAccuracyVerifier === 'function' && R.real) {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
     }
+    if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
+    if (typeof _bhRunAccuracyRepairPass === 'function') await _bhRunAccuracyRepairPass();
     if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
     if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate();
   } catch(e) {
@@ -5993,25 +6190,8 @@ async function reRunAgent(n) {
   if(btn) btn.style.display='none';
   running=true;
   try {
-    const s = k => JSON.stringify(R['a'+k]||{});
     // runAgent1 (and all others) write R.aN internally. Don't double-assign.
-    if(n===1)      { await runAgent1(); }
-    else if(n===2) { await runAgent2(s(1),s(5),s(6)); }
-    else if(n===3) { await runAgent3(s(1),s(2),s(5)); }
-    else if(n===4) { await runAgent4(s(3),s(5)); }
-    else if(n===5) { await runAgent5(); }
-    else if(n===6) { await runAgent6(); }
-    else if(n===7) { await runAgent7(s(3),s(4),s(5),s(1),s(2)); }
-    else if(n===8) { await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7)); }
-    else if(n===9) { await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8)); }
-    else if(n===10){ await runAgent10(s(3),s(4),s(5),s(7),s(9)); }
-    else if(n===11){ await runAgent11(s(1),s(2),s(4)); }
-    else if(n===12){ await runAgent12(s(3),s(5)); }
-    else if(n===13){ await runAgent13(s(6)); }
-    else if(n===14){ await runAgent14(R); }
-    else if(n===15){ await runAgent15(R); }
-    else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
-    else if(n===17){ await runAgent17(R); }
+    await _bhRunAgentInternal(n);
     try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) {}
     try { if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate(); } catch(e) {}
   } catch(e) {
@@ -6180,7 +6360,6 @@ function resetAll() {
   // Empty R in-place so other modules that hold a reference see the cleared object
   Object.keys(R).forEach(k => { delete R[k]; });
 }
-
 
 
 // ══════════════════════════════════════════════════════════
@@ -6470,7 +6649,7 @@ is different; do not echo example numbers.
 }`;
 
   // ── Part 2 of 4: Market Analysis ────────────────────────
-  const p1 = await claudeJSON(sys1, usr1, {webSearch:true});
+  const p1 = await claudeJSON(sys1, usr1, {webSearch:true, agentNum:9});
   $('9-mkt-c').innerHTML = subProgress(2,4,'Market Analysis & Competitive Positioning');
   const sys2 = `You are a market research analyst. Return JSON only.`;
   const usr2 = `Write Part 2 — market analysis — for a ${base}.
@@ -6498,7 +6677,7 @@ Return ONLY this JSON. All values are placeholders.
 }`;
 
   // ── Part 3 of 4: Operations Plan + Financial Plan ───────
-  const p2 = await claudeJSON(sys2, usr2, {webSearch:true});
+  const p2 = await claudeJSON(sys2, usr2, {webSearch:true, agentNum:9});
   $('9-fin-c').innerHTML = subProgress(3,4,'Operations Plan & Financial Model');
   const sys3 = `You are a ${ind.unit} operations and finance expert. Return JSON only.`;
   const usr3 = `Write Part 3 — operations and financial plan — for a ${base}.
@@ -6553,7 +6732,7 @@ this schema.
 
   // ── Part 4 of 4: SBA Checklist + Investor Slides ────────
   // webSearch: find real SBA lender contacts and current commercial rent comps
-  const p3 = await claudeJSON(sys3, usr3, {webSearch:true});
+  const p3 = await claudeJSON(sys3, usr3, {webSearch:true, agentNum:9});
   $('9-sba-c').innerHTML = subProgress(4,4,'SBA Package & Investor Deck');
   const sys4 = `You are an SBA loan consultant and startup pitch coach. Return JSON only.`;
   const usr4 = `Write Part 4 — SBA checklist and investor pitch deck — for a ${base}.
@@ -6580,7 +6759,7 @@ fields must be populated from upstream context, not from this schema.
   ]
 }`;
 
-  const p4 = await claudeJSON(sys4, usr4, {webSearch:true});
+  const p4 = await claudeJSON(sys4, usr4, {webSearch:true, agentNum:9});
 
   // Merge all 4 parts into one object
   const merged = Object.assign(
@@ -6668,7 +6847,7 @@ amount as a literal output.
 Include ALL 5 phases: Foundation & Funding (1-3), Legal/Lease/Design (3-6), Construction & Licensing (6-12), Staffing & Pre-Opening (12-16), Soft Open & Ramp (16-18). Each phase 8-12 tasks. Priority strings exactly "Critical", "High", "Medium".`;
 
   // ── Part 2 of 3: Milestones + Budget Tracker ─────────────
-  const p1 = await claudeJSON(sys1, usr1, {webSearch:true});
+  const p1 = await claudeJSON(sys1, usr1, {webSearch:true, agentNum:10});
   $('10-mile-c').innerHTML = subProgress(2,3,'Milestones & Budget Tracker');
   const sys2 = `You are a ${ind.unit} project manager. Return JSON only.`;
   const usr2 = `${_rdCtx10 ? _rdCtx10 + '\n\n' : ''}Create milestones and budget tracker for launching a ${base}.
@@ -6700,7 +6879,7 @@ Return ONLY this JSON. All values are placeholders.
 15-20 milestones from Week 1 through Month 18. 15-20 budget line items covering all startup costs with cost-driver notes.`;
 
   // ── Part 3 of 3: Risk Register + Team + Checklist ────────
-  const p2 = await claudeJSON(sys2, usr2, {webSearch:true});
+  const p2 = await claudeJSON(sys2, usr2, {webSearch:true, agentNum:10});
   $('10-risk-c').innerHTML = subProgress(3,3,'Risk Register, Team & Checklist');
   const sys3 = `You are a ${ind.unit} project risk manager and operations consultant. Return JSON only.`;
   const usr3 = `Create risk register, team/vendor directory, and launch checklist for a ${base}.
@@ -6742,7 +6921,7 @@ Return ONLY this JSON. All values are placeholders.
 }
 Risk register: 8-10. Team/vendors: 10-14 (only include vendors you can actually verify — null phone/contact if unknown). Checklist: 5 phases × 10-15 items.`;
 
-  const p3 = await claudeJSON(sys3, usr3, {webSearch:true});
+  const p3 = await claudeJSON(sys3, usr3, {webSearch:true, agentNum:10});
 
   // Merge all 3 parts
   return Object.assign(
@@ -6824,7 +7003,7 @@ Return ONLY:
   ]
 }`;
 
-  const revModel = await claudeJSON(sysA, usrA, {webSearch:true}) || {};
+  const revModel = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:7}) || {};
 
   // ── Sub-call B: Cost Model ──────────────────────────────
   $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/3: Cost Model…');
@@ -6867,7 +7046,7 @@ Return ONLY:
   "total_variable_at_base": 0
 }`;
 
-  const costModel = await claudeJSON(sysB, usrB, {webSearch:true}) || {};
+  const costModel = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:7}) || {};
 
   // ── Main Consolidating Call ─────────────────────────────
   $('7-sc-c').innerHTML = subProgress(3, 3, 'Consolidating…');
@@ -6932,7 +7111,7 @@ Return ONLY:
 }`;
 
   try {
-    let main = await claudeJSON(sysMain, usrMain, {webSearch:true});
+    let main = await claudeJSON(sysMain, usrMain, {webSearch:true, agentNum:7});
     if (!main) { console.warn('Agent 7 consolidation fallback'); main = getFallback7(); }
 
     // Merge sub-model arrays into result so renderAgent7 can use them.
@@ -7188,7 +7367,7 @@ Return ONLY:
 
   // (No _setDemoKey here — demo path already returned above. Live path uses
   // real claudeJSON calls for all three sub-agents.)
-  const listingsData = await claudeJSON(sysA, usrA, {webSearch:true});
+  const listingsData = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:16});
 
   // ── Sub-call B: Build Analysis ──────────────────────────
   if (outEl) {
@@ -7229,7 +7408,7 @@ Return ONLY:
   }
 }`;
 
-  const analysisData = await claudeJSON(sysB, usrB, {webSearch:true});
+  const analysisData = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:16});
 
   // ── Sub-call C: Recommendation ──────────────────────────
   if (outEl) {
@@ -7270,7 +7449,7 @@ Return ONLY:
   ]
 }`;
 
-  const recData = await claudeJSON(sysC, usrC);
+  const recData = await claudeJSON(sysC, usrC, {agentNum:16});
 
   // ── Merge & store ───────────────────────────────────────
   const merged = Object.assign(
@@ -10999,6 +11178,7 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
   const INPUT_CHAR_LIMIT = 80000;  // ~20k tokens — well under 200k context
   const MAX_RETRY_PROMPT = 40000;  // Smaller prompt for retry
 
+  const callOpts = opts.agentNum ? opts : { ...opts, agentNum: parseInt(agentNum, 10) || undefined };
   let activeUser = user;
 
   // Guard: truncate if input is huge
@@ -11009,7 +11189,7 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
   }
 
   try {
-    const result = await claudeJSON(system, activeUser, opts);
+    const result = await claudeJSON(system, activeUser, callOpts);
     if (result) return result;
     throw new Error('Null result');
   } catch (e) {
@@ -11037,7 +11217,7 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
       '\n\n[Context condensed. Return a SHORTER JSON with the same schema — use concise 1-sentence strings instead of detailed paragraphs. Schema structure must be preserved exactly.]';
 
     try {
-      const retryOpts = opts.webSearch ? { ...opts, webSearch:true, webSearchMaxUses: Math.min(opts.webSearchMaxUses || 2, 2) } : opts;
+      const retryOpts = callOpts.webSearch ? { ...callOpts, webSearch:true, webSearchMaxUses: Math.min(callOpts.webSearchMaxUses || 2, 2) } : callOpts;
       const retryResult = await claudeJSON(system, shortUser, retryOpts);
       if (retryResult) return retryResult;
     } catch (retryErr) {
@@ -14758,8 +14938,8 @@ function rdRenderFinancialBadge(elId) {
     if (!statusEl) return;
     meta = meta || {};
 
-    const color = pct >= 85 ? 'var(--green)' : pct >= 70 ? 'var(--amber)' : 'var(--red)';
-    const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : 'D';
+    const color = pct >= 95 ? 'var(--green)' : pct >= 85 ? 'var(--amber)' : 'var(--red)';
+    const grade = pct >= 95 ? 'A' : pct >= 85 ? 'B' : pct >= 70 ? 'C' : 'D';
 
     const typeBadge = {
       exact:          {label:'EXACT',     color:'var(--green)',  bg:'rgba(34,197,94,0.15)'},
@@ -14773,7 +14953,7 @@ function rdRenderFinancialBadge(elId) {
     const sorted = [...checks].sort((a,b) => (order[a.match_type]??9) - (order[b.match_type]??9));
     const rows = sorted.map(c => {
       const ap  = Math.round(c.acc * 100);
-      const col = ap >= 85 ? 'var(--green)' : ap >= 70 ? 'var(--amber)' : 'var(--red)';
+      const col = ap >= 95 ? 'var(--green)' : ap >= 85 ? 'var(--amber)' : 'var(--red)';
       const bar = `<div style="width:${ap}%;height:3px;background:${col};border-radius:2px"></div>`;
       const tb  = typeBadge[c.match_type] || typeBadge.exact;
       return `<tr style="border-top:1px solid var(--border)">

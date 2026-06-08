@@ -53,7 +53,7 @@ Use REAL coordinates for all cities. Cap at 8 cities, 4 real estate pins at top 
   try {
     const _rdCtx11 = (typeof buildRealDataCtx === 'function') ? buildRealDataCtx(['demographics','business_density','wages']) : '';
     const usrWithCtx = _rdCtx11 ? _rdCtx11 + '\n\n' + usr : usr;
-    let d=await claudeJSON(sys, usrWithCtx, {webSearch:true});
+    let d=await claudeJSON(sys, usrWithCtx, {webSearch:true, agentNum:11});
     if(!d) { console.warn('Agent 11 fallback'); d=getFallback11(); }
     R.a11=d;
     buildMap(d);

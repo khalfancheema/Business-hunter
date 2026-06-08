@@ -71,7 +71,7 @@ ZIP/city/state — do not echo the literal template strings shown here.
 }`;
   try {
     _setDemoKey(4);
-    let d=await claudeJSON(sys, usr, {webSearch:true});
+    let d=await claudeJSON(sys, usr, {webSearch:true, agentNum:4});
     if(!d) { console.warn('Agent 4 fallback'); d=getFallback4(); }
     R.a4=d;
     $('4-s-t').textContent=d.summary+'\n\nSearch links: LoopNet · BizBuySell · Crexi · CoStar';

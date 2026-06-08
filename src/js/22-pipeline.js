@@ -1,3 +1,51 @@
+async function _bhRunAgentInternal(n) {
+  const s = k => JSON.stringify(R['a'+k]||{});
+  if(n===1)      return await runAgent1();
+  else if(n===2) return await runAgent2(s(1),s(5),s(6));
+  else if(n===3) return await runAgent3(s(1),s(2),s(5));
+  else if(n===4) return await runAgent4(s(3),s(5));
+  else if(n===5) return await runAgent5();
+  else if(n===6) return await runAgent6();
+  else if(n===7) return await runAgent7(s(3),s(4),s(5),s(1),s(2));
+  else if(n===8) return await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7));
+  else if(n===9) return await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8));
+  else if(n===10)return await runAgent10(s(3),s(4),s(5),s(7),s(9));
+  else if(n===11)return await runAgent11(s(1),s(2),s(4));
+  else if(n===12)return await runAgent12(s(3),s(5));
+  else if(n===13)return await runAgent13(s(6));
+  else if(n===14)return await runAgent14(R);
+  else if(n===15)return await runAgent15(R);
+  else if(n===16 && typeof runAgent16 === 'function') return await runAgent16(s(3),s(4),s(7),s(8));
+  else if(n===17 && typeof runAgent17 === 'function') return await runAgent17(R);
+  return null;
+}
+
+async function _bhRunAccuracyRepairPass() {
+  if (demoMode || typeof _bhAccuracyRepairAgents !== 'function') return [];
+  const score = R.accuracy?.score;
+  const agents = _bhAccuracyRepairAgents().filter(n => n <= 17);
+  if (!agents.length || score == null || score >= 95) return [];
+  R.accuracy_repair = { started_at: Date.now(), agents, before_score: score, attempts: [] };
+  for (const n of agents) {
+    if (stopRequested) break;
+    try {
+      setProgress(98, `Accuracy repair - Agent ${n}...`);
+      await _bhRunAgentInternal(n);
+      if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]);
+      R.accuracy_repair.attempts.push({ agent:n, status:'rerun' });
+    } catch(e) {
+      console.warn(`Accuracy repair failed for A${n}:`, e.message);
+      R.accuracy_repair.attempts.push({ agent:n, status:'failed', error:e.message });
+    }
+  }
+  if (typeof runAccuracyVerifier === 'function' && R.real) {
+    try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed after repair:', e.message); }
+  }
+  R.accuracy_repair.after_score = R.accuracy?.score ?? null;
+  R.accuracy_repair.finished_at = Date.now();
+  return R.accuracy_repair.attempts;
+}
+
 async function runPipeline() {
   if(running) return;
   const proxyReady = typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy();
@@ -13,10 +61,15 @@ async function runPipeline() {
   $('orchStatus').textContent='orchestrating…';
   $('finalBox').className='final-box';
 
-  const fb     = k => JSON.stringify(window['getFallback'+k]?.() || {});
+  const fb     = k => {
+    const d = window['getFallback'+k]?.() || {};
+    R['a'+k] = d;
+    return JSON.stringify(d);
+  };
   const cached = k => R['a'+k] ? JSON.stringify(R['a'+k]) : null;
   const best   = k => cached(k) || fb(k);
   const learn  = n => { try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) { console.warn('Agent feedback failed for A'+n, e.message); } };
+  const depsOk = (n, deps) => { if (typeof _bhAssertNoFallbackDeps === 'function') _bhAssertNoFallbackDeps(n, deps); };
   try {
     // ── Phase 0: Real Data Prefetch (parallel, non-blocking) ─
     // Fires all free-API calls BEFORE agents start so every prompt
@@ -66,6 +119,7 @@ async function runPipeline() {
     setProgress(16, phaseShouldRun(2)?'Phase 2 — Gap Analysis…':'Phase 2 — skipped');
     let r2=best(2);
     if (phaseShouldRun(2)) {
+      depsOk(2, [1,5,6]);
       try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); r2=fb(2); }
       learn(2);
     }
@@ -75,6 +129,7 @@ async function runPipeline() {
     setProgress(24, phaseShouldRun(3)?'Phase 3 — Site Selection…':'Phase 3 — skipped');
     let r3=best(3);
     if (phaseShouldRun(3)) {
+      depsOk(3, [1,2,5]);
       try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); r3=fb(3); }
       learn(3);
     }
@@ -84,6 +139,7 @@ async function runPipeline() {
     setProgress(32, phaseShouldRun(4)?'Phase 4 — Real Estate Search…':'Phase 4 — skipped');
     let r4=best(4);
     if (phaseShouldRun(4)) {
+      depsOk(4, [3,5]);
       try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); r4=fb(4); }
       learn(4);
     }
@@ -93,6 +149,7 @@ async function runPipeline() {
     setProgress(40, phaseShouldRun(5)?'Phase 5 — Financial Feasibility (revenue model · cost model · analysis)…':'Phase 5 — skipped');
     let r7=best(7);
     if (phaseShouldRun(5)) {
+      depsOk(7, [1,2,3,4,5]);
       try { r7=await runAgent7(r3,r4,r5,r1,r2); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
       learn(7);
     }
@@ -102,6 +159,7 @@ async function runPipeline() {
     setProgress(50, phaseShouldRun(6)?'Phase 6 — Executive Summary & Verdict…':'Phase 6 — skipped');
     let r8=best(8);
     if (phaseShouldRun(6)) {
+      depsOk(8, [1,2,3,4,5,6,7]);
       try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); r8=fb(8); }
       learn(8);
     }
@@ -111,6 +169,7 @@ async function runPipeline() {
     setProgress(58, phaseShouldRun(7)?'Phase 7 — Business Plan (4 focused sub-agents)…':'Phase 7 — skipped');
     let r9=best(9);
     if (phaseShouldRun(7)) {
+      depsOk(9, [1,2,3,4,5,6,7,8]);
       try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); r9=fb(9); }
       learn(9);
     }
@@ -119,7 +178,8 @@ async function runPipeline() {
     // ── Phase 8: Project Plan (3 sub-calls) ──────────────────
     setProgress(66, phaseShouldRun(8)?'Phase 8 — Project Plan (3 focused sub-agents)…':'Phase 8 — skipped');
     if (phaseShouldRun(8)) {
-      try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+      depsOk(10, [3,4,5,7,9]);
+      try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); fb(10); }
       learn(10);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
@@ -127,19 +187,23 @@ async function runPipeline() {
     // ── Phase 9: Supplemental Analysis (dependency-gated) ───
     if (phaseShouldRun(9)) {
       setProgress(72,'Phase 9 — Market map…');
-      try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); }
+      depsOk(11, [1,2,4]);
+      try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); fb(11); }
       learn(11);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(76,'Phase 9 — Grants and incentives…');
-      try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); }
+      depsOk(12, [3,5]);
+      try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); fb(12); }
       learn(12);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(80,'Phase 9 — Competitor deep-dive…');
-      try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); }
+      depsOk(13, [6]);
+      try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); fb(13); }
       learn(13);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(84,'Phase 9 — Build vs buy analysis…');
-      try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); }
+      depsOk(16, [3,4,7,8]);
+      try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); fb(16); }
       learn(16);
       // Apply fallbacks for any phase 9 agent that failed and has no data
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
@@ -156,10 +220,10 @@ async function runPipeline() {
     // ── Phase 11: Meta Agents ────────────────────────────────
     if (phaseShouldRun(11)) {
       setProgress(86,'Phase 11 — Code Review · QA Testing…');
-      try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+      try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); fb(14); }
       learn(14);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
-      try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+      try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); fb(15); }
       learn(15);
     } else {
       setProgress(86,'Phase 11 — skipped');
@@ -172,7 +236,7 @@ async function runPipeline() {
       try {
         if(typeof runAgent17==='function') await runAgent17(R);
         learn(17);
-      } catch(e) { console.error('Agent 17 failed:',e.message); }
+      } catch(e) { console.error('Agent 17 failed:',e.message); fb(17); }
     } else {
       setProgress(94,'Phase 12 — skipped');
     }
@@ -183,6 +247,8 @@ async function runPipeline() {
     if (typeof runAccuracyVerifier === 'function' && R.real) {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
     }
+    if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
+    if (typeof _bhRunAccuracyRepairPass === 'function') await _bhRunAccuracyRepairPass();
     if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
     if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate();
   } catch(e) {
@@ -212,25 +278,8 @@ async function reRunAgent(n) {
   if(btn) btn.style.display='none';
   running=true;
   try {
-    const s = k => JSON.stringify(R['a'+k]||{});
     // runAgent1 (and all others) write R.aN internally. Don't double-assign.
-    if(n===1)      { await runAgent1(); }
-    else if(n===2) { await runAgent2(s(1),s(5),s(6)); }
-    else if(n===3) { await runAgent3(s(1),s(2),s(5)); }
-    else if(n===4) { await runAgent4(s(3),s(5)); }
-    else if(n===5) { await runAgent5(); }
-    else if(n===6) { await runAgent6(); }
-    else if(n===7) { await runAgent7(s(3),s(4),s(5),s(1),s(2)); }
-    else if(n===8) { await runAgent8(s(1),s(2),s(3),s(4),s(5),s(6),s(7)); }
-    else if(n===9) { await runAgent9(s(1),s(2),s(3),s(4),s(5),s(6),s(7),s(8)); }
-    else if(n===10){ await runAgent10(s(3),s(4),s(5),s(7),s(9)); }
-    else if(n===11){ await runAgent11(s(1),s(2),s(4)); }
-    else if(n===12){ await runAgent12(s(3),s(5)); }
-    else if(n===13){ await runAgent13(s(6)); }
-    else if(n===14){ await runAgent14(R); }
-    else if(n===15){ await runAgent15(R); }
-    else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
-    else if(n===17){ await runAgent17(R); }
+    await _bhRunAgentInternal(n);
     try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) {}
     try { if (typeof _bhApplyProductionSafetyGate === 'function') _bhApplyProductionSafetyGate(); } catch(e) {}
   } catch(e) {
@@ -399,4 +448,3 @@ function resetAll() {
   // Empty R in-place so other modules that hold a reference see the cleared object
   Object.keys(R).forEach(k => { delete R[k]; });
 }
-

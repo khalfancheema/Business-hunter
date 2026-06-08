@@ -58,7 +58,7 @@ amount as a literal output.
 Include ALL 5 phases: Foundation & Funding (1-3), Legal/Lease/Design (3-6), Construction & Licensing (6-12), Staffing & Pre-Opening (12-16), Soft Open & Ramp (16-18). Each phase 8-12 tasks. Priority strings exactly "Critical", "High", "Medium".`;
 
   // ── Part 2 of 3: Milestones + Budget Tracker ─────────────
-  const p1 = await claudeJSON(sys1, usr1, {webSearch:true});
+  const p1 = await claudeJSON(sys1, usr1, {webSearch:true, agentNum:10});
   $('10-mile-c').innerHTML = subProgress(2,3,'Milestones & Budget Tracker');
   const sys2 = `You are a ${ind.unit} project manager. Return JSON only.`;
   const usr2 = `${_rdCtx10 ? _rdCtx10 + '\n\n' : ''}Create milestones and budget tracker for launching a ${base}.
@@ -90,7 +90,7 @@ Return ONLY this JSON. All values are placeholders.
 15-20 milestones from Week 1 through Month 18. 15-20 budget line items covering all startup costs with cost-driver notes.`;
 
   // ── Part 3 of 3: Risk Register + Team + Checklist ────────
-  const p2 = await claudeJSON(sys2, usr2, {webSearch:true});
+  const p2 = await claudeJSON(sys2, usr2, {webSearch:true, agentNum:10});
   $('10-risk-c').innerHTML = subProgress(3,3,'Risk Register, Team & Checklist');
   const sys3 = `You are a ${ind.unit} project risk manager and operations consultant. Return JSON only.`;
   const usr3 = `Create risk register, team/vendor directory, and launch checklist for a ${base}.
@@ -132,7 +132,7 @@ Return ONLY this JSON. All values are placeholders.
 }
 Risk register: 8-10. Team/vendors: 10-14 (only include vendors you can actually verify — null phone/contact if unknown). Checklist: 5 phases × 10-15 items.`;
 
-  const p3 = await claudeJSON(sys3, usr3, {webSearch:true});
+  const p3 = await claudeJSON(sys3, usr3, {webSearch:true, agentNum:10});
 
   // Merge all 3 parts
   return Object.assign(

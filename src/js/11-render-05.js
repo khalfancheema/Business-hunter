@@ -51,7 +51,7 @@ Return ONLY:
 }`;
   try {
     _setDemoKey(3);
-    let d=await claudeJSON(sys, usr, {webSearch:true});
+    let d=await claudeJSON(sys, usr, {webSearch:true, agentNum:3});
     if(!d) { console.warn('Agent 3 fallback'); d=getFallback3(); }
     R.a3=d;
     $('3-s-t').textContent=d.summary||'';

@@ -74,7 +74,7 @@ Return ONLY this JSON:
 }
 For each item provide 4-6 numbered steps with SPECIFIC actions (not generic). Include actual form names, website paths, and timing caveats.`;
     try {
-      const partB = await claudeJSON(sysB, usrB, {webSearch:true});
+      const partB = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:5});
       if (partB && Array.isArray(partB.instructions)) {
         partB.instructions.forEach(inst => {
           const req = reqs.find(r => r.item === inst.item ||
@@ -92,7 +92,7 @@ For each item provide 4-6 numbered steps with SPECIFIC actions (not generic). In
   }
 
   try {
-    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true}) : (R.a5 || null);
+    let d = !demoMode ? await claudeJSON(sysA, usrA, {webSearch:true, agentNum:5}) : (R.a5 || null);
     if(!d) { console.warn('Agent 5 fallback'); d=getFallback5(); }
     R.a5=d;
 

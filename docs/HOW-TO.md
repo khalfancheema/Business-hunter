@@ -729,7 +729,7 @@ A badge panel in the UI shows which data sources loaded successfully for your ZI
 
 ### Accuracy Verifier
 
-After the pipeline completes, the accuracy verifier cross-checks **15 specific fields** from AI outputs against `R.real`:
+After the pipeline completes, the accuracy verifier cross-checks specific fields from AI outputs against `R.real`:
 
 - **Agent 1:** median income vs Census ACS, population vs ACS, renter % vs ACS, bachelors+ % vs ACS B15003
 - **Agent 4:** rent/sqft vs Census gross rent
@@ -737,7 +737,7 @@ After the pipeline completes, the accuracy verifier cross-checks **15 specific f
 - **Agent 7:** electricity rates vs EIA, SBA loan amount vs SBA FOIA, flood risk vs NFIP
 - **Cross-agent:** Agent 9 year-1 revenue vs Agent 7 base-case (should closely match)
 
-An accuracy score card renders in the UI after completion. Fields within tolerance show green; out-of-tolerance fields show orange with the expected vs. actual values. A passing score is 80%+.
+An accuracy score card renders in the UI after completion. Fields at 95%+ show green, 85-94% is review-grade, and anything below 85% fails the production gate. If the first verifier pass is below 95%, the pipeline reruns affected agents once with the exact failed fields injected as repair feedback, then reruns the verifier and production safety gate.
 
 ### When Data Sources Fail
 

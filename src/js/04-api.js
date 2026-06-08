@@ -179,6 +179,42 @@ const _BH_AGENT_ARRAY_KEYS = {
   17:['data_sources'],
 };
 
+const _BH_PRODUCTION_ACCURACY_TARGET = 95;
+const _BH_REVIEW_ACCURACY_FLOOR = 85;
+
+function _bhHasNearbySource(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  return Object.keys(obj).some(k => /source|citation|url|retrieved|verified/i.test(k) && obj[k]);
+}
+
+function _bhCollectCitationIssues(data, agentNum) {
+  const issues = [];
+  const rootHasSource = _bhHasNearbySource(data);
+  const visit = (node, path, parent) => {
+    if (node == null) return;
+    if (Array.isArray(node)) {
+      node.slice(0, 25).forEach((v, i) => visit(v, `${path}[${i}]`, node));
+      return;
+    }
+    if (typeof node !== 'object') return;
+    Object.entries(node).forEach(([k, v]) => {
+      const here = path ? `${path}.${k}` : k;
+      if (typeof v === 'number' && isFinite(v) && Math.abs(v) > 0) {
+        const critical = /cost|price|rate|tuition|revenue|income|rent|count|capacity|score|pct|percent|weeks|months|fee|amount|salary|wage|rating|sqft|slots|beds|employees|population/i.test(k);
+        if (critical && !rootHasSource && !_bhHasNearbySource(node) && !_bhHasNearbySource(parent)) {
+          issues.push(`Numeric claim ${here} lacks a nearby source/citation/url field.`);
+        }
+      }
+      if (typeof v === 'string' && /https?:\/\/(example\.com|localhost|test\.com)|555[-.\s]?01/i.test(v)) {
+        issues.push(`Placeholder or fake contact/URL detected at ${here}.`);
+      }
+      visit(v, here, node);
+    });
+  };
+  visit(data, `A${agentNum}`, null);
+  return [...new Set(issues)].slice(0, 12);
+}
+
 function _bhValidateAgentSchema(agentNum, data) {
   const issues = [];
   const n = Number(agentNum);
@@ -193,6 +229,7 @@ function _bhValidateAgentSchema(agentNum, data) {
   (_BH_AGENT_ARRAY_KEYS[n] || []).forEach(k => {
     if (data[k] !== undefined && !Array.isArray(data[k])) issues.push(`Field must be an array: ${k}`);
   });
+  _bhCollectCitationIssues(data, n).forEach(i => issues.push(i));
   if (data._is_fallback) issues.push('Fallback output was used; this is not production-grade evidence.');
   return { ok: issues.length === 0, issues: [...new Set(issues)], checked_at: new Date().toISOString() };
 }
@@ -310,7 +347,7 @@ function _bhRecordAccuracyFeedback(checks) {
   if (!R.agent_feedback) R.agent_feedback = { items: [], by_agent: {}, persistent_lessons: _bhLoadPersistentLearning() };
   const poor = checks.filter(c => {
     const m = (c.agent || '').match(/^A(\d+)/);
-    return m && c.acc != null && !isNaN(c.acc) && c.acc < 0.85;
+    return m && c.acc != null && !isNaN(c.acc) && c.acc < (_BH_PRODUCTION_ACCURACY_TARGET / 100);
   });
   if (!poor.length) return [];
   const byAgent = {};
@@ -389,6 +426,43 @@ function _bhRecordAllAgentFeedback() {
   }
 }
 
+function _bhFirstNumber() {
+  for (const v of arguments) {
+    const n = Number(v);
+    if (isFinite(n)) return n;
+  }
+  return null;
+}
+
+function _bhClampScore(n) {
+  n = Number(n);
+  if (!isFinite(n)) return null;
+  return Math.max(0, Math.min(100, n));
+}
+
+function _bhComputeProductionScorecard() {
+  if (typeof R !== 'object' || !R) return null;
+  const location = Array.isArray(R.a3?.locations) ? R.a3.locations[0] : null;
+  const scenario = Array.isArray(R.a7?.scenarios) ? (R.a7.scenarios.find(s => /base/i.test(s.name || s.label || '')) || R.a7.scenarios[0]) : null;
+  const riskRows = Array.isArray(R.a8?.risks) ? R.a8.risks : [];
+  const scores = {
+    market_demand: _bhClampScore(_bhFirstNumber(R.a2?.overall_opportunity_score, location?.scores?.demand, location?.overall_score)),
+    competition: _bhClampScore(_bhFirstNumber(location?.scores?.competition, R.a6?.competitive_intensity_score != null ? 100 - Number(R.a6.competitive_intensity_score) * 10 : null)),
+    compliance: _bhClampScore(_bhFirstNumber(location?.scores?.regulatory, R.a5?.total_timeline_months ? 100 - Number(R.a5.total_timeline_months) * 3 : null)),
+    real_estate: _bhClampScore(_bhFirstNumber(location?.scores?.real_estate, location?.overall_score)),
+    capital: _bhClampScore(_bhFirstNumber(scenario?.monthly_net != null && scenario?.monthly_revenue ? Number(scenario.monthly_net) / Number(scenario.monthly_revenue) * 100 + 50 : null, scenario?.roi_3yr)),
+    execution_risk: _bhClampScore(100 - Math.min(60, riskRows.filter(r => /high|critical/i.test(r.severity || '')).length * 20 + riskRows.filter(r => /medium/i.test(r.severity || '')).length * 8)),
+  };
+  const weights = { market_demand:0.24, competition:0.16, compliance:0.14, real_estate:0.14, capital:0.22, execution_risk:0.10 };
+  const parts = Object.entries(scores).filter(([,v]) => v != null);
+  const weightSum = parts.reduce((s,[k]) => s + weights[k], 0);
+  const overall = weightSum ? Math.round(parts.reduce((s,[k,v]) => s + v * weights[k], 0) / weightSum) : null;
+  const recommendation = overall == null ? 'Needs Review' : overall >= 75 ? 'Go' : overall >= 60 ? 'Cautious Go' : 'No Go';
+  const scorecard = { overall, recommendation, scores, weights, generated_at: new Date().toISOString(), method:'deterministic_weighted_evidence_v1' };
+  R.production_scorecard = scorecard;
+  return scorecard;
+}
+
 function _bhProductionBlockers() {
   const blockers = [];
   const warnings = [];
@@ -403,13 +477,25 @@ function _bhProductionBlockers() {
   if (feedback.length) blockers.push(`${feedback.length} agent feedback item(s) need correction before production use.`);
 
   const score = R.accuracy?.score;
-  if (score !== undefined && score !== null && Number(score) < 85) blockers.push(`Accuracy verifier score ${Math.round(Number(score))}% is below the 95-100% target.`);
+  if (score !== undefined && score !== null && Number(score) < _BH_PRODUCTION_ACCURACY_TARGET) {
+    blockers.push(`Accuracy verifier score ${Math.round(Number(score))}% is below the ${_BH_PRODUCTION_ACCURACY_TARGET}-100% production target.`);
+    if (Number(score) >= _BH_REVIEW_ACCURACY_FLOOR) warnings.push(`Accuracy score is review-grade but not production-ready: ${Math.round(Number(score))}%.`);
+  }
   const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
   if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
   if (!hasRealData && (R.a1 || R.a2) && (score === undefined || score === null)) warnings.push('No verified real-data score was available for this run.');
 
   const unsourced = Array.isArray(R.a17?.unable_to_source) ? R.a17.unable_to_source.length : 0;
   if (unsourced) blockers.push(`${unsourced} claim(s) remain unsourced in Agent 17.`);
+
+  const scorecard = _bhComputeProductionScorecard();
+  if (!scorecard || scorecard.overall == null) blockers.push('Deterministic production scorecard could not be computed from verified agent evidence.');
+  const modelVerdict = String(R.a8?.verdict || '');
+  if (scorecard?.recommendation && modelVerdict && !/needs review/i.test(modelVerdict)) {
+    const modelGo = /go|recommend|approved|yes/i.test(modelVerdict) && !/no go/i.test(modelVerdict);
+    const cardGo = /go/i.test(scorecard.recommendation) && !/no go/i.test(scorecard.recommendation);
+    if (modelGo !== cardGo) blockers.push(`Final verdict (${modelVerdict}) conflicts with deterministic scorecard (${scorecard.recommendation}, ${scorecard.overall}/100).`);
+  }
 
   return { blockers, warnings, fallbackAgents, feedbackCount: feedback.length, unsourcedClaims: unsourced };
 }
@@ -469,10 +555,55 @@ function _bhBuildAgentFeedbackContext() {
   return `\n\nCROSS-AGENT FEEDBACK / SELF-LEARNING MEMORY:\n${rows.map(r => '- ' + r).join('\n')}\nApply these corrections. Do not repeat known weak claims. If upstream data is missing or weak, return null/N/A and explain the limitation in notes or sources.`;
 }
 
+function _bhBuildAgentRepairContext(agentNum) {
+  const fb = R.agent_feedback?.by_agent?.[String(agentNum)];
+  if (!fb || fb.status === 'ok') return '';
+  const checks = (fb.accuracy_checks || []).slice(0, 6).map(c =>
+    `- ${c.field}: replace AI value ${c.aiFmt || c.ai} with verified ${c.realFmt || c.real} from ${c.source || 'verified source'}; previous match ${c.match_pct}%.`
+  );
+  const issues = (fb.issues || []).slice(0, 6).map(i => `- ${i}`);
+  const actions = (fb.actions || []).slice(0, 6).map(a => `- ${a}`);
+  return `\n\nACCURACY REPAIR REQUIRED FOR AGENT ${agentNum}:\n${[...checks, ...issues, ...actions].join('\n')}\nReturn corrected JSON only. Preserve valid sourced fields. Replace unverifiable values with null/N/A.`;
+}
+
 function _bhWithAgentFeedback(user, opts={}) {
   if (opts.skipFeedback) return user;
   const ctx = _bhBuildAgentFeedbackContext();
-  return ctx ? user + ctx : user;
+  const repair = opts.agentNum ? _bhBuildAgentRepairContext(opts.agentNum) : '';
+  return user + (ctx || '') + (repair || '');
+}
+
+function _bhDependencyFallbacks(deps) {
+  if (demoMode) return [];
+  return (deps || []).filter(n => {
+    const d = _bhAgentData(n);
+    return d && typeof d === 'object' && d._is_fallback;
+  });
+}
+
+function _bhAssertNoFallbackDeps(agentNum, deps) {
+  const failed = _bhDependencyFallbacks(deps);
+  if (failed.length) {
+    throw new Error(`Agent ${agentNum} blocked: upstream fallback output from A${failed.join(', A')} must be repaired before downstream analysis.`);
+  }
+}
+
+function _bhAccuracyRepairAgents() {
+  const items = R.agent_feedback?.items || [];
+  const agents = [];
+  items.forEach(i => {
+    if (i.status !== 'ok' && i.agent && !agents.includes(i.agent)) agents.push(i.agent);
+  });
+  if (Array.isArray(R.accuracy?.checks)) {
+    R.accuracy.checks.forEach(c => {
+      const m = (c.agent || '').match(/^A(\d+)/);
+      if (m && c.acc != null && c.acc < (_BH_PRODUCTION_ACCURACY_TARGET / 100)) {
+        const n = parseInt(m[1], 10);
+        if (!agents.includes(n)) agents.push(n);
+      }
+    });
+  }
+  return agents.filter(n => n >= 1 && n <= 17).slice(0, 6);
 }
 
 // Retry an agent call up to 2 times if JSON parse fails
@@ -527,6 +658,7 @@ CRITICAL — NUMERIC PRECISION:
 CRITICAL - SOURCE COVERAGE:
 - For every numeric claim in an array row, include a nearby source/source_url/citation field when the schema provides one.
 - If the schema lacks a source field, put the source name in the nearest summary, notes, or data_sources field.
+- Every recommendation-critical value should be emitted as or accompanied by: value, source_name/source, source_url/citation, retrieved_at/last_updated, confidence, and verification_method when the schema has room for it.
 - Never output placeholder URLs, "example.com", fake phone numbers, or sample addresses. Use "N/A" instead.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped

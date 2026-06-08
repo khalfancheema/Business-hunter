@@ -37,7 +37,7 @@ with values grounded in the user's specific ZIP / industry / KEY FINDINGS data).
     // Show panel early so streaming text is visible immediately
     showOut(8);
     // Stream response into summary prose panel while building
-    let d = await claudeStreamJSON(sys, usr, '8-s-t', {webSearch:true});
+    let d = await claudeStreamJSON(sys, usr, '8-s-t', {webSearch:true, agentNum:8});
     if(!d) { console.warn('Agent 8 fallback'); d=getFallback8(); }
     R.a8=d;
     if (typeof rdRenderRealDataBadge === 'function') rdRenderRealDataBadge('8-s-t', ['demographics','wages','macro','rents','competitors_osm']);

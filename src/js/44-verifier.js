@@ -741,8 +741,8 @@
     if (!statusEl) return;
     meta = meta || {};
 
-    const color = pct >= 85 ? 'var(--green)' : pct >= 70 ? 'var(--amber)' : 'var(--red)';
-    const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : 'D';
+    const color = pct >= 95 ? 'var(--green)' : pct >= 85 ? 'var(--amber)' : 'var(--red)';
+    const grade = pct >= 95 ? 'A' : pct >= 85 ? 'B' : pct >= 70 ? 'C' : 'D';
 
     const typeBadge = {
       exact:          {label:'EXACT',     color:'var(--green)',  bg:'rgba(34,197,94,0.15)'},
@@ -756,7 +756,7 @@
     const sorted = [...checks].sort((a,b) => (order[a.match_type]??9) - (order[b.match_type]??9));
     const rows = sorted.map(c => {
       const ap  = Math.round(c.acc * 100);
-      const col = ap >= 85 ? 'var(--green)' : ap >= 70 ? 'var(--amber)' : 'var(--red)';
+      const col = ap >= 95 ? 'var(--green)' : ap >= 85 ? 'var(--amber)' : 'var(--red)';
       const bar = `<div style="width:${ap}%;height:3px;background:${col};border-radius:2px"></div>`;
       const tb  = typeBadge[c.match_type] || typeBadge.exact;
       return `<tr style="border-top:1px solid var(--border)">

@@ -68,7 +68,7 @@ Return ONLY:
   ]
 }`;
 
-  const revModel = await claudeJSON(sysA, usrA, {webSearch:true}) || {};
+  const revModel = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:7}) || {};
 
   // ── Sub-call B: Cost Model ──────────────────────────────
   $('7-sc-c').innerHTML = subProgress(2, 3, 'Sub-agent 2/3: Cost Model…');
@@ -111,7 +111,7 @@ Return ONLY:
   "total_variable_at_base": 0
 }`;
 
-  const costModel = await claudeJSON(sysB, usrB, {webSearch:true}) || {};
+  const costModel = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:7}) || {};
 
   // ── Main Consolidating Call ─────────────────────────────
   $('7-sc-c').innerHTML = subProgress(3, 3, 'Consolidating…');
@@ -176,7 +176,7 @@ Return ONLY:
 }`;
 
   try {
-    let main = await claudeJSON(sysMain, usrMain, {webSearch:true});
+    let main = await claudeJSON(sysMain, usrMain, {webSearch:true, agentNum:7});
     if (!main) { console.warn('Agent 7 consolidation fallback'); main = getFallback7(); }
 
     // Merge sub-model arrays into result so renderAgent7 can use them.

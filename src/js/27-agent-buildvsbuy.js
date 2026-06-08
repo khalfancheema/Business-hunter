@@ -53,7 +53,7 @@ Return ONLY:
 
   // (No _setDemoKey here — demo path already returned above. Live path uses
   // real claudeJSON calls for all three sub-agents.)
-  const listingsData = await claudeJSON(sysA, usrA, {webSearch:true});
+  const listingsData = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:16});
 
   // ── Sub-call B: Build Analysis ──────────────────────────
   if (outEl) {
@@ -94,7 +94,7 @@ Return ONLY:
   }
 }`;
 
-  const analysisData = await claudeJSON(sysB, usrB, {webSearch:true});
+  const analysisData = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:16});
 
   // ── Sub-call C: Recommendation ──────────────────────────
   if (outEl) {
@@ -135,7 +135,7 @@ Return ONLY:
   ]
 }`;
 
-  const recData = await claudeJSON(sysC, usrC);
+  const recData = await claudeJSON(sysC, usrC, {agentNum:16});
 
   // ── Merge & store ───────────────────────────────────────
   const merged = Object.assign(

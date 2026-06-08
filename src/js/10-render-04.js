@@ -107,7 +107,7 @@ Use recommended_tuition_infant as the primary price point and recommended_tuitio
 For pricing, cross-reference NDCP county median rates to validate recommendations (premium operators typically price 10-20% above market median).`;
   try {
     _setDemoKey(2);
-    let d=await claudeJSON(sys,usr,{webSearch:true});
+    let d=await claudeJSON(sys,usr,{webSearch:true, agentNum:2});
     if(!d) { console.warn('Agent 2 fallback'); d=getFallback2(); }
     R.a2=d;
 

@@ -43,7 +43,7 @@ Return ONLY:
 }
 Include 4-5 specific competitor profiles (named chains + local independents). Use real review themes from your search.`;
 
-    const partA = await claudeJSON(sysA, usrA, {webSearch:true});
+    const partA = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:13});
 
     // ── Part B: Pain Points + Differentiation ───────────────
     const competitorNames = (partA?.competitor_profiles || []).map(c => c.name).join(', ');
@@ -71,7 +71,7 @@ Return ONLY:
 }
 Include 6-8 pain points (with real frequency estimates from review data) and 5-6 differentiation pillars.`;
 
-    const partB = await claudeJSON(sysB, usrB, {webSearch:true});
+    const partB = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:13});
 
     // ── Part C: Messaging Guide ──────────────────────────────
     const sysC = `You are a ${ind.unit} marketing strategist. Respond JSON only.`;
@@ -90,7 +90,7 @@ Return ONLY:
 }
 Include 5 distinct audience segments with messaging tailored to their specific competitor frustrations.`;
 
-    const partC = await claudeJSON(sysC, usrC, {webSearch:true});
+    const partC = await claudeJSON(sysC, usrC, {webSearch:true, agentNum:13});
 
     // Merge all 3 parts
     const d = Object.assign(

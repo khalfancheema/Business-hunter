@@ -47,6 +47,7 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
   const INPUT_CHAR_LIMIT = 80000;  // ~20k tokens — well under 200k context
   const MAX_RETRY_PROMPT = 40000;  // Smaller prompt for retry
 
+  const callOpts = opts.agentNum ? opts : { ...opts, agentNum: parseInt(agentNum, 10) || undefined };
   let activeUser = user;
 
   // Guard: truncate if input is huge
@@ -57,7 +58,7 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
   }
 
   try {
-    const result = await claudeJSON(system, activeUser, opts);
+    const result = await claudeJSON(system, activeUser, callOpts);
     if (result) return result;
     throw new Error('Null result');
   } catch (e) {
@@ -85,7 +86,7 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
       '\n\n[Context condensed. Return a SHORTER JSON with the same schema — use concise 1-sentence strings instead of detailed paragraphs. Schema structure must be preserved exactly.]';
 
     try {
-      const retryOpts = opts.webSearch ? { ...opts, webSearch:true, webSearchMaxUses: Math.min(opts.webSearchMaxUses || 2, 2) } : opts;
+      const retryOpts = callOpts.webSearch ? { ...callOpts, webSearch:true, webSearchMaxUses: Math.min(callOpts.webSearchMaxUses || 2, 2) } : callOpts;
       const retryResult = await claudeJSON(system, shortUser, retryOpts);
       if (retryResult) return retryResult;
     } catch (retryErr) {

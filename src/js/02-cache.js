@@ -4,7 +4,7 @@ const memCache = {};
 
 // Cache schema version — bump to invalidate all cached entries after
 // a breaking change to the prompt or response shape.
-const CACHE_SCHEMA_VERSION = '2';
+const CACHE_SCHEMA_VERSION = '3';
 
 function _cacheCtx() {
   // Discriminator: provider + model + schema version. Without these,
@@ -21,7 +21,8 @@ function cacheKey(system, user, opts) {
   // materially differs between web-search-enabled and disabled calls.
   const ctx  = _cacheCtx();
   const tool = (opts && opts.webSearch) ? '|websearch' : '';
-  const raw  = ctx + tool + '||' + (system || '') + '||' + (user || '');
+  const agent = opts && opts.agentNum ? '|agent:' + opts.agentNum : '';
+  const raw  = ctx + tool + agent + '||' + (system || '') + '||' + (user || '');
   let h = 5381;
   for (let i = 0; i < raw.length; i++) {
     h = (Math.imul(33, h) ^ raw.charCodeAt(i)) | 0;
@@ -52,4 +53,3 @@ function clearAllCache() {
   Object.keys(memCache).forEach(k=>delete memCache[k]);
   Object.keys(localStorage).filter(k=>k.startsWith(CACHE_KEY_PREFIX)).forEach(k=>localStorage.removeItem(k));
 }
-

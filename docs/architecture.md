@@ -152,9 +152,9 @@ When a phase is skipped, downstream agents receive context from cached `R` data 
 - **Structured JSON** — all agents emit and consume JSON; no free-text context passing
 - **Parallel execution** — `Promise.allSettled()` for Phase 1 (agents 1+5+6) and Phase 9 (agents 11+12+13+16)
 - **Sequential phases** — phases 2–8, 11, 12 run in sequence; each depends on previous phase outputs
-- **Error isolation** — each agent is wrapped in `try/catch`; failures use `getFallback(n)`, are marked as fallback output, and are blocked from production-ready status by `_bhApplyProductionSafetyGate()`
-- **Self-learning feedback** — `_bhRecordAgentFeedback()` stores schema, source, and verifier lessons in `R.agent_feedback` plus industry-scoped localStorage memory for downstream prompts
-- **Production safety gate** — after Agent 17 and the verifier run, `_bhApplyProductionSafetyGate()` checks fallbacks, schema feedback, verifier score, and unsourced claims; unsafe Go-style verdicts are downgraded to `Needs Review`
+- **Error isolation** — each agent is wrapped in `try/catch`; failures use `getFallback(n)`, are written to `R.aN`, marked as fallback output, and blocked from downstream dependency use unless Demo Mode is active
+- **Self-learning feedback** — `_bhRecordAgentFeedback()` stores schema, source, and verifier lessons in `R.agent_feedback` plus industry-scoped localStorage memory; `_bhBuildAgentRepairContext()` injects exact verifier failures back into the next run of that agent
+- **Production safety gate** — after Agent 17 and the verifier run, `_bhApplyProductionSafetyGate()` checks fallbacks, schema feedback, a strict 95% verifier target, claim sourcing, unsourced claims, and deterministic scorecard agreement; unsafe Go-style verdicts are downgraded to `Needs Review`
 
 ---
 
@@ -184,7 +184,7 @@ CRITICAL — DATA INTEGRITY:
 - Do NOT use 0 when the real value is unknown
 ```
 
-This single injection covers all 17 agents automatically. `_bhValidateAgentSchema()` verifies required fields for each agent, `_bhAttachOutputQuality()` flags weak sourcing or placeholder values, and `_bhBuildAgentFeedbackContext()` feeds those lessons into later agent prompts. The `_nv()`, `_nvNum()`, `_esc()`, `_safeUrl()`, and `_safeHtml()` helper functions in `06-ui.js` render missing and model-originated values safely in tables, cards, citations, and chat output.
+This single injection covers all fixed agent calls through `agentNum` options. `_bhValidateAgentSchema()` verifies required fields and nearby claim citations for each agent, `_bhAttachOutputQuality()` flags weak sourcing or placeholder values, `_bhBuildAgentFeedbackContext()` feeds lessons into later agent prompts, and `_bhBuildAgentRepairContext()` feeds exact failed verifier checks back into repair reruns. The `_nv()`, `_nvNum()`, `_esc()`, `_safeUrl()`, and `_safeHtml()` helper functions in `06-ui.js` render missing and model-originated values safely in tables, cards, citations, and chat output.
 
 ---
 
@@ -193,9 +193,9 @@ This single injection covers all 17 agents automatically. `_bhValidateAgentSchem
 | File | Responsibility |
 |------|---------------|
 | `01-config.js` | INDUSTRIES config (14 industries), PROVIDERS config, global state variables, `R.real` init |
-| `02-cache.js` | localStorage response cache, 4-hour TTL, hash-keyed by system+user prompt |
+| `02-cache.js` | localStorage response cache, 4-hour TTL, hash-keyed by provider/model/schema, system+user prompt, web-search flag, and agent identity |
 | `03-utils.js` | DOM helpers: `$()`, `zip()`, `radius()`, `industry()`, `key()`, `setDot()`, `showOut()`, `tab()`, `setProgress()` |
-| `04-api.js` | `claudeJSON()` — multi-provider API call + JSON extraction + `strictSystem` injection; schema validation, output-quality feedback, self-learning memory, and production safety gate helpers; `opts.webSearch` adds `web_search_20250305` tool |
+| `04-api.js` | `claudeJSON()` — multi-provider API call + JSON extraction + `strictSystem` injection; schema validation, claim-source validation, output-quality feedback, self-learning memory, deterministic scorecard, and production safety gate helpers; `opts.webSearch` adds `web_search_20250305` tool |
 | `05-fallbacks.js` | `getFallback1()` through `getFallback17()` — error fallback data marked `_is_fallback` and blocked from production-ready status |
 | `06-ui.js` | `_nv()`, `_nvNum()` null-safe renderers; `_esc()`, `_safeUrl()`, `_safeHtml()` output safety helpers; `renderHmap()` heatmap builder |
 | `07-render-01.js` | Agent 1 render: Demographics (Census · BLS · 15 sources · metro overview) |
@@ -234,7 +234,7 @@ This single injection covers all 17 agents automatically. `_bhValidateAgentSchem
 | `40-local-guide.js` | Ollama/local LLM setup guide + data freshness badge renderer |
 | `41-agent-stress-guard.js` | Stress-test protection layer: detects max_tokens truncation, attempts JSON repair, retries with smaller output |
 | `43-real-data.js` | **Real data pipeline**: prefetch 17 government APIs → `R.real`; `buildRealDataCtx(keys)` → verified data block for prompt injection; `rdShowDataStatus()` badge panel |
-| `44-verifier.js` | **Accuracy verifier**: 15 cross-checks AI agent outputs vs `R.real`; renders scored accuracy card in `#realDataStatus` |
+| `44-verifier.js` | **Accuracy verifier**: cross-checks AI agent outputs vs `R.real`; records repair feedback and renders a scored accuracy card in `#realDataStatus` with green reserved for 95%+ |
 
 ---
 
@@ -278,12 +278,14 @@ This single injection covers all 17 agents automatically. `_bhValidateAgentSchem
 | A9 Business Plan (Part 2) | wages, rents, macro |
 | A16 Build vs Buy (Sub-call B) | rents, wages, macro |
 
-**Accuracy verifier** (`44-verifier.js`) runs 15 cross-checks after pipeline completion, comparing AI-reported values against `R.real` and rendering a scored accuracy card:
+**Accuracy verifier** (`44-verifier.js`) runs cross-checks after pipeline completion, comparing AI-reported values against `R.real`, recording field-level repair lessons, and rendering a scored accuracy card. Scores below 95% are not production-ready:
 - A1: median income vs ACS B19013, population vs B01003, renter % vs B25003, bachelors+ % vs B15003
 - A4: rent/sqft vs Census gross rent
 - A6: competitor count vs OSM Overpass
 - A7: electricity costs vs EIA, SBA loan amounts vs SBA FOIA, flood risk vs NFIP
 - Cross-agent: A9 year-1 revenue consistency vs A7 base-case
+
+If the first verifier pass is below 95%, `_bhRunAccuracyRepairPass()` reruns the affected agents once with exact failed checks injected as repair context, then reruns the verifier and production safety gate. `_bhComputeProductionScorecard()` also derives a deterministic weighted evidence score across demand, competition, compliance, real estate, capital, and execution risk so the final model verdict cannot override contradictory evidence.
 
 ---
 
@@ -329,7 +331,7 @@ user clicks Run
 |-----|-----|---------|
 | `biz_session_v1` | 24 hours | Full session: R object, rendered HTML, inputs |
 | `biz_history_v1` | Permanent (max 5 entries) | Lightweight run summaries (verdict, zip, date, scores) |
-| `dh_cache_v2_*` | 4 hours | Individual agent API responses, keyed by prompt hash |
+| `dh_cache_v2_*` | 4 hours | Individual agent API responses, keyed by prompt hash, provider/model/schema version, web-search flag, and agent identity |
 
 ---
 

@@ -73,7 +73,7 @@ Return ONLY:
 }
 Use REAL URLs, phone numbers, and dollar amounts for ZIP ${zip()} state.`;
     try {
-      const partB = await claudeJSON(sysB, usrB, {webSearch:true});
+      const partB = await claudeJSON(sysB, usrB, {webSearch:true, agentNum:12});
       if (!partB) return;
       if (partB.industry_subsidy) data.caps_program = partB.industry_subsidy;
       if (partB.state_program) data.georgia_pre_k = partB.state_program;
@@ -86,7 +86,7 @@ Use REAL URLs, phone numbers, and dollar amounts for ZIP ${zip()} state.`;
 
   try {
     // webSearch=true: Claude uses live search to verify grant program details
-    let d = await claudeJSON(sysA, usrA, {webSearch:true});
+    let d = await claudeJSON(sysA, usrA, {webSearch:true, agentNum:12});
     if(!d) { console.warn('Agent 12 fallback'); d=getFallback12(); }
     R.a12 = d;
     buildGrants(d);
