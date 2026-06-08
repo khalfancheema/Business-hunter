@@ -241,6 +241,63 @@ function _rdShouldUseProxy() {
   return true;
 }
 
+function _rdRequiredSources(industryKey) {
+  const common = ['geo', 'demographics', 'business_density', 'wages', 'macro'];
+  const byIndustry = {
+    daycare: ['rents', 'competitors_osm', 'regulations', 'building_permits', 'hud_income'],
+    gas_station: ['rents', 'competitors_osm', 'regulations', 'epa_echo', 'energy_state'],
+    laundromat: ['rents', 'competitors_osm', 'energy_state', 'regulations'],
+    car_wash: ['rents', 'competitors_osm', 'regulations', 'epa_echo'],
+    restaurant: ['rents', 'competitors_osm', 'regulations', 'food_access'],
+    gym: ['rents', 'competitors_osm', 'acs_expanded'],
+    indoor_play: ['rents', 'competitors_osm', 'regulations', 'schools'],
+    dry_cleaning: ['rents', 'competitors_osm', 'regulations', 'epa_echo'],
+    senior_care: ['rents', 'npi_providers', 'regulations', 'health', 'hrsa_hpsa'],
+    tutoring: ['rents', 'competitors_osm', 'schools', 'acs_expanded'],
+    urgent_care: ['rents', 'npi_providers', 'regulations', 'hrsa_hpsa', 'health'],
+    coffee_shop: ['rents', 'competitors_osm', 'food_access'],
+    barbershop: ['rents', 'competitors_osm', 'regulations'],
+    coworking: ['rents', 'competitors_osm', 'fcc_broadband', 'local_unemp'],
+    medical_practice: ['rents', 'npi_providers', 'regulations', 'hrsa_hpsa'],
+    optometry: ['rents', 'npi_providers', 'regulations'],
+  };
+  return [...new Set([...common, ...(byIndustry[industryKey] || ['rents', 'competitors_osm'])])];
+}
+
+function _rdBuildSourceStatus(real, industryKey) {
+  const required = _rdRequiredSources(industryKey);
+  const loaded = Object.entries(real || {}).filter(([k, v]) => v && !k.startsWith('_')).map(([k]) => k);
+  const missing = Object.entries(real || {}).filter(([k, v]) => !v && !k.startsWith('_')).map(([k]) => k);
+  const requiredMissing = required.filter(k => !real || !real[k]);
+  return {
+    loaded,
+    missing,
+    required,
+    required_missing: requiredMissing,
+    production_ready_sources: requiredMissing.length === 0,
+    checked_at: new Date().toISOString(),
+  };
+}
+
+function _rdRealFingerprint(real) {
+  if (!real || typeof real !== 'object') return 'no-real-data';
+  const stable = {};
+  Object.keys(real).sort().forEach(k => {
+    if (k === '_fingerprint') return;
+    const v = real[k];
+    if (!v || typeof v !== 'object') stable[k] = !!v;
+    else stable[k] = {
+      source: v.source || v.period || v.year || v.zip || null,
+      count: v.count ?? v.population ?? v.establishments ?? null,
+      updated: v.updated_at || v.last_updated || v.period || null,
+    };
+  });
+  const raw = JSON.stringify(stable);
+  let h = 5381;
+  for (let i = 0; i < raw.length; i++) h = (Math.imul(33, h) ^ raw.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(36);
+}
+
 // ── _rdGovFetch ───────────────────────────────────────────────────────────────
 // Smart fetch helper for the 8 key-gated government APIs. Branches at runtime:
 //   • window.USE_PROXY === true → route through /api/proxy (server-side keys)
@@ -504,6 +561,9 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
       if (npiR) R.real.npi_providers = npiR;
     } catch(e) { console.warn('[RealData] NPI fetch failed (non-fatal):', e.message); }
   }
+
+  R.real._source_status = _rdBuildSourceStatus(R.real, industryKey);
+  R.real._fingerprint = _rdRealFingerprint(R.real);
 
   const loaded = Object.entries(R.real)
     .filter(([k, v2]) => v2 && !k.startsWith('_'))

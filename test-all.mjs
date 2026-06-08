@@ -396,22 +396,27 @@ test('production gate requires verifier coverage and evidence ledger', () => {
   assert.ok(VERIFIER_SRC.includes('agents_checked: agentsChecked'));
 });
 test('field-level claim ledger and source quality harden accuracy gates', () => {
-  ['_bhFieldEvidence','_bhHasFieldEvidence','_bhExtractClaimLedger','_bhSourceQuality','_bhSourceFreshness'].forEach(fn => {
+  ['_bhFieldEvidence','_bhHasFieldEvidence','_bhExtractClaimLedger','_bhSourceQuality','_bhSourceFreshness','_bhValidateEvidenceSource'].forEach(fn => {
     assert.ok(API_SRC.includes(`function ${fn}(`), `missing ${fn}`);
   });
   assert.ok(API_SRC.includes('lacks field-level source evidence'));
   assert.ok(API_SRC.includes('recommendation-critical claim(s) lack verified field-level evidence'));
   assert.ok(API_SRC.includes('evidence source URL(s) are invalid or placeholder URLs'));
+  assert.ok(API_SRC.includes('failed deterministic source validation'));
 });
 test('verifier production score uses exact verified checks only', () => {
   assert.ok(VERIFIER_SRC.includes('const exactVerifiedPct = buckets.exact.length >= 5 ? strictPct : null'));
   assert.ok(VERIFIER_SRC.includes('score_exact_verified: exactVerifiedPct'));
+  assert.ok(VERIFIER_SRC.includes('production_score: exactVerifiedPct'));
+  assert.ok(VERIFIER_SRC.includes('source_coverage_missing'));
   assert.ok(API_SRC.includes('Exact verified score ${Math.round(Number(exactVerifiedScore))}%'));
 });
 test('repair loop expands dependents and runs bounded multiple passes', () => {
   assert.ok(PIPELINE_SRC.includes('const _BH_AGENT_DEPS ='));
   assert.ok(PIPELINE_SRC.includes('function _bhExpandRepairAgents('));
+  assert.ok(PIPELINE_SRC.includes('function _bhAccuracyFailureSignature('));
   assert.ok(PIPELINE_SRC.includes('for (let pass = 1; pass <= 3; pass++)'));
+  assert.ok(PIPELINE_SRC.includes('resolved_failures'));
 });
 test('agent 17 and stress guard use evidence packs instead of raw truncation only', () => {
   assert.ok(API_SRC.includes('function _bhBuildEvidencePack('));
@@ -423,9 +428,47 @@ test('agent 17 and stress guard use evidence packs instead of raw truncation onl
 test('cache ttl varies by volatile agent type and scorecard is industry-profiled', () => {
   const CACHE_SRC = readFileSync('src/js/02-cache.js', 'utf8');
   assert.ok(CACHE_SRC.includes('function _cacheTtlMs(opts)'));
+  assert.ok(CACHE_SRC.includes('function _cacheRealDataFingerprint()'));
   assert.ok(CACHE_SRC.includes('[4, 12, 13, 16, 17].includes(n)'));
   assert.ok(API_SRC.includes('deterministic_weighted_evidence_v2_industry_profile'));
   assert.ok(API_SRC.includes('industry:key'));
+  ['gas_station','laundromat','car_wash','gym','coffee_shop','barbershop','coworking','medical_practice','optometry'].forEach(k => {
+    assert.ok(API_SRC.includes(`${k}: {`), `missing industry score profile ${k}`);
+  });
+});
+test('real-data prefetch records required source status and fingerprint', () => {
+  assert.ok(REAL_DATA_SRC.includes('function _rdRequiredSources('));
+  assert.ok(REAL_DATA_SRC.includes('function _rdBuildSourceStatus('));
+  assert.ok(REAL_DATA_SRC.includes('function _rdRealFingerprint('));
+  assert.ok(REAL_DATA_SRC.includes('R.real._source_status = _rdBuildSourceStatus'));
+  assert.ok(REAL_DATA_SRC.includes('R.real._fingerprint = _rdRealFingerprint'));
+  assert.ok(API_SRC.includes('Required real-data source(s) missing for production accuracy'));
+});
+test('behavior: parent-only source no longer validates nested critical claim', () => {
+  const issues = ctxEval(`_bhCollectCitationIssues({ source:'ACS', nested:{ monthly_rent: 12000 } }, 4)`);
+  assert.ok(Array.isArray(issues));
+  assert.ok(issues.some(x => x.includes('nested.monthly_rent')));
+});
+test('behavior: deterministic source validator rejects placeholder URL and unclassified critical source', () => {
+  const bad = ctxEval(`_bhValidateEvidenceSource({ type:'agent_claim', agent:'A4', field:'monthly_rent', value:12000, source:'Random blog', source_url:'https://example.com/rent' })`);
+  assert.equal(bad.source_validated, false);
+  assert.ok(bad.source_validation_issues.includes('invalid_url'));
+  const good = ctxEval(`_bhValidateEvidenceSource({ type:'agent_claim', agent:'A1', field:'median_income', value:90000, source:'U.S. Census ACS', source_field:'B19013_001E', retrieved_at:'2024' })`);
+  assert.equal(good.source_validated, true);
+});
+test('behavior: production blockers require real-data source status and source coverage', () => {
+  const blockers = ctxEval(`(function(){
+    R = {
+      real:{ _source_status:{ required_missing:['demographics','business_density'] }, demographics:{population:1} },
+      accuracy:{ score:96, score_exact_verified:96, buckets:{exact:5}, agents_checked:['A1','A2','A4','A6','A7'], source_coverage_missing:['A12'] },
+      a3:{locations:[{overall_score:80, scores:{demand:80, competition:80, regulatory:80, real_estate:80}}]},
+      a7:{scenarios:[{name:'base', monthly_net:1000, monthly_revenue:10000, roi_3yr:20}]},
+      a8:{verdict:'Needs Review', risks:[]}
+    };
+    return _bhProductionBlockers().blockers;
+  })()`);
+  assert.ok(blockers.some(x => x.includes('Required real-data source(s) missing')));
+  assert.ok(blockers.some(x => x.includes('source coverage missing')));
 });
 test('cache distinguishes validated agent outputs and repair context', () => {
   const CACHE_SRC = readFileSync('src/js/02-cache.js', 'utf8');

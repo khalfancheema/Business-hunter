@@ -22,6 +22,22 @@ function _cacheCtx() {
   return provider + '|' + model + '|v' + CACHE_SCHEMA_VERSION;
 }
 
+function _cacheRealDataFingerprint() {
+  try {
+    const real = (typeof R !== 'undefined' && R) ? R.real : null;
+    if (!real) return 'no-real-data';
+    if (real._fingerprint) return real._fingerprint;
+    const status = real._source_status ? JSON.stringify(real._source_status) : '';
+    const pulled = real._pulled_at || '';
+    let h = 5381;
+    const raw = pulled + '|' + status;
+    for (let i = 0; i < raw.length; i++) h = (Math.imul(33, h) ^ raw.charCodeAt(i)) | 0;
+    return Math.abs(h).toString(36);
+  } catch {
+    return 'no-real-data';
+  }
+}
+
 function cacheKey(system, user, opts) {
   // Hash FULL system + user + provider/model + tool flags.
   // Includes opts.webSearch because response shape (citations vs none)
@@ -29,7 +45,8 @@ function cacheKey(system, user, opts) {
   const ctx  = _cacheCtx();
   const tool = (opts && opts.webSearch) ? '|websearch' : '';
   const agent = opts && opts.agentNum ? '|agent:' + opts.agentNum : '';
-  const raw  = ctx + tool + agent + '||' + (system || '') + '||' + (user || '');
+  const real = opts && opts.agentNum ? '|real:' + _cacheRealDataFingerprint() : '';
+  const raw  = ctx + tool + agent + real + '||' + (system || '') + '||' + (user || '');
   let h = 5381;
   for (let i = 0; i < raw.length; i++) {
     h = (Math.imul(33, h) ^ raw.charCodeAt(i)) | 0;

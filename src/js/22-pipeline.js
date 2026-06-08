@@ -41,6 +41,19 @@ function _bhExpandRepairAgents(agents) {
   return [...out].filter(n => n >= 1 && n <= 17).sort((a,b) => a - b);
 }
 
+function _bhAccuracyFailureSignature() {
+  const failedChecks = (R.accuracy?.checks || [])
+    .filter(c => c.acc != null && c.acc < 0.95)
+    .map(c => `${c.agent}:${c.field}:${Math.round(c.acc * 100)}`);
+  const feedback = (R.agent_feedback?.items || [])
+    .filter(i => i.status !== 'ok')
+    .map(i => `A${i.agent}:${(i.issues || []).slice(0, 2).join('|')}`);
+  const ledgerFailures = (R.evidence_ledger || [])
+    .filter(r => r.source_validated === false || (r.type === 'agent_claim' && !r.source))
+    .map(r => `${r.agent}:${r.field}:${(r.source_validation_issues || []).join('|') || 'missing_source'}`);
+  return [...new Set([...failedChecks, ...feedback, ...ledgerFailures])].sort();
+}
+
 async function _bhRunAccuracyRepairPass() {
   if (demoMode || typeof _bhAccuracyRepairAgents !== 'function') return [];
   const before = R.accuracy?.score_exact_verified ?? R.accuracy?.score;
@@ -49,9 +62,11 @@ async function _bhRunAccuracyRepairPass() {
   for (let pass = 1; pass <= 3; pass++) {
     const current = R.accuracy?.score_exact_verified ?? R.accuracy?.score;
     if (current != null && current >= 95) break;
+    if (typeof _bhBuildEvidenceLedger === 'function') _bhBuildEvidenceLedger();
+    const beforeFailures = _bhAccuracyFailureSignature();
     const agents = _bhExpandRepairAgents(_bhAccuracyRepairAgents().filter(n => n <= 17));
     if (!agents.length) break;
-    R.accuracy_repair.passes.push({ pass, agents:[...agents], before_score: current ?? null });
+    R.accuracy_repair.passes.push({ pass, agents:[...agents], before_score: current ?? null, before_failures: beforeFailures.length });
     for (const n of agents) {
       if (stopRequested) break;
       try {
@@ -67,9 +82,16 @@ async function _bhRunAccuracyRepairPass() {
     if (typeof runAccuracyVerifier === 'function' && R.real) {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed after repair:', e.message); }
     }
-    R.accuracy_repair.passes[R.accuracy_repair.passes.length - 1].after_score = R.accuracy?.score ?? null;
+    if (typeof _bhBuildEvidenceLedger === 'function') _bhBuildEvidenceLedger();
+    const afterFailures = _bhAccuracyFailureSignature();
+    const passRow = R.accuracy_repair.passes[R.accuracy_repair.passes.length - 1];
+    passRow.after_score = R.accuracy?.score_exact_verified ?? R.accuracy?.score ?? null;
+    passRow.after_failures = afterFailures.length;
+    passRow.resolved_failures = beforeFailures.filter(x => !afterFailures.includes(x)).length;
+    passRow.new_failures = afterFailures.filter(x => !beforeFailures.includes(x)).length;
+    if (afterFailures.length >= beforeFailures.length && pass > 1) break;
   }
-  R.accuracy_repair.after_score = R.accuracy?.score ?? null;
+  R.accuracy_repair.after_score = R.accuracy?.score_exact_verified ?? R.accuracy?.score ?? null;
   R.accuracy_repair.finished_at = Date.now();
   return R.accuracy_repair.attempts;
 }

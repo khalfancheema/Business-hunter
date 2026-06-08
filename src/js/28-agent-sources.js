@@ -67,7 +67,7 @@ async function runAgent17() {
     ? _bhBuildAgentFeedbackContext()
     : '';
 
-  const sys = `You are a research methodology auditor for a ${ind.unit} business planning system. Return JSON only. Be thorough — flag every data source used and every claim that cannot be independently verified.`;
+  const sys = `You are an advisory research methodology auditor for a ${ind.unit} business planning system. Return JSON only. Be thorough - flag every data source used and every claim that cannot be independently verified. Deterministic source validation is handled separately by the evidence ledger; your role is to add human-readable audit findings, not to override validator failures.`;
   const usr = `Audit all data sources and claims used across this ${ind.unit} business planning analysis for ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
 
 AGENT OUTPUTS (summarized):

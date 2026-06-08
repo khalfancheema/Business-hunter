@@ -187,8 +187,23 @@ function _bhHasNearbySource(obj) {
   return Object.keys(obj).some(k => /source|citation|url|retrieved|verified/i.test(k) && obj[k]);
 }
 
-function _bhFieldEvidence(obj) {
+function _bhFieldEvidence(obj, fieldKey, path) {
   if (!obj || typeof obj !== 'object') return {};
+  const maps = obj.sources_by_field || obj.evidence_by_field || obj.citations_by_field || null;
+  const fieldMap = maps && typeof maps === 'object'
+    ? (maps[fieldKey] || maps[path] || maps[String(fieldKey || '').toLowerCase()] || null)
+    : null;
+  if (fieldMap && typeof fieldMap === 'object') {
+    return {
+      source: fieldMap.source || fieldMap.source_name || fieldMap.citation || fieldMap.agency_name || null,
+      source_url: fieldMap.source_url || fieldMap.url || fieldMap.link || fieldMap.citation_url || null,
+      retrieved_at: fieldMap.retrieved_at || fieldMap.checked_at || fieldMap.last_updated || fieldMap.as_of || null,
+      source_field: fieldMap.source_field || fieldMap.table || fieldMap.dataset_field || fieldMap.verification_method || null,
+      confidence: fieldMap.confidence ?? fieldMap.reliability ?? null,
+      verification_method: fieldMap.verification_method || 'field_map',
+      evidence_scope: 'field',
+    };
+  }
   return {
     source: obj.source || obj.source_name || obj.citation || obj.agency_name || null,
     source_url: obj.source_url || obj.url || obj.link || obj.citation_url || null,
@@ -196,11 +211,12 @@ function _bhFieldEvidence(obj) {
     source_field: obj.source_field || obj.table || obj.dataset_field || obj.verification_method || null,
     confidence: obj.confidence ?? obj.reliability ?? null,
     verification_method: obj.verification_method || null,
+    evidence_scope: 'row',
   };
 }
 
-function _bhHasFieldEvidence(obj) {
-  const ev = _bhFieldEvidence(obj);
+function _bhHasFieldEvidence(obj, fieldKey, path) {
+  const ev = _bhFieldEvidence(obj, fieldKey, path);
   return !!(ev.source && (ev.source_url || ev.source_field || ev.retrieved_at || ev.verification_method));
 }
 
@@ -217,7 +233,7 @@ function _bhCollectCitationIssues(data, agentNum) {
       const here = path ? `${path}.${k}` : k;
       if (typeof v === 'number' && isFinite(v) && Math.abs(v) > 0) {
         const critical = /cost|price|rate|tuition|revenue|income|rent|count|capacity|score|pct|percent|weeks|months|fee|amount|salary|wage|rating|sqft|slots|beds|employees|population/i.test(k);
-        if (critical && !_bhHasFieldEvidence(node) && !_bhHasFieldEvidence(parent)) {
+        if (critical && !_bhHasFieldEvidence(node, k, here)) {
           issues.push(`Numeric claim ${here} lacks field-level source evidence.`);
         }
       }
@@ -238,6 +254,15 @@ function _bhSourceQuality(row) {
   let validUrl = false;
   try {
     if (url) {
+      if (/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(String(url)) && !/^https?:\/\//i.test(String(url))) {
+        return {
+          valid_url: false,
+          host: '',
+          source_tier: 'unclassified',
+          is_authoritative: false,
+          is_estimated: /estimate|proxy|derived|model|ai|unknown|n\/a/i.test(source + ' ' + (row?.verification_method || '')),
+        };
+      }
       const base = (typeof window !== 'undefined' && window.location && window.location.href) ? window.location.href : 'https://example.invalid';
       const u = new URL(url, base);
       validUrl = ['http:', 'https:'].includes(u.protocol) && !/example\.com|localhost|test\.com/i.test(u.hostname);
@@ -253,6 +278,28 @@ function _bhSourceQuality(row) {
     source_tier: authoritative ? 'authoritative' : marketplace ? 'marketplace' : estimated ? 'estimated' : 'unclassified',
     is_authoritative: authoritative,
     is_estimated: estimated,
+  };
+}
+
+function _bhValidateEvidenceSource(row) {
+  const q = _bhSourceQuality(row);
+  const f = _bhSourceFreshness(row);
+  const source = String(row?.source || '');
+  const field = String(row?.field || '');
+  const url = row?.source_url || row?.url || '';
+  const needsUrl = !row?.source_field && !row?.verification_method;
+  const issues = [];
+  if (!source || /unknown|n\/a|not available|ai|model/i.test(source)) issues.push('missing_or_model_source');
+  if (url && !q.valid_url) issues.push('invalid_url');
+  if (needsUrl && !url) issues.push('missing_url_or_source_field');
+  if (q.source_tier === 'unclassified' && /rent|tuition|revenue|cost|wage|count|score|capacity|fee|amount/i.test(field)) issues.push('unclassified_critical_source');
+  if (f.stale) issues.push('stale_source');
+  return {
+    ...q,
+    ...f,
+    source_validation_method: 'deterministic_host_field_freshness_policy',
+    source_validated: issues.length === 0,
+    source_validation_issues: issues,
   };
 }
 
@@ -274,7 +321,7 @@ function _bhExtractClaimLedger(data, agentNum) {
       const here = path ? `${path}.${k}` : k;
       const critical = /cost|price|rate|tuition|revenue|income|rent|count|capacity|score|pct|percent|weeks|months|fee|amount|salary|wage|rating|sqft|slots|beds|employees|population/i.test(k);
       if (typeof v === 'number' && isFinite(v) && Math.abs(v) > 0 && critical) {
-        const ev = _bhHasFieldEvidence(node) ? _bhFieldEvidence(node) : _bhFieldEvidence(parent);
+        const ev = _bhHasFieldEvidence(node, k, here) ? _bhFieldEvidence(node, k, here) : {};
         const row = {
           type: 'agent_claim',
           agent: 'A' + Number(agentNum),
@@ -286,8 +333,9 @@ function _bhExtractClaimLedger(data, agentNum) {
           source_field: ev.source_field || null,
           confidence: ev.confidence ?? null,
           verification_method: ev.verification_method || (ev.source ? 'declared_source' : 'missing'),
+          evidence_scope: ev.evidence_scope || 'missing',
         };
-        Object.assign(row, _bhSourceQuality(row), _bhSourceFreshness(row));
+        Object.assign(row, _bhValidateEvidenceSource(row));
         rows.push(row);
       }
       visit(v, here, node);
@@ -533,9 +581,21 @@ function _bhComputeProductionScorecard() {
   const key = typeof industryKey === 'function' ? industryKey() : 'business';
   const profiles = {
     daycare: { market_demand:0.26, competition:0.16, compliance:0.20, real_estate:0.12, capital:0.18, execution_risk:0.08, min_go:78 },
-    urgent_care: { market_demand:0.22, competition:0.14, compliance:0.18, real_estate:0.12, capital:0.22, execution_risk:0.14, min_go:80 },
-    senior_care: { market_demand:0.22, competition:0.12, compliance:0.22, real_estate:0.14, capital:0.20, execution_risk:0.10, min_go:80 },
+    gas_station: { market_demand:0.18, competition:0.18, compliance:0.18, real_estate:0.20, capital:0.18, execution_risk:0.08, min_go:78 },
+    laundromat: { market_demand:0.22, competition:0.16, compliance:0.10, real_estate:0.18, capital:0.24, execution_risk:0.10, min_go:74 },
+    car_wash: { market_demand:0.20, competition:0.16, compliance:0.16, real_estate:0.22, capital:0.18, execution_risk:0.08, min_go:76 },
     restaurant: { market_demand:0.20, competition:0.22, compliance:0.10, real_estate:0.20, capital:0.20, execution_risk:0.08, min_go:76 },
+    gym: { market_demand:0.22, competition:0.20, compliance:0.08, real_estate:0.18, capital:0.22, execution_risk:0.10, min_go:75 },
+    indoor_play: { market_demand:0.22, competition:0.14, compliance:0.18, real_estate:0.18, capital:0.18, execution_risk:0.10, min_go:77 },
+    dry_cleaning: { market_demand:0.18, competition:0.18, compliance:0.20, real_estate:0.16, capital:0.18, execution_risk:0.10, min_go:76 },
+    senior_care: { market_demand:0.22, competition:0.12, compliance:0.22, real_estate:0.14, capital:0.20, execution_risk:0.10, min_go:80 },
+    tutoring: { market_demand:0.28, competition:0.18, compliance:0.08, real_estate:0.10, capital:0.24, execution_risk:0.12, min_go:74 },
+    urgent_care: { market_demand:0.22, competition:0.14, compliance:0.18, real_estate:0.12, capital:0.22, execution_risk:0.14, min_go:80 },
+    coffee_shop: { market_demand:0.22, competition:0.24, compliance:0.08, real_estate:0.18, capital:0.20, execution_risk:0.08, min_go:75 },
+    barbershop: { market_demand:0.24, competition:0.20, compliance:0.08, real_estate:0.12, capital:0.24, execution_risk:0.12, min_go:73 },
+    coworking: { market_demand:0.20, competition:0.16, compliance:0.06, real_estate:0.28, capital:0.20, execution_risk:0.10, min_go:76 },
+    medical_practice: { market_demand:0.22, competition:0.14, compliance:0.20, real_estate:0.12, capital:0.20, execution_risk:0.12, min_go:80 },
+    optometry: { market_demand:0.22, competition:0.16, compliance:0.16, real_estate:0.12, capital:0.22, execution_risk:0.12, min_go:78 },
   };
   const profile = profiles[key] || { market_demand:0.24, competition:0.16, compliance:0.14, real_estate:0.14, capital:0.22, execution_risk:0.10, min_go:75 };
   const scores = {
@@ -576,7 +636,7 @@ function _bhBuildEvidenceLedger() {
       match_type: c.match_type || null,
       verification_method: c.match_type === 'exact' || c.match_type === 'tolerance_rate' ? 'verified_exact_or_rate' : c.match_type || null,
     };
-    Object.assign(row, _bhSourceQuality(row), _bhSourceFreshness(row));
+    Object.assign(row, _bhValidateEvidenceSource(row));
     rows.push(row);
   });
   (R.a17?.data_sources || []).forEach(s => {
@@ -591,7 +651,7 @@ function _bhBuildEvidenceLedger() {
       retrieved_at: s.last_updated || null,
       verification_method: 'declared_source',
     };
-    Object.assign(row, _bhSourceQuality(row), _bhSourceFreshness(row));
+    Object.assign(row, _bhValidateEvidenceSource(row));
     rows.push(row);
   });
   R.evidence_ledger = rows;
@@ -621,6 +681,8 @@ function _bhProductionBlockers() {
     blockers.push(`Exact verified score ${Math.round(Number(exactVerifiedScore))}% is below the ${_BH_PRODUCTION_ACCURACY_TARGET}-100% production target.`);
   }
   const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
+  const missingRequired = (R.real?._source_status?.required_missing || []);
+  if (missingRequired.length) blockers.push(`Required real-data source(s) missing for production accuracy: ${missingRequired.join(', ')}.`);
   if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
   if (!hasRealData && (R.a1 || R.a2) && (score === undefined || score === null)) warnings.push('No verified real-data score was available for this run.');
   const buckets = R.accuracy?.buckets || {};
@@ -628,6 +690,8 @@ function _bhProductionBlockers() {
   const checkedAgents = Array.isArray(R.accuracy?.agents_checked) ? R.accuracy.agents_checked : [];
   const missingCritical = ['A1','A2','A4','A6','A7'].filter(a => !checkedAgents.includes(a));
   if (hasRealData && missingCritical.length) blockers.push(`Accuracy verifier did not cover critical agent(s): ${missingCritical.join(', ')}.`);
+  const missingSourceCoverage = R.accuracy?.source_coverage_missing || [];
+  if (hasRealData && missingSourceCoverage.length) blockers.push(`Accuracy verifier source coverage missing for critical agent(s): ${missingSourceCoverage.join(', ')}.`);
 
   const unsourced = Array.isArray(R.a17?.unable_to_source) ? R.a17.unable_to_source.length : 0;
   if (unsourced) blockers.push(`${unsourced} claim(s) remain unsourced in Agent 17.`);
@@ -635,10 +699,14 @@ function _bhProductionBlockers() {
   if (hasRealData && ledger.length < 10) blockers.push(`Evidence ledger has only ${ledger.length} row(s); production requires at least 10 verifier/source entries.`);
   const badUrls = ledger.filter(r => r.source_url && r.valid_url === false);
   if (badUrls.length) blockers.push(`${badUrls.length} evidence source URL(s) are invalid or placeholder URLs.`);
+  const invalidSources = ledger.filter(r => r.type !== 'verifier_check' && r.source_validated === false);
+  if (invalidSources.length) blockers.push(`${invalidSources.length} evidence source row(s) failed deterministic source validation.`);
   const staleSources = ledger.filter(r => r.type !== 'verifier_check' && r.stale);
   if (staleSources.length) warnings.push(`${staleSources.length} evidence source row(s) appear older than 3 years.`);
   const estimatedClaims = ledger.filter(r => r.type === 'agent_claim' && (r.is_estimated || !r.source));
   if (estimatedClaims.length) blockers.push(`${estimatedClaims.length} recommendation-critical claim(s) lack verified field-level evidence.`);
+  const criticalCoverage = ['A3','A4','A5','A6','A10','A12','A16','A17'].filter(agent => !ledger.some(r => r.agent === agent && r.source_validated !== false));
+  if (hasRealData && criticalCoverage.length) blockers.push(`Evidence ledger lacks deterministic source-backed rows for critical agent(s): ${criticalCoverage.join(', ')}.`);
 
   const scorecard = _bhComputeProductionScorecard();
   if (!scorecard || scorecard.overall == null) blockers.push('Deterministic production scorecard could not be computed from verified agent evidence.');
