@@ -157,12 +157,14 @@ Use REAL data for ZIP ${zip()}. Revenue model: ${ind.revenue_unit}.`;
     });
     tbl+=`</tbody></table>`;
     $('6-t-c').innerHTML=tbl;
-    setDot(6,'done'); showOut(6);
-
-    // Part B: Enrich cities with individual center details (non-blocking, lazy)
+    // Part B: Enrich cities with individual center details before downstream
+    // agents treat the competitive landscape as complete.
     if (!demoMode && d.cities && d.cities.length) {
-      _runAgent6PartB(d).catch(e => console.warn('Agent 6 Part B err:', e.message));
+      await _runAgent6PartB(d);
+      R.a6 = d;
     }
+
+    setDot(6,'done'); showOut(6);
 
     return JSON.stringify(d);
   } catch(e){setDot(6,'error');showOut(6);$('6-s-t').textContent='Error: '+e.message;throw e}

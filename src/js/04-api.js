@@ -63,6 +63,89 @@ function killChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete 
 let _demoCJKey = null;
 function _setDemoKey(k) { _demoCJKey = k; }
 
+function _bhWalkJSON(value, visit, path='') {
+  if (!value || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    value.forEach((v, i) => _bhWalkJSON(v, visit, `${path}[${i}]`));
+    return;
+  }
+  visit(value, path);
+  Object.keys(value).forEach(k => _bhWalkJSON(value[k], visit, path ? `${path}.${k}` : k));
+}
+
+function _bhAssessOutputQuality(data, opts={}) {
+  const stats = {
+    numeric_fields: 0,
+    source_fields: 0,
+    url_fields: 0,
+    fake_url_fields: 0,
+    fake_phone_fields: 0,
+    placeholder_strings: 0,
+    empty_source_fields: 0,
+    arrays_with_source: 0,
+    arrays_without_source: 0,
+  };
+  const warnings = [];
+  const isSourceKey = k => /(^|_)(source|sources|citation|citations|data_sources|data_sources_used|reasoning_sources|website|url|apply_url)$/i.test(k);
+  const isUrlKey = k => /url|website|portal/i.test(k);
+  const isPhoneKey = k => /phone|tel/i.test(k);
+
+  _bhWalkJSON(data, (obj, path) => {
+    const keys = Object.keys(obj);
+    const hasSource = keys.some(k => isSourceKey(k) && obj[k]);
+    const numericCount = keys.filter(k => typeof obj[k] === 'number' && Number.isFinite(obj[k])).length;
+    if (numericCount) stats.numeric_fields += numericCount;
+    keys.forEach(k => {
+      const v = obj[k];
+      if (isSourceKey(k)) {
+        stats.source_fields++;
+        if (v === null || v === '' || v === 'N/A' || v === 'Information not available') stats.empty_source_fields++;
+      }
+      if (typeof v === 'string') {
+        if (/^(unknown|tbd|to be determined|sample|placeholder)$/i.test(v.trim())) stats.placeholder_strings++;
+        if (isUrlKey(k)) {
+          stats.url_fields++;
+          if (/example\.com|localhost|fake|placeholder|your-?url|maps\.google\.com\/\?q=\.\.\./i.test(v)) stats.fake_url_fields++;
+        }
+        if (isPhoneKey(k) && /555-?0|000-?000|123-?456|xxx/i.test(v)) stats.fake_phone_fields++;
+      }
+    });
+    if (path && /\[\d+\]$/.test(path)) {
+      if (hasSource) stats.arrays_with_source++;
+      else if (numericCount >= 2) stats.arrays_without_source++;
+    }
+  });
+
+  if (stats.numeric_fields >= 8 && stats.source_fields < 2) warnings.push('Numeric-heavy output has too few source/citation fields.');
+  if (stats.arrays_without_source >= 3) warnings.push('Several numeric array rows do not carry row-level sources.');
+  if (stats.empty_source_fields) warnings.push(`${stats.empty_source_fields} source field(s) are empty or unavailable.`);
+  if (stats.fake_url_fields) warnings.push(`${stats.fake_url_fields} URL field(s) look placeholder/fake.`);
+  if (stats.fake_phone_fields) warnings.push(`${stats.fake_phone_fields} phone field(s) look placeholder/fake.`);
+  if (stats.placeholder_strings >= 3) warnings.push('Multiple placeholder strings remain in the output.');
+
+  return {
+    checked_at: new Date().toISOString(),
+    web_search: !!opts.webSearch,
+    risk: warnings.length >= 3 ? 'high' : warnings.length ? 'medium' : 'low',
+    warnings,
+    stats,
+  };
+}
+
+function _bhAttachOutputQuality(data, opts={}) {
+  if (!data || typeof data !== 'object') return data;
+  const quality = _bhAssessOutputQuality(data, opts);
+  try {
+    Object.defineProperty(data, '_quality', { value: quality, enumerable: false, configurable: true });
+  } catch {
+    data._quality = quality;
+  }
+  if (quality.risk !== 'low') {
+    console.warn('[OutputQuality]', quality.risk, quality.warnings.join(' | '), quality.stats);
+  }
+  return data;
+}
+
 // Retry an agent call up to 2 times if JSON parse fails
 // opts.webSearch = true enables Anthropic web_search tool for this call
 async function claudeJSON(system, user, opts={}) {
@@ -71,18 +154,18 @@ async function claudeJSON(system, user, opts={}) {
     // NEW: Try dedicated demo data first (deterministic, richly-shaped)
     if (typeof getDemoData === 'function' && typeof _demoCJKey !== 'undefined' && _demoCJKey !== null) {
       const d = getDemoData(_demoCJKey);
-      if (d) { _demoCJKey = null; return d; }
+      if (d) { _demoCJKey = null; return _bhAttachOutputQuality(d, { ...opts, demo:true }); }
     }
     // Fallback: parse template from prompt (legacy)
     const marker = user.search(/Return ONLY[:\s]/i);
     const src    = marker >= 0 ? user.slice(marker) : user;
     const d = parseJSON(src);
-    if (d) return d;
+    if (d) return _bhAttachOutputQuality(d, { ...opts, demo:true });
     return {};
   }
   if(!demoMode) {
     const cached = getCache(system, user, opts);
-    if(cached) { console.log('Cache hit'); return cached; }
+    if(cached) { console.log('Cache hit'); return _bhAttachOutputQuality(cached, { ...opts, cached:true }); }
   }
   const strictSystem = system + `
 
@@ -109,7 +192,12 @@ CRITICAL — NUMERIC PRECISION:
 - Round percentages to one decimal place max.
 - Round large counts (population, sqft) to nearest 100.
 - Integer fields like counts and units must be integers, not floats.
-- Do NOT pad numbers with .00 or fake precision.`;
+- Do NOT pad numbers with .00 or fake precision.
+
+CRITICAL - SOURCE COVERAGE:
+- For every numeric claim in an array row, include a nearby source/source_url/citation field when the schema provides one.
+- If the schema lacks a source field, put the source name in the nearest summary, notes, or data_sources field.
+- Never output placeholder URLs, "example.com", fake phone numbers, or sample addresses. Use "N/A" instead.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
@@ -125,7 +213,11 @@ CRITICAL — NUMERIC PRECISION:
     try {
       const raw = await claude(strictSystem, user + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : ''), opts);
       const d = parseJSON(raw);
-      if (d) { setCache(system, user, d, opts); return d; }
+      if (d) {
+        const checked = _bhAttachOutputQuality(d, opts);
+        setCache(system, user, checked, opts);
+        return checked;
+      }
       console.warn(`Attempt ${attempt} parse fail. Raw:`, (raw||'').substring(0, 200));
     } catch(e) {
       if (attempt === 3) throw e;

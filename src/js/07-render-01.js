@@ -132,6 +132,7 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
 }`;
   // ── Part 2 prompt (community profile — separate sub-call to avoid max_tokens) ──
   const usr2 = `Return community profile data for ZIP ${zip()} area (${radius()} mile radius). Use US Census ACS, BLS CES, and Esri lifestyle segmentation sources.
+All numbers/strings in the schema are placeholders. Replace every value with verified data for ZIP ${zip()}, or use null/"N/A" when not verified.
 Return ONLY this JSON:
 {
   "age_pyramid": [{"bracket":"0-4","male":2400,"female":2350},{"bracket":"5-9","male":2600,"female":2500},{"bracket":"10-14","male":2550,"female":2480},{"bracket":"15-19","male":2300,"female":2200},{"bracket":"20-24","male":2800,"female":2750},{"bracket":"25-29","male":4200,"female":4100},{"bracket":"30-34","male":5100,"female":4900},{"bracket":"35-39","male":4800,"female":4700},{"bracket":"40-44","male":4200,"female":4100},{"bracket":"45-49","male":3800,"female":3900},{"bracket":"50-54","male":3200,"female":3400},{"bracket":"55-59","male":2800,"female":3100},{"bracket":"60-64","male":2200,"female":2600},{"bracket":"65-69","male":1600,"female":2100},{"bracket":"70-74","male":1100,"female":1600},{"bracket":"75+","male":700,"female":1200}],
@@ -232,11 +233,9 @@ Return ONLY this JSON:
     });
     tbl+=`</tbody></table>`;
     $('1-t-c').innerHTML=tbl;
-    setDot(1,'done'); showOut(1);
-
     // ── Part 2 of 2: Community Profile (separate sub-call to avoid max_tokens) ──
-    // Runs after Part 1 renders — enriches R.a1 with community profile data
-    // Non-blocking for the main pipeline (downstream agents use Part 1 data)
+    // Runs after Part 1 renders and before A1 is marked done, so downstream
+    // agents can rely on the complete demographics package.
     if (!demoMode) {
       try {
         const sys2 = `You are a community profile analyst. Return only accurate JSON — no text before or after.`;
@@ -251,6 +250,8 @@ Return ONLY this JSON:
         }
       } catch(e2) { console.warn('Agent 1 Part 2 community profile failed:', e2.message); }
     }
+
+    setDot(1,'done'); showOut(1);
 
     return JSON.stringify(d);
   } catch(e){setDot(1,'error');showOut(1);$('1-s-t').textContent='Error: '+e.message;throw e}

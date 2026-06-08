@@ -84,17 +84,18 @@ const v1BodyMatch = v1Template.match(/<body>([\s\S]*?)<\/body>/i);
 const v1Body = v1BodyMatch ? v1BodyMatch[1].trim() : '';
 html = html.replace('<!-- BUILD:V1 -->', () => v1Body);
 
-// API key injection — three sources, in priority order:
-//   1. process.env.<KEY>  (Vercel env vars / CI — for hosted deploys)
-//   2. src/js/local-keys.js (gitignored — for local dev)
-//   3. nothing (user pastes via in-app 🔑 button — localStorage fallback)
+// API key injection — intentionally disabled by default for production builds.
+// Vercel env vars belong on the server-side /api/proxy path, not in public HTML.
+// Local dev can opt in with ALLOW_PUBLIC_KEY_INJECTION=true plus local-keys.js.
 const KEY_NAMES = [
   'CENSUS_API_KEY','HUD_TOKEN','BEA_API_KEY','NOAA_TOKEN',
   'AIRNOW_API_KEY','BLS_API_KEY','FRED_API_KEY','SAM_API_KEY',
   'NREL_API_KEY','FBI_API_KEY',
 ];
 const envKeys = Object.fromEntries(
-  KEY_NAMES.filter(n => process.env[n]).map(n => [n, process.env[n]])
+  process.env.ALLOW_PUBLIC_KEY_INJECTION === 'true'
+    ? KEY_NAMES.filter(n => process.env[n]).map(n => [n, process.env[n]])
+    : []
 );
 let envInjection = '';
 if (Object.keys(envKeys).length) {

@@ -1502,45 +1502,6 @@ select option{background:var(--surface2)}
 
 </div>
 <script>
-// ══════════════════════════════════════════════════════════════════════════════
-// LOCAL API KEYS — personal copy, kept out of git
-// ══════════════════════════════════════════════════════════════════════════════
-//
-// USAGE:
-//   1. Copy this file to `src/js/local-keys.js` (already in .gitignore)
-//   2. Replace each '' with your actual key
-//   3. Run `node build.mjs && (cd v2 && node build-v2.mjs)` to bundle
-//
-// The keys load BEFORE prefetchRealData runs, so every pipeline run picks them
-// up automatically. They never reach git, never leave your local clone.
-//
-// Get free keys (~5 min total):
-//   Census  -> https://api.census.gov/data/key_signup.html         (REQUIRED for ACS, ZBP, PEP, BPS)
-//   HUD     -> https://www.huduser.gov/portal/dataset/fmr-api.html (FMR, Income Limits, Vacancy)
-//   BEA     -> https://apps.bea.gov/API/signup/                    (Per-capita personal income)
-//   NOAA    -> https://www.ncdc.noaa.gov/cdo-web/token             (Climate normals)
-//   AirNow  -> https://docs.airnowapi.org/account/request/         (Air quality)
-//   BLS     -> https://data.bls.gov/registrationEngine/            (BLS OES wages — higher rate)
-//   FRED    -> https://fred.stlouisfed.org/docs/api/api_key.html   (County LAUS)
-//   SAM.gov -> https://sam.gov/data-services                       (Federal contracting)
-//
-// ══════════════════════════════════════════════════════════════════════════════
-
-if (typeof window !== 'undefined') {
-  window.CENSUS_API_KEY = '6174bf11a8e4ecfd1b593ccdc54e359f9af6bad9';   // 🚨 Required — unlocks 9 sources
-  window.HUD_TOKEN      = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2IiwianRpIjoiNmI4ODUwM2YxYmMyNWNhYTIwNzAzZDc4YzFhYzFlZWI2ZDc4MDQxNDMwZmVmMDFhNGI0MTkzYTg3YWFmM2JlOTdlNTAxZjNkMDhkOWQ1YjgiLCJpYXQiOjE3Nzg5NzI1ODUuNzg2MTUsIm5iZiI6MTc3ODk3MjU4NS43ODYxNTMsImV4cCI6MjA5NDU5MTc4NS43ODE4NDQsInN1YiI6IjEyODc1NCIsInNjb3BlcyI6W119.j3h_J76MRg5iyZbp6MY2fZV5sLdi6H4ACfvPtKkILH2Cw_bhW7GBRyJEY5FYK40gnsLHioej3PG_lns0eBRd3w';
-  window.BEA_API_KEY    = 'FD0A43B6-7620-4C2A-A556-0D89F1BCE48F';
-  window.NOAA_TOKEN     = 'OoOuSldKdIyQBGgjniqUbrWnocQOPBBC';
-  window.AIRNOW_API_KEY = '6C450DED-F39C-4B65-B8D8-D834FFD066DD';
-  window.BLS_API_KEY    = 'ab371b09ca1241e2a801446af7cb5814';
-  window.FRED_API_KEY   = '59de256ecd2f5c77c0111f90da978ab9';
-  window.SAM_API_KEY    = '';
-  // Optional — DEMO_KEY works for low volume
-  window.NREL_API_KEY   = 'andQ5cinYztYHaGkEzI1JJlddTcwJ37WIZiJa0Ui';
-  window.FBI_API_KEY    = '95HiPCzv6XBbAdIu5J6Lf4QTfeGOZJtjTkgnDKbc';
-}
-
-
 
 const API='https://api.anthropic.com/v1/messages', MODEL='claude-sonnet-4-6';
 let running=false, R={}, charts={}, demoMode=false, stopRequested=false;
@@ -2042,6 +2003,89 @@ function killChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete 
 let _demoCJKey = null;
 function _setDemoKey(k) { _demoCJKey = k; }
 
+function _bhWalkJSON(value, visit, path='') {
+  if (!value || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    value.forEach((v, i) => _bhWalkJSON(v, visit, `${path}[${i}]`));
+    return;
+  }
+  visit(value, path);
+  Object.keys(value).forEach(k => _bhWalkJSON(value[k], visit, path ? `${path}.${k}` : k));
+}
+
+function _bhAssessOutputQuality(data, opts={}) {
+  const stats = {
+    numeric_fields: 0,
+    source_fields: 0,
+    url_fields: 0,
+    fake_url_fields: 0,
+    fake_phone_fields: 0,
+    placeholder_strings: 0,
+    empty_source_fields: 0,
+    arrays_with_source: 0,
+    arrays_without_source: 0,
+  };
+  const warnings = [];
+  const isSourceKey = k => /(^|_)(source|sources|citation|citations|data_sources|data_sources_used|reasoning_sources|website|url|apply_url)$/i.test(k);
+  const isUrlKey = k => /url|website|portal/i.test(k);
+  const isPhoneKey = k => /phone|tel/i.test(k);
+
+  _bhWalkJSON(data, (obj, path) => {
+    const keys = Object.keys(obj);
+    const hasSource = keys.some(k => isSourceKey(k) && obj[k]);
+    const numericCount = keys.filter(k => typeof obj[k] === 'number' && Number.isFinite(obj[k])).length;
+    if (numericCount) stats.numeric_fields += numericCount;
+    keys.forEach(k => {
+      const v = obj[k];
+      if (isSourceKey(k)) {
+        stats.source_fields++;
+        if (v === null || v === '' || v === 'N/A' || v === 'Information not available') stats.empty_source_fields++;
+      }
+      if (typeof v === 'string') {
+        if (/^(unknown|tbd|to be determined|sample|placeholder)$/i.test(v.trim())) stats.placeholder_strings++;
+        if (isUrlKey(k)) {
+          stats.url_fields++;
+          if (/example\.com|localhost|fake|placeholder|your-?url|maps\.google\.com\/\?q=\.\.\./i.test(v)) stats.fake_url_fields++;
+        }
+        if (isPhoneKey(k) && /555-?0|000-?000|123-?456|xxx/i.test(v)) stats.fake_phone_fields++;
+      }
+    });
+    if (path && /\[\d+\]$/.test(path)) {
+      if (hasSource) stats.arrays_with_source++;
+      else if (numericCount >= 2) stats.arrays_without_source++;
+    }
+  });
+
+  if (stats.numeric_fields >= 8 && stats.source_fields < 2) warnings.push('Numeric-heavy output has too few source/citation fields.');
+  if (stats.arrays_without_source >= 3) warnings.push('Several numeric array rows do not carry row-level sources.');
+  if (stats.empty_source_fields) warnings.push(`${stats.empty_source_fields} source field(s) are empty or unavailable.`);
+  if (stats.fake_url_fields) warnings.push(`${stats.fake_url_fields} URL field(s) look placeholder/fake.`);
+  if (stats.fake_phone_fields) warnings.push(`${stats.fake_phone_fields} phone field(s) look placeholder/fake.`);
+  if (stats.placeholder_strings >= 3) warnings.push('Multiple placeholder strings remain in the output.');
+
+  return {
+    checked_at: new Date().toISOString(),
+    web_search: !!opts.webSearch,
+    risk: warnings.length >= 3 ? 'high' : warnings.length ? 'medium' : 'low',
+    warnings,
+    stats,
+  };
+}
+
+function _bhAttachOutputQuality(data, opts={}) {
+  if (!data || typeof data !== 'object') return data;
+  const quality = _bhAssessOutputQuality(data, opts);
+  try {
+    Object.defineProperty(data, '_quality', { value: quality, enumerable: false, configurable: true });
+  } catch {
+    data._quality = quality;
+  }
+  if (quality.risk !== 'low') {
+    console.warn('[OutputQuality]', quality.risk, quality.warnings.join(' | '), quality.stats);
+  }
+  return data;
+}
+
 // Retry an agent call up to 2 times if JSON parse fails
 // opts.webSearch = true enables Anthropic web_search tool for this call
 async function claudeJSON(system, user, opts={}) {
@@ -2050,18 +2094,18 @@ async function claudeJSON(system, user, opts={}) {
     // NEW: Try dedicated demo data first (deterministic, richly-shaped)
     if (typeof getDemoData === 'function' && typeof _demoCJKey !== 'undefined' && _demoCJKey !== null) {
       const d = getDemoData(_demoCJKey);
-      if (d) { _demoCJKey = null; return d; }
+      if (d) { _demoCJKey = null; return _bhAttachOutputQuality(d, { ...opts, demo:true }); }
     }
     // Fallback: parse template from prompt (legacy)
     const marker = user.search(/Return ONLY[:\s]/i);
     const src    = marker >= 0 ? user.slice(marker) : user;
     const d = parseJSON(src);
-    if (d) return d;
+    if (d) return _bhAttachOutputQuality(d, { ...opts, demo:true });
     return {};
   }
   if(!demoMode) {
     const cached = getCache(system, user, opts);
-    if(cached) { console.log('Cache hit'); return cached; }
+    if(cached) { console.log('Cache hit'); return _bhAttachOutputQuality(cached, { ...opts, cached:true }); }
   }
   const strictSystem = system + `
 
@@ -2088,7 +2132,12 @@ CRITICAL — NUMERIC PRECISION:
 - Round percentages to one decimal place max.
 - Round large counts (population, sqft) to nearest 100.
 - Integer fields like counts and units must be integers, not floats.
-- Do NOT pad numbers with .00 or fake precision.`;
+- Do NOT pad numbers with .00 or fake precision.
+
+CRITICAL - SOURCE COVERAGE:
+- For every numeric claim in an array row, include a nearby source/source_url/citation field when the schema provides one.
+- If the schema lacks a source field, put the source name in the nearest summary, notes, or data_sources field.
+- Never output placeholder URLs, "example.com", fake phone numbers, or sample addresses. Use "N/A" instead.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
@@ -2104,7 +2153,11 @@ CRITICAL — NUMERIC PRECISION:
     try {
       const raw = await claude(strictSystem, user + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : ''), opts);
       const d = parseJSON(raw);
-      if (d) { setCache(system, user, d, opts); return d; }
+      if (d) {
+        const checked = _bhAttachOutputQuality(d, opts);
+        setCache(system, user, checked, opts);
+        return checked;
+      }
       console.warn(`Attempt ${attempt} parse fail. Raw:`, (raw||'').substring(0, 200));
     } catch(e) {
       if (attempt === 3) throw e;
@@ -2429,6 +2482,7 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
 }`;
   // ── Part 2 prompt (community profile — separate sub-call to avoid max_tokens) ──
   const usr2 = `Return community profile data for ZIP ${zip()} area (${radius()} mile radius). Use US Census ACS, BLS CES, and Esri lifestyle segmentation sources.
+All numbers/strings in the schema are placeholders. Replace every value with verified data for ZIP ${zip()}, or use null/"N/A" when not verified.
 Return ONLY this JSON:
 {
   "age_pyramid": [{"bracket":"0-4","male":2400,"female":2350},{"bracket":"5-9","male":2600,"female":2500},{"bracket":"10-14","male":2550,"female":2480},{"bracket":"15-19","male":2300,"female":2200},{"bracket":"20-24","male":2800,"female":2750},{"bracket":"25-29","male":4200,"female":4100},{"bracket":"30-34","male":5100,"female":4900},{"bracket":"35-39","male":4800,"female":4700},{"bracket":"40-44","male":4200,"female":4100},{"bracket":"45-49","male":3800,"female":3900},{"bracket":"50-54","male":3200,"female":3400},{"bracket":"55-59","male":2800,"female":3100},{"bracket":"60-64","male":2200,"female":2600},{"bracket":"65-69","male":1600,"female":2100},{"bracket":"70-74","male":1100,"female":1600},{"bracket":"75+","male":700,"female":1200}],
@@ -2529,11 +2583,9 @@ Return ONLY this JSON:
     });
     tbl+=`</tbody></table>`;
     $('1-t-c').innerHTML=tbl;
-    setDot(1,'done'); showOut(1);
-
     // ── Part 2 of 2: Community Profile (separate sub-call to avoid max_tokens) ──
-    // Runs after Part 1 renders — enriches R.a1 with community profile data
-    // Non-blocking for the main pipeline (downstream agents use Part 1 data)
+    // Runs after Part 1 renders and before A1 is marked done, so downstream
+    // agents can rely on the complete demographics package.
     if (!demoMode) {
       try {
         const sys2 = `You are a community profile analyst. Return only accurate JSON — no text before or after.`;
@@ -2548,6 +2600,8 @@ Return ONLY this JSON:
         }
       } catch(e2) { console.warn('Agent 1 Part 2 community profile failed:', e2.message); }
     }
+
+    setDot(1,'done'); showOut(1);
 
     return JSON.stringify(d);
   } catch(e){setDot(1,'error');showOut(1);$('1-s-t').textContent='Error: '+e.message;throw e}
@@ -2704,12 +2758,17 @@ For each item provide 4-6 numbered steps with SPECIFIC actions (not generic). In
       datasets:[{label:'Weeks',data:(d.timeline_phases||[]).map(p=>p.weeks),backgroundColor:['rgba(74,158,255,0.7)','rgba(61,214,140,0.7)','rgba(245,166,35,0.7)','rgba(167,139,250,0.7)','rgba(45,212,191,0.7)','rgba(255,95,95,0.7)','rgba(74,158,255,0.5)'],borderWidth:0,borderRadius:4}]
     },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} weeks — ${(d.timeline_phases||[])[c.dataIndex]?.tasks||''}`}}},scales:{x:{ticks:{color:'#8a8d96'},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96',font:{size:10}},grid:{color:'#2a2d35'}}}}});
 
-    setDot(5,'done'); showOut(5);
-
-    // Part B: enrich with apply_instructions (non-blocking, post-render)
+    // Part B: enrich with apply_instructions before downstream agents consume
+    // compliance results.
     if (!demoMode && d.requirements && d.requirements.length) {
-      _runAgent5PartB(d.requirements).catch(e => console.warn('Agent 5 Part B err:', e.message));
+      $('5-s-t').textContent = sumText + '\n\nLoading step-by-step application instructions...';
+      await _runAgent5PartB(d.requirements);
+      R.a5 = d;
+      if (applyContainer) _renderAgent5ApplyCards(d, applyContainer);
+      $('5-s-t').textContent = sumText;
     }
+
+    setDot(5,'done'); showOut(5);
 
     return JSON.stringify(d);
   } catch(e){setDot(5,'error');showOut(5);$('5-s-t').textContent='Error: '+e.message;throw e}
@@ -2927,12 +2986,14 @@ Use REAL data for ZIP ${zip()}. Revenue model: ${ind.revenue_unit}.`;
     });
     tbl+=`</tbody></table>`;
     $('6-t-c').innerHTML=tbl;
-    setDot(6,'done'); showOut(6);
-
-    // Part B: Enrich cities with individual center details (non-blocking, lazy)
+    // Part B: Enrich cities with individual center details before downstream
+    // agents treat the competitive landscape as complete.
     if (!demoMode && d.cities && d.cities.length) {
-      _runAgent6PartB(d).catch(e => console.warn('Agent 6 Part B err:', e.message));
+      await _runAgent6PartB(d);
+      R.a6 = d;
     }
+
+    setDot(6,'done'); showOut(6);
 
     return JSON.stringify(d);
   } catch(e){setDot(6,'error');showOut(6);$('6-s-t').textContent='Error: '+e.message;throw e}
@@ -4606,11 +4667,12 @@ Use REAL URLs, phone numbers, and dollar amounts for ZIP ${zip()} state.`;
     if(!d) { console.warn('Agent 12 fallback'); d=getFallback12(); }
     R.a12 = d;
     buildGrants(d);
-    setDot(12,'done'); showOut(12);
-    // Part B: enrich with program details (non-blocking)
+    // Part B: enrich with program details before the agent is marked done.
     if (!demoMode) {
-      _runAgent12PartB(d).catch(e=>console.warn('Agent 12 Part B err:', e.message));
+      await _runAgent12PartB(d);
+      R.a12 = d;
     }
+    setDot(12,'done'); showOut(12);
     return JSON.stringify(d);
   } catch(e){setDot(12,'error');showOut(12);$('12-sum-t').textContent='Error: '+e.message;throw e}
 }
@@ -5113,6 +5175,7 @@ async function runAgent15(allResults) {
   let totalFields = 0, totalPass = 0, totalWarn = 0, totalFail = 0;
   const critIssues = [];
   const warnings = [];
+  const qualityWarnings = [];
 
   agentSpecs.forEach(spec => {
     const d = R[`a${spec.n}`];
@@ -5128,6 +5191,12 @@ async function runAgent15(allResults) {
         else if (typeof v === 'string' && v.length < 10) { warn++; warnings.push(`Agent ${spec.n} ${k} suspiciously short`); }
         else { ok++; }
       });
+      if (d._quality && d._quality.risk !== 'low') {
+        warn++;
+        const q = `Agent ${spec.n} output quality ${d._quality.risk}: ${(d._quality.warnings || []).join('; ')}`;
+        warnings.push(q);
+        qualityWarnings.push({ agent: spec.n, name: spec.name, risk: d._quality.risk, warnings: d._quality.warnings || [], stats: d._quality.stats || {} });
+      }
     }
     const total = ok + warn + fail;
     totalFields += total; totalPass += ok; totalWarn += warn; totalFail += fail;
@@ -5139,7 +5208,7 @@ async function runAgent15(allResults) {
   });
 
   // Additional checks
-  const hasParallelPhase1 = true; // architecture fact
+  const hasParallelPhase1 = false; // Phase 1 is dependency-gated in runPipeline
   const hasPerAgentFallbacks = typeof getFallback1 === 'function' && typeof getFallback7 === 'function';
   const hasStopCheck = typeof stopRequested !== 'undefined';
   const agentsWithData = agentSpecs.filter(a => !!R[`a${a.n}`]).length;
@@ -5155,7 +5224,7 @@ async function runAgent15(allResults) {
       detail:`${totalPass} fields valid, ${totalWarn} warnings, ${totalFail} missing. Warnings: ${warnings.slice(0,5).join('; ')||'none'}.` },
     { suite:'Architecture Checks', passCount: (hasPerAgentFallbacks?1:0)+(hasStopCheck?1:0)+1+1,
       totalCount: 4,
-      detail:`Fallbacks present: ${hasPerAgentFallbacks}. Stop flag: ${hasStopCheck}. Parallel phase 1 (agents 1+5+6): true. Sub-agents (7,9,10,13): true.` },
+      detail:`Fallbacks present: ${hasPerAgentFallbacks}. Stop flag: ${hasStopCheck}. Parallel phase 1 (agents 1+5+6): false. Sub-agents (1,5,6,7,9,10,12,13,16): true.` },
   ];
 
   const sys = `You are a senior QA engineer validating an AI pipeline run. Respond JSON only.`;
@@ -5168,6 +5237,7 @@ ACTUAL TEST RESULTS:
 - Field pass rate: ${passRate}%
 - Critical issues: ${critIssues.length > 0 ? critIssues.join('; ') : 'none'}
 - Warnings: ${warnings.slice(0,8).join('; ')||'none'}
+- Output-quality warnings: ${qualityWarnings.length ? qualityWarnings.map(q=>`A${q.agent} ${q.risk}: ${q.warnings.join(', ')}`).join(' | ') : 'none'}
 - Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
 - Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
@@ -5206,6 +5276,7 @@ Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with
       fields_failed:    totalFail,
       critical_issues:  critIssues,
       warnings:         warnings.slice(0, 8),
+      quality_warnings: qualityWarnings,
       by_agent:         byAgent,
     };
     R.a15 = d;
@@ -5229,7 +5300,7 @@ function renderQA(d) {
     tests+=`</div>`;
   });
   $('15-tests-c').innerHTML=tests;
-  const dv=d.data_validation||{fields_checked:0,fields_passed:0,fields_warned:0,fields_failed:0,critical_issues:[],warnings:[],by_agent:[]};
+  const dv=d.data_validation||{fields_checked:0,fields_passed:0,fields_warned:0,fields_failed:0,critical_issues:[],warnings:[],quality_warnings:[],by_agent:[]};
   let dataVal=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px">
     <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)">${dv.fields_passed}</div><div style="font-size:11px;color:var(--muted)">Passed</div></div>
     <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber)">${dv.fields_warned}</div><div style="font-size:11px;color:var(--muted)">Warnings</div></div>
@@ -5237,6 +5308,9 @@ function renderQA(d) {
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)">${dv.fields_checked}</div><div style="font-size:11px;color:var(--muted)">Total</div></div>
   </div>`;
   if(dv.critical_issues?.length){dataVal+=`<div style="background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--red);margin-bottom:6px">Critical Issues</div>${(dv.critical_issues||[]).map(i=>`<div style="font-size:12px;color:var(--muted);margin-bottom:3px">• ${i}</div>`).join('')}</div>`;}
+  if(dv.quality_warnings?.length){
+    dataVal+=`<div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber);margin-bottom:6px">Output Quality Warnings</div>${(dv.quality_warnings||[]).map(q=>`<div style="font-size:12px;color:var(--muted);margin-bottom:5px"><strong>A${q.agent} ${q.name}</strong> (${q.risk}): ${(q.warnings||[]).join('; ')}</div>`).join('')}</div>`;
+  }
   dataVal+=`<table class="tbl"><thead><tr><th>Agent</th><th>OK</th><th>Warn</th><th>Fail</th><th>Score</th></tr></thead><tbody>`;
   (dv.by_agent||[]).forEach(a=>{
     const sb=a.score>=90?'b-green':a.score>=75?'b-amber':'b-red';
@@ -5308,17 +5382,17 @@ async function runPipeline() {
       } catch(e) { console.warn('Real data prefetch failed (non-fatal):', e.message); }
     }
 
-    // ── Phase 1: Foundation Research (parallel) ─────────────
+    // ── Phase 1: Foundation Research (dependency-gated) ─────
     let r1, r5, r6;
     if (phaseShouldRun(1)) {
-      setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
-      const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
-      r1=res1.status==='fulfilled'?res1.value:fb(1);
-      r5=res5.status==='fulfilled'?res5.value:fb(5);
-      r6=res6.status==='fulfilled'?res6.value:fb(6);
-      if(res1.status==='rejected') console.error('Agent 1 failed:',res1.reason?.message);
-      if(res5.status==='rejected') console.error('Agent 5 failed:',res5.reason?.message);
-      if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
+      setProgress(5,'Phase 1 — Demographics research…');
+      try { r1=await runAgent1(); } catch(e) { console.error('Agent 1 failed:',e.message); r1=fb(1); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(9,'Phase 1 — Compliance requirements…');
+      try { r5=await runAgent5(); } catch(e) { console.error('Agent 5 failed:',e.message); r5=fb(5); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(13,'Phase 1 — Competitive intelligence…');
+      try { r6=await runAgent6(); } catch(e) { console.error('Agent 6 failed:',e.message); r6=fb(6); }
     } else {
       setProgress(5,'Phase 1 — skipped (using cached data)');
       r1=best(1); r5=best(5); r6=best(6);
@@ -5380,19 +5454,19 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 9: Supplemental Analysis (parallel) ───────────
+    // ── Phase 9: Supplemental Analysis (dependency-gated) ───
     if (phaseShouldRun(9)) {
-      setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
-      const [res11,res12,res13,res16] = await Promise.allSettled([
-        runAgent11(r1,r2,r4),
-        runAgent12(r3,r5),
-        runAgent13(r6),
-        (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
-      ]);
-      if(res11.status==='rejected') console.error('Agent 11 failed:',res11.reason?.message);
-      if(res12.status==='rejected') console.error('Agent 12 failed:',res12.reason?.message);
-      if(res13.status==='rejected') console.error('Agent 13 failed:',res13.reason?.message);
-      if(res16.status==='rejected') console.error('Agent 16 failed:',res16.reason?.message);
+      setProgress(72,'Phase 9 — Market map…');
+      try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(76,'Phase 9 — Grants and incentives…');
+      try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(80,'Phase 9 — Competitor deep-dive…');
+      try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(84,'Phase 9 — Build vs buy analysis…');
+      try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); }
       // Apply fallbacks for any phase 9 agent that failed and has no data
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
       if(!R.a12) try{R.a12=getFallback12();}catch(e){}
@@ -10479,7 +10553,8 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
       '\n\n[Context condensed. Return a SHORTER JSON with the same schema — use concise 1-sentence strings instead of detailed paragraphs. Schema structure must be preserved exactly.]';
 
     try {
-      const retryResult = await claudeJSON(system, shortUser, {}); // no webSearch on retry (condensed prompt)
+      const retryOpts = opts.webSearch ? { ...opts, webSearch:true, webSearchMaxUses: Math.min(opts.webSearchMaxUses || 2, 2) } : opts;
+      const retryResult = await claudeJSON(system, shortUser, retryOpts);
       if (retryResult) return retryResult;
     } catch (retryErr) {
       console.error(`[StressGuard] Agent ${agentNum}: retry also failed:`, retryErr.message);
@@ -10662,7 +10737,7 @@ if (typeof runAgent14 === 'function') {
 (function _patchClaudeJSON() {
   if (typeof claudeJSON !== 'function') return;
   const _origClaudeJSON = window.claudeJSON;
-  window.claudeJSON = async function(system, user, opts={}) {
+  const guardedClaudeJSON = async function(system, user, opts={}) {
     const totalChars = (system || '').length + (user || '').length;
     if (totalChars > 100000) {
       console.warn(`[StressGuard] Large claudeJSON call: ${totalChars} chars (~${Math.round(totalChars/4)} tokens). Consider sub-agents.`);
@@ -10677,12 +10752,15 @@ if (typeof runAgent14 === 'function') {
         const halfUser = user.slice(0, Math.floor(user.length / 2)) +
           '\n[Context truncated. Return JSON with available data; use null for unknown fields.]';
         try {
-          return await _origClaudeJSON(system, halfUser, {}); // no webSearch on truncated retry
+          const retryOpts = opts.webSearch ? { ...opts, webSearch:true, webSearchMaxUses: Math.min(opts.webSearchMaxUses || 2, 2) } : opts;
+          return await _origClaudeJSON(system, halfUser, retryOpts);
         } catch {}
       }
       throw e;
     }
   };
+  window.claudeJSON = guardedClaudeJSON;
+  try { claudeJSON = guardedClaudeJSON; } catch {}
 })();
 
 // ── STRESS TEST REPORT (accessible via browser console) ──────────────────────
@@ -11786,7 +11864,7 @@ async function _rdFetchACS(zip) {
       under_18:      u18 > 0 ? u18 : null,
       employed:      emp > 0 ? emp : null,
       bachelors:     bachPlus > 0 ? bachPlus : null, // bachelors+ (B15003_022-025)
-      source:        'ACS 5-Year 2022',
+      source:        'ACS 5-Year 2024',
       zip,
     };
     return _rdCacheSet(k, result);
@@ -12334,7 +12412,7 @@ async function _rdFetchACSExpanded(zip) {
       median_gross_rent:    medGrossRent > 0 ? medGrossRent : null,
       vacancy_pct:          (housingVac > 0 && housingTotal > 0) ? Math.round(housingVac/housingTotal*1000)/10 : null,
       long_commute_pct:     (commute60Plus > 0 && commuteTotal > 0) ? Math.round(commute60Plus/commuteTotal*1000)/10 : null,
-      source: 'ACS 5-Year 2022 (S2301, B17001, B11003, B25064, B25002, B08303)',
+      source: 'ACS 5-Year 2024 (S2301, B17001, B11003, B25064, B25002, B08303)',
       zip,
     };
     return _rdCacheSet(k, result);
@@ -12482,7 +12560,7 @@ async function _rdFetchCBPCounty(stateFips, countyFips, naics) {
       employees:      parseInt(row[1]) || 0,
       annual_payroll: parseInt(row[2]) || 0,
       naics,
-      source: 'Census CBP 2022 (county-level)',
+      source: 'Census CBP 2023 (county-level)',
     };
     return _rdCacheSet(k, result);
   } catch(e) { console.warn('[RealData] CBP County failed:', e.message); return null; }
@@ -12525,7 +12603,7 @@ async function _rdFetchBLSOES(stateAbbr, industryKey) {
       median_hourly_wage: annualMedian > 0 ? Math.round(annualMedian / 2080 * 100) / 100 : null,
       state:             stateAbbr,
       year:              latest.year,
-      source:            'BLS OES (May 2024)',
+      source:            `BLS OES (${latest.year})`,
     };
     return _rdCacheSet(k, result);
   } catch(e) { console.warn('[RealData] BLS OES failed:', e.message); return null; }
@@ -12718,7 +12796,7 @@ async function _rdFetchACSHomeValue(zip) {
       median_home_value:        parseInt(row[0]) || null,
       median_monthly_costs:     parseInt(row[1]) || null,
       median_mortgage_payment:  parseInt(row[2]) || null,
-      source:                   'ACS 5-Year 2022 (B25077, B25104, B25088)',
+      source:                   'ACS 5-Year 2024 (B25077, B25104, B25088)',
       zip,
     };
     return _rdCacheSet(k, result);
@@ -13382,14 +13460,15 @@ function rdRenderRealDataBadge(elId, keys) {
   const rows = [];
   if ((!keys || keys.includes('demographics')) && d.demographics) {
     const dem = d.demographics;
-    if (dem.population)    rows.push(['Population',    dem.population.toLocaleString(),        'ACS 2022']);
-    if (dem.median_income) rows.push(['Median HH Income', '$'+dem.median_income.toLocaleString(), 'ACS 2022']);
-    if (dem.households)    rows.push(['Households',    dem.households.toLocaleString(),        'ACS 2022']);
-    if (dem.renter_pct != null) rows.push(['Renter %', dem.renter_pct+'%', 'ACS 2022']);
+    const demSource = dem.source || 'ACS';
+    if (dem.population)    rows.push(['Population',    dem.population.toLocaleString(),        demSource]);
+    if (dem.median_income) rows.push(['Median HH Income', '$'+dem.median_income.toLocaleString(), demSource]);
+    if (dem.households)    rows.push(['Households',    dem.households.toLocaleString(),        demSource]);
+    if (dem.renter_pct != null) rows.push(['Renter %', dem.renter_pct+'%', demSource]);
   }
   if ((!keys || keys.includes('business_density')) && d.business_density) {
     const biz = d.business_density;
-    rows.push(['Competitors in ZIP (NAICS '+biz.naics+')', biz.count+' establishments', 'Census ZBP 2021']);
+    rows.push(['Competitors in ZIP (NAICS '+biz.naics+')', biz.count+' establishments', biz.source || 'Census ZBP']);
   }
   if ((!keys || keys.includes('macro')) && d.macro) {
     const m = d.macro;

@@ -144,12 +144,17 @@ For each item provide 4-6 numbered steps with SPECIFIC actions (not generic). In
       datasets:[{label:'Weeks',data:(d.timeline_phases||[]).map(p=>p.weeks),backgroundColor:['rgba(74,158,255,0.7)','rgba(61,214,140,0.7)','rgba(245,166,35,0.7)','rgba(167,139,250,0.7)','rgba(45,212,191,0.7)','rgba(255,95,95,0.7)','rgba(74,158,255,0.5)'],borderWidth:0,borderRadius:4}]
     },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} weeks — ${(d.timeline_phases||[])[c.dataIndex]?.tasks||''}`}}},scales:{x:{ticks:{color:'#8a8d96'},grid:{color:'#2a2d35'}},y:{ticks:{color:'#8a8d96',font:{size:10}},grid:{color:'#2a2d35'}}}}});
 
-    setDot(5,'done'); showOut(5);
-
-    // Part B: enrich with apply_instructions (non-blocking, post-render)
+    // Part B: enrich with apply_instructions before downstream agents consume
+    // compliance results.
     if (!demoMode && d.requirements && d.requirements.length) {
-      _runAgent5PartB(d.requirements).catch(e => console.warn('Agent 5 Part B err:', e.message));
+      $('5-s-t').textContent = sumText + '\n\nLoading step-by-step application instructions...';
+      await _runAgent5PartB(d.requirements);
+      R.a5 = d;
+      if (applyContainer) _renderAgent5ApplyCards(d, applyContainer);
+      $('5-s-t').textContent = sumText;
     }
+
+    setDot(5,'done'); showOut(5);
 
     return JSON.stringify(d);
   } catch(e){setDot(5,'error');showOut(5);$('5-s-t').textContent='Error: '+e.message;throw e}

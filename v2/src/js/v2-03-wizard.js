@@ -46,6 +46,77 @@ const V2_US_STATES = [
   'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC',
 ];
 
+const V2_INDUSTRY_ALIASES = {
+  daycare_home:'daycare',
+  daycare_faith:'daycare',
+  daycare_subsidy:'daycare',
+  daycare_aftersch:'daycare',
+};
+
+function v2IndustryKeyForConfig(key) {
+  return V2_INDUSTRY_ALIASES[key] || key || 'daycare';
+}
+
+function v2IndustryConfig(key) {
+  const configKey = v2IndustryKeyForConfig(key);
+  return (typeof INDUSTRIES !== 'undefined' && INDUSTRIES[configKey]) ? INDUSTRIES[configKey] : null;
+}
+
+function v2FormatMoneyShort(n) {
+  const val = parseInt(n) || 0;
+  if (val >= 1000000) return '$' + (val / 1000000).toFixed(val % 1000000 ? 1 : 0) + 'M';
+  return '$' + Math.round(val / 1000) + 'K';
+}
+
+function v2BudgetOptionsForIndustry(key) {
+  const cfg = v2IndustryConfig(key);
+  const base = cfg?.budget_default || 600000;
+  return [
+    { val:String(Math.round(base * 0.65)), label:v2FormatMoneyShort(base * 0.65), desc:'Lean launch for this industry' },
+    { val:String(base), label:v2FormatMoneyShort(base), desc:'Recommended baseline' },
+    { val:String(Math.round(base * 1.5)), label:v2FormatMoneyShort(base * 1.5), desc:'Stronger build-out and buffer' },
+    { val:String(Math.round(base * 2.25)), label:v2FormatMoneyShort(base * 2.25), desc:'Premium or multi-site plan' },
+    { val:'custom', label:'Custom', desc:'Enter your own amount' },
+  ];
+}
+
+function v2IndustryRadiusDefault(key) {
+  const local = ['barbershop','coffee_shop','restaurant','laundromat','dry_cleaning','tutoring'];
+  const regional = ['urgent_care','medical_practice','senior_care','gas_station','car_wash','indoor_play'];
+  const configKey = v2IndustryKeyForConfig(key);
+  if (local.includes(configKey)) return '5';
+  if (regional.includes(configKey)) return '10';
+  return '25';
+}
+
+function v2DetailChoicesForIndustry(key) {
+  const cfg = v2IndustryConfig(key) || {};
+  const unit = cfg.unit || 'business';
+  const revenue = cfg.revenue_unit || 'unit economics';
+  return {
+    experience:[
+      ['none', `New to ${unit}`],
+      ['some', 'Have operator experience'],
+      ['expert', 'Licensed / expert operator'],
+    ],
+    goals:[
+      ['open', 'Find best opening site'],
+      ['invest', `Validate ${revenue}`],
+      ['finance', 'Prepare lender-ready case'],
+      ['compare', 'Compare locations'],
+    ],
+  };
+}
+
+function v2ApplyIndustryDefaults(key) {
+  const cfg = v2IndustryConfig(key);
+  if (!cfg) return;
+  V2.wizard.data.capacity = String(cfg.capacity_default || V2.wizard.data.capacity || 75);
+  V2.wizard.data.budget = String(cfg.budget_default || V2.wizard.data.budget || 600000);
+  V2.wizard.data.radius = v2IndustryRadiusDefault(key);
+  V2.wizard.data.extras = {};
+}
+
 /** Combine split address fields into a single geocodable string. */
 function v2WizBuildAddress() {
   const d = V2.wizard.data;
@@ -155,10 +226,15 @@ function v2WizRenderStep() {
 
   } else if (s.id === 'budget') {
     // Sync state with the visual default so "Continue" doesn't silently block
-    if (!d.budget) { V2.wizard.data.budget = '600000'; }
+    const cfg = v2IndustryConfig(d.industry);
+    const budgets = v2BudgetOptionsForIndustry(d.industry);
+    if (!d.budget) { V2.wizard.data.budget = String(cfg?.budget_default || 600000); }
     body = `
+      <div style="font-size:12px;color:var(--v2-t2);margin-bottom:12px">
+        Baseline reflects ${cfg?.label || 'this business'} startup capital, fit-out, compliance, staffing, and opening reserve.
+      </div>
       <div class="v2-budget-grid">
-        ${V2_BUDGETS.map(b=>`<div class="v2-budget-item${d.budget===b.val?' selected':''}" onclick="v2WizPickBudget('${b.val}')">
+        ${budgets.map(b=>`<div class="v2-budget-item${d.budget===b.val?' selected':''}" onclick="v2WizPickBudget('${b.val}')">
           <div class="v2-budget-val">${b.label}</div><div class="v2-budget-desc">${b.desc}</div></div>`).join('')}
       </div>
       <div class="v2-field" id="wiz-custom-budget-row" style="display:${d.budget==='custom'?'block':'none'};margin-top:12px">
@@ -168,33 +244,39 @@ function v2WizRenderStep() {
 
   } else if (s.id === 'details') {
     const ind = V2_INDUSTRIES.find(i=>i.val===d.industry)||{label:'Business'};
+    const cfg = v2IndustryConfig(d.industry) || {};
+    const choices = v2DetailChoicesForIndustry(d.industry);
+    if (!d.capacity && cfg.capacity_default) V2.wizard.data.capacity = String(cfg.capacity_default);
     body = `
       <div class="v2-field">
-        <label>Capacity (${ind.label} units)</label>
-        <input class="v2-input" id="wiz-capacity" type="number" min="1" placeholder="e.g. 75" value="${d.capacity||''}" oninput="V2.wizard.data.capacity=this.value" />
+        <label>${cfg.capacity_label || `${ind.label} Capacity`}</label>
+        <input class="v2-input" id="wiz-capacity" type="number" min="1" placeholder="e.g. ${cfg.capacity_default || 75}" value="${d.capacity||cfg.capacity_default||''}" oninput="V2.wizard.data.capacity=this.value" />
+        <div style="font-size:11px;color:var(--v2-t3);margin-top:6px">${cfg.revenue_unit ? 'Model revenue as: '+cfg.revenue_unit : 'Use the operating capacity that drives revenue.'}</div>
       </div>
       <div class="v2-field">
-        <label>Experience Level</label>
+        <label>Operator Readiness</label>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-          ${[['none','None'],['some','Some'],['expert','Expert']].map(([v,l])=>`
+          ${choices.experience.map(([v,l])=>`
             <div class="v2-choose-item${(d.experience||'some')===v?' selected':''}" onclick="V2.wizard.data.experience='${v}';v2WizRenderStep()" style="justify-content:center">
               <span class="lbl">${l}</span>
             </div>`).join('')}
         </div>
       </div>
       <div class="v2-field">
-        <label>Primary Goal</label>
+        <label>Primary Decision</label>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-          ${[['open','Open & Operate'],['invest','Investment / ROI'],['sell','Sell / Exit'],['validate','Just Validating']].map(([v,l])=>`
+          ${choices.goals.map(([v,l])=>`
             <div class="v2-choose-item${(d.goal||'open')===v?' selected':''}" onclick="V2.wizard.data.goal='${v}';v2WizRenderStep()" style="justify-content:center">
               <span class="lbl">${l}</span>
             </div>`).join('')}
         </div>
       </div>
+      ${cfg.real_estate ? `<div style="font-size:12px;color:var(--v2-t2);line-height:1.6;background:var(--v2-s3);border-radius:10px;padding:12px 14px;margin-bottom:12px"><strong>Site screen:</strong> ${cfg.real_estate}</div>` : ''}
       ${typeof v2GetIndustryExtrasHTML === 'function' ? v2GetIndustryExtrasHTML(d.industry||'') : ''}`;
 
   } else if (s.id === 'confirm') {
     const ind  = V2_INDUSTRIES.find(i=>i.val===d.industry)||{emoji:'🏢',label:'Business'};
+    const cfg = v2IndustryConfig(d.industry) || {};
     const budg = d.budget==='custom' ? `$${parseInt(d.customBudget||600000).toLocaleString()}` : `$${parseInt(d.budget||600000).toLocaleString()}`;
     const hasKey = !!(localStorage.getItem('v2_apikey')||'').trim();
     body = `
@@ -212,8 +294,8 @@ function v2WizRenderStep() {
           <strong>${budg}</strong>
         </div>
         <div style="display:flex;justify-content:space-between;padding:12px 16px;background:var(--v2-s3);border-radius:10px">
-          <span style="color:var(--v2-t2);font-size:13px">Capacity</span>
-          <strong>${d.capacity||75} units</strong>
+          <span style="color:var(--v2-t2);font-size:13px">${cfg.capacity_label || 'Capacity'}</span>
+          <strong>${d.capacity||cfg.capacity_default||75}</strong>
         </div>
         <div style="display:flex;justify-content:space-between;padding:12px 16px;background:var(--v2-s3);border-radius:10px">
           <span style="color:var(--v2-t2);font-size:13px">Goal</span>
@@ -275,6 +357,7 @@ function v2WizRenderStep() {
 
 function v2WizPickIndustry(val) {
   V2.wizard.data.industry = val;
+  v2ApplyIndustryDefaults(val);
   v2WizRenderStep();
 }
 function v2WizPickRadius(val) {
@@ -337,7 +420,8 @@ function v2WizBack() {
 
 function v2LaunchPipeline() {
   const d = V2.wizard.data;
-  const budget = d.budget === 'custom' ? (d.customBudget||600000) : (d.budget||600000);
+  const cfg = v2IndustryConfig(d.industry) || {};
+  const budget = d.budget === 'custom' ? (d.customBudget||cfg.budget_default||600000) : (d.budget||cfg.budget_default||600000);
 
   // Sync wizard values to v1 DOM
   const zipEl      = document.getElementById('zip');
@@ -347,8 +431,8 @@ function v2LaunchPipeline() {
   const indEl      = document.getElementById('industrySelect');
 
   if (zipEl) zipEl.value = d.zip || '30097';
-  if (radEl) radEl.value = d.radius || '40';
-  if (capEl) capEl.value = d.capacity || '75';
+  if (radEl) radEl.value = d.radius || v2IndustryRadiusDefault(d.industry);
+  if (capEl) capEl.value = d.capacity || cfg.capacity_default || '75';
   if (budEl) budEl.value = budget;
   // Map non-premium childcare subtypes back to 'daycare' for v1 pipeline compatibility
   const industryVal = ['daycare_home','daycare_faith','daycare_subsidy','daycare_aftersch'].includes(d.industry) ? 'daycare' : (d.industry || 'daycare');

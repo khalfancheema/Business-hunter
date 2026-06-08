@@ -30,6 +30,7 @@ async function runAgent15(allResults) {
   let totalFields = 0, totalPass = 0, totalWarn = 0, totalFail = 0;
   const critIssues = [];
   const warnings = [];
+  const qualityWarnings = [];
 
   agentSpecs.forEach(spec => {
     const d = R[`a${spec.n}`];
@@ -45,6 +46,12 @@ async function runAgent15(allResults) {
         else if (typeof v === 'string' && v.length < 10) { warn++; warnings.push(`Agent ${spec.n} ${k} suspiciously short`); }
         else { ok++; }
       });
+      if (d._quality && d._quality.risk !== 'low') {
+        warn++;
+        const q = `Agent ${spec.n} output quality ${d._quality.risk}: ${(d._quality.warnings || []).join('; ')}`;
+        warnings.push(q);
+        qualityWarnings.push({ agent: spec.n, name: spec.name, risk: d._quality.risk, warnings: d._quality.warnings || [], stats: d._quality.stats || {} });
+      }
     }
     const total = ok + warn + fail;
     totalFields += total; totalPass += ok; totalWarn += warn; totalFail += fail;
@@ -56,7 +63,7 @@ async function runAgent15(allResults) {
   });
 
   // Additional checks
-  const hasParallelPhase1 = true; // architecture fact
+  const hasParallelPhase1 = false; // Phase 1 is dependency-gated in runPipeline
   const hasPerAgentFallbacks = typeof getFallback1 === 'function' && typeof getFallback7 === 'function';
   const hasStopCheck = typeof stopRequested !== 'undefined';
   const agentsWithData = agentSpecs.filter(a => !!R[`a${a.n}`]).length;
@@ -72,7 +79,7 @@ async function runAgent15(allResults) {
       detail:`${totalPass} fields valid, ${totalWarn} warnings, ${totalFail} missing. Warnings: ${warnings.slice(0,5).join('; ')||'none'}.` },
     { suite:'Architecture Checks', passCount: (hasPerAgentFallbacks?1:0)+(hasStopCheck?1:0)+1+1,
       totalCount: 4,
-      detail:`Fallbacks present: ${hasPerAgentFallbacks}. Stop flag: ${hasStopCheck}. Parallel phase 1 (agents 1+5+6): true. Sub-agents (7,9,10,13): true.` },
+      detail:`Fallbacks present: ${hasPerAgentFallbacks}. Stop flag: ${hasStopCheck}. Parallel phase 1 (agents 1+5+6): false. Sub-agents (1,5,6,7,9,10,12,13,16): true.` },
   ];
 
   const sys = `You are a senior QA engineer validating an AI pipeline run. Respond JSON only.`;
@@ -85,6 +92,7 @@ ACTUAL TEST RESULTS:
 - Field pass rate: ${passRate}%
 - Critical issues: ${critIssues.length > 0 ? critIssues.join('; ') : 'none'}
 - Warnings: ${warnings.slice(0,8).join('; ')||'none'}
+- Output-quality warnings: ${qualityWarnings.length ? qualityWarnings.map(q=>`A${q.agent} ${q.risk}: ${q.warnings.join(', ')}`).join(' | ') : 'none'}
 - Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
 - Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
@@ -123,6 +131,7 @@ Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with
       fields_failed:    totalFail,
       critical_issues:  critIssues,
       warnings:         warnings.slice(0, 8),
+      quality_warnings: qualityWarnings,
       by_agent:         byAgent,
     };
     R.a15 = d;
@@ -146,7 +155,7 @@ function renderQA(d) {
     tests+=`</div>`;
   });
   $('15-tests-c').innerHTML=tests;
-  const dv=d.data_validation||{fields_checked:0,fields_passed:0,fields_warned:0,fields_failed:0,critical_issues:[],warnings:[],by_agent:[]};
+  const dv=d.data_validation||{fields_checked:0,fields_passed:0,fields_warned:0,fields_failed:0,critical_issues:[],warnings:[],quality_warnings:[],by_agent:[]};
   let dataVal=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px">
     <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)">${dv.fields_passed}</div><div style="font-size:11px;color:var(--muted)">Passed</div></div>
     <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber)">${dv.fields_warned}</div><div style="font-size:11px;color:var(--muted)">Warnings</div></div>
@@ -154,6 +163,9 @@ function renderQA(d) {
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center"><div style="font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)">${dv.fields_checked}</div><div style="font-size:11px;color:var(--muted)">Total</div></div>
   </div>`;
   if(dv.critical_issues?.length){dataVal+=`<div style="background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--red);margin-bottom:6px">Critical Issues</div>${(dv.critical_issues||[]).map(i=>`<div style="font-size:12px;color:var(--muted);margin-bottom:3px">• ${i}</div>`).join('')}</div>`;}
+  if(dv.quality_warnings?.length){
+    dataVal+=`<div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber);margin-bottom:6px">Output Quality Warnings</div>${(dv.quality_warnings||[]).map(q=>`<div style="font-size:12px;color:var(--muted);margin-bottom:5px"><strong>A${q.agent} ${q.name}</strong> (${q.risk}): ${(q.warnings||[]).join('; ')}</div>`).join('')}</div>`;
+  }
   dataVal+=`<table class="tbl"><thead><tr><th>Agent</th><th>OK</th><th>Warn</th><th>Fail</th><th>Score</th></tr></thead><tbody>`;
   (dv.by_agent||[]).forEach(a=>{
     const sb=a.score>=90?'b-green':a.score>=75?'b-amber':'b-red';

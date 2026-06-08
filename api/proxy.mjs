@@ -90,12 +90,18 @@ const SOURCE_CONFIG = {
 function corsHeaders(req) {
   const allowed = (process.env.ALLOWED_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean);
   const origin  = req.headers.origin || '';
-  const allow   = allowed.length === 0 || allowed.includes(origin) || allowed.includes('*');
+  const host    = req.headers['x-forwarded-host'] || req.headers.host || '';
+  const sameOrigin = !origin || origin === `https://${host}` || origin === `http://${host}`;
+  const allow   = allowed.length
+    ? allowed.includes(origin) || allowed.includes('*')
+    : sameOrigin;
+  const fallbackOrigin = host ? `https://${host}` : 'null';
   return {
-    'Access-Control-Allow-Origin':  allow ? origin || '*' : 'null',
+    'Access-Control-Allow-Origin':  allow ? origin || fallbackOrigin : 'null',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age':       '600',
+    'Vary':                         'Origin',
   };
 }
 

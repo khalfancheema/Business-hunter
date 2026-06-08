@@ -39,17 +39,17 @@ async function runPipeline() {
       } catch(e) { console.warn('Real data prefetch failed (non-fatal):', e.message); }
     }
 
-    // ── Phase 1: Foundation Research (parallel) ─────────────
+    // ── Phase 1: Foundation Research (dependency-gated) ─────
     let r1, r5, r6;
     if (phaseShouldRun(1)) {
-      setProgress(5,'Phase 1 — Demographics · Compliance · Competitive Intel (parallel)…');
-      const [res1,res5,res6]=await Promise.allSettled([runAgent1(),runAgent5(),runAgent6()]);
-      r1=res1.status==='fulfilled'?res1.value:fb(1);
-      r5=res5.status==='fulfilled'?res5.value:fb(5);
-      r6=res6.status==='fulfilled'?res6.value:fb(6);
-      if(res1.status==='rejected') console.error('Agent 1 failed:',res1.reason?.message);
-      if(res5.status==='rejected') console.error('Agent 5 failed:',res5.reason?.message);
-      if(res6.status==='rejected') console.error('Agent 6 failed:',res6.reason?.message);
+      setProgress(5,'Phase 1 — Demographics research…');
+      try { r1=await runAgent1(); } catch(e) { console.error('Agent 1 failed:',e.message); r1=fb(1); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(9,'Phase 1 — Compliance requirements…');
+      try { r5=await runAgent5(); } catch(e) { console.error('Agent 5 failed:',e.message); r5=fb(5); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(13,'Phase 1 — Competitive intelligence…');
+      try { r6=await runAgent6(); } catch(e) { console.error('Agent 6 failed:',e.message); r6=fb(6); }
     } else {
       setProgress(5,'Phase 1 — skipped (using cached data)');
       r1=best(1); r5=best(5); r6=best(6);
@@ -111,19 +111,19 @@ async function runPipeline() {
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
-    // ── Phase 9: Supplemental Analysis (parallel) ───────────
+    // ── Phase 9: Supplemental Analysis (dependency-gated) ───
     if (phaseShouldRun(9)) {
-      setProgress(72,'Phase 9 — Market Map · Grants · Competitor Deep-Dive · Build vs Buy (parallel)…');
-      const [res11,res12,res13,res16] = await Promise.allSettled([
-        runAgent11(r1,r2,r4),
-        runAgent12(r3,r5),
-        runAgent13(r6),
-        (typeof runAgent16==='function' ? runAgent16(r3,r4,r7,r8) : Promise.resolve()),
-      ]);
-      if(res11.status==='rejected') console.error('Agent 11 failed:',res11.reason?.message);
-      if(res12.status==='rejected') console.error('Agent 12 failed:',res12.reason?.message);
-      if(res13.status==='rejected') console.error('Agent 13 failed:',res13.reason?.message);
-      if(res16.status==='rejected') console.error('Agent 16 failed:',res16.reason?.message);
+      setProgress(72,'Phase 9 — Market map…');
+      try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(76,'Phase 9 — Grants and incentives…');
+      try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(80,'Phase 9 — Competitor deep-dive…');
+      try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); }
+      if(stopRequested){showErr('Pipeline stopped by user.');return;}
+      setProgress(84,'Phase 9 — Build vs buy analysis…');
+      try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); }
       // Apply fallbacks for any phase 9 agent that failed and has no data
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
       if(!R.a12) try{R.a12=getFallback12();}catch(e){}

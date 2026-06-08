@@ -90,11 +90,12 @@ Use REAL URLs, phone numbers, and dollar amounts for ZIP ${zip()} state.`;
     if(!d) { console.warn('Agent 12 fallback'); d=getFallback12(); }
     R.a12 = d;
     buildGrants(d);
-    setDot(12,'done'); showOut(12);
-    // Part B: enrich with program details (non-blocking)
+    // Part B: enrich with program details before the agent is marked done.
     if (!demoMode) {
-      _runAgent12PartB(d).catch(e=>console.warn('Agent 12 Part B err:', e.message));
+      await _runAgent12PartB(d);
+      R.a12 = d;
     }
+    setDot(12,'done'); showOut(12);
     return JSON.stringify(d);
   } catch(e){setDot(12,'error');showOut(12);$('12-sum-t').textContent='Error: '+e.message;throw e}
 }

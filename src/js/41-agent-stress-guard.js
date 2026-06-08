@@ -85,7 +85,8 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
       '\n\n[Context condensed. Return a SHORTER JSON with the same schema — use concise 1-sentence strings instead of detailed paragraphs. Schema structure must be preserved exactly.]';
 
     try {
-      const retryResult = await claudeJSON(system, shortUser, {}); // no webSearch on retry (condensed prompt)
+      const retryOpts = opts.webSearch ? { ...opts, webSearch:true, webSearchMaxUses: Math.min(opts.webSearchMaxUses || 2, 2) } : opts;
+      const retryResult = await claudeJSON(system, shortUser, retryOpts);
       if (retryResult) return retryResult;
     } catch (retryErr) {
       console.error(`[StressGuard] Agent ${agentNum}: retry also failed:`, retryErr.message);
@@ -268,7 +269,7 @@ if (typeof runAgent14 === 'function') {
 (function _patchClaudeJSON() {
   if (typeof claudeJSON !== 'function') return;
   const _origClaudeJSON = window.claudeJSON;
-  window.claudeJSON = async function(system, user, opts={}) {
+  const guardedClaudeJSON = async function(system, user, opts={}) {
     const totalChars = (system || '').length + (user || '').length;
     if (totalChars > 100000) {
       console.warn(`[StressGuard] Large claudeJSON call: ${totalChars} chars (~${Math.round(totalChars/4)} tokens). Consider sub-agents.`);
@@ -283,12 +284,15 @@ if (typeof runAgent14 === 'function') {
         const halfUser = user.slice(0, Math.floor(user.length / 2)) +
           '\n[Context truncated. Return JSON with available data; use null for unknown fields.]';
         try {
-          return await _origClaudeJSON(system, halfUser, {}); // no webSearch on truncated retry
+          const retryOpts = opts.webSearch ? { ...opts, webSearch:true, webSearchMaxUses: Math.min(opts.webSearchMaxUses || 2, 2) } : opts;
+          return await _origClaudeJSON(system, halfUser, retryOpts);
         } catch {}
       }
       throw e;
     }
   };
+  window.claudeJSON = guardedClaudeJSON;
+  try { claudeJSON = guardedClaudeJSON; } catch {}
 })();
 
 // ── STRESS TEST REPORT (accessible via browser console) ──────────────────────

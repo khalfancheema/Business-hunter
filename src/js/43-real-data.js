@@ -1073,7 +1073,7 @@ async function _rdFetchACS(zip) {
       under_18:      u18 > 0 ? u18 : null,
       employed:      emp > 0 ? emp : null,
       bachelors:     bachPlus > 0 ? bachPlus : null, // bachelors+ (B15003_022-025)
-      source:        'ACS 5-Year 2022',
+      source:        'ACS 5-Year 2024',
       zip,
     };
     return _rdCacheSet(k, result);
@@ -1621,7 +1621,7 @@ async function _rdFetchACSExpanded(zip) {
       median_gross_rent:    medGrossRent > 0 ? medGrossRent : null,
       vacancy_pct:          (housingVac > 0 && housingTotal > 0) ? Math.round(housingVac/housingTotal*1000)/10 : null,
       long_commute_pct:     (commute60Plus > 0 && commuteTotal > 0) ? Math.round(commute60Plus/commuteTotal*1000)/10 : null,
-      source: 'ACS 5-Year 2022 (S2301, B17001, B11003, B25064, B25002, B08303)',
+      source: 'ACS 5-Year 2024 (S2301, B17001, B11003, B25064, B25002, B08303)',
       zip,
     };
     return _rdCacheSet(k, result);
@@ -1769,7 +1769,7 @@ async function _rdFetchCBPCounty(stateFips, countyFips, naics) {
       employees:      parseInt(row[1]) || 0,
       annual_payroll: parseInt(row[2]) || 0,
       naics,
-      source: 'Census CBP 2022 (county-level)',
+      source: 'Census CBP 2023 (county-level)',
     };
     return _rdCacheSet(k, result);
   } catch(e) { console.warn('[RealData] CBP County failed:', e.message); return null; }
@@ -1812,7 +1812,7 @@ async function _rdFetchBLSOES(stateAbbr, industryKey) {
       median_hourly_wage: annualMedian > 0 ? Math.round(annualMedian / 2080 * 100) / 100 : null,
       state:             stateAbbr,
       year:              latest.year,
-      source:            'BLS OES (May 2024)',
+      source:            `BLS OES (${latest.year})`,
     };
     return _rdCacheSet(k, result);
   } catch(e) { console.warn('[RealData] BLS OES failed:', e.message); return null; }
@@ -2005,7 +2005,7 @@ async function _rdFetchACSHomeValue(zip) {
       median_home_value:        parseInt(row[0]) || null,
       median_monthly_costs:     parseInt(row[1]) || null,
       median_mortgage_payment:  parseInt(row[2]) || null,
-      source:                   'ACS 5-Year 2022 (B25077, B25104, B25088)',
+      source:                   'ACS 5-Year 2024 (B25077, B25104, B25088)',
       zip,
     };
     return _rdCacheSet(k, result);
@@ -2669,14 +2669,15 @@ function rdRenderRealDataBadge(elId, keys) {
   const rows = [];
   if ((!keys || keys.includes('demographics')) && d.demographics) {
     const dem = d.demographics;
-    if (dem.population)    rows.push(['Population',    dem.population.toLocaleString(),        'ACS 2022']);
-    if (dem.median_income) rows.push(['Median HH Income', '$'+dem.median_income.toLocaleString(), 'ACS 2022']);
-    if (dem.households)    rows.push(['Households',    dem.households.toLocaleString(),        'ACS 2022']);
-    if (dem.renter_pct != null) rows.push(['Renter %', dem.renter_pct+'%', 'ACS 2022']);
+    const demSource = dem.source || 'ACS';
+    if (dem.population)    rows.push(['Population',    dem.population.toLocaleString(),        demSource]);
+    if (dem.median_income) rows.push(['Median HH Income', '$'+dem.median_income.toLocaleString(), demSource]);
+    if (dem.households)    rows.push(['Households',    dem.households.toLocaleString(),        demSource]);
+    if (dem.renter_pct != null) rows.push(['Renter %', dem.renter_pct+'%', demSource]);
   }
   if ((!keys || keys.includes('business_density')) && d.business_density) {
     const biz = d.business_density;
-    rows.push(['Competitors in ZIP (NAICS '+biz.naics+')', biz.count+' establishments', 'Census ZBP 2021']);
+    rows.push(['Competitors in ZIP (NAICS '+biz.naics+')', biz.count+' establishments', biz.source || 'Census ZBP']);
   }
   if ((!keys || keys.includes('macro')) && d.macro) {
     const m = d.macro;
