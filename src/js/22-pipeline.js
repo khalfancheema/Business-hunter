@@ -20,26 +20,54 @@ async function _bhRunAgentInternal(n) {
   return null;
 }
 
+const _BH_AGENT_DEPS = {
+  2:[1,5,6], 3:[1,2,5], 4:[3,5], 7:[1,2,3,4,5], 8:[1,2,3,4,5,6,7],
+  9:[1,2,3,4,5,6,7,8], 10:[3,4,5,7,9], 11:[1,2,4], 12:[3,5], 13:[6],
+  16:[3,4,7,8], 17:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+};
+
+function _bhExpandRepairAgents(agents) {
+  const out = new Set(agents || []);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    Object.entries(_BH_AGENT_DEPS).forEach(([child, deps]) => {
+      if (deps.some(d => out.has(d)) && !out.has(Number(child))) {
+        out.add(Number(child));
+        changed = true;
+      }
+    });
+  }
+  return [...out].filter(n => n >= 1 && n <= 17).sort((a,b) => a - b);
+}
+
 async function _bhRunAccuracyRepairPass() {
   if (demoMode || typeof _bhAccuracyRepairAgents !== 'function') return [];
-  const score = R.accuracy?.score;
-  const agents = _bhAccuracyRepairAgents().filter(n => n <= 17);
-  if (!agents.length || score == null || score >= 95) return [];
-  R.accuracy_repair = { started_at: Date.now(), agents, before_score: score, attempts: [] };
-  for (const n of agents) {
-    if (stopRequested) break;
-    try {
-      setProgress(98, `Accuracy repair - Agent ${n}...`);
-      await _bhRunAgentInternal(n);
-      if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]);
-      R.accuracy_repair.attempts.push({ agent:n, status:'rerun' });
-    } catch(e) {
-      console.warn(`Accuracy repair failed for A${n}:`, e.message);
-      R.accuracy_repair.attempts.push({ agent:n, status:'failed', error:e.message });
+  const before = R.accuracy?.score_exact_verified ?? R.accuracy?.score;
+  if (before == null || before >= 95) return [];
+  R.accuracy_repair = { started_at: Date.now(), before_score: before, passes: [], attempts: [] };
+  for (let pass = 1; pass <= 3; pass++) {
+    const current = R.accuracy?.score_exact_verified ?? R.accuracy?.score;
+    if (current != null && current >= 95) break;
+    const agents = _bhExpandRepairAgents(_bhAccuracyRepairAgents().filter(n => n <= 17));
+    if (!agents.length) break;
+    R.accuracy_repair.passes.push({ pass, agents:[...agents], before_score: current ?? null });
+    for (const n of agents) {
+      if (stopRequested) break;
+      try {
+        setProgress(98, `Accuracy repair pass ${pass} - Agent ${n}...`);
+        await _bhRunAgentInternal(n);
+        if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]);
+        R.accuracy_repair.attempts.push({ pass, agent:n, status:'rerun' });
+      } catch(e) {
+        console.warn(`Accuracy repair failed for A${n}:`, e.message);
+        R.accuracy_repair.attempts.push({ pass, agent:n, status:'failed', error:e.message });
+      }
     }
-  }
-  if (typeof runAccuracyVerifier === 'function' && R.real) {
-    try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed after repair:', e.message); }
+    if (typeof runAccuracyVerifier === 'function' && R.real) {
+      try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed after repair:', e.message); }
+    }
+    R.accuracy_repair.passes[R.accuracy_repair.passes.length - 1].after_score = R.accuracy?.score ?? null;
   }
   R.accuracy_repair.after_score = R.accuracy?.score ?? null;
   R.accuracy_repair.finished_at = Date.now();

@@ -737,7 +737,9 @@ After the pipeline completes, the accuracy verifier cross-checks specific fields
 - **Agent 7:** electricity rates vs EIA, SBA loan amount vs SBA FOIA, flood risk vs NFIP
 - **Cross-agent:** Agent 9 year-1 revenue vs Agent 7 base-case (should closely match)
 
-An accuracy score card renders in the UI after completion. Fields at 95%+ show green, 85-94% is review-grade, and anything below 85% fails the production gate. Production readiness also requires at least 5 exact-match checks, coverage of critical agents A1/A2/A4/A6/A7, and at least 10 evidence-ledger rows from verifier checks or declared sources. If the first verifier pass is below 95%, the pipeline reruns affected agents once with the exact failed fields injected as repair feedback, then reruns the verifier and production safety gate.
+An accuracy score card renders in the UI after completion. Fields at 95%+ show green, 85-94% is review-grade, and anything below 85% fails the production gate. Production readiness uses the exact verified score when at least 5 exact-match checks are available, requires coverage of critical agents A1/A2/A4/A6/A7, and requires an evidence ledger with verifier checks, declared sources, and field-level evidence for recommendation-critical numbers. Placeholder URLs, invalid evidence URLs, stale source rows, and unsupported estimates block production readiness.
+
+If verifier confidence is below 95%, the pipeline expands failed agents to downstream dependent agents and runs up to three repair passes. Each repair pass injects exact failed fields, prior feedback, and a verified evidence pack, then reruns the verifier and production safety gate. Fast-changing outputs such as real estate, competitors, grants, build-vs-buy, source audit, financial, and plan agents also use shorter cache TTLs so old market evidence is less likely to survive into a new recommendation.
 
 ### When Data Sources Fail
 

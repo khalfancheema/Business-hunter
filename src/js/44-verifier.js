@@ -699,13 +699,16 @@
     const normalPct = pctOf(avg([...buckets.exact, ...buckets.tolerance_rate]));        // field+rate tolerance
     const broadPct  = pctOf(avg(valid));                                                // includes proxy / cross-agent
 
-    // Headline = strict if enough exact checks, else normal
-    const pct = (buckets.exact.length >= 3 ? strictPct : normalPct) ?? broadPct ?? 0;
+    // Production headline must be exact verified when enough exact rows exist.
+    // Proxy/cross-agent checks remain visible but no longer make a run production-ready.
+    const exactVerifiedPct = buckets.exact.length >= 5 ? strictPct : null;
+    const pct = exactVerifiedPct ?? normalPct ?? broadPct ?? 0;
     const agentsChecked = [...new Set(valid.map(c => c.agent).filter(a => /^A\d+/.test(a || '')))].sort((a,b) => parseInt(a.slice(1),10) - parseInt(b.slice(1),10));
 
     R.accuracy = {
       score: pct,
       score_strict: strictPct,
+      score_exact_verified: exactVerifiedPct,
       score_normal: normalPct,
       score_broad:  broadPct,
       checks: valid,

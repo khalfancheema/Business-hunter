@@ -53,8 +53,12 @@ async function safeClaudeJSON(system, user, agentNum, opts={}) {
   // Guard: truncate if input is huge
   if ((system + user).length > INPUT_CHAR_LIMIT) {
     console.warn(`[StressGuard] Agent ${agentNum}: input ${(system+user).length} chars — truncating to ${INPUT_CHAR_LIMIT}`);
+    const pack = typeof _bhBuildEvidencePack === 'function' ? _bhBuildEvidencePack(16000) + '\n\n' : '';
     const headroom = INPUT_CHAR_LIMIT - system.length - 500;
-    activeUser = user.slice(0, headroom) + '\n\n[...context truncated for length. Use available data above to complete JSON response.]';
+    const remaining = Math.max(2000, headroom - pack.length);
+    const head = user.slice(0, Math.floor(remaining * 0.65));
+    const tail = user.slice(Math.max(0, user.length - Math.floor(remaining * 0.35)));
+    activeUser = pack + head + '\n\n[...middle context truncated; verified evidence pack above is authoritative...]\n\n' + tail + '\n\n[Use verified evidence rows above first. Return null/N/A for anything not evidenced.]';
   }
 
   try {

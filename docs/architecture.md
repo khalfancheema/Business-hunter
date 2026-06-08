@@ -278,14 +278,16 @@ This single injection covers all fixed agent calls through `agentNum` options. `
 | A9 Business Plan (Part 2) | wages, rents, macro |
 | A16 Build vs Buy (Sub-call B) | rents, wages, macro |
 
-**Accuracy verifier** (`44-verifier.js`) runs cross-checks after pipeline completion, comparing AI-reported values against `R.real`, recording field-level repair lessons, and rendering a scored accuracy card. Scores below 95% are not production-ready:
+**Accuracy verifier** (`44-verifier.js`) runs cross-checks after pipeline completion, comparing AI-reported values against `R.real`, recording field-level repair lessons, and rendering a scored accuracy card. Production readiness is based on exact verified checks when at least five exact checks are available; scores below 95% are not production-ready:
 - A1: median income vs ACS B19013, population vs B01003, renter % vs B25003, bachelors+ % vs B15003
 - A4: rent/sqft vs Census gross rent
 - A6: competitor count vs OSM Overpass
 - A7: electricity costs vs EIA, SBA loan amounts vs SBA FOIA, flood risk vs NFIP
 - Cross-agent: A9 year-1 revenue consistency vs A7 base-case
 
-If the first verifier pass is below 95%, `_bhRunAccuracyRepairPass()` reruns the affected agents once with exact failed checks injected as repair context, then reruns the verifier and production safety gate. `_bhBuildEvidenceLedger()` records verifier checks and Agent 17 declared sources into `R.evidence_ledger`, and production readiness requires enough exact checks plus coverage of critical agents A1, A2, A4, A6, and A7. `_bhComputeProductionScorecard()` also derives a deterministic weighted evidence score across demand, competition, compliance, real estate, capital, and execution risk so the final model verdict cannot override contradictory evidence.
+If verifier confidence is below 95%, `_bhRunAccuracyRepairPass()` expands the failed agents to downstream dependents and runs up to three bounded repair passes with exact failed checks injected as repair context, then reruns the verifier and production safety gate after each pass. `_bhBuildEvidenceLedger()` records verifier checks, Agent 17 declared sources, and recommendation-critical agent claims with field-level source metadata into `R.evidence_ledger`. Production readiness requires enough exact checks, critical-agent coverage across A1, A2, A4, A6, and A7, valid non-placeholder evidence URLs, and field-level evidence for critical numbers such as rent, prices, revenue, costs, wages, counts, scores, percentages, capacity, timelines, fees, and funding amounts. `_bhComputeProductionScorecard()` also derives an industry-profiled deterministic weighted evidence score across demand, competition, compliance, real estate, capital, and execution risk so the final model verdict cannot override contradictory evidence.
+
+Fast-changing outputs use shorter cache TTLs: real estate, grants, competitors, build-vs-buy, and source audit outputs expire after 45 minutes; competitive/financial/plan outputs expire after two hours; stable outputs keep the default TTL.
 
 ---
 

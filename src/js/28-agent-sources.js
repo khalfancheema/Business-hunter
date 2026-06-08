@@ -59,6 +59,10 @@ async function runAgent17() {
   const agentContext = agentSummaries
     .map(a => `[${a.label}]: ${a.snippet}`)
     .join('\n\n');
+  const evidenceRows = typeof _bhBuildEvidenceLedger === 'function' ? _bhBuildEvidenceLedger() : [];
+  const evidenceContext = evidenceRows.slice(0, 80).map(r =>
+    `${r.type} | ${r.agent || 'Data'} | ${r.field || ''} | value=${r.value ?? r.ai_value ?? ''} | source=${r.source || ''} | url=${r.source_url || ''} | method=${r.verification_method || r.match_type || ''} | tier=${r.source_tier || ''}`
+  ).join('\n');
   const feedbackContext = typeof _bhBuildAgentFeedbackContext === 'function'
     ? _bhBuildAgentFeedbackContext()
     : '';
@@ -68,6 +72,9 @@ async function runAgent17() {
 
 AGENT OUTPUTS (summarized):
 ${agentContext}
+
+EVIDENCE / CLAIM LEDGER:
+${evidenceContext || 'No evidence ledger rows available.'}
 
 ${feedbackContext}
 

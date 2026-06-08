@@ -187,9 +187,25 @@ function _bhHasNearbySource(obj) {
   return Object.keys(obj).some(k => /source|citation|url|retrieved|verified/i.test(k) && obj[k]);
 }
 
+function _bhFieldEvidence(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  return {
+    source: obj.source || obj.source_name || obj.citation || obj.agency_name || null,
+    source_url: obj.source_url || obj.url || obj.link || obj.citation_url || null,
+    retrieved_at: obj.retrieved_at || obj.checked_at || obj.last_updated || obj.as_of || null,
+    source_field: obj.source_field || obj.table || obj.dataset_field || obj.verification_method || null,
+    confidence: obj.confidence ?? obj.reliability ?? null,
+    verification_method: obj.verification_method || null,
+  };
+}
+
+function _bhHasFieldEvidence(obj) {
+  const ev = _bhFieldEvidence(obj);
+  return !!(ev.source && (ev.source_url || ev.source_field || ev.retrieved_at || ev.verification_method));
+}
+
 function _bhCollectCitationIssues(data, agentNum) {
   const issues = [];
-  const rootHasSource = _bhHasNearbySource(data);
   const visit = (node, path, parent) => {
     if (node == null) return;
     if (Array.isArray(node)) {
@@ -201,8 +217,8 @@ function _bhCollectCitationIssues(data, agentNum) {
       const here = path ? `${path}.${k}` : k;
       if (typeof v === 'number' && isFinite(v) && Math.abs(v) > 0) {
         const critical = /cost|price|rate|tuition|revenue|income|rent|count|capacity|score|pct|percent|weeks|months|fee|amount|salary|wage|rating|sqft|slots|beds|employees|population/i.test(k);
-        if (critical && !rootHasSource && !_bhHasNearbySource(node) && !_bhHasNearbySource(parent)) {
-          issues.push(`Numeric claim ${here} lacks a nearby source/citation/url field.`);
+        if (critical && !_bhHasFieldEvidence(node) && !_bhHasFieldEvidence(parent)) {
+          issues.push(`Numeric claim ${here} lacks field-level source evidence.`);
         }
       }
       if (typeof v === 'string' && /https?:\/\/(example\.com|localhost|test\.com)|555[-.\s]?01/i.test(v)) {
@@ -213,6 +229,72 @@ function _bhCollectCitationIssues(data, agentNum) {
   };
   visit(data, `A${agentNum}`, null);
   return [...new Set(issues)].slice(0, 12);
+}
+
+function _bhSourceQuality(row) {
+  const url = row && (row.source_url || row.url);
+  const source = String((row && row.source) || '');
+  let host = '';
+  let validUrl = false;
+  try {
+    if (url) {
+      const base = (typeof window !== 'undefined' && window.location && window.location.href) ? window.location.href : 'https://example.invalid';
+      const u = new URL(url, base);
+      validUrl = ['http:', 'https:'].includes(u.protocol) && !/example\.com|localhost|test\.com/i.test(u.hostname);
+      host = u.hostname.replace(/^www\./, '');
+    }
+  } catch {}
+  const authoritative = /\.(gov|edu)$/i.test(host) || /census|bls|hud|sba|fema|epa|usda|cms|fred|bea|hrsa|noaa|nces|cdc|eia|dol/i.test(source + ' ' + host);
+  const marketplace = /loopnet|crexi|bizbuysell|google|yelp|winnie|care\.com|facebook/i.test(source + ' ' + host);
+  const estimated = /estimate|proxy|derived|model|ai|unknown|n\/a/i.test(source + ' ' + (row?.verification_method || ''));
+  return {
+    valid_url: validUrl || !url ? true : false,
+    host,
+    source_tier: authoritative ? 'authoritative' : marketplace ? 'marketplace' : estimated ? 'estimated' : 'unclassified',
+    is_authoritative: authoritative,
+    is_estimated: estimated,
+  };
+}
+
+function _bhSourceFreshness(row) {
+  const s = String(row?.retrieved_at || row?.last_updated || '');
+  const years = [...s.matchAll(/\b(20\d{2})\b/g)].map(m => Number(m[1]));
+  const year = years.length ? Math.max(...years) : null;
+  const current = new Date().getFullYear();
+  return { year, stale: year ? (current - year > 3) : false, missing: !s };
+}
+
+function _bhExtractClaimLedger(data, agentNum) {
+  const rows = [];
+  const visit = (node, path, parent) => {
+    if (node == null) return;
+    if (Array.isArray(node)) return node.slice(0, 40).forEach((v, i) => visit(v, `${path}[${i}]`, node));
+    if (typeof node !== 'object') return;
+    Object.entries(node).forEach(([k, v]) => {
+      const here = path ? `${path}.${k}` : k;
+      const critical = /cost|price|rate|tuition|revenue|income|rent|count|capacity|score|pct|percent|weeks|months|fee|amount|salary|wage|rating|sqft|slots|beds|employees|population/i.test(k);
+      if (typeof v === 'number' && isFinite(v) && Math.abs(v) > 0 && critical) {
+        const ev = _bhHasFieldEvidence(node) ? _bhFieldEvidence(node) : _bhFieldEvidence(parent);
+        const row = {
+          type: 'agent_claim',
+          agent: 'A' + Number(agentNum),
+          field: here,
+          value: v,
+          source: ev.source || null,
+          source_url: ev.source_url || null,
+          retrieved_at: ev.retrieved_at || null,
+          source_field: ev.source_field || null,
+          confidence: ev.confidence ?? null,
+          verification_method: ev.verification_method || (ev.source ? 'declared_source' : 'missing'),
+        };
+        Object.assign(row, _bhSourceQuality(row), _bhSourceFreshness(row));
+        rows.push(row);
+      }
+      visit(v, here, node);
+    });
+  };
+  visit(data, `A${agentNum}`, null);
+  return rows.slice(0, 120);
 }
 
 function _bhValidateAgentSchema(agentNum, data) {
@@ -237,10 +319,13 @@ function _bhValidateAgentSchema(agentNum, data) {
 function _bhAttachSchemaValidation(data, opts={}) {
   if (!data || typeof data !== 'object' || !opts.agentNum) return data;
   const schema = _bhValidateAgentSchema(opts.agentNum, data);
+  const claims = _bhExtractClaimLedger(data, opts.agentNum);
   try {
     Object.defineProperty(data, '_schema', { value: schema, enumerable: false, configurable: true });
+    Object.defineProperty(data, '_claim_ledger', { value: claims, enumerable: false, configurable: true });
   } catch {
     data._schema = schema;
+    data._claim_ledger = claims;
   }
   if (!schema.ok) console.warn('[AgentSchema]', `A${opts.agentNum}`, schema.issues.join(' | '));
   return data;
@@ -445,6 +530,14 @@ function _bhComputeProductionScorecard() {
   const location = Array.isArray(R.a3?.locations) ? R.a3.locations[0] : null;
   const scenario = Array.isArray(R.a7?.scenarios) ? (R.a7.scenarios.find(s => /base/i.test(s.name || s.label || '')) || R.a7.scenarios[0]) : null;
   const riskRows = Array.isArray(R.a8?.risks) ? R.a8.risks : [];
+  const key = typeof industryKey === 'function' ? industryKey() : 'business';
+  const profiles = {
+    daycare: { market_demand:0.26, competition:0.16, compliance:0.20, real_estate:0.12, capital:0.18, execution_risk:0.08, min_go:78 },
+    urgent_care: { market_demand:0.22, competition:0.14, compliance:0.18, real_estate:0.12, capital:0.22, execution_risk:0.14, min_go:80 },
+    senior_care: { market_demand:0.22, competition:0.12, compliance:0.22, real_estate:0.14, capital:0.20, execution_risk:0.10, min_go:80 },
+    restaurant: { market_demand:0.20, competition:0.22, compliance:0.10, real_estate:0.20, capital:0.20, execution_risk:0.08, min_go:76 },
+  };
+  const profile = profiles[key] || { market_demand:0.24, competition:0.16, compliance:0.14, real_estate:0.14, capital:0.22, execution_risk:0.10, min_go:75 };
   const scores = {
     market_demand: _bhClampScore(_bhFirstNumber(R.a2?.overall_opportunity_score, location?.scores?.demand, location?.overall_score)),
     competition: _bhClampScore(_bhFirstNumber(location?.scores?.competition, R.a6?.competitive_intensity_score != null ? 100 - Number(R.a6.competitive_intensity_score) * 10 : null)),
@@ -453,12 +546,12 @@ function _bhComputeProductionScorecard() {
     capital: _bhClampScore(_bhFirstNumber(scenario?.monthly_net != null && scenario?.monthly_revenue ? Number(scenario.monthly_net) / Number(scenario.monthly_revenue) * 100 + 50 : null, scenario?.roi_3yr)),
     execution_risk: _bhClampScore(100 - Math.min(60, riskRows.filter(r => /high|critical/i.test(r.severity || '')).length * 20 + riskRows.filter(r => /medium/i.test(r.severity || '')).length * 8)),
   };
-  const weights = { market_demand:0.24, competition:0.16, compliance:0.14, real_estate:0.14, capital:0.22, execution_risk:0.10 };
+  const weights = profile;
   const parts = Object.entries(scores).filter(([,v]) => v != null);
   const weightSum = parts.reduce((s,[k]) => s + weights[k], 0);
   const overall = weightSum ? Math.round(parts.reduce((s,[k,v]) => s + v * weights[k], 0) / weightSum) : null;
-  const recommendation = overall == null ? 'Needs Review' : overall >= 75 ? 'Go' : overall >= 60 ? 'Cautious Go' : 'No Go';
-  const scorecard = { overall, recommendation, scores, weights, generated_at: new Date().toISOString(), method:'deterministic_weighted_evidence_v1' };
+  const recommendation = overall == null ? 'Needs Review' : overall >= profile.min_go ? 'Go' : overall >= 60 ? 'Cautious Go' : 'No Go';
+  const scorecard = { overall, recommendation, scores, weights, min_go: profile.min_go, industry:key, generated_at: new Date().toISOString(), method:'deterministic_weighted_evidence_v2_industry_profile' };
   R.production_scorecard = scorecard;
   return scorecard;
 }
@@ -466,8 +559,13 @@ function _bhComputeProductionScorecard() {
 function _bhBuildEvidenceLedger() {
   if (typeof R !== 'object' || !R) return [];
   const rows = [];
+  for (let n = 1; n <= 17; n++) {
+    const d = _bhAgentData(n);
+    const claims = Array.isArray(d?._claim_ledger) ? d._claim_ledger : (d && typeof d === 'object' ? _bhExtractClaimLedger(d, n) : []);
+    claims.forEach(c => rows.push(c));
+  }
   (R.accuracy?.checks || []).forEach(c => {
-    rows.push({
+    const row = {
       type: 'verifier_check',
       agent: c.agent || 'Data',
       field: c.field,
@@ -476,10 +574,13 @@ function _bhBuildEvidenceLedger() {
       match_pct: c.acc == null ? null : Math.round(c.acc * 100),
       source: c.source || null,
       match_type: c.match_type || null,
-    });
+      verification_method: c.match_type === 'exact' || c.match_type === 'tolerance_rate' ? 'verified_exact_or_rate' : c.match_type || null,
+    };
+    Object.assign(row, _bhSourceQuality(row), _bhSourceFreshness(row));
+    rows.push(row);
   });
   (R.a17?.data_sources || []).forEach(s => {
-    rows.push({
+    const row = {
       type: 'declared_source',
       agent: s.agent || null,
       field: s.data_used || s.category || null,
@@ -487,7 +588,11 @@ function _bhBuildEvidenceLedger() {
       source_url: s.url || null,
       reliability: s.reliability || null,
       last_updated: s.last_updated || null,
-    });
+      retrieved_at: s.last_updated || null,
+      verification_method: 'declared_source',
+    };
+    Object.assign(row, _bhSourceQuality(row), _bhSourceFreshness(row));
+    rows.push(row);
   });
   R.evidence_ledger = rows;
   return rows;
@@ -507,9 +612,13 @@ function _bhProductionBlockers() {
   if (feedback.length) blockers.push(`${feedback.length} agent feedback item(s) need correction before production use.`);
 
   const score = R.accuracy?.score;
+  const exactVerifiedScore = R.accuracy?.score_exact_verified ?? R.accuracy?.score_strict;
   if (score !== undefined && score !== null && Number(score) < _BH_PRODUCTION_ACCURACY_TARGET) {
     blockers.push(`Accuracy verifier score ${Math.round(Number(score))}% is below the ${_BH_PRODUCTION_ACCURACY_TARGET}-100% production target.`);
     if (Number(score) >= _BH_REVIEW_ACCURACY_FLOOR) warnings.push(`Accuracy score is review-grade but not production-ready: ${Math.round(Number(score))}%.`);
+  }
+  if (exactVerifiedScore !== undefined && exactVerifiedScore !== null && Number(exactVerifiedScore) < _BH_PRODUCTION_ACCURACY_TARGET) {
+    blockers.push(`Exact verified score ${Math.round(Number(exactVerifiedScore))}% is below the ${_BH_PRODUCTION_ACCURACY_TARGET}-100% production target.`);
   }
   const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
   if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
@@ -524,6 +633,12 @@ function _bhProductionBlockers() {
   if (unsourced) blockers.push(`${unsourced} claim(s) remain unsourced in Agent 17.`);
   const ledger = _bhBuildEvidenceLedger();
   if (hasRealData && ledger.length < 10) blockers.push(`Evidence ledger has only ${ledger.length} row(s); production requires at least 10 verifier/source entries.`);
+  const badUrls = ledger.filter(r => r.source_url && r.valid_url === false);
+  if (badUrls.length) blockers.push(`${badUrls.length} evidence source URL(s) are invalid or placeholder URLs.`);
+  const staleSources = ledger.filter(r => r.type !== 'verifier_check' && r.stale);
+  if (staleSources.length) warnings.push(`${staleSources.length} evidence source row(s) appear older than 3 years.`);
+  const estimatedClaims = ledger.filter(r => r.type === 'agent_claim' && (r.is_estimated || !r.source));
+  if (estimatedClaims.length) blockers.push(`${estimatedClaims.length} recommendation-critical claim(s) lack verified field-level evidence.`);
 
   const scorecard = _bhComputeProductionScorecard();
   if (!scorecard || scorecard.overall == null) blockers.push('Deterministic production scorecard could not be computed from verified agent evidence.');
@@ -603,6 +718,27 @@ function _bhBuildAgentRepairContext(agentNum) {
   return `\n\nACCURACY REPAIR REQUIRED FOR AGENT ${agentNum}:\n${[...checks, ...issues, ...actions].join('\n')}\nReturn corrected JSON only. Preserve valid sourced fields. Replace unverifiable values with null/N/A.`;
 }
 
+function _bhBuildEvidencePack(maxChars) {
+  maxChars = maxChars || 12000;
+  const lines = [];
+  const add = line => {
+    if (!line) return;
+    const next = lines.concat(line).join('\n');
+    if (next.length <= maxChars) lines.push(line);
+  };
+  add('VERIFIED EVIDENCE PACK - prioritize these rows over prose context.');
+  (R.accuracy?.checks || [])
+    .filter(c => c.match_type === 'exact' || c.match_type === 'tolerance_rate')
+    .slice(0, 24)
+    .forEach(c => add(`CHECK ${c.agent} ${c.field}: AI=${c.aiFmt || c.ai}; VERIFIED=${c.realFmt || c.real}; SOURCE=${c.source}; MATCH=${Math.round((c.acc || 0) * 100)}%; TYPE=${c.match_type}`));
+  const feedback = R.agent_feedback?.items || [];
+  feedback.filter(i => i.status !== 'ok').slice(0, 12).forEach(i => add(`FEEDBACK A${i.agent}: ${(i.issues || []).slice(0, 2).join('; ')} | ${(i.actions || []).slice(0, 2).join(' ')}`));
+  _bhBuildEvidenceLedger().filter(r => r.type === 'agent_claim' && r.source).slice(0, 30).forEach(r => {
+    add(`CLAIM ${r.agent} ${r.field}: ${r.value} | ${r.source || 'no source'} | ${r.source_url || r.source_field || 'no URL/field'} | ${r.retrieved_at || 'no date'}`);
+  });
+  return lines.join('\n');
+}
+
 function _bhWithAgentFeedback(user, opts={}) {
   if (opts.skipFeedback) return user;
   const ctx = _bhBuildAgentFeedbackContext();
@@ -640,7 +776,7 @@ function _bhAccuracyRepairAgents() {
       }
     });
   }
-  return agents.filter(n => n >= 1 && n <= 17).slice(0, 6);
+  return agents.filter(n => n >= 1 && n <= 17);
 }
 
 // Retry an agent call up to 2 times if JSON parse fails
@@ -696,6 +832,8 @@ CRITICAL - SOURCE COVERAGE:
 - For every numeric claim in an array row, include a nearby source/source_url/citation field when the schema provides one.
 - If the schema lacks a source field, put the source name in the nearest summary, notes, or data_sources field.
 - Every recommendation-critical value should be emitted as or accompanied by: value, source_name/source, source_url/citation, retrieved_at/last_updated, confidence, and verification_method when the schema has room for it.
+- Field-level evidence is required for recommendation-critical numbers: rent, tuition/prices, revenue, cost, wages, counts, scores, percentages, capacity, timeline, fees, and funding amounts.
+- Prefer official .gov/.edu/API data. Marketplace/search sources are acceptable only for listings, reviews, or pricing and must be labeled as marketplace evidence.
 - Never output placeholder URLs, "example.com", fake phone numbers, or sample addresses. Use "N/A" instead.`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     // Bail immediately if pipeline was stopped

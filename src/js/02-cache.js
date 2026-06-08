@@ -6,6 +6,13 @@ const memCache = {};
 // a breaking change to the prompt or response shape.
 const CACHE_SCHEMA_VERSION = '3';
 
+function _cacheTtlMs(opts) {
+  const n = opts && Number(opts.agentNum);
+  if ([4, 12, 13, 16, 17].includes(n)) return 45 * 60 * 1000;
+  if ([5, 6, 7, 8, 9, 10].includes(n)) return 2 * 60 * 60 * 1000;
+  return CACHE_TTL_MS;
+}
+
 function _cacheCtx() {
   // Discriminator: provider + model + schema version. Without these,
   // switching Anthropic ↔ OpenAI or toggling models would return stale
@@ -37,7 +44,7 @@ function getCache(system, user, opts) {
     const raw = localStorage.getItem(k);
     if(!raw) return null;
     const {ts, data} = JSON.parse(raw);
-    if(Date.now()-ts > CACHE_TTL_MS) { localStorage.removeItem(k); return null; }
+    if(Date.now()-ts > _cacheTtlMs(opts)) { localStorage.removeItem(k); return null; }
     memCache[k] = data;
     return data;
   } catch(e) { return null; }

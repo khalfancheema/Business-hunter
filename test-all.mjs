@@ -368,7 +368,8 @@ test('fixed agent LLM calls pass agentNum for schema and repair gates', () => {
 });
 test('production accuracy target is strict 95 percent', () => {
   assert.ok(API_SRC.includes('const _BH_PRODUCTION_ACCURACY_TARGET = 95'));
-  assert.ok(PIPELINE_SRC.includes('score >= 95'));
+  assert.ok(PIPELINE_SRC.includes('before >= 95'));
+  assert.ok(PIPELINE_SRC.includes('current >= 95'));
   assert.ok(VERIFIER_SRC.includes("pct >= 95 ? 'var(--green)'"));
   assert.equal(/Number\(score\) < 85/.test(API_SRC), false);
 });
@@ -381,10 +382,10 @@ test('pipeline blocks fallback dependencies and attempts verifier repair', () =>
 });
 test('production gate uses deterministic scorecard and claim citations', () => {
   assert.ok(API_SRC.includes('function _bhCollectCitationIssues('));
-  assert.ok(API_SRC.includes('Numeric claim ${here} lacks a nearby source/citation/url field.'));
+  assert.ok(API_SRC.includes('Numeric claim ${here} lacks field-level source evidence.'));
   assert.ok(API_SRC.includes('function _bhComputeProductionScorecard('));
   assert.ok(API_SRC.includes('R.production_scorecard = scorecard'));
-  assert.ok(API_SRC.includes('deterministic_weighted_evidence_v1'));
+  assert.ok(API_SRC.includes('deterministic_weighted_evidence_v2_industry_profile'));
 });
 test('production gate requires verifier coverage and evidence ledger', () => {
   assert.ok(API_SRC.includes('function _bhBuildEvidenceLedger('));
@@ -393,6 +394,38 @@ test('production gate requires verifier coverage and evidence ledger', () => {
   assert.ok(API_SRC.includes("['A1','A2','A4','A6','A7']"));
   assert.ok(API_SRC.includes('production requires at least 10 verifier/source entries'));
   assert.ok(VERIFIER_SRC.includes('agents_checked: agentsChecked'));
+});
+test('field-level claim ledger and source quality harden accuracy gates', () => {
+  ['_bhFieldEvidence','_bhHasFieldEvidence','_bhExtractClaimLedger','_bhSourceQuality','_bhSourceFreshness'].forEach(fn => {
+    assert.ok(API_SRC.includes(`function ${fn}(`), `missing ${fn}`);
+  });
+  assert.ok(API_SRC.includes('lacks field-level source evidence'));
+  assert.ok(API_SRC.includes('recommendation-critical claim(s) lack verified field-level evidence'));
+  assert.ok(API_SRC.includes('evidence source URL(s) are invalid or placeholder URLs'));
+});
+test('verifier production score uses exact verified checks only', () => {
+  assert.ok(VERIFIER_SRC.includes('const exactVerifiedPct = buckets.exact.length >= 5 ? strictPct : null'));
+  assert.ok(VERIFIER_SRC.includes('score_exact_verified: exactVerifiedPct'));
+  assert.ok(API_SRC.includes('Exact verified score ${Math.round(Number(exactVerifiedScore))}%'));
+});
+test('repair loop expands dependents and runs bounded multiple passes', () => {
+  assert.ok(PIPELINE_SRC.includes('const _BH_AGENT_DEPS ='));
+  assert.ok(PIPELINE_SRC.includes('function _bhExpandRepairAgents('));
+  assert.ok(PIPELINE_SRC.includes('for (let pass = 1; pass <= 3; pass++)'));
+});
+test('agent 17 and stress guard use evidence packs instead of raw truncation only', () => {
+  assert.ok(API_SRC.includes('function _bhBuildEvidencePack('));
+  assert.ok(SOURCES_SRC.includes('EVIDENCE / CLAIM LEDGER'));
+  const STRESS_SRC = readFileSync('src/js/41-agent-stress-guard.js', 'utf8');
+  assert.ok(STRESS_SRC.includes('_bhBuildEvidencePack(16000)'));
+  assert.ok(STRESS_SRC.includes('verified evidence pack above is authoritative'));
+});
+test('cache ttl varies by volatile agent type and scorecard is industry-profiled', () => {
+  const CACHE_SRC = readFileSync('src/js/02-cache.js', 'utf8');
+  assert.ok(CACHE_SRC.includes('function _cacheTtlMs(opts)'));
+  assert.ok(CACHE_SRC.includes('[4, 12, 13, 16, 17].includes(n)'));
+  assert.ok(API_SRC.includes('deterministic_weighted_evidence_v2_industry_profile'));
+  assert.ok(API_SRC.includes('industry:key'));
 });
 test('cache distinguishes validated agent outputs and repair context', () => {
   const CACHE_SRC = readFileSync('src/js/02-cache.js', 'utf8');
