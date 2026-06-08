@@ -244,6 +244,7 @@ const PIPELINE_SRC = readFileSync('src/js/22-pipeline.js', 'utf8');
 const STREAMING_SRC = readFileSync('src/js/33-streaming.js', 'utf8');
 const QA_SRC = readFileSync('src/js/21-render-15.js', 'utf8');
 const SOURCES_SRC = readFileSync('src/js/28-agent-sources.js', 'utf8');
+const VERIFIER_SRC = readFileSync('src/js/44-verifier.js', 'utf8');
 const UTILS_API_SRC = readFileSync('src/utils/api.js', 'utf8');
 const LLM_PROXY_SRC = readFileSync('api/llm.mjs', 'utf8');
 const V2_STATE_SRC = readFileSync('v2/src/js/v2-01-state.js', 'utf8');
@@ -310,11 +311,16 @@ test('legacy utils API helper uses server-side /api/llm', () => {
   assert.equal(/anthropic-dangerous-direct-browser-access/.test(UTILS_API_SRC), false);
 });
 test('agent feedback bus records and injects self-learning context', () => {
-  ['_bhRecordAgentFeedback','_bhBuildAgentFeedbackContext','_bhWithAgentFeedback','_bhRecordAllAgentFeedback'].forEach(fn => {
+  ['_bhRecordAgentFeedback','_bhBuildAgentFeedbackContext','_bhWithAgentFeedback','_bhRecordAllAgentFeedback','_bhRecordAccuracyFeedback'].forEach(fn => {
     assert.ok(API_SRC.includes(`function ${fn}(`), `missing ${fn}`);
   });
   assert.ok(API_SRC.includes('CROSS-AGENT FEEDBACK / SELF-LEARNING MEMORY'));
   assert.ok(API_SRC.includes('_bhWithAgentFeedback(user, opts)'));
+});
+test('agent feedback affects cache identity to avoid stale learned outputs', () => {
+  assert.ok(API_SRC.includes('const cacheUser = _bhWithAgentFeedback(user, opts)'));
+  assert.ok(API_SRC.includes('getCache(system, cacheUser, opts)'));
+  assert.ok(API_SRC.includes('setCache(system, _bhWithAgentFeedback(user, opts), checked, opts)'));
 });
 test('pipeline records feedback after agent completion and reruns', () => {
   assert.ok(PIPELINE_SRC.includes('const learn  = n =>'));
@@ -328,6 +334,12 @@ test('QA and sources agents expose cross-agent feedback', () => {
   assert.ok(QA_SRC.includes('agent_feedback: feedbackItems'));
   assert.ok(SOURCES_SRC.includes('feedbackContext'));
   assert.ok(SOURCES_SRC.includes('_bhBuildAgentFeedbackContext'));
+});
+test('accuracy verifier sends failed checks into self-learning feedback', () => {
+  assert.ok(VERIFIER_SRC.includes('_bhRecordAccuracyFeedback(valid)'));
+  assert.ok(VERIFIER_SRC.includes('R.accuracy.feedback_items'));
+  assert.ok(API_SRC.includes('accuracy_checks: rows.map'));
+  assert.ok(API_SRC.includes('Use verified ${c.source'));
 });
 
 // ═══════════════════════════════════════════════

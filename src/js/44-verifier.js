@@ -713,6 +713,18 @@
       dropped_checks:  droppedFallback,
       buckets: Object.fromEntries(Object.entries(buckets).map(([k,v])=>[k,v.length])),
     };
+    if (typeof _bhRecordAccuracyFeedback === 'function') {
+      try {
+        const accuracyFeedback = _bhRecordAccuracyFeedback(valid);
+        R.accuracy.feedback_items = accuracyFeedback.map(i => ({
+          agent: i.agent,
+          issue_count: (i.issues || []).length,
+          accuracy_check_count: (i.accuracy_checks || []).length,
+        }));
+      } catch(e) {
+        console.warn('[Verifier] Accuracy feedback failed:', e.message);
+      }
+    }
     console.log(`[Verifier] Consistency: strict=${strictPct}% normal=${normalPct}% broad=${broadPct}% (${valid.length} checks; ${droppedFallback} dropped due to fallbacks; buckets: ${JSON.stringify(R.accuracy.buckets)})`);
 
     _renderAccuracyCard(pct, valid, {

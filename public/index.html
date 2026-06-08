@@ -2190,6 +2190,83 @@ function _bhRecordAgentFeedback(agentNum, data) {
   return item;
 }
 
+function _bhRecordAccuracyFeedback(checks) {
+  if (!Array.isArray(checks) || !checks.length) return [];
+  if (!R.agent_feedback) R.agent_feedback = { items: [], by_agent: {}, persistent_lessons: _bhLoadPersistentLearning() };
+  const poor = checks.filter(c => {
+    const m = (c.agent || '').match(/^A(\d+)/);
+    return m && c.acc != null && !isNaN(c.acc) && c.acc < 0.85;
+  });
+  if (!poor.length) return [];
+  const byAgent = {};
+  poor.forEach(c => {
+    const agent = parseInt((c.agent || '').replace(/^A/i, ''), 10);
+    if (!agent) return;
+    if (!byAgent[agent]) byAgent[agent] = [];
+    byAgent[agent].push(c);
+  });
+  const lessons = _bhLoadPersistentLearning();
+  const created = [];
+  Object.entries(byAgent).forEach(([agent, rows]) => {
+    const n = Number(agent);
+    const issues = rows.slice(0, 5).map(c =>
+      `Accuracy check below target for ${c.field}: AI=${c.aiFmt || c.ai}, verified=${c.realFmt || c.real}, match=${Math.round(c.acc * 100)}% (${c.source || 'source unknown'}).`
+    );
+    const actions = rows.slice(0, 5).map(c =>
+      `For Agent ${n} ${c.field}, use the verified ${c.source || 'source'} value when available; otherwise return null/N/A instead of estimating.`
+    );
+    const existing = R.agent_feedback.by_agent[String(n)] || {
+      agent: n,
+      checked_at: new Date().toISOString(),
+      status: 'ok',
+      issues: [],
+      actions: [],
+      quality: null,
+    };
+    const item = {
+      ...existing,
+      checked_at: new Date().toISOString(),
+      status: 'needs_attention',
+      issues: [...new Set([...(existing.issues || []), ...issues])],
+      actions: [...new Set([...(existing.actions || []), ...actions])],
+      accuracy_checks: rows.map(c => ({
+        field: c.field,
+        ai: c.ai,
+        real: c.real,
+        aiFmt: c.aiFmt,
+        realFmt: c.realFmt,
+        match_pct: Math.round(c.acc * 100),
+        source: c.source,
+        match_type: c.match_type,
+      })),
+    };
+    R.agent_feedback.by_agent[String(n)] = item;
+    created.push(item);
+    rows.slice(0, 3).forEach(c => {
+      const issue = `A${n} ${c.field} accuracy ${Math.round(c.acc * 100)}% vs ${c.source || 'verified source'}`;
+      lessons.unshift({
+        agent: n,
+        industry: (typeof industryKey === 'function' ? industryKey() : 'business'),
+        lesson: `Use verified ${c.source || 'source'} data for ${c.field}; do not estimate when the value is missing.`,
+        issue,
+        seen_at: item.checked_at,
+      });
+    });
+  });
+  const deduped = [];
+  const seen = new Set();
+  lessons.forEach(l => {
+    const key = `${l.agent}|${l.issue}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    deduped.push(l);
+  });
+  _bhSavePersistentLearning(deduped);
+  R.agent_feedback.items = Object.values(R.agent_feedback.by_agent).sort((a,b) => a.agent - b.agent);
+  R.agent_feedback.persistent_lessons = deduped.slice(0, 30);
+  return created;
+}
+
 function _bhRecordAllAgentFeedback() {
   for (let i = 1; i <= 17; i++) {
     const d = _bhAgentData(i);
@@ -2235,7 +2312,8 @@ async function claudeJSON(system, user, opts={}) {
     return {};
   }
   if(!demoMode) {
-    const cached = getCache(system, user, opts);
+    const cacheUser = _bhWithAgentFeedback(user, opts);
+    const cached = getCache(system, cacheUser, opts);
     if(cached) { console.log('Cache hit'); return _bhAttachOutputQuality(cached, { ...opts, cached:true }); }
   }
   const strictSystem = system + `
@@ -2287,7 +2365,7 @@ CRITICAL - SOURCE COVERAGE:
       const d = parseJSON(raw);
       if (d) {
         const checked = _bhAttachOutputQuality(d, opts);
-        setCache(system, user, checked, opts);
+        setCache(system, _bhWithAgentFeedback(user, opts), checked, opts);
         return checked;
       }
       console.warn(`Attempt ${attempt} parse fail. Raw:`, (raw||'').substring(0, 200));
@@ -14485,6 +14563,18 @@ function rdRenderFinancialBadge(elId) {
       dropped_checks:  droppedFallback,
       buckets: Object.fromEntries(Object.entries(buckets).map(([k,v])=>[k,v.length])),
     };
+    if (typeof _bhRecordAccuracyFeedback === 'function') {
+      try {
+        const accuracyFeedback = _bhRecordAccuracyFeedback(valid);
+        R.accuracy.feedback_items = accuracyFeedback.map(i => ({
+          agent: i.agent,
+          issue_count: (i.issues || []).length,
+          accuracy_check_count: (i.accuracy_checks || []).length,
+        }));
+      } catch(e) {
+        console.warn('[Verifier] Accuracy feedback failed:', e.message);
+      }
+    }
     console.log(`[Verifier] Consistency: strict=${strictPct}% normal=${normalPct}% broad=${broadPct}% (${valid.length} checks; ${droppedFallback} dropped due to fallbacks; buckets: ${JSON.stringify(R.accuracy.buckets)})`);
 
     _renderAccuracyCard(pct, valid, {
