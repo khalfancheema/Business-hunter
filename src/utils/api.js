@@ -1,47 +1,33 @@
 /**
- * Anthropic API wrapper for browser-based agent calls.
- * Requires user to provide their API key in the UI.
+ * LLM API wrapper for browser-based agent calls.
+ * Production calls go through /api/llm so provider keys stay server-side.
  *
  * Usage:
  *   import { callClaude } from './api.js';
- *   const result = await callClaude(apiKey, systemPrompt, userPrompt, useWebSearch);
+ *   const result = await callClaude(null, systemPrompt, userPrompt, useWebSearch);
  */
 
-const API_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-sonnet-4-6';
-const MAX_TOKENS = 3000;
 
 /**
- * Call the Anthropic API from a browser context.
- * @param {string} apiKey - Anthropic API key (sk-ant-...)
+ * Call the server-side LLM proxy from a browser context.
+ * @param {string|null} apiKey - Deprecated. Kept for backward compatibility.
  * @param {string} system - System prompt defining the agent role
  * @param {string} user - User message / task prompt
  * @param {boolean} useWebSearch - Whether to enable the web_search tool
  * @returns {Promise<string>} - The text content of Claude's response
  */
 export async function callClaude(apiKey, system, user, useWebSearch = false) {
-  if (!apiKey) throw new Error('No API key provided.');
-
-  const body = {
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system,
-    messages: [{ role: 'user', content: user }],
-  };
-
-  if (useWebSearch) {
-    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-  }
-
-  const res = await fetch(API_URL, {
+  const res = await fetch('/api/llm', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      provider: 'anthropic',
+      model: MODEL,
+      system,
+      user,
+      opts: { webSearch: useWebSearch },
+    }),
   });
 
   if (!res.ok) {
@@ -51,12 +37,7 @@ export async function callClaude(apiKey, system, user, useWebSearch = false) {
 
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
-
-  // Extract text from all content blocks (handles tool use + text interleaved)
-  return data.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('\n');
+  return data.text || '';
 }
 
 /**

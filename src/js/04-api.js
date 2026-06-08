@@ -228,9 +228,63 @@ CRITICAL - SOURCE COVERAGE:
 }
 
 // opts.webSearch = true → enable Anthropic web_search tool (Anthropic provider only)
+function _bhShouldUseLLMProxy() {
+  if (typeof window === 'undefined') return false;
+  if (typeof window.USE_LLM_PROXY === 'boolean') return window.USE_LLM_PROXY;
+  const loc = window.location || {};
+  if (loc.protocol === 'file:') return false;
+  const p = provider();
+  if (p === 'openai_compat' && /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i.test(customUrl())) return false;
+  return true;
+}
+
+function _bhAllowDirectLLMKeys() {
+  if (typeof window === 'undefined') return false;
+  if (window.ALLOW_CLIENT_LLM_KEYS === true || window.BH_ALLOW_CLIENT_LLM_KEYS === true) return true;
+  const loc = window.location || {};
+  if (loc.protocol === 'file:') return true;
+  const p = provider();
+  return p === 'openai_compat' && /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i.test(customUrl());
+}
+
+async function _bhLLMProxy(system, user, opts={}) {
+  const signal = window._v2AbortCtrl?.signal;
+  const fetchOpts = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      provider: provider(),
+      model: model(),
+      system,
+      user,
+      opts: {
+        webSearch: opts.webSearch === true,
+        webSearchMaxUses: opts.webSearchMaxUses,
+      },
+    }),
+  };
+  if (signal && !signal.aborted) fetchOpts.signal = signal;
+  const proxyUrl = window.LLM_PROXY_URL || '/api/llm';
+  const res = await fetch(proxyUrl, fetchOpts);
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok || d.error) throw new Error(d.error || 'HTTP ' + res.status);
+  const stop = d.stop;
+  if (stop === 'max_tokens' || stop === 'MAX_TOKENS' || stop === 'length') throw new Error('Response truncated at max_tokens');
+  return d.text || '';
+}
+
 async function claude(system, user, opts={}) {
   const k=key();
-  if(!k) throw new Error('No API key.');
+  if (_bhShouldUseLLMProxy()) {
+    try {
+      return await _bhLLMProxy(system, user, opts);
+    } catch(e) {
+      if (!k) throw e;
+      if (!_bhAllowDirectLLMKeys()) throw e;
+      console.warn('[LLMProxy] falling back to direct provider call:', e.message);
+    }
+  }
+  if(!k || !_bhAllowDirectLLMKeys()) throw new Error('No API key. Configure server-side /api/llm env vars or enable local-development client keys.');
   const p = PROVIDERS[provider()]||PROVIDERS.anthropic;
   const url = p.url_custom ? customUrl() : (typeof p.url==='function' ? p.url(k) : p.url);
   const headers = p.headers(k);

@@ -315,7 +315,8 @@ let _v2OnboardStep = 0;
 
 function v2InitOnboarding() {
   const visited = localStorage.getItem('v2_visited');
-  const hasKey  = !!((typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || '').trim();
+  const hasKey  = !!((typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || '').trim()
+    || (typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy());
   if (!visited && !hasKey) setTimeout(v2ShowOnboarding, 600);
   localStorage.setItem('v2_visited', '1');
 }

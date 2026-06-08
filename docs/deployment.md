@@ -149,14 +149,14 @@ firebase deploy
 
 ## CORS Note
 
-When running from a local `file://` URL, direct API calls to Anthropic require:
-```
-anthropic-dangerous-direct-browser-access: true
-```
+Hosted production deployments should use the server-side `/api/llm` and `/api/proxy`
+functions. These keep LLM and government-data API keys in environment variables
+instead of exposing them to browser JavaScript.
 
-This header is already included in the app (`04-api.js`). No configuration needed for local file access.
+Static-only local usage can still enter a temporary browser-session key for
+development, but that is not the production path.
 
-For hosted deployments (GitHub Pages, Netlify, etc.), standard CORS applies — the Anthropic API allows browser requests from any origin when this header is present.
+Production hosting should configure the server env vars documented above.
 
 ---
 
@@ -164,10 +164,10 @@ For hosted deployments (GitHub Pages, Netlify, etc.), standard CORS applies — 
 
 | Practice | Details |
 |----------|---------|
-| **Never stored** | API keys are held in memory only — not in localStorage, cookies, or the DOM |
-| **Only sent to provider** | Keys are sent directly to `api.anthropic.com` / `api.openai.com` / etc. — never to any third party |
-| **No hardcoding** | Never embed an API key in `public/index.html` — always use the UI input |
-| **Team use** | For shared team deployments, build a thin backend proxy that holds the key server-side and forwards requests |
+| **Server-side by default** | Hosted deployments call `/api/llm` and `/api/proxy`; provider keys live in server env vars |
+| **Session-only fallback** | Local development keys are migrated out of `localStorage` and kept in `sessionStorage` |
+| **No hardcoding** | Never embed an API key in `public/index.html`; use server env vars for production |
+| **Team use** | Configure `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, and public-data keys in the hosting dashboard |
 | **Usage limits** | Set spend limits at [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
 
 ---

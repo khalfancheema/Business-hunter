@@ -239,7 +239,13 @@ test('package.json has test script', () => assert.ok(readFileSync('package.json'
 
 // Production secret handling
 const REAL_DATA_SRC = readFileSync('src/js/43-real-data.js', 'utf8');
+const API_SRC = readFileSync('src/js/04-api.js', 'utf8');
+const PIPELINE_SRC = readFileSync('src/js/22-pipeline.js', 'utf8');
+const STREAMING_SRC = readFileSync('src/js/33-streaming.js', 'utf8');
+const UTILS_API_SRC = readFileSync('src/utils/api.js', 'utf8');
+const LLM_PROXY_SRC = readFileSync('api/llm.mjs', 'utf8');
 const V2_STATE_SRC = readFileSync('v2/src/js/v2-01-state.js', 'utf8');
+const V2_WIZARD_SRC = readFileSync('v2/src/js/v2-03-wizard.js', 'utf8');
 const V2_FEATURES_SRC = readFileSync('v2/src/js/v2-10-features.js', 'utf8');
 const V2_COPILOT_SRC = readFileSync('v2/src/js/v2-04-copilot.js', 'utf8');
 const V2_ADVANCED_SRC = readFileSync('v2/src/js/v2-11-advanced.js', 'utf8');
@@ -267,6 +273,39 @@ test('v2 API key reads use session secret helpers', () => {
   const joined = V2_STATE_SRC + V2_FEATURES_SRC + V2_COPILOT_SRC + V2_ADVANCED_SRC;
   assert.equal(/localStorage\.getItem\('v2_apikey'/.test(joined), false);
   assert.equal(/localStorage\.getItem\('v2_or_apikey'/.test(joined), false);
+});
+test('server LLM proxy exists and uses env-backed provider keys', () => {
+  assert.ok(existsSync('api/llm.mjs'));
+  ['ANTHROPIC_API_KEY','OPENAI_API_KEY','GEMINI_API_KEY','OPENAI_COMPAT_API_KEY'].forEach(envName => {
+    assert.ok(LLM_PROXY_SRC.includes(envName), `missing env ${envName}`);
+  });
+  assert.equal(/dangerous-direct-browser-access/.test(LLM_PROXY_SRC), false);
+});
+test('browser claude() prefers /api/llm before direct provider calls', () => {
+  assert.ok(API_SRC.includes('function _bhShouldUseLLMProxy()'));
+  assert.ok(API_SRC.includes('function _bhAllowDirectLLMKeys()'));
+  assert.ok(API_SRC.includes("window.LLM_PROXY_URL || '/api/llm'"));
+  assert.ok(API_SRC.includes('return await _bhLLMProxy(system, user, opts)'));
+  assert.ok(API_SRC.includes('ALLOW_CLIENT_LLM_KEYS'));
+});
+test('pipeline can start with server-side LLM proxy and no browser key', () => {
+  assert.ok(PIPELINE_SRC.includes('const proxyReady = typeof _bhShouldUseLLMProxy'));
+  assert.ok(PIPELINE_SRC.includes('!key() && !proxyReady'));
+});
+test('streaming falls back through claude() when LLM proxy is active', () => {
+  assert.ok(STREAMING_SRC.includes("typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy()"));
+  assert.ok(STREAMING_SRC.includes('const text = await claude(system, user)'));
+  assert.ok(STREAMING_SRC.includes('_bhAllowDirectLLMKeys'));
+});
+test('v2 UI recognizes server-side LLM proxy as an AI-ready state', () => {
+  const joined = V2_WIZARD_SRC + V2_FEATURES_SRC + V2_COPILOT_SRC + V2_ADVANCED_SRC;
+  assert.ok(joined.includes('_bhShouldUseLLMProxy'));
+  assert.ok(V2_COPILOT_SRC.includes('apiKey || proxyReady'));
+  assert.ok(V2_ADVANCED_SRC.includes('!apiKey && !proxyReady'));
+});
+test('legacy utils API helper uses server-side /api/llm', () => {
+  assert.ok(UTILS_API_SRC.includes("fetch('/api/llm'"));
+  assert.equal(/anthropic-dangerous-direct-browser-access/.test(UTILS_API_SRC), false);
 });
 
 // ═══════════════════════════════════════════════

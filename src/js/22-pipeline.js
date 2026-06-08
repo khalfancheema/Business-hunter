@@ -1,6 +1,7 @@
 async function runPipeline() {
   if(running) return;
-  if(!demoMode && !key()) { showErr('Please enter your Anthropic API key.'); return; }
+  const proxyReady = typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy();
+  if(!demoMode && !key() && !proxyReady) { showErr('Please enter your Anthropic API key or deploy with server-side /api/llm env vars.'); return; }
   hideErr(); running=true; stopRequested=false;
   // Fresh abort controller if previous run was stopped
   if (window._v2AbortCtrl?.signal?.aborted) {

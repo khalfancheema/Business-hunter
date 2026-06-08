@@ -255,7 +255,8 @@ function v2AnswerQuestion(q) {
 
   // Try API-powered answer first (if key available)
   const apiKey = (typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || (typeof key === 'function' ? key() : '');
-  if (apiKey && typeof claudeJSON === 'function') {
+  const proxyReady = typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy();
+  if ((apiKey || proxyReady) && typeof claudeJSON === 'function') {
     _v2AiAnswer(q, R_data);
     return;
   }

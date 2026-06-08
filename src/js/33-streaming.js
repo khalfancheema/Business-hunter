@@ -13,7 +13,14 @@
 
 async function claudeStream(system, user, onChunk) {
   const k = key();
-  if (!k) throw new Error('No API key.');
+  if (typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy()) {
+    const text = await claude(system, user);
+    if (onChunk) onChunk(text);
+    return text;
+  }
+  if (!k || (typeof _bhAllowDirectLLMKeys === 'function' && !_bhAllowDirectLLMKeys())) {
+    throw new Error('No API key. Configure server-side /api/llm env vars or enable local-development client keys.');
+  }
 
   // Only Anthropic natively supported for SSE streaming here
   if (provider() !== 'anthropic') {
