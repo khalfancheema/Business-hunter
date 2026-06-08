@@ -59,12 +59,17 @@ async function runAgent17() {
   const agentContext = agentSummaries
     .map(a => `[${a.label}]: ${a.snippet}`)
     .join('\n\n');
+  const feedbackContext = typeof _bhBuildAgentFeedbackContext === 'function'
+    ? _bhBuildAgentFeedbackContext()
+    : '';
 
   const sys = `You are a research methodology auditor for a ${ind.unit} business planning system. Return JSON only. Be thorough — flag every data source used and every claim that cannot be independently verified.`;
   const usr = `Audit all data sources and claims used across this ${ind.unit} business planning analysis for ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
 
 AGENT OUTPUTS (summarized):
 ${agentContext}
+
+${feedbackContext}
 
 Return ONLY:
 {

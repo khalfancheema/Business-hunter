@@ -4309,6 +4309,137 @@ function _bhAttachOutputQuality(data, opts={}) {
   return data;
 }
 
+const _BH_AGENT_REQUIRED_KEYS = {
+  1:['summary','cities'],
+  2:['summary','cities','overall_opportunity_score'],
+  3:['summary','locations'],
+  4:['summary'],
+  5:['summary','requirements','total_timeline_months'],
+  6:['summary','cities'],
+  7:['summary','scenarios'],
+  8:['verdict','assessment','success_factors','risks'],
+  9:['executive_summary','company_overview'],
+  10:['phases','total_duration_months'],
+  11:['summary'],
+  12:['summary','total_potential_funding'],
+  13:['summary','competitor_profiles'],
+  14:['summary'],
+  15:['summary','overall_pass_rate'],
+  16:['summary'],
+  17:['summary','data_sources'],
+};
+
+function _bhFeedbackStoreKey() {
+  let ind = 'business';
+  try { ind = industryKey ? industryKey() : ind; } catch {}
+  return 'bh_agent_learning_v1:' + ind;
+}
+
+function _bhLoadPersistentLearning() {
+  try {
+    const raw = localStorage.getItem(_bhFeedbackStoreKey());
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.slice(0, 30) : [];
+  } catch { return []; }
+}
+
+function _bhSavePersistentLearning(items) {
+  try {
+    localStorage.setItem(_bhFeedbackStoreKey(), JSON.stringify((items || []).slice(0, 30)));
+  } catch {}
+}
+
+function _bhAgentData(agentNum) {
+  try { return R && R['a' + agentNum]; } catch { return null; }
+}
+
+function _bhCollectAgentFeedback(agentNum, data) {
+  const issues = [];
+  const actions = [];
+  const required = _BH_AGENT_REQUIRED_KEYS[agentNum] || [];
+  required.forEach(k => {
+    const v = data && data[k];
+    if (v === undefined || v === null || v === '') {
+      issues.push(`Missing required field: ${k}`);
+      actions.push(`Downstream agents must treat Agent ${agentNum}.${k} as unavailable unless verified from real data.`);
+    } else if (Array.isArray(v) && v.length === 0) {
+      issues.push(`Empty required array: ${k}`);
+      actions.push(`Do not infer values for Agent ${agentNum}.${k}; request/source specific rows before using it.`);
+    }
+  });
+  const q = data && data._quality;
+  if (q && q.risk !== 'low') {
+    (q.warnings || []).forEach(w => issues.push(w));
+    actions.push(`When using Agent ${agentNum} output, preserve sourced values and replace weak/placeholder claims with null/N/A.`);
+  }
+  if (data && typeof data === 'object') {
+    const sourceish = JSON.stringify(data).match(/source|citation|data_sources|url/gi);
+    const numberish = JSON.stringify(data).match(/[-]?\d+(\.\d+)?/g);
+    if ((numberish || []).length >= 12 && (sourceish || []).length < 3) {
+      issues.push('Output contains many numeric claims but sparse source markers.');
+      actions.push(`Require source labels for numeric claims copied from Agent ${agentNum}.`);
+    }
+  }
+  return { issues: [...new Set(issues)], actions: [...new Set(actions)] };
+}
+
+function _bhRecordAgentFeedback(agentNum, data) {
+  if (!agentNum || !data || typeof data !== 'object') return null;
+  if (!R.agent_feedback) R.agent_feedback = { items: [], by_agent: {}, persistent_lessons: _bhLoadPersistentLearning() };
+  const fb = _bhCollectAgentFeedback(agentNum, data);
+  const item = {
+    agent: Number(agentNum),
+    checked_at: new Date().toISOString(),
+    status: fb.issues.length ? 'needs_attention' : 'ok',
+    issues: fb.issues,
+    actions: fb.actions,
+    quality: data._quality || null,
+  };
+  R.agent_feedback.by_agent[String(agentNum)] = item;
+  R.agent_feedback.items = Object.values(R.agent_feedback.by_agent).sort((a,b) => a.agent - b.agent);
+  if (fb.issues.length) {
+    const lessons = _bhLoadPersistentLearning();
+    const lesson = {
+      agent: Number(agentNum),
+      industry: (typeof industryKey === 'function' ? industryKey() : 'business'),
+      lesson: fb.actions[0] || fb.issues[0],
+      issue: fb.issues[0],
+      seen_at: item.checked_at,
+    };
+    const deduped = [lesson, ...lessons.filter(l => !(l.agent === lesson.agent && l.issue === lesson.issue))];
+    _bhSavePersistentLearning(deduped);
+    R.agent_feedback.persistent_lessons = deduped.slice(0, 30);
+  }
+  return item;
+}
+
+function _bhRecordAllAgentFeedback() {
+  for (let i = 1; i <= 17; i++) {
+    const d = _bhAgentData(i);
+    if (d && typeof d === 'object') _bhRecordAgentFeedback(i, d);
+  }
+}
+
+function _bhBuildAgentFeedbackContext() {
+  const live = R.agent_feedback?.items || [];
+  const persistent = _bhLoadPersistentLearning();
+  const rows = [];
+  live.filter(i => i.status !== 'ok').slice(-8).forEach(i => {
+    rows.push(`A${i.agent}: ${i.issues.slice(0,2).join('; ')} | Required response: ${i.actions.slice(0,2).join(' ')}`);
+  });
+  persistent.slice(0, 6).forEach(l => {
+    rows.push(`Prior lesson A${l.agent}: ${l.lesson}`);
+  });
+  if (!rows.length) return '';
+  return `\n\nCROSS-AGENT FEEDBACK / SELF-LEARNING MEMORY:\n${rows.map(r => '- ' + r).join('\n')}\nApply these corrections. Do not repeat known weak claims. If upstream data is missing or weak, return null/N/A and explain the limitation in notes or sources.`;
+}
+
+function _bhWithAgentFeedback(user, opts={}) {
+  if (opts.skipFeedback) return user;
+  const ctx = _bhBuildAgentFeedbackContext();
+  return ctx ? user + ctx : user;
+}
+
 // Retry an agent call up to 2 times if JSON parse fails
 // opts.webSearch = true enables Anthropic web_search tool for this call
 async function claudeJSON(system, user, opts={}) {
@@ -4374,7 +4505,8 @@ CRITICAL - SOURCE COVERAGE:
     }
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
     try {
-      const raw = await claude(strictSystem, user + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : ''), opts);
+      const activeUser = _bhWithAgentFeedback(user, opts) + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : '');
+      const raw = await claude(strictSystem, activeUser, opts);
       const d = parseJSON(raw);
       if (d) {
         const checked = _bhAttachOutputQuality(d, opts);
@@ -7484,6 +7616,11 @@ async function runAgent15(allResults) {
     });
   });
 
+  const feedbackItems = (R.agent_feedback?.items || []).filter(i => i.status !== 'ok');
+  const feedbackSummary = feedbackItems.length
+    ? feedbackItems.map(i => `A${i.agent}: ${(i.issues || []).slice(0,2).join('; ')}`).join(' | ')
+    : 'none';
+
   // Additional checks
   const hasParallelPhase1 = false; // Phase 1 is dependency-gated in runPipeline
   const hasPerAgentFallbacks = typeof getFallback1 === 'function' && typeof getFallback7 === 'function';
@@ -7515,6 +7652,7 @@ ACTUAL TEST RESULTS:
 - Critical issues: ${critIssues.length > 0 ? critIssues.join('; ') : 'none'}
 - Warnings: ${warnings.slice(0,8).join('; ')||'none'}
 - Output-quality warnings: ${qualityWarnings.length ? qualityWarnings.map(q=>`A${q.agent} ${q.risk}: ${q.warnings.join(', ')}`).join(' | ') : 'none'}
+- Cross-agent feedback issued: ${feedbackSummary}
 - Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
 - Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
@@ -7554,6 +7692,8 @@ Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with
       critical_issues:  critIssues,
       warnings:         warnings.slice(0, 8),
       quality_warnings: qualityWarnings,
+      agent_feedback: feedbackItems,
+      persistent_lessons: R.agent_feedback?.persistent_lessons || [],
       by_agent:         byAgent,
     };
     R.a15 = d;
@@ -7587,6 +7727,9 @@ function renderQA(d) {
   if(dv.critical_issues?.length){dataVal+=`<div style="background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--red);margin-bottom:6px">Critical Issues</div>${(dv.critical_issues||[]).map(i=>`<div style="font-size:12px;color:var(--muted);margin-bottom:3px">• ${i}</div>`).join('')}</div>`;}
   if(dv.quality_warnings?.length){
     dataVal+=`<div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber);margin-bottom:6px">Output Quality Warnings</div>${(dv.quality_warnings||[]).map(q=>`<div style="font-size:12px;color:var(--muted);margin-bottom:5px"><strong>A${q.agent} ${q.name}</strong> (${q.risk}): ${(q.warnings||[]).join('; ')}</div>`).join('')}</div>`;
+  }
+  if(dv.agent_feedback?.length){
+    dataVal+=`<div style="background:rgba(74,158,255,0.10);border:1px solid var(--blue);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);margin-bottom:6px">Cross-Agent Feedback / Self-Learning</div>${(dv.agent_feedback||[]).map(f=>`<div style="font-size:12px;color:var(--muted);margin-bottom:7px"><strong>A${f.agent}</strong>: ${(f.issues||[]).slice(0,2).join('; ')}<br><span style="color:var(--faint)">Action: ${(f.actions||[]).slice(0,2).join(' ')}</span></div>`).join('')}</div>`;
   }
   dataVal+=`<table class="tbl"><thead><tr><th>Agent</th><th>OK</th><th>Warn</th><th>Fail</th><th>Score</th></tr></thead><tbody>`;
   (dv.by_agent||[]).forEach(a=>{
@@ -7636,6 +7779,7 @@ async function runPipeline() {
   const fb     = k => JSON.stringify(window['getFallback'+k]?.() || {});
   const cached = k => R['a'+k] ? JSON.stringify(R['a'+k]) : null;
   const best   = k => cached(k) || fb(k);
+  const learn  = n => { try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) { console.warn('Agent feedback failed for A'+n, e.message); } };
   try {
     // ── Phase 0: Real Data Prefetch (parallel, non-blocking) ─
     // Fires all free-API calls BEFORE agents start so every prompt
@@ -7666,12 +7810,15 @@ async function runPipeline() {
     if (phaseShouldRun(1)) {
       setProgress(5,'Phase 1 — Demographics research…');
       try { r1=await runAgent1(); } catch(e) { console.error('Agent 1 failed:',e.message); r1=fb(1); }
+      learn(1);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(9,'Phase 1 — Compliance requirements…');
       try { r5=await runAgent5(); } catch(e) { console.error('Agent 5 failed:',e.message); r5=fb(5); }
+      learn(5);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(13,'Phase 1 — Competitive intelligence…');
       try { r6=await runAgent6(); } catch(e) { console.error('Agent 6 failed:',e.message); r6=fb(6); }
+      learn(6);
     } else {
       setProgress(5,'Phase 1 — skipped (using cached data)');
       r1=best(1); r5=best(5); r6=best(6);
@@ -7683,6 +7830,7 @@ async function runPipeline() {
     let r2=best(2);
     if (phaseShouldRun(2)) {
       try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); r2=fb(2); }
+      learn(2);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7691,6 +7839,7 @@ async function runPipeline() {
     let r3=best(3);
     if (phaseShouldRun(3)) {
       try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); r3=fb(3); }
+      learn(3);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7699,6 +7848,7 @@ async function runPipeline() {
     let r4=best(4);
     if (phaseShouldRun(4)) {
       try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); r4=fb(4); }
+      learn(4);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7707,6 +7857,7 @@ async function runPipeline() {
     let r7=best(7);
     if (phaseShouldRun(5)) {
       try { r7=await runAgent7(r3,r4,r5,r1,r2); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
+      learn(7);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7715,6 +7866,7 @@ async function runPipeline() {
     let r8=best(8);
     if (phaseShouldRun(6)) {
       try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); r8=fb(8); }
+      learn(8);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7723,6 +7875,7 @@ async function runPipeline() {
     let r9=best(9);
     if (phaseShouldRun(7)) {
       try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); r9=fb(9); }
+      learn(9);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7730,6 +7883,7 @@ async function runPipeline() {
     setProgress(66, phaseShouldRun(8)?'Phase 8 — Project Plan (3 focused sub-agents)…':'Phase 8 — skipped');
     if (phaseShouldRun(8)) {
       try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+      learn(10);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -7737,15 +7891,19 @@ async function runPipeline() {
     if (phaseShouldRun(9)) {
       setProgress(72,'Phase 9 — Market map…');
       try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); }
+      learn(11);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(76,'Phase 9 — Grants and incentives…');
       try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); }
+      learn(12);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(80,'Phase 9 — Competitor deep-dive…');
       try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); }
+      learn(13);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(84,'Phase 9 — Build vs buy analysis…');
       try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); }
+      learn(16);
       // Apply fallbacks for any phase 9 agent that failed and has no data
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
       if(!R.a12) try{R.a12=getFallback12();}catch(e){}
@@ -7762,8 +7920,10 @@ async function runPipeline() {
     if (phaseShouldRun(11)) {
       setProgress(86,'Phase 11 — Code Review · QA Testing…');
       try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+      learn(14);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+      learn(15);
     } else {
       setProgress(86,'Phase 11 — skipped');
     }
@@ -7774,6 +7934,7 @@ async function runPipeline() {
       setProgress(94,'Phase 12 — Sources & Citations…');
       try {
         if(typeof runAgent17==='function') await runAgent17(R);
+        learn(17);
       } catch(e) { console.error('Agent 17 failed:',e.message); }
     } else {
       setProgress(94,'Phase 12 — skipped');
@@ -7785,6 +7946,7 @@ async function runPipeline() {
     if (typeof runAccuracyVerifier === 'function' && R.real) {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
     }
+    if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
   } catch(e) {
     $('orchStatus').textContent='error';
     showErr('Pipeline error: '+e.message+'\n\nTip: Make sure your API key is correct and has credits.');
@@ -7831,6 +7993,7 @@ async function reRunAgent(n) {
     else if(n===15){ await runAgent15(R); }
     else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
     else if(n===17){ await runAgent17(R); }
+    try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) {}
   } catch(e) {
     console.error('Re-run agent '+n+' failed:',e.message);
   } finally {
@@ -9361,12 +9524,17 @@ async function runAgent17() {
   const agentContext = agentSummaries
     .map(a => `[${a.label}]: ${a.snippet}`)
     .join('\n\n');
+  const feedbackContext = typeof _bhBuildAgentFeedbackContext === 'function'
+    ? _bhBuildAgentFeedbackContext()
+    : '';
 
   const sys = `You are a research methodology auditor for a ${ind.unit} business planning system. Return JSON only. Be thorough — flag every data source used and every claim that cannot be independently verified.`;
   const usr = `Audit all data sources and claims used across this ${ind.unit} business planning analysis for ZIP ${zip()}, budget $${parseInt(budget()).toLocaleString()}.
 
 AGENT OUTPUTS (summarized):
 ${agentContext}
+
+${feedbackContext}
 
 Return ONLY:
 {

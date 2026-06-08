@@ -242,6 +242,8 @@ const REAL_DATA_SRC = readFileSync('src/js/43-real-data.js', 'utf8');
 const API_SRC = readFileSync('src/js/04-api.js', 'utf8');
 const PIPELINE_SRC = readFileSync('src/js/22-pipeline.js', 'utf8');
 const STREAMING_SRC = readFileSync('src/js/33-streaming.js', 'utf8');
+const QA_SRC = readFileSync('src/js/21-render-15.js', 'utf8');
+const SOURCES_SRC = readFileSync('src/js/28-agent-sources.js', 'utf8');
 const UTILS_API_SRC = readFileSync('src/utils/api.js', 'utf8');
 const LLM_PROXY_SRC = readFileSync('api/llm.mjs', 'utf8');
 const V2_STATE_SRC = readFileSync('v2/src/js/v2-01-state.js', 'utf8');
@@ -306,6 +308,26 @@ test('v2 UI recognizes server-side LLM proxy as an AI-ready state', () => {
 test('legacy utils API helper uses server-side /api/llm', () => {
   assert.ok(UTILS_API_SRC.includes("fetch('/api/llm'"));
   assert.equal(/anthropic-dangerous-direct-browser-access/.test(UTILS_API_SRC), false);
+});
+test('agent feedback bus records and injects self-learning context', () => {
+  ['_bhRecordAgentFeedback','_bhBuildAgentFeedbackContext','_bhWithAgentFeedback','_bhRecordAllAgentFeedback'].forEach(fn => {
+    assert.ok(API_SRC.includes(`function ${fn}(`), `missing ${fn}`);
+  });
+  assert.ok(API_SRC.includes('CROSS-AGENT FEEDBACK / SELF-LEARNING MEMORY'));
+  assert.ok(API_SRC.includes('_bhWithAgentFeedback(user, opts)'));
+});
+test('pipeline records feedback after agent completion and reruns', () => {
+  assert.ok(PIPELINE_SRC.includes('const learn  = n =>'));
+  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].forEach(n => {
+    assert.ok(PIPELINE_SRC.includes(`learn(${n})`), `missing learn(${n})`);
+  });
+  assert.ok(PIPELINE_SRC.includes('_bhRecordAgentFeedback(n, R'));
+});
+test('QA and sources agents expose cross-agent feedback', () => {
+  assert.ok(QA_SRC.includes('Cross-Agent Feedback / Self-Learning'));
+  assert.ok(QA_SRC.includes('agent_feedback: feedbackItems'));
+  assert.ok(SOURCES_SRC.includes('feedbackContext'));
+  assert.ok(SOURCES_SRC.includes('_bhBuildAgentFeedbackContext'));
 });
 
 // ═══════════════════════════════════════════════

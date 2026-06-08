@@ -146,6 +146,137 @@ function _bhAttachOutputQuality(data, opts={}) {
   return data;
 }
 
+const _BH_AGENT_REQUIRED_KEYS = {
+  1:['summary','cities'],
+  2:['summary','cities','overall_opportunity_score'],
+  3:['summary','locations'],
+  4:['summary'],
+  5:['summary','requirements','total_timeline_months'],
+  6:['summary','cities'],
+  7:['summary','scenarios'],
+  8:['verdict','assessment','success_factors','risks'],
+  9:['executive_summary','company_overview'],
+  10:['phases','total_duration_months'],
+  11:['summary'],
+  12:['summary','total_potential_funding'],
+  13:['summary','competitor_profiles'],
+  14:['summary'],
+  15:['summary','overall_pass_rate'],
+  16:['summary'],
+  17:['summary','data_sources'],
+};
+
+function _bhFeedbackStoreKey() {
+  let ind = 'business';
+  try { ind = industryKey ? industryKey() : ind; } catch {}
+  return 'bh_agent_learning_v1:' + ind;
+}
+
+function _bhLoadPersistentLearning() {
+  try {
+    const raw = localStorage.getItem(_bhFeedbackStoreKey());
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.slice(0, 30) : [];
+  } catch { return []; }
+}
+
+function _bhSavePersistentLearning(items) {
+  try {
+    localStorage.setItem(_bhFeedbackStoreKey(), JSON.stringify((items || []).slice(0, 30)));
+  } catch {}
+}
+
+function _bhAgentData(agentNum) {
+  try { return R && R['a' + agentNum]; } catch { return null; }
+}
+
+function _bhCollectAgentFeedback(agentNum, data) {
+  const issues = [];
+  const actions = [];
+  const required = _BH_AGENT_REQUIRED_KEYS[agentNum] || [];
+  required.forEach(k => {
+    const v = data && data[k];
+    if (v === undefined || v === null || v === '') {
+      issues.push(`Missing required field: ${k}`);
+      actions.push(`Downstream agents must treat Agent ${agentNum}.${k} as unavailable unless verified from real data.`);
+    } else if (Array.isArray(v) && v.length === 0) {
+      issues.push(`Empty required array: ${k}`);
+      actions.push(`Do not infer values for Agent ${agentNum}.${k}; request/source specific rows before using it.`);
+    }
+  });
+  const q = data && data._quality;
+  if (q && q.risk !== 'low') {
+    (q.warnings || []).forEach(w => issues.push(w));
+    actions.push(`When using Agent ${agentNum} output, preserve sourced values and replace weak/placeholder claims with null/N/A.`);
+  }
+  if (data && typeof data === 'object') {
+    const sourceish = JSON.stringify(data).match(/source|citation|data_sources|url/gi);
+    const numberish = JSON.stringify(data).match(/[-]?\d+(\.\d+)?/g);
+    if ((numberish || []).length >= 12 && (sourceish || []).length < 3) {
+      issues.push('Output contains many numeric claims but sparse source markers.');
+      actions.push(`Require source labels for numeric claims copied from Agent ${agentNum}.`);
+    }
+  }
+  return { issues: [...new Set(issues)], actions: [...new Set(actions)] };
+}
+
+function _bhRecordAgentFeedback(agentNum, data) {
+  if (!agentNum || !data || typeof data !== 'object') return null;
+  if (!R.agent_feedback) R.agent_feedback = { items: [], by_agent: {}, persistent_lessons: _bhLoadPersistentLearning() };
+  const fb = _bhCollectAgentFeedback(agentNum, data);
+  const item = {
+    agent: Number(agentNum),
+    checked_at: new Date().toISOString(),
+    status: fb.issues.length ? 'needs_attention' : 'ok',
+    issues: fb.issues,
+    actions: fb.actions,
+    quality: data._quality || null,
+  };
+  R.agent_feedback.by_agent[String(agentNum)] = item;
+  R.agent_feedback.items = Object.values(R.agent_feedback.by_agent).sort((a,b) => a.agent - b.agent);
+  if (fb.issues.length) {
+    const lessons = _bhLoadPersistentLearning();
+    const lesson = {
+      agent: Number(agentNum),
+      industry: (typeof industryKey === 'function' ? industryKey() : 'business'),
+      lesson: fb.actions[0] || fb.issues[0],
+      issue: fb.issues[0],
+      seen_at: item.checked_at,
+    };
+    const deduped = [lesson, ...lessons.filter(l => !(l.agent === lesson.agent && l.issue === lesson.issue))];
+    _bhSavePersistentLearning(deduped);
+    R.agent_feedback.persistent_lessons = deduped.slice(0, 30);
+  }
+  return item;
+}
+
+function _bhRecordAllAgentFeedback() {
+  for (let i = 1; i <= 17; i++) {
+    const d = _bhAgentData(i);
+    if (d && typeof d === 'object') _bhRecordAgentFeedback(i, d);
+  }
+}
+
+function _bhBuildAgentFeedbackContext() {
+  const live = R.agent_feedback?.items || [];
+  const persistent = _bhLoadPersistentLearning();
+  const rows = [];
+  live.filter(i => i.status !== 'ok').slice(-8).forEach(i => {
+    rows.push(`A${i.agent}: ${i.issues.slice(0,2).join('; ')} | Required response: ${i.actions.slice(0,2).join(' ')}`);
+  });
+  persistent.slice(0, 6).forEach(l => {
+    rows.push(`Prior lesson A${l.agent}: ${l.lesson}`);
+  });
+  if (!rows.length) return '';
+  return `\n\nCROSS-AGENT FEEDBACK / SELF-LEARNING MEMORY:\n${rows.map(r => '- ' + r).join('\n')}\nApply these corrections. Do not repeat known weak claims. If upstream data is missing or weak, return null/N/A and explain the limitation in notes or sources.`;
+}
+
+function _bhWithAgentFeedback(user, opts={}) {
+  if (opts.skipFeedback) return user;
+  const ctx = _bhBuildAgentFeedbackContext();
+  return ctx ? user + ctx : user;
+}
+
 // Retry an agent call up to 2 times if JSON parse fails
 // opts.webSearch = true enables Anthropic web_search tool for this call
 async function claudeJSON(system, user, opts={}) {
@@ -211,7 +342,8 @@ CRITICAL - SOURCE COVERAGE:
     }
     if (window._v2AbortCtrl?.signal?.aborted || window.stopRequested) throw new Error('Pipeline stopped');
     try {
-      const raw = await claude(strictSystem, user + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : ''), opts);
+      const activeUser = _bhWithAgentFeedback(user, opts) + (attempt > 1 ? '\n\nRemember: respond with ONLY the JSON object, nothing else.' : '');
+      const raw = await claude(strictSystem, activeUser, opts);
       const d = parseJSON(raw);
       if (d) {
         const checked = _bhAttachOutputQuality(d, opts);

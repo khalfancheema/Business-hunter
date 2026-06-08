@@ -62,6 +62,11 @@ async function runAgent15(allResults) {
     });
   });
 
+  const feedbackItems = (R.agent_feedback?.items || []).filter(i => i.status !== 'ok');
+  const feedbackSummary = feedbackItems.length
+    ? feedbackItems.map(i => `A${i.agent}: ${(i.issues || []).slice(0,2).join('; ')}`).join(' | ')
+    : 'none';
+
   // Additional checks
   const hasParallelPhase1 = false; // Phase 1 is dependency-gated in runPipeline
   const hasPerAgentFallbacks = typeof getFallback1 === 'function' && typeof getFallback7 === 'function';
@@ -93,6 +98,7 @@ ACTUAL TEST RESULTS:
 - Critical issues: ${critIssues.length > 0 ? critIssues.join('; ') : 'none'}
 - Warnings: ${warnings.slice(0,8).join('; ')||'none'}
 - Output-quality warnings: ${qualityWarnings.length ? qualityWarnings.map(q=>`A${q.agent} ${q.risk}: ${q.warnings.join(', ')}`).join(' | ') : 'none'}
+- Cross-agent feedback issued: ${feedbackSummary}
 - Suite results: ${suiteResults.map(s=>`${s.suite} ${s.passCount}/${s.totalCount}: ${s.detail}`).join(' | ')}
 - Per-agent scores: ${byAgent.map(a=>`${a.agent}=${a.score}%`).join(', ')}
 
@@ -132,6 +138,8 @@ Generate 3 test suites (Pipeline Completion, Data Validation, Architecture) with
       critical_issues:  critIssues,
       warnings:         warnings.slice(0, 8),
       quality_warnings: qualityWarnings,
+      agent_feedback: feedbackItems,
+      persistent_lessons: R.agent_feedback?.persistent_lessons || [],
       by_agent:         byAgent,
     };
     R.a15 = d;
@@ -165,6 +173,9 @@ function renderQA(d) {
   if(dv.critical_issues?.length){dataVal+=`<div style="background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--red);margin-bottom:6px">Critical Issues</div>${(dv.critical_issues||[]).map(i=>`<div style="font-size:12px;color:var(--muted);margin-bottom:3px">• ${i}</div>`).join('')}</div>`;}
   if(dv.quality_warnings?.length){
     dataVal+=`<div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--amber);margin-bottom:6px">Output Quality Warnings</div>${(dv.quality_warnings||[]).map(q=>`<div style="font-size:12px;color:var(--muted);margin-bottom:5px"><strong>A${q.agent} ${q.name}</strong> (${q.risk}): ${(q.warnings||[]).join('; ')}</div>`).join('')}</div>`;
+  }
+  if(dv.agent_feedback?.length){
+    dataVal+=`<div style="background:rgba(74,158,255,0.10);border:1px solid var(--blue);border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);margin-bottom:6px">Cross-Agent Feedback / Self-Learning</div>${(dv.agent_feedback||[]).map(f=>`<div style="font-size:12px;color:var(--muted);margin-bottom:7px"><strong>A${f.agent}</strong>: ${(f.issues||[]).slice(0,2).join('; ')}<br><span style="color:var(--faint)">Action: ${(f.actions||[]).slice(0,2).join(' ')}</span></div>`).join('')}</div>`;
   }
   dataVal+=`<table class="tbl"><thead><tr><th>Agent</th><th>OK</th><th>Warn</th><th>Fail</th><th>Score</th></tr></thead><tbody>`;
   (dv.by_agent||[]).forEach(a=>{

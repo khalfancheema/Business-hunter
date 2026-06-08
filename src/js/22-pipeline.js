@@ -16,6 +16,7 @@ async function runPipeline() {
   const fb     = k => JSON.stringify(window['getFallback'+k]?.() || {});
   const cached = k => R['a'+k] ? JSON.stringify(R['a'+k]) : null;
   const best   = k => cached(k) || fb(k);
+  const learn  = n => { try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) { console.warn('Agent feedback failed for A'+n, e.message); } };
   try {
     // ── Phase 0: Real Data Prefetch (parallel, non-blocking) ─
     // Fires all free-API calls BEFORE agents start so every prompt
@@ -46,12 +47,15 @@ async function runPipeline() {
     if (phaseShouldRun(1)) {
       setProgress(5,'Phase 1 — Demographics research…');
       try { r1=await runAgent1(); } catch(e) { console.error('Agent 1 failed:',e.message); r1=fb(1); }
+      learn(1);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(9,'Phase 1 — Compliance requirements…');
       try { r5=await runAgent5(); } catch(e) { console.error('Agent 5 failed:',e.message); r5=fb(5); }
+      learn(5);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(13,'Phase 1 — Competitive intelligence…');
       try { r6=await runAgent6(); } catch(e) { console.error('Agent 6 failed:',e.message); r6=fb(6); }
+      learn(6);
     } else {
       setProgress(5,'Phase 1 — skipped (using cached data)');
       r1=best(1); r5=best(5); r6=best(6);
@@ -63,6 +67,7 @@ async function runPipeline() {
     let r2=best(2);
     if (phaseShouldRun(2)) {
       try { r2=await runAgent2(r1,r5,r6); } catch(e) { console.error('Agent 2 failed:',e.message); r2=fb(2); }
+      learn(2);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -71,6 +76,7 @@ async function runPipeline() {
     let r3=best(3);
     if (phaseShouldRun(3)) {
       try { r3=await runAgent3(r1,r2,r5); } catch(e) { console.error('Agent 3 failed:',e.message); r3=fb(3); }
+      learn(3);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -79,6 +85,7 @@ async function runPipeline() {
     let r4=best(4);
     if (phaseShouldRun(4)) {
       try { r4=await runAgent4(r3,r5); } catch(e) { console.error('Agent 4 failed:',e.message); r4=fb(4); }
+      learn(4);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -87,6 +94,7 @@ async function runPipeline() {
     let r7=best(7);
     if (phaseShouldRun(5)) {
       try { r7=await runAgent7(r3,r4,r5,r1,r2); } catch(e) { console.error('Agent 7 failed:',e.message); r7=fb(7); }
+      learn(7);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -95,6 +103,7 @@ async function runPipeline() {
     let r8=best(8);
     if (phaseShouldRun(6)) {
       try { r8=await runAgent8(r1,r2,r3,r4,r5,r6,r7); } catch(e) { console.error('Agent 8 failed:',e.message); r8=fb(8); }
+      learn(8);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -103,6 +112,7 @@ async function runPipeline() {
     let r9=best(9);
     if (phaseShouldRun(7)) {
       try { r9=await runAgent9(r1,r2,r3,r4,r5,r6,r7,r8); } catch(e) { console.error('Agent 9 failed:',e.message); r9=fb(9); }
+      learn(9);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -110,6 +120,7 @@ async function runPipeline() {
     setProgress(66, phaseShouldRun(8)?'Phase 8 — Project Plan (3 focused sub-agents)…':'Phase 8 — skipped');
     if (phaseShouldRun(8)) {
       try { await runAgent10(r3,r4,r5,r7,r9); } catch(e) { console.error('Agent 10 failed:',e.message); }
+      learn(10);
     }
     if(stopRequested){showErr('Pipeline stopped by user.');return;}
 
@@ -117,15 +128,19 @@ async function runPipeline() {
     if (phaseShouldRun(9)) {
       setProgress(72,'Phase 9 — Market map…');
       try { await runAgent11(r1,r2,r4); } catch(e) { console.error('Agent 11 failed:',e.message); }
+      learn(11);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(76,'Phase 9 — Grants and incentives…');
       try { await runAgent12(r3,r5); } catch(e) { console.error('Agent 12 failed:',e.message); }
+      learn(12);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(80,'Phase 9 — Competitor deep-dive…');
       try { await runAgent13(r6); } catch(e) { console.error('Agent 13 failed:',e.message); }
+      learn(13);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       setProgress(84,'Phase 9 — Build vs buy analysis…');
       try { if(typeof runAgent16==='function') await runAgent16(r3,r4,r7,r8); } catch(e) { console.error('Agent 16 failed:',e.message); }
+      learn(16);
       // Apply fallbacks for any phase 9 agent that failed and has no data
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
       if(!R.a12) try{R.a12=getFallback12();}catch(e){}
@@ -142,8 +157,10 @@ async function runPipeline() {
     if (phaseShouldRun(11)) {
       setProgress(86,'Phase 11 — Code Review · QA Testing…');
       try { await runAgent14(R); } catch(e) { console.error('Agent 14 failed:',e.message); }
+      learn(14);
       if(stopRequested){showErr('Pipeline stopped by user.');return;}
       try { await runAgent15(R); } catch(e) { console.error('Agent 15 failed:',e.message); }
+      learn(15);
     } else {
       setProgress(86,'Phase 11 — skipped');
     }
@@ -154,6 +171,7 @@ async function runPipeline() {
       setProgress(94,'Phase 12 — Sources & Citations…');
       try {
         if(typeof runAgent17==='function') await runAgent17(R);
+        learn(17);
       } catch(e) { console.error('Agent 17 failed:',e.message); }
     } else {
       setProgress(94,'Phase 12 — skipped');
@@ -165,6 +183,7 @@ async function runPipeline() {
     if (typeof runAccuracyVerifier === 'function' && R.real) {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
     }
+    if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
   } catch(e) {
     $('orchStatus').textContent='error';
     showErr('Pipeline error: '+e.message+'\n\nTip: Make sure your API key is correct and has credits.');
@@ -211,6 +230,7 @@ async function reRunAgent(n) {
     else if(n===15){ await runAgent15(R); }
     else if(n===16){ await runAgent16(s(3),s(4),s(7),s(8)); }
     else if(n===17){ await runAgent17(R); }
+    try { if (typeof _bhRecordAgentFeedback === 'function' && R['a'+n]) _bhRecordAgentFeedback(n, R['a'+n]); } catch(e) {}
   } catch(e) {
     console.error('Re-run agent '+n+' failed:',e.message);
   } finally {
