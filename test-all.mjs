@@ -237,6 +237,38 @@ test('build.mjs includes 39-scenario.js', () => assert.ok(readFileSync('build.mj
 test('build.mjs includes 40-local-guide.js', () => assert.ok(readFileSync('build.mjs','utf8').includes('40-local-guide.js')));
 test('package.json has test script', () => assert.ok(readFileSync('package.json','utf8').includes('"test"')));
 
+// Production secret handling
+const REAL_DATA_SRC = readFileSync('src/js/43-real-data.js', 'utf8');
+const V2_STATE_SRC = readFileSync('v2/src/js/v2-01-state.js', 'utf8');
+const V2_FEATURES_SRC = readFileSync('v2/src/js/v2-10-features.js', 'utf8');
+const V2_COPILOT_SRC = readFileSync('v2/src/js/v2-04-copilot.js', 'utf8');
+const V2_ADVANCED_SRC = readFileSync('v2/src/js/v2-11-advanced.js', 'utf8');
+
+test('real-data defaults hosted requests to proxy helper', () => {
+  assert.ok(REAL_DATA_SRC.includes('function _rdShouldUseProxy()'));
+  assert.ok(REAL_DATA_SRC.includes('if (_rdShouldUseProxy())'));
+});
+test('real-data client keys require explicit local-dev opt-in', () => {
+  assert.ok(REAL_DATA_SRC.includes('function _rdAllowClientKeys()'));
+  assert.ok(REAL_DATA_SRC.includes('window.ALLOW_CLIENT_API_KEYS === true'));
+  assert.ok(REAL_DATA_SRC.includes('const clientKey = _rdAllowClientKeys()'));
+});
+test('real-data no longer persists government API keys in localStorage', () => {
+  assert.equal(/localStorage\.setItem\('bh:apikey:/.test(REAL_DATA_SRC), false);
+  assert.ok(REAL_DATA_SRC.includes("localStorage.removeItem('bh:apikey:' + def.id)"));
+});
+test('v2 provider API keys use session secret helpers', () => {
+  assert.ok(V2_STATE_SRC.includes('function v2SecretGet(name)'));
+  assert.ok(V2_STATE_SRC.includes('function v2SecretSet(name, value)'));
+  assert.equal(/localStorage\.setItem\('v2_apikey'/.test(V2_STATE_SRC + V2_FEATURES_SRC), false);
+  assert.equal(/localStorage\.setItem\('v2_or_apikey'/.test(V2_STATE_SRC + V2_FEATURES_SRC), false);
+});
+test('v2 API key reads use session secret helpers', () => {
+  const joined = V2_STATE_SRC + V2_FEATURES_SRC + V2_COPILOT_SRC + V2_ADVANCED_SRC;
+  assert.equal(/localStorage\.getItem\('v2_apikey'/.test(joined), false);
+  assert.equal(/localStorage\.getItem\('v2_or_apikey'/.test(joined), false);
+});
+
 // ═══════════════════════════════════════════════
 // Results
 // ═══════════════════════════════════════════════

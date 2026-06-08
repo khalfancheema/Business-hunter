@@ -138,6 +138,10 @@ const _RD_KEY_DEFS = [
 function _rdLoadKeysFromStorage() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
   for (const def of _RD_KEY_DEFS) {
+    try { localStorage.removeItem('bh:apikey:' + def.id); } catch {}
+  }
+  if (!_rdAllowClientKeys()) return;
+  for (const def of _RD_KEY_DEFS) {
     try {
       const v = localStorage.getItem('bh:apikey:' + def.id);
       if (v && !window[def.id]) window[def.id] = v;
@@ -175,8 +179,8 @@ function rdShowApiKeysPanel() {
         <button onclick="document.getElementById('rdApiKeysModal').remove()" style="background:transparent;border:none;color:var(--muted,#8a8d96);font-size:18px;cursor:pointer;line-height:1">×</button>
       </div>
       <p style="font-size:11px;color:var(--muted,#8a8d96);margin:0 0 10px 0">
-        Stored locally in your browser. Census key is <strong style="color:#ef4444">required</strong> for demographics / business density.
-        Others optional but each unlocks specific data sources. All free, instant signup.
+        Production mode reads keys from server-side environment variables through <code>/api/proxy</code>, so secrets are not exposed to the browser.
+        Pasted keys are kept in memory only for local development when <code>ALLOW_CLIENT_API_KEYS</code> is enabled.
       </p>
       <div>${rows}</div>
       <div style="display:flex;gap:8px;margin-top:14px">
@@ -192,13 +196,12 @@ function rdShowApiKeysPanel() {
       const el = document.getElementById('apikey-' + def.id);
       const v = el && el.value && el.value.trim();
       if (v) {
-        try { localStorage.setItem('bh:apikey:' + def.id, v); } catch {}
         window[def.id] = v;
         saved++;
       }
     }
     document.getElementById('rdSaveStatus').innerHTML =
-      `<span style="color:var(--green,#22c55e)">✓ Saved ${saved} key${saved===1?'':'s'} to browser. Run pipeline again to use them.</span>`;
+      `<span style="color:var(--green,#22c55e)">✓ Loaded ${saved} key${saved===1?'':'s'} for this browser session only. Run pipeline again to use them.</span>`;
     setTimeout(() => { const m=document.getElementById('rdApiKeysModal'); if (m) m.remove(); }, 1500);
   };
 }
@@ -225,6 +228,19 @@ async function _rdViaProxy(source, path, opts = {}) {
   return res;
 }
 
+function _rdAllowClientKeys() {
+  if (typeof window === 'undefined') return false;
+  return window.ALLOW_CLIENT_API_KEYS === true || window.BH_ALLOW_CLIENT_API_KEYS === true;
+}
+
+function _rdShouldUseProxy() {
+  if (typeof window === 'undefined') return false;
+  if (typeof window.USE_PROXY === 'boolean') return window.USE_PROXY;
+  const loc = window.location || {};
+  if (loc.protocol === 'file:') return false;
+  return true;
+}
+
 // ── _rdGovFetch ───────────────────────────────────────────────────────────────
 // Smart fetch helper for the 8 key-gated government APIs. Branches at runtime:
 //   • window.USE_PROXY === true → route through /api/proxy (server-side keys)
@@ -235,7 +251,7 @@ async function _rdViaProxy(source, path, opts = {}) {
 // Direct mode injects the key per the source's auth scheme; proxy mode strips
 // keys client-side because the proxy adds them server-side.
 async function _rdGovFetch(source, path, opts = {}) {
-  if (typeof window !== 'undefined' && window.USE_PROXY) {
+  if (_rdShouldUseProxy()) {
     return _rdViaProxy(source, path, opts);
   }
   // Direct fetch — inject key from window.<KEY>
@@ -253,7 +269,8 @@ async function _rdGovFetch(source, path, opts = {}) {
   };
   const cfg = SOURCES[source];
   if (!cfg) throw new Error('_rdGovFetch: unknown source ' + source);
-  const k = (typeof window !== 'undefined' && window[cfg.key]) || cfg.fallback;
+  const clientKey = _rdAllowClientKeys() && typeof window !== 'undefined' ? window[cfg.key] : null;
+  const k = clientKey || cfg.fallback;
   if (!k) return new Response(null, { status: 503, statusText: 'missing client key ' + cfg.key });
 
   let url = cfg.base + path;
@@ -293,7 +310,7 @@ const _RD_PROXY_MAP = {
   'https://api.usa.gov':             'fbi',
 };
 async function _rdFetchWithProxy(url, opts = {}) {
-  if (typeof window === 'undefined' || !window.USE_PROXY) return fetch(url, opts);
+  if (typeof window === 'undefined' || !_rdShouldUseProxy()) return fetch(url, opts);
   const baseMatch = Object.keys(_RD_PROXY_MAP).find(b => url.startsWith(b));
   if (!baseMatch) return fetch(url, opts); // not a key-gated source — direct fetch
   const source = _RD_PROXY_MAP[baseMatch];
@@ -312,10 +329,7 @@ async function _rdFetchWithProxy(url, opts = {}) {
 if (typeof window !== 'undefined' && window.USE_PROXY === undefined) {
   // Auto-enable proxy if it responds to a HEAD/OPTIONS probe — gives zero-config
   // behavior when api/proxy.mjs is deployed alongside the static bundle.
-  window.USE_PROXY = false;
-  fetch('/api/proxy', { method: 'OPTIONS' })
-    .then(r => { if (r.status === 204 || r.status === 200) window.USE_PROXY = true; })
-    .catch(() => {});
+  window.USE_PROXY = _rdShouldUseProxy();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

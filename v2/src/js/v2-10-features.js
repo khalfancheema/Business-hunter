@@ -315,7 +315,7 @@ let _v2OnboardStep = 0;
 
 function v2InitOnboarding() {
   const visited = localStorage.getItem('v2_visited');
-  const hasKey  = !!(localStorage.getItem('v2_apikey') || '').trim();
+  const hasKey  = !!((typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || '').trim();
   if (!visited && !hasKey) setTimeout(v2ShowOnboarding, 600);
   localStorage.setItem('v2_visited', '1');
 }
@@ -364,7 +364,7 @@ function v2RenderOnboardStep() {
           <input class="v2-input" type="password" id="v2-onboard-key"
             placeholder="sk-ant-... or sk-... or AIza..."
             autocomplete="off"
-            value="${localStorage.getItem('v2_apikey') || ''}" />
+            value="${typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : ''}" />
           <div style="font-size:12px;color:var(--v2-t3);margin-top:6px">Key is sent directly to the provider — we never store it.</div>
         </div>
         <div style="text-align:center;margin-top:12px">
@@ -412,7 +412,7 @@ function v2OnboardNext() {
   if (_v2OnboardStep === 1) {
     const keyEl = document.getElementById('v2-onboard-key');
     if (keyEl?.value.trim()) {
-      localStorage.setItem('v2_apikey', keyEl.value.trim());
+      if (typeof v2SecretSet === 'function') v2SecretSet('v2_apikey', keyEl.value.trim());
       v2SyncToV1Dom();
     }
   }

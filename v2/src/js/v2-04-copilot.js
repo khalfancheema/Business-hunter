@@ -254,7 +254,7 @@ function v2AnswerQuestion(q) {
   const R_data = typeof R !== 'undefined' ? R : {};
 
   // Try API-powered answer first (if key available)
-  const apiKey = localStorage.getItem('v2_apikey') || (typeof key === 'function' ? key() : '');
+  const apiKey = (typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || (typeof key === 'function' ? key() : '');
   if (apiKey && typeof claudeJSON === 'function') {
     _v2AiAnswer(q, R_data);
     return;

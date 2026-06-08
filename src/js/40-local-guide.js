@@ -88,7 +88,7 @@ function _applyOllamaPresetClassic() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', url);
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     'ollama');
+  try { sessionStorage.setItem('v2_apikey', 'ollama'); localStorage.removeItem('v2_apikey'); } catch {}
 
   if (typeof onProviderChange === 'function') onProviderChange();
 
@@ -116,7 +116,11 @@ async function _detectOpenRouterModelsClassic() {
   const ki     = document.getElementById('cl-or-key-input');
   if (!sel) return;
 
-  const savedKey   = localStorage.getItem('v2_or_apikey') || '';
+  let savedKey = '';
+  try {
+    savedKey = sessionStorage.getItem('v2_or_apikey') || localStorage.getItem('v2_or_apikey') || '';
+    if (localStorage.getItem('v2_or_apikey')) localStorage.removeItem('v2_or_apikey');
+  } catch {}
   const savedModel = localStorage.getItem('v2_or_model') || _CL_OR_DEFAULTS[0].id;
   if (ki) ki.value = savedKey;
 
@@ -171,8 +175,12 @@ function _applyOpenRouterPresetClassic() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', url);
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     key);
-  localStorage.setItem('v2_or_apikey',  key);
+  try {
+    sessionStorage.setItem('v2_apikey', key);
+    sessionStorage.setItem('v2_or_apikey', key);
+    localStorage.removeItem('v2_apikey');
+    localStorage.removeItem('v2_or_apikey');
+  } catch {}
   localStorage.setItem('v2_or_model',   model);
 
   if (typeof onProviderChange === 'function') onProviderChange();

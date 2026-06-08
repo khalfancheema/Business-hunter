@@ -7590,7 +7590,8 @@ async function runPipeline() {
       // ACS demographics layer (the foundation of the pipeline) silently fails.
       // Surface a non-blocking warning the FIRST time the pipeline runs without it.
       try {
-        if (!window.CENSUS_API_KEY && !localStorage.getItem('bh:censusKeyDismissed')) {
+        const proxyBacked = typeof _rdShouldUseProxy === 'function' && _rdShouldUseProxy();
+        if (!proxyBacked && !window.CENSUS_API_KEY && !localStorage.getItem('bh:censusKeyDismissed')) {
           const banner = document.createElement('div');
           banner.style.cssText = 'background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px;color:#fca5a5;display:flex;gap:10px;align-items:center';
           banner.innerHTML = `<span style="font-size:18px">🚨</span><div style="flex:1"><strong>Census API key not set.</strong> Demographics, business density, building permits, and 7 other foundational sources will be skipped. Get a free key in ~30 seconds at <a href="https://api.census.gov/data/key_signup.html" target="_blank" rel="noopener" style="color:#fca5a5;text-decoration:underline">api.census.gov</a>, then paste it below.</div><button onclick="rdShowApiKeysPanel && rdShowApiKeysPanel()" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Add Key</button><button onclick="localStorage.setItem('bh:censusKeyDismissed','1');this.parentElement.remove()" style="background:transparent;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:6px 10px;border-radius:5px;font-size:11px;cursor:pointer">Skip</button>`;
@@ -12560,7 +12561,7 @@ function _applyOllamaPresetClassic() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', url);
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     'ollama');
+  try { sessionStorage.setItem('v2_apikey', 'ollama'); localStorage.removeItem('v2_apikey'); } catch {}
 
   if (typeof onProviderChange === 'function') onProviderChange();
 
@@ -12588,7 +12589,11 @@ async function _detectOpenRouterModelsClassic() {
   const ki     = document.getElementById('cl-or-key-input');
   if (!sel) return;
 
-  const savedKey   = localStorage.getItem('v2_or_apikey') || '';
+  let savedKey = '';
+  try {
+    savedKey = sessionStorage.getItem('v2_or_apikey') || localStorage.getItem('v2_or_apikey') || '';
+    if (localStorage.getItem('v2_or_apikey')) localStorage.removeItem('v2_or_apikey');
+  } catch {}
   const savedModel = localStorage.getItem('v2_or_model') || _CL_OR_DEFAULTS[0].id;
   if (ki) ki.value = savedKey;
 
@@ -12643,8 +12648,12 @@ function _applyOpenRouterPresetClassic() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', url);
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     key);
-  localStorage.setItem('v2_or_apikey',  key);
+  try {
+    sessionStorage.setItem('v2_apikey', key);
+    sessionStorage.setItem('v2_or_apikey', key);
+    localStorage.removeItem('v2_apikey');
+    localStorage.removeItem('v2_or_apikey');
+  } catch {}
   localStorage.setItem('v2_or_model',   model);
 
   if (typeof onProviderChange === 'function') onProviderChange();
@@ -13152,6 +13161,10 @@ const _RD_KEY_DEFS = [
 function _rdLoadKeysFromStorage() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
   for (const def of _RD_KEY_DEFS) {
+    try { localStorage.removeItem('bh:apikey:' + def.id); } catch {}
+  }
+  if (!_rdAllowClientKeys()) return;
+  for (const def of _RD_KEY_DEFS) {
     try {
       const v = localStorage.getItem('bh:apikey:' + def.id);
       if (v && !window[def.id]) window[def.id] = v;
@@ -13189,8 +13202,8 @@ function rdShowApiKeysPanel() {
         <button onclick="document.getElementById('rdApiKeysModal').remove()" style="background:transparent;border:none;color:var(--muted,#8a8d96);font-size:18px;cursor:pointer;line-height:1">×</button>
       </div>
       <p style="font-size:11px;color:var(--muted,#8a8d96);margin:0 0 10px 0">
-        Stored locally in your browser. Census key is <strong style="color:#ef4444">required</strong> for demographics / business density.
-        Others optional but each unlocks specific data sources. All free, instant signup.
+        Production mode reads keys from server-side environment variables through <code>/api/proxy</code>, so secrets are not exposed to the browser.
+        Pasted keys are kept in memory only for local development when <code>ALLOW_CLIENT_API_KEYS</code> is enabled.
       </p>
       <div>${rows}</div>
       <div style="display:flex;gap:8px;margin-top:14px">
@@ -13206,13 +13219,12 @@ function rdShowApiKeysPanel() {
       const el = document.getElementById('apikey-' + def.id);
       const v = el && el.value && el.value.trim();
       if (v) {
-        try { localStorage.setItem('bh:apikey:' + def.id, v); } catch {}
         window[def.id] = v;
         saved++;
       }
     }
     document.getElementById('rdSaveStatus').innerHTML =
-      `<span style="color:var(--green,#22c55e)">✓ Saved ${saved} key${saved===1?'':'s'} to browser. Run pipeline again to use them.</span>`;
+      `<span style="color:var(--green,#22c55e)">✓ Loaded ${saved} key${saved===1?'':'s'} for this browser session only. Run pipeline again to use them.</span>`;
     setTimeout(() => { const m=document.getElementById('rdApiKeysModal'); if (m) m.remove(); }, 1500);
   };
 }
@@ -13239,6 +13251,19 @@ async function _rdViaProxy(source, path, opts = {}) {
   return res;
 }
 
+function _rdAllowClientKeys() {
+  if (typeof window === 'undefined') return false;
+  return window.ALLOW_CLIENT_API_KEYS === true || window.BH_ALLOW_CLIENT_API_KEYS === true;
+}
+
+function _rdShouldUseProxy() {
+  if (typeof window === 'undefined') return false;
+  if (typeof window.USE_PROXY === 'boolean') return window.USE_PROXY;
+  const loc = window.location || {};
+  if (loc.protocol === 'file:') return false;
+  return true;
+}
+
 // ── _rdGovFetch ───────────────────────────────────────────────────────────────
 // Smart fetch helper for the 8 key-gated government APIs. Branches at runtime:
 //   • window.USE_PROXY === true → route through /api/proxy (server-side keys)
@@ -13249,7 +13274,7 @@ async function _rdViaProxy(source, path, opts = {}) {
 // Direct mode injects the key per the source's auth scheme; proxy mode strips
 // keys client-side because the proxy adds them server-side.
 async function _rdGovFetch(source, path, opts = {}) {
-  if (typeof window !== 'undefined' && window.USE_PROXY) {
+  if (_rdShouldUseProxy()) {
     return _rdViaProxy(source, path, opts);
   }
   // Direct fetch — inject key from window.<KEY>
@@ -13267,7 +13292,8 @@ async function _rdGovFetch(source, path, opts = {}) {
   };
   const cfg = SOURCES[source];
   if (!cfg) throw new Error('_rdGovFetch: unknown source ' + source);
-  const k = (typeof window !== 'undefined' && window[cfg.key]) || cfg.fallback;
+  const clientKey = _rdAllowClientKeys() && typeof window !== 'undefined' ? window[cfg.key] : null;
+  const k = clientKey || cfg.fallback;
   if (!k) return new Response(null, { status: 503, statusText: 'missing client key ' + cfg.key });
 
   let url = cfg.base + path;
@@ -13307,7 +13333,7 @@ const _RD_PROXY_MAP = {
   'https://api.usa.gov':             'fbi',
 };
 async function _rdFetchWithProxy(url, opts = {}) {
-  if (typeof window === 'undefined' || !window.USE_PROXY) return fetch(url, opts);
+  if (typeof window === 'undefined' || !_rdShouldUseProxy()) return fetch(url, opts);
   const baseMatch = Object.keys(_RD_PROXY_MAP).find(b => url.startsWith(b));
   if (!baseMatch) return fetch(url, opts); // not a key-gated source — direct fetch
   const source = _RD_PROXY_MAP[baseMatch];
@@ -13326,10 +13352,7 @@ async function _rdFetchWithProxy(url, opts = {}) {
 if (typeof window !== 'undefined' && window.USE_PROXY === undefined) {
   // Auto-enable proxy if it responds to a HEAD/OPTIONS probe — gives zero-config
   // behavior when api/proxy.mjs is deployed alongside the static bundle.
-  window.USE_PROXY = false;
-  fetch('/api/proxy', { method: 'OPTIONS' })
-    .then(r => { if (r.status === 204 || r.status === 200) window.USE_PROXY = true; })
-    .catch(() => {});
+  window.USE_PROXY = _rdShouldUseProxy();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -16573,6 +16596,25 @@ const V2 = {
 
 const V2_SCREENS = ['landing','wizard','copilot','dashboard','portfolio'];
 
+function v2SecretGet(name) {
+  try {
+    const existing = sessionStorage.getItem(name) || '';
+    const legacy = localStorage.getItem(name) || '';
+    if (legacy) {
+      if (!existing) sessionStorage.setItem(name, legacy);
+      localStorage.removeItem(name);
+    }
+    return sessionStorage.getItem(name) || '';
+  } catch { return ''; }
+}
+
+function v2SecretSet(name, value) {
+  try {
+    if (value) sessionStorage.setItem(name, value);
+    localStorage.removeItem(name);
+  } catch {}
+}
+
 const V2_AGENTS = [
   { id:1,  name:'Demographics',       ico:'📊' },
   { id:2,  name:'Gap Analysis',       ico:'📈' },
@@ -16799,7 +16841,7 @@ function v2StopPipeline() {
 function v2ShowApiKey() {
   document.getElementById('v2-apikey-modal').classList.add('open');
   v2RenderProviderGrid();
-  const saved = localStorage.getItem('v2_apikey') || '';
+  const saved = v2SecretGet('v2_apikey');
   const el = document.getElementById('v2-api-key-input');
   if (el) el.value = saved;
   const mi = document.getElementById('v2-model-input');
@@ -16857,7 +16899,7 @@ function v2ApplyOllamaPreset() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', 'http://localhost:11434/v1/chat/completions');
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     'ollama');
+  v2SecretSet('v2_apikey', 'ollama');
   v2SyncToV1Dom();
   v2Toast(`🦙 Ollama configured — using ${model}`);
 }
@@ -16884,7 +16926,7 @@ async function v2DetectOpenRouterModels() {
   if (!sel) return;
 
   // Pre-fill with curated defaults immediately
-  const savedKey = localStorage.getItem('v2_or_apikey') || '';
+  const savedKey = v2SecretGet('v2_or_apikey');
   const ki = document.getElementById('v2-or-key-input');
   if (ki) ki.value = savedKey;
 
@@ -16945,8 +16987,8 @@ function v2ApplyOpenRouterPreset() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', 'https://openrouter.ai/api/v1/chat/completions');
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     key);
-  localStorage.setItem('v2_or_apikey',  key);
+  v2SecretSet('v2_apikey', key);
+  v2SecretSet('v2_or_apikey', key);
   localStorage.setItem('v2_or_model',   model);
   v2SyncToV1Dom();
   v2Toast(`🌐 OpenRouter configured — using ${model.split('/').pop()}`);
@@ -16960,7 +17002,7 @@ function v2SaveApiKey() {
   const k  = document.getElementById('v2-api-key-input').value.trim();
   const m  = document.getElementById('v2-model-input').value.trim();
   const cu = document.getElementById('v2-custom-url-input').value.trim();
-  if (k)  localStorage.setItem('v2_apikey', k);
+  if (k)  v2SecretSet('v2_apikey', k);
   if (m)  localStorage.setItem('v2_model', m);
   if (cu) localStorage.setItem('v2_custom_url', cu);
   v2SyncToV1Dom();
@@ -16969,7 +17011,7 @@ function v2SaveApiKey() {
 }
 
 function v2SyncToV1Dom() {
-  const k  = document.getElementById('v2-api-key-input')?.value.trim() || localStorage.getItem('v2_apikey') || '';
+  const k  = document.getElementById('v2-api-key-input')?.value.trim() || v2SecretGet('v2_apikey');
   const m  = document.getElementById('v2-model-input')?.value.trim() || localStorage.getItem('v2_model') || '';
   const cu = document.getElementById('v2-custom-url-input')?.value.trim() || localStorage.getItem('v2_custom_url') || '';
   const p  = V2.selectedProvider || localStorage.getItem('v2_provider') || 'anthropic';
@@ -17380,7 +17422,7 @@ function v2WizRenderStep() {
     const ind  = V2_INDUSTRIES.find(i=>i.val===d.industry)||{emoji:'🏢',label:'Business'};
     const cfg = v2IndustryConfig(d.industry) || {};
     const budg = d.budget==='custom' ? `$${parseInt(d.customBudget||600000).toLocaleString()}` : `$${parseInt(d.budget||600000).toLocaleString()}`;
-    const hasKey = !!(localStorage.getItem('v2_apikey')||'').trim();
+    const hasKey = !!((typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || '').trim();
     body = `
       <div style="display:grid;gap:12px;margin-bottom:20px">
         <div style="display:flex;justify-content:space-between;padding:12px 16px;background:var(--v2-s3);border-radius:10px">
@@ -17856,7 +17898,7 @@ function v2AnswerQuestion(q) {
   const R_data = typeof R !== 'undefined' ? R : {};
 
   // Try API-powered answer first (if key available)
-  const apiKey = localStorage.getItem('v2_apikey') || (typeof key === 'function' ? key() : '');
+  const apiKey = (typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || (typeof key === 'function' ? key() : '');
   if (apiKey && typeof claudeJSON === 'function') {
     _v2AiAnswer(q, R_data);
     return;
@@ -20550,7 +20592,7 @@ let _v2OnboardStep = 0;
 
 function v2InitOnboarding() {
   const visited = localStorage.getItem('v2_visited');
-  const hasKey  = !!(localStorage.getItem('v2_apikey') || '').trim();
+  const hasKey  = !!((typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || '').trim();
   if (!visited && !hasKey) setTimeout(v2ShowOnboarding, 600);
   localStorage.setItem('v2_visited', '1');
 }
@@ -20599,7 +20641,7 @@ function v2RenderOnboardStep() {
           <input class="v2-input" type="password" id="v2-onboard-key"
             placeholder="sk-ant-... or sk-... or AIza..."
             autocomplete="off"
-            value="${localStorage.getItem('v2_apikey') || ''}" />
+            value="${typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : ''}" />
           <div style="font-size:12px;color:var(--v2-t3);margin-top:6px">Key is sent directly to the provider — we never store it.</div>
         </div>
         <div style="text-align:center;margin-top:12px">
@@ -20647,7 +20689,7 @@ function v2OnboardNext() {
   if (_v2OnboardStep === 1) {
     const keyEl = document.getElementById('v2-onboard-key');
     if (keyEl?.value.trim()) {
-      localStorage.setItem('v2_apikey', keyEl.value.trim());
+      if (typeof v2SecretSet === 'function') v2SecretSet('v2_apikey', keyEl.value.trim());
       v2SyncToV1Dom();
     }
   }
@@ -20899,7 +20941,7 @@ function v2SendChatQuestion() {
 
 // Override _v2AiAnswer with streaming + memory version
 async function _v2AiAnswer(question, R_data) {
-  const apiKey  = localStorage.getItem('v2_apikey') || '';
+  const apiKey  = (typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '');
   const provider = V2.selectedProvider || 'anthropic';
   if (!apiKey) { v2AnswerQuestionOffline(question, R_data); return; }
 

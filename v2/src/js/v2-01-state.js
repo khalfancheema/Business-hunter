@@ -9,6 +9,25 @@ const V2 = {
 
 const V2_SCREENS = ['landing','wizard','copilot','dashboard','portfolio'];
 
+function v2SecretGet(name) {
+  try {
+    const existing = sessionStorage.getItem(name) || '';
+    const legacy = localStorage.getItem(name) || '';
+    if (legacy) {
+      if (!existing) sessionStorage.setItem(name, legacy);
+      localStorage.removeItem(name);
+    }
+    return sessionStorage.getItem(name) || '';
+  } catch { return ''; }
+}
+
+function v2SecretSet(name, value) {
+  try {
+    if (value) sessionStorage.setItem(name, value);
+    localStorage.removeItem(name);
+  } catch {}
+}
+
 const V2_AGENTS = [
   { id:1,  name:'Demographics',       ico:'📊' },
   { id:2,  name:'Gap Analysis',       ico:'📈' },
@@ -235,7 +254,7 @@ function v2StopPipeline() {
 function v2ShowApiKey() {
   document.getElementById('v2-apikey-modal').classList.add('open');
   v2RenderProviderGrid();
-  const saved = localStorage.getItem('v2_apikey') || '';
+  const saved = v2SecretGet('v2_apikey');
   const el = document.getElementById('v2-api-key-input');
   if (el) el.value = saved;
   const mi = document.getElementById('v2-model-input');
@@ -293,7 +312,7 @@ function v2ApplyOllamaPreset() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', 'http://localhost:11434/v1/chat/completions');
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     'ollama');
+  v2SecretSet('v2_apikey', 'ollama');
   v2SyncToV1Dom();
   v2Toast(`🦙 Ollama configured — using ${model}`);
 }
@@ -320,7 +339,7 @@ async function v2DetectOpenRouterModels() {
   if (!sel) return;
 
   // Pre-fill with curated defaults immediately
-  const savedKey = localStorage.getItem('v2_or_apikey') || '';
+  const savedKey = v2SecretGet('v2_or_apikey');
   const ki = document.getElementById('v2-or-key-input');
   if (ki) ki.value = savedKey;
 
@@ -381,8 +400,8 @@ function v2ApplyOpenRouterPreset() {
   localStorage.setItem('v2_provider',   'openai_compat');
   localStorage.setItem('v2_custom_url', 'https://openrouter.ai/api/v1/chat/completions');
   localStorage.setItem('v2_model',      model);
-  localStorage.setItem('v2_apikey',     key);
-  localStorage.setItem('v2_or_apikey',  key);
+  v2SecretSet('v2_apikey', key);
+  v2SecretSet('v2_or_apikey', key);
   localStorage.setItem('v2_or_model',   model);
   v2SyncToV1Dom();
   v2Toast(`🌐 OpenRouter configured — using ${model.split('/').pop()}`);
@@ -396,7 +415,7 @@ function v2SaveApiKey() {
   const k  = document.getElementById('v2-api-key-input').value.trim();
   const m  = document.getElementById('v2-model-input').value.trim();
   const cu = document.getElementById('v2-custom-url-input').value.trim();
-  if (k)  localStorage.setItem('v2_apikey', k);
+  if (k)  v2SecretSet('v2_apikey', k);
   if (m)  localStorage.setItem('v2_model', m);
   if (cu) localStorage.setItem('v2_custom_url', cu);
   v2SyncToV1Dom();
@@ -405,7 +424,7 @@ function v2SaveApiKey() {
 }
 
 function v2SyncToV1Dom() {
-  const k  = document.getElementById('v2-api-key-input')?.value.trim() || localStorage.getItem('v2_apikey') || '';
+  const k  = document.getElementById('v2-api-key-input')?.value.trim() || v2SecretGet('v2_apikey');
   const m  = document.getElementById('v2-model-input')?.value.trim() || localStorage.getItem('v2_model') || '';
   const cu = document.getElementById('v2-custom-url-input')?.value.trim() || localStorage.getItem('v2_custom_url') || '';
   const p  = V2.selectedProvider || localStorage.getItem('v2_provider') || 'anthropic';

@@ -31,7 +31,7 @@ function v2SendChatQuestion() {
 
 // Override _v2AiAnswer with streaming + memory version
 async function _v2AiAnswer(question, R_data) {
-  const apiKey  = localStorage.getItem('v2_apikey') || '';
+  const apiKey  = (typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '');
   const provider = V2.selectedProvider || 'anthropic';
   if (!apiKey) { v2AnswerQuestionOffline(question, R_data); return; }
 

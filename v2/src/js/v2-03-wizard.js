@@ -278,7 +278,7 @@ function v2WizRenderStep() {
     const ind  = V2_INDUSTRIES.find(i=>i.val===d.industry)||{emoji:'🏢',label:'Business'};
     const cfg = v2IndustryConfig(d.industry) || {};
     const budg = d.budget==='custom' ? `$${parseInt(d.customBudget||600000).toLocaleString()}` : `$${parseInt(d.budget||600000).toLocaleString()}`;
-    const hasKey = !!(localStorage.getItem('v2_apikey')||'').trim();
+    const hasKey = !!((typeof v2SecretGet === 'function' ? v2SecretGet('v2_apikey') : '') || '').trim();
     body = `
       <div style="display:grid;gap:12px;margin-bottom:20px">
         <div style="display:flex;justify-content:space-between;padding:12px 16px;background:var(--v2-s3);border-radius:10px">
