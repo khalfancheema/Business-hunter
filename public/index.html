@@ -1502,6 +1502,45 @@ select option{background:var(--surface2)}
 
 </div>
 <script>
+// ══════════════════════════════════════════════════════════════════════════════
+// LOCAL API KEYS — personal copy, kept out of git
+// ══════════════════════════════════════════════════════════════════════════════
+//
+// USAGE:
+//   1. Copy this file to `src/js/local-keys.js` (already in .gitignore)
+//   2. Replace each '' with your actual key
+//   3. Run `node build.mjs && (cd v2 && node build-v2.mjs)` to bundle
+//
+// The keys load BEFORE prefetchRealData runs, so every pipeline run picks them
+// up automatically. They never reach git, never leave your local clone.
+//
+// Get free keys (~5 min total):
+//   Census  -> https://api.census.gov/data/key_signup.html         (REQUIRED for ACS, ZBP, PEP, BPS)
+//   HUD     -> https://www.huduser.gov/portal/dataset/fmr-api.html (FMR, Income Limits, Vacancy)
+//   BEA     -> https://apps.bea.gov/API/signup/                    (Per-capita personal income)
+//   NOAA    -> https://www.ncdc.noaa.gov/cdo-web/token             (Climate normals)
+//   AirNow  -> https://docs.airnowapi.org/account/request/         (Air quality)
+//   BLS     -> https://data.bls.gov/registrationEngine/            (BLS OES wages — higher rate)
+//   FRED    -> https://fred.stlouisfed.org/docs/api/api_key.html   (County LAUS)
+//   SAM.gov -> https://sam.gov/data-services                       (Federal contracting)
+//
+// ══════════════════════════════════════════════════════════════════════════════
+
+if (typeof window !== 'undefined') {
+  window.CENSUS_API_KEY = '6174bf11a8e4ecfd1b593ccdc54e359f9af6bad9';   // 🚨 Required — unlocks 9 sources
+  window.HUD_TOKEN      = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2IiwianRpIjoiNmI4ODUwM2YxYmMyNWNhYTIwNzAzZDc4YzFhYzFlZWI2ZDc4MDQxNDMwZmVmMDFhNGI0MTkzYTg3YWFmM2JlOTdlNTAxZjNkMDhkOWQ1YjgiLCJpYXQiOjE3Nzg5NzI1ODUuNzg2MTUsIm5iZiI6MTc3ODk3MjU4NS43ODYxNTMsImV4cCI6MjA5NDU5MTc4NS43ODE4NDQsInN1YiI6IjEyODc1NCIsInNjb3BlcyI6W119.j3h_J76MRg5iyZbp6MY2fZV5sLdi6H4ACfvPtKkILH2Cw_bhW7GBRyJEY5FYK40gnsLHioej3PG_lns0eBRd3w';
+  window.BEA_API_KEY    = 'FD0A43B6-7620-4C2A-A556-0D89F1BCE48F';
+  window.NOAA_TOKEN     = 'OoOuSldKdIyQBGgjniqUbrWnocQOPBBC';
+  window.AIRNOW_API_KEY = '6C450DED-F39C-4B65-B8D8-D834FFD066DD';
+  window.BLS_API_KEY    = 'ab371b09ca1241e2a801446af7cb5814';
+  window.FRED_API_KEY   = '59de256ecd2f5c77c0111f90da978ab9';
+  window.SAM_API_KEY    = '';
+  // Optional — DEMO_KEY works for low volume
+  window.NREL_API_KEY   = 'andQ5cinYztYHaGkEzI1JJlddTcwJ37WIZiJa0Ui';
+  window.FBI_API_KEY    = '95HiPCzv6XBbAdIu5J6Lf4QTfeGOZJtjTkgnDKbc';
+}
+
+
 
 const API='https://api.anthropic.com/v1/messages', MODEL='claude-sonnet-4-6';
 let running=false, R={}, charts={}, demoMode=false, stopRequested=false;
@@ -13122,7 +13161,6 @@ async function _rdFetchACS(zip) {
       median_income:  raw.median_income  ?? null,
       employed:       raw.employed       ?? raw.labor_force           ?? null,
       bachelors:      raw.bachelors      ?? raw.bachelors_degree_plus ?? null,
-      // renter_pct not available in v2 shape — leave as null
       renter_pct:     raw.renter_pct     ?? null,
     };
   }

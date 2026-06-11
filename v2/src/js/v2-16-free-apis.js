@@ -237,6 +237,8 @@ async function v2FetchCensusACS(zip) {
       'B25064_001E', // Median gross rent
       'B23025_002E', // Labor force
       'B15003_022E', // Bachelor's degree +
+      'B25003_002E', // Owner-occupied housing units
+      'B25003_003E', // Renter-occupied housing units
     ].join(',');
 
     const keySuffix = (typeof window !== 'undefined' && window.CENSUS_API_KEY) ? `&key=${window.CENSUS_API_KEY}` : '';
@@ -257,6 +259,10 @@ async function v2FetchCensusACS(zip) {
       return (v && v > 0) ? v : null;
     };
 
+    const owner  = val('B25003_002E');
+    const renter = val('B25003_003E');
+    const occHH  = (owner != null && renter != null) ? owner + renter : null;
+
     const result = {
       zip,
       median_income:        val('B19013_001E'),
@@ -267,6 +273,9 @@ async function v2FetchCensusACS(zip) {
       median_gross_rent:    val('B25064_001E'),
       labor_force:          val('B23025_002E'),
       bachelors_degree_plus:val('B15003_022E'),
+      owner_occupied:       owner,
+      renter_occ:           renter,
+      renter_pct:           occHH > 0 ? Math.round(renter / occHH * 100) : null,
       source: 'US Census Bureau ACS 5-Year Estimates (2022)',
       fetched_at: Date.now(),
     };

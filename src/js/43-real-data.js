@@ -1144,7 +1144,6 @@ async function _rdFetchACS(zip) {
       median_income:  raw.median_income  ?? null,
       employed:       raw.employed       ?? raw.labor_force           ?? null,
       bachelors:      raw.bachelors      ?? raw.bachelors_degree_plus ?? null,
-      // renter_pct not available in v2 shape — leave as null
       renter_pct:     raw.renter_pct     ?? null,
     };
   }
