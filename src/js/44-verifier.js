@@ -705,12 +705,13 @@
     const pct = exactVerifiedPct ?? normalPct ?? broadPct ?? 0;
     const agentsChecked = [...new Set(valid.map(c => c.agent).filter(a => /^A\d+/.test(a || '')))].sort((a,b) => parseInt(a.slice(1),10) - parseInt(b.slice(1),10));
     const ledger = typeof _bhBuildEvidenceLedger === 'function' ? _bhBuildEvidenceLedger() : [];
-    const sourceCoverageAgents = ['A3','A4','A5','A6','A10','A12','A16','A17'];
-    const sourceCoverage = sourceCoverageAgents.map(agent => {
-      const rows = ledger.filter(r => r.agent === agent && r.type !== 'verifier_check');
-      const validRows = rows.filter(r => r.source_validated !== false && r.source);
-      return { agent, rows: rows.length, valid_rows: validRows.length, covered: validRows.length > 0 };
-    });
+    const sourceCoverage = typeof _bhRequiredEvidenceFields === 'function' && typeof _bhAgentRequiredFieldCoverage === 'function'
+      ? Object.keys(_bhRequiredEvidenceFields()).flatMap(agent => _bhAgentRequiredFieldCoverage(ledger, agent))
+      : ['A3','A4','A5','A6','A10','A12','A16','A17'].map(agent => {
+          const rows = ledger.filter(r => r.agent === agent && r.type !== 'verifier_check');
+          const validRows = rows.filter(r => r.source_validated !== false && r.source);
+          return { agent, rows: rows.length, valid_rows: validRows.length, covered: validRows.length > 0 };
+        });
 
     R.accuracy = {
       score: pct,
@@ -727,7 +728,7 @@
       buckets: Object.fromEntries(Object.entries(buckets).map(([k,v])=>[k,v.length])),
       agents_checked: agentsChecked,
       source_coverage: sourceCoverage,
-      source_coverage_missing: sourceCoverage.filter(r => !r.covered).map(r => r.agent),
+      source_coverage_missing: [...new Set(sourceCoverage.filter(r => !r.covered).map(r => r.agent))],
     };
     if (typeof _bhRecordAccuracyFeedback === 'function') {
       try {

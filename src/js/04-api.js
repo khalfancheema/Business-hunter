@@ -220,6 +220,35 @@ function _bhHasFieldEvidence(obj, fieldKey, path) {
   return !!(ev.source && (ev.source_url || ev.source_field || ev.retrieved_at || ev.verification_method));
 }
 
+function _bhClaimCriticality(field) {
+  const f = String(field || '');
+  if (/revenue|rent|capital|funding|loan|amount|tuition|price|fee|cost|capacity|slots|beds|count|competitor|timeline|weeks|months/i.test(f)) return 'high';
+  if (/income|wage|salary|rate|pct|percent|score|sqft|population|employees/i.test(f)) return 'medium';
+  return 'low';
+}
+
+function _bhRequiredEvidenceFields() {
+  return {
+    A3: [/overall_score/i, /est_monthly_rent_range|rent/i, /competitors_within_2mi|competitor/i, /timeline_months/i],
+    A4: [/monthly_rent/i, /sqft/i, /source|url/i],
+    A5: [/cost_usd|fee/i, /timeline_weeks|timeline/i, /agency_name|source/i],
+    A6: [/total_licensed_estimated|competitor|count/i, /source/i],
+    A10:[/cost|budget|weeks|months|timeline/i],
+    A12:[/amount|funding|deadline|eligibility|url/i],
+    A16:[/asking_price|monthly_rent|revenue|timeline|cost/i],
+    A17:[/source|url|data_used/i],
+  };
+}
+
+function _bhAgentRequiredFieldCoverage(ledger, agent) {
+  const rules = _bhRequiredEvidenceFields()[agent] || [];
+  return rules.map(rule => {
+    const rows = (ledger || []).filter(r => r.agent === agent && r.type !== 'verifier_check' && rule.test(String(r.field || '')));
+    const validRows = rows.filter(r => r.source_validated !== false && r.source_supports_claim !== false && r.source);
+    return { agent, rule: String(rule), rows: rows.length, valid_rows: validRows.length, covered: validRows.length > 0 };
+  });
+}
+
 function _bhCollectCitationIssues(data, agentNum) {
   const issues = [];
   const visit = (node, path, parent) => {
@@ -294,13 +323,53 @@ function _bhValidateEvidenceSource(row) {
   if (needsUrl && !url) issues.push('missing_url_or_source_field');
   if (q.source_tier === 'unclassified' && /rent|tuition|revenue|cost|wage|count|score|capacity|fee|amount/i.test(field)) issues.push('unclassified_critical_source');
   if (f.stale) issues.push('stale_source');
+  const valueText = row?.value ?? row?.ai_value ?? row?.verified_value ?? '';
+  const supportText = String(row?.source_excerpt || row?.source_title || row?.source_field || row?.verification_method || row?.source || '');
+  const supportsClaim = valueText === '' || valueText == null || String(valueText).length > 20
+    ? !!supportText
+    : supportText.includes(String(valueText)) || !!row?.source_field || /verified_exact_or_rate|field_map/i.test(String(row?.verification_method || ''));
+  if (!supportsClaim) issues.push('source_does_not_support_claim_value');
   return {
     ...q,
     ...f,
     source_validation_method: 'deterministic_host_field_freshness_policy',
     source_validated: issues.length === 0,
+    source_supports_claim: supportsClaim,
+    claim_criticality: _bhClaimCriticality(field),
     source_validation_issues: issues,
   };
+}
+
+async function _bhValidateEvidenceUrls(limit=40) {
+  const ledger = _bhBuildEvidenceLedger();
+  const targets = ledger.filter(r => r.source_url && r.valid_url !== false).slice(0, limit);
+  const results = [];
+  for (const row of targets) {
+    const out = { url: row.source_url, agent: row.agent, field: row.field, ok:false };
+    try {
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 7000) : null;
+      let res = await fetch(row.source_url, { method:'HEAD', signal: ctrl?.signal });
+      if (!res.ok || res.status === 405) res = await fetch(row.source_url, { method:'GET', signal: ctrl?.signal });
+      if (timer) clearTimeout(timer);
+      out.status = res.status;
+      out.final_url = res.url || row.source_url;
+      out.content_type = res.headers?.get ? res.headers.get('content-type') : null;
+      out.ok = res.ok;
+      row.url_reachable = res.ok;
+      row.url_status = res.status;
+      row.final_url = out.final_url;
+      row.content_type = out.content_type;
+      if (!res.ok) row.source_validated = false;
+    } catch(e) {
+      out.error = e.message;
+      row.url_reachable = false;
+      row.source_validated = false;
+    }
+    results.push(out);
+  }
+  R.evidence_url_checks = results;
+  return results;
 }
 
 function _bhSourceFreshness(row) {
@@ -699,14 +768,22 @@ function _bhProductionBlockers() {
   if (hasRealData && ledger.length < 10) blockers.push(`Evidence ledger has only ${ledger.length} row(s); production requires at least 10 verifier/source entries.`);
   const badUrls = ledger.filter(r => r.source_url && r.valid_url === false);
   if (badUrls.length) blockers.push(`${badUrls.length} evidence source URL(s) are invalid or placeholder URLs.`);
+  const unreachableUrls = (R.evidence_url_checks || []).filter(r => r.ok === false);
+  if (unreachableUrls.length) blockers.push(`${unreachableUrls.length} evidence source URL(s) failed live reachability validation.`);
   const invalidSources = ledger.filter(r => r.type !== 'verifier_check' && r.source_validated === false);
   if (invalidSources.length) blockers.push(`${invalidSources.length} evidence source row(s) failed deterministic source validation.`);
+  const unsupportedSources = ledger.filter(r => r.type !== 'verifier_check' && r.source_supports_claim === false);
+  if (unsupportedSources.length) blockers.push(`${unsupportedSources.length} evidence source row(s) do not support their claim value.`);
   const staleSources = ledger.filter(r => r.type !== 'verifier_check' && r.stale);
   if (staleSources.length) warnings.push(`${staleSources.length} evidence source row(s) appear older than 3 years.`);
   const estimatedClaims = ledger.filter(r => r.type === 'agent_claim' && (r.is_estimated || !r.source));
   if (estimatedClaims.length) blockers.push(`${estimatedClaims.length} recommendation-critical claim(s) lack verified field-level evidence.`);
-  const criticalCoverage = ['A3','A4','A5','A6','A10','A12','A16','A17'].filter(agent => !ledger.some(r => r.agent === agent && r.source_validated !== false));
+  const coverageRows = Object.keys(_bhRequiredEvidenceFields()).flatMap(agent => _bhAgentRequiredFieldCoverage(ledger, agent));
+  const criticalCoverage = [...new Set(coverageRows.filter(r => !r.covered).map(r => r.agent))];
   if (hasRealData && criticalCoverage.length) blockers.push(`Evidence ledger lacks deterministic source-backed rows for critical agent(s): ${criticalCoverage.join(', ')}.`);
+  const highCriticalFailures = ledger.filter(r => r.claim_criticality === 'high' && (r.source_validated === false || r.source_supports_claim === false || !r.source));
+  if (highCriticalFailures.length) blockers.push(`${highCriticalFailures.length} high-criticality claim(s) failed evidence validation.`);
+  R.evidence_field_coverage = coverageRows;
 
   const scorecard = _bhComputeProductionScorecard();
   if (!scorecard || scorecard.overall == null) blockers.push('Deterministic production scorecard could not be computed from verified agent evidence.');
@@ -901,6 +978,7 @@ CRITICAL - SOURCE COVERAGE:
 - If the schema lacks a source field, put the source name in the nearest summary, notes, or data_sources field.
 - Every recommendation-critical value should be emitted as or accompanied by: value, source_name/source, source_url/citation, retrieved_at/last_updated, confidence, and verification_method when the schema has room for it.
 - Field-level evidence is required for recommendation-critical numbers: rent, tuition/prices, revenue, cost, wages, counts, scores, percentages, capacity, timeline, fees, and funding amounts.
+- Add a root-level sources_by_field object when possible. Keys must match critical field names or paths; values must include source, source_url or source_field, retrieved_at, and verification_method.
 - Prefer official .gov/.edu/API data. Marketplace/search sources are acceptable only for listings, reviews, or pricing and must be labeled as marketplace evidence.
 - Never output placeholder URLs, "example.com", fake phone numbers, or sample addresses. Use "N/A" instead.`;
   for (let attempt = 1; attempt <= 3; attempt++) {

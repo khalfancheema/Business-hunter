@@ -396,19 +396,22 @@ test('production gate requires verifier coverage and evidence ledger', () => {
   assert.ok(VERIFIER_SRC.includes('agents_checked: agentsChecked'));
 });
 test('field-level claim ledger and source quality harden accuracy gates', () => {
-  ['_bhFieldEvidence','_bhHasFieldEvidence','_bhExtractClaimLedger','_bhSourceQuality','_bhSourceFreshness','_bhValidateEvidenceSource'].forEach(fn => {
+  ['_bhFieldEvidence','_bhHasFieldEvidence','_bhExtractClaimLedger','_bhSourceQuality','_bhSourceFreshness','_bhValidateEvidenceSource','_bhClaimCriticality','_bhRequiredEvidenceFields','_bhAgentRequiredFieldCoverage','_bhValidateEvidenceUrls'].forEach(fn => {
     assert.ok(API_SRC.includes(`function ${fn}(`), `missing ${fn}`);
   });
   assert.ok(API_SRC.includes('lacks field-level source evidence'));
   assert.ok(API_SRC.includes('recommendation-critical claim(s) lack verified field-level evidence'));
   assert.ok(API_SRC.includes('evidence source URL(s) are invalid or placeholder URLs'));
   assert.ok(API_SRC.includes('failed deterministic source validation'));
+  assert.ok(API_SRC.includes('do not support their claim value'));
+  assert.ok(API_SRC.includes('high-criticality claim(s) failed evidence validation'));
 });
 test('verifier production score uses exact verified checks only', () => {
   assert.ok(VERIFIER_SRC.includes('const exactVerifiedPct = buckets.exact.length >= 5 ? strictPct : null'));
   assert.ok(VERIFIER_SRC.includes('score_exact_verified: exactVerifiedPct'));
   assert.ok(VERIFIER_SRC.includes('production_score: exactVerifiedPct'));
   assert.ok(VERIFIER_SRC.includes('source_coverage_missing'));
+  assert.ok(VERIFIER_SRC.includes('_bhAgentRequiredFieldCoverage(ledger, agent)'));
   assert.ok(API_SRC.includes('Exact verified score ${Math.round(Number(exactVerifiedScore))}%'));
 });
 test('repair loop expands dependents and runs bounded multiple passes', () => {
@@ -440,6 +443,9 @@ test('real-data prefetch records required source status and fingerprint', () => 
   assert.ok(REAL_DATA_SRC.includes('function _rdRequiredSources('));
   assert.ok(REAL_DATA_SRC.includes('function _rdBuildSourceStatus('));
   assert.ok(REAL_DATA_SRC.includes('function _rdRealFingerprint('));
+  assert.ok(REAL_DATA_SRC.includes('source_details'));
+  assert.ok(REAL_DATA_SRC.includes('geo_level'));
+  assert.ok(REAL_DATA_SRC.includes('record_count'));
   assert.ok(REAL_DATA_SRC.includes('R.real._source_status = _rdBuildSourceStatus'));
   assert.ok(REAL_DATA_SRC.includes('R.real._fingerprint = _rdRealFingerprint'));
   assert.ok(API_SRC.includes('Required real-data source(s) missing for production accuracy'));
@@ -456,6 +462,20 @@ test('behavior: deterministic source validator rejects placeholder URL and uncla
   const good = ctxEval(`_bhValidateEvidenceSource({ type:'agent_claim', agent:'A1', field:'median_income', value:90000, source:'U.S. Census ACS', source_field:'B19013_001E', retrieved_at:'2024' })`);
   assert.equal(good.source_validated, true);
 });
+test('behavior: source validator rejects unsupported claim values', () => {
+  const bad = ctxEval(`_bhValidateEvidenceSource({ type:'agent_claim', agent:'A12', field:'funding_amount', value:75000, source:'State grant portal', source_url:'https://grants.gov/program', source_excerpt:'Awards up to 25000', retrieved_at:'2026' })`);
+  assert.equal(bad.source_supports_claim, false);
+  assert.ok(bad.source_validation_issues.includes('source_does_not_support_claim_value'));
+  assert.equal(bad.claim_criticality, 'high');
+});
+test('behavior: required evidence coverage is per field, not one row per agent', () => {
+  const coverage = ctxEval(`_bhAgentRequiredFieldCoverage([
+    {agent:'A4', type:'agent_claim', field:'A4.options[0].monthly_rent', source:'LoopNet', source_validated:true, source_supports_claim:true}
+  ], 'A4')`);
+  assert.ok(Array.isArray(coverage));
+  assert.ok(coverage.some(r => r.covered));
+  assert.ok(coverage.some(r => !r.covered));
+});
 test('behavior: production blockers require real-data source status and source coverage', () => {
   const blockers = ctxEval(`(function(){
     R = {
@@ -469,6 +489,13 @@ test('behavior: production blockers require real-data source status and source c
   })()`);
   assert.ok(blockers.some(x => x.includes('Required real-data source(s) missing')));
   assert.ok(blockers.some(x => x.includes('source coverage missing')));
+});
+test('pipeline performs live evidence URL validation before final gate', () => {
+  assert.ok(PIPELINE_SRC.includes('await _bhValidateEvidenceUrls(40)'));
+  assert.ok(API_SRC.includes('evidence source URL(s) failed live reachability validation'));
+});
+test('agent prompts require root sources_by_field maps', () => {
+  assert.ok(API_SRC.includes('Add a root-level sources_by_field object'));
 });
 test('cache distinguishes validated agent outputs and repair context', () => {
   const CACHE_SRC = readFileSync('src/js/02-cache.js', 'utf8');

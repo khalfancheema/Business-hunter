@@ -266,14 +266,39 @@ function _rdRequiredSources(industryKey) {
 
 function _rdBuildSourceStatus(real, industryKey) {
   const required = _rdRequiredSources(industryKey);
-  const loaded = Object.entries(real || {}).filter(([k, v]) => v && !k.startsWith('_')).map(([k]) => k);
-  const missing = Object.entries(real || {}).filter(([k, v]) => !v && !k.startsWith('_')).map(([k]) => k);
+  const source_details = {};
+  Object.entries(real || {}).filter(([k]) => !k.startsWith('_')).forEach(([k, v]) => {
+    const text = JSON.stringify(v || {});
+    const years = [...text.matchAll(/\b(20\d{2})\b/g)].map(m => Number(m[1]));
+    const recordCount = Array.isArray(v) ? v.length :
+      Array.isArray(v?.businesses) ? v.businesses.length :
+      Array.isArray(v?.opportunities) ? v.opportunities.length :
+      Array.isArray(v?.rows) ? v.rows.length :
+      Number.isFinite(Number(v?.count)) ? Number(v.count) :
+      Number.isFinite(Number(v?.population)) ? 1 : 0;
+    const geoLevel = v?.zip ? 'zip' : v?.county || v?.county_fips ? 'county' : v?.state || v?.state_abbr ? 'state' : v?.lat && v?.lng ? 'point' : 'unknown';
+    const year = years.length ? Math.max(...years) : null;
+    const ok = !!v;
+    source_details[k] = {
+      ok,
+      required: required.includes(k),
+      year,
+      stale: year ? (new Date().getFullYear() - year > 3) : false,
+      geo_level: geoLevel,
+      record_count: recordCount,
+      source: v?.source || null,
+      confidence: !ok ? 0 : required.includes(k) && recordCount === 0 ? 45 : year && new Date().getFullYear() - year <= 3 ? 95 : 75,
+    };
+  });
+  const loaded = Object.entries(source_details).filter(([, d]) => d.ok).map(([k]) => k);
+  const missing = Object.entries(source_details).filter(([, d]) => !d.ok).map(([k]) => k);
   const requiredMissing = required.filter(k => !real || !real[k]);
   return {
     loaded,
     missing,
     required,
     required_missing: requiredMissing,
+    source_details,
     production_ready_sources: requiredMissing.length === 0,
     checked_at: new Date().toISOString(),
   };
@@ -283,14 +308,10 @@ function _rdRealFingerprint(real) {
   if (!real || typeof real !== 'object') return 'no-real-data';
   const stable = {};
   Object.keys(real).sort().forEach(k => {
-    if (k === '_fingerprint') return;
+    if (k === '_fingerprint' || k === '_pulled_at') return;
     const v = real[k];
     if (!v || typeof v !== 'object') stable[k] = !!v;
-    else stable[k] = {
-      source: v.source || v.period || v.year || v.zip || null,
-      count: v.count ?? v.population ?? v.establishments ?? null,
-      updated: v.updated_at || v.last_updated || v.period || null,
-    };
+    else stable[k] = JSON.parse(JSON.stringify(v, (key, val) => /checked_at|pulled_at/i.test(key) ? undefined : val));
   });
   const raw = JSON.stringify(stable);
   let h = 5381;
