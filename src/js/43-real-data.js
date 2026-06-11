@@ -280,7 +280,8 @@ function _rdBuildSourceStatus(real, industryKey) {
       v && typeof v === 'object' && Object.keys(v).some(key => !/^source|url|checked_at|pulled_at|retrieved_at$/i.test(key) && v[key] != null && v[key] !== '') ? 1 : 0;
     const geoLevel = v?.zip ? 'zip' : v?.county || v?.county_fips ? 'county' : v?.state || v?.state_abbr ? 'state' : v?.lat && v?.lng ? 'point' : 'unknown';
     const year = years.length ? Math.max(...years) : null;
-    const ok = !!v && recordCount > 0;
+    const skipped = !!v?.skipped;
+    const ok = !!v && recordCount > 0 && !skipped;
     const stale = year ? (new Date().getFullYear() - year > 3) : false;
     const tooBroad = required.includes(k) && ['rents','competitors_osm','business_density','regulations','building_permits','npi_providers'].includes(k) && /state|unknown/i.test(geoLevel);
     const confidence = !ok ? 0 :
@@ -290,6 +291,7 @@ function _rdBuildSourceStatus(real, industryKey) {
       year && new Date().getFullYear() - year <= 3 ? 95 : 80;
     source_details[k] = {
       ok,
+      skipped,
       required: required.includes(k),
       year,
       stale,
@@ -357,8 +359,8 @@ async function _rdGovFetch(source, path, opts = {}) {
     bls:    { base:'https://api.bls.gov',           key:'BLS_API_KEY',     mode:'body',   name:'registrationkey' },
     fred:   { base:'https://api.stlouisfed.org',    key:'FRED_API_KEY',    mode:'query',  name:'api_key' },
     sam:    { base:'https://api.sam.gov',           key:'SAM_API_KEY',     mode:'query',  name:'api_key' },
-    nrel:   { base:'https://developer.nrel.gov',    key:'NREL_API_KEY',    mode:'query',  name:'api_key',  fallback:'DEMO_KEY' },
-    fbi:    { base:'https://api.usa.gov',           key:'FBI_API_KEY',     mode:'query',  name:'API_KEY',  fallback:'DEMO_KEY' },
+    nrel:   { base:'https://developer.nrel.gov',    key:'NREL_API_KEY',    mode:'query',  name:'api_key' },
+    fbi:    { base:'https://api.usa.gov',           key:'FBI_API_KEY',     mode:'query',  name:'API_KEY' },
   };
   const cfg = SOURCES[source];
   if (!cfg) throw new Error('_rdGovFetch: unknown source ' + source);
@@ -602,7 +604,7 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
   R.real._fingerprint = _rdRealFingerprint(R.real);
 
   const loaded = Object.entries(R.real)
-    .filter(([k, v2]) => v2 && !k.startsWith('_'))
+    .filter(([k, v2]) => v2 && !v2.skipped && !k.startsWith('_'))
     .map(([k]) => k);
   console.log(`[RealData] ✓ ${loaded.length} sources loaded for ZIP ${zipCode}:`, loaded.join(', '));
 
@@ -620,8 +622,8 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     if (!window.BLS_API_KEY)    missing.push('BLS_API_KEY (BLS OES occupation wages)');
     if (!window.FRED_API_KEY)   missing.push('FRED_API_KEY (FRED LAUS county unemployment)');
     if (!window.SAM_API_KEY)    missing.push('SAM_API_KEY (SAM.gov federal opportunities — free at sam.gov/data-services)');
-    if (!window.NREL_API_KEY)   missing.push('NREL_API_KEY (NREL utility rates — optional; DEMO_KEY works for low volume)');
-    if (!window.FBI_API_KEY)    missing.push('FBI_API_KEY (FBI Crime Data Explorer — optional; DEMO_KEY works for low volume)');
+    if (!window.NREL_API_KEY)   missing.push('NREL_API_KEY (NREL utility rates — optional direct-mode key; proxy can inject server key)');
+    if (!window.FBI_API_KEY)    missing.push('FBI_API_KEY (FBI Crime Data Explorer — optional direct-mode key; proxy can inject server key)');
     if (missing.length) {
       console.warn(`[RealData] ⚠ ${missing.length} API keys absent (sources will return null):\n  - ` + missing.join('\n  - ') + '\nSet via window.<KEY_NAME> = "..." before pipeline runs to enable.');
     }
@@ -636,7 +638,7 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
 function buildRealDataCtx(keys) {
   if (!R || !R.real) return '';
   const d = R.real;
-  const want = k => !keys || keys.includes(k);
+  const want = k => (!keys || keys.includes(k)) && !d[k]?.skipped;
   const lines = ['\n\n══ VERIFIED REAL DATA — MANDATORY: use EXACT numbers below verbatim. DO NOT round, adjust, or re-estimate. If your training data conflicts with these numbers, these numbers win. Cite each figure with its bracketed source tag. ══'];
 
   if (want('demographics') && d.demographics) {
@@ -1258,10 +1260,10 @@ async function _rdFetchFRED() {
     if (prime == null && un == null && cpi == null) return null;
     const fed = prime != null ? Math.round((prime - 3) * 100) / 100 : null;
     return {
-      fed_funds_rate: fed   ?? 4.33,
-      cpi:            cpi   ?? 319.8,
-      unemployment:   un    ?? 4.2,
-      prime_rate:     prime ?? 7.33,
+      fed_funds_rate: fed,
+      cpi:            cpi,
+      unemployment:   un,
+      prime_rate:     prime,
       source:         'FRED (Federal Reserve)',
     };
   }
@@ -1340,12 +1342,37 @@ async function _rdFetchHUDRents(zip, stateAbbr) {
 
 async function _rdFetchClimate(lat, lng) {
   if (typeof v2FetchClimate === 'function') return v2FetchClimate(lat, lng);
-  return null;
+  const k = `rdclimate:${lat.toFixed(3)}:${lng.toFixed(3)}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=celsius&timezone=auto&forecast_days=7`;
+    const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const highs = (d.daily?.temperature_2m_max || []).filter(v => v != null).map(Number);
+    const lows = (d.daily?.temperature_2m_min || []).filter(v => v != null).map(Number);
+    const precip = (d.daily?.precipitation_sum || []).filter(v => v != null).map(Number);
+    if (!highs.length || !lows.length) return null;
+    const avg = arr => arr.reduce((s,v)=>s+v,0) / arr.length;
+    const avgTemp = (avg(highs) + avg(lows)) / 2;
+    const result = {
+      avgTemp_c: Math.round(avgTemp * 10) / 10,
+      avg_daily_high_c: Math.round(avg(highs) * 10) / 10,
+      avg_daily_low_c: Math.round(avg(lows) * 10) / 10,
+      precipitation_7d_mm: precip.length ? Math.round(precip.reduce((s,v)=>s+v,0) * 10) / 10 : null,
+      source: 'Open-Meteo forecast',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] Climate failed:', e.message); return null; }
 }
 
 async function _rdFetchCDC(city, stateAbbr) {
   if (typeof v2FetchCDCPlaces === 'function') return v2FetchCDCPlaces(city, stateAbbr);
-  return null;
+  return {
+    skipped: true,
+    reason: 'CDC PLACES city lookup requires v2FetchCDCPlaces or a server-side geocoded PLACES bridge.',
+    source: 'CDC PLACES (not loaded)',
+  };
 }
 
 async function _rdFetchSBA(zip, industry) {
@@ -1364,7 +1391,11 @@ async function _rdFetchSBA(zip, industry) {
       source:          'SBA FOIA Data',
     };
   }
-  return null;
+  return {
+    skipped: true,
+    reason: 'SBA FOIA loan search requires v2FetchSBALoans or a server-side dataset index.',
+    source: 'SBA FOIA (not loaded)',
+  };
 }
 
 async function _rdFetchEIA(stateAbbr) {
@@ -1381,7 +1412,12 @@ async function _rdFetchEIA(stateAbbr) {
       source: 'EIA Electric Power Monthly',
     };
   }
-  return null;
+  return {
+    skipped: true,
+    reason: 'EIA API fetch requires v2FetchEIAEnergy or a configured server-side EIA bridge.',
+    state: stateAbbr,
+    source: 'EIA Electric Power Monthly (not loaded)',
+  };
 }
 
 // ── Phase B: NEW APIs ─────────────────────────────────────────────────────────
@@ -1525,9 +1561,9 @@ async function _rdFetchFBICrime(stateAbbr) {
   const k = 'rdfbi:'+stateAbbr;
   if (_rdCacheGet(k)) return _rdCacheGet(k);
   try {
-    // FBI CDE migrated to api.usa.gov in 2024; cde.ucr.cjis.gov returns 404. Date format
-    // is MM-YYYY. DEMO_KEY works for light use; users can set window.FBI_API_KEY.
-    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : 'DEMO_KEY';
+    // FBI CDE migrated to api.usa.gov in 2024; cde.ucr.cjis.gov returns 404. Date format is MM-YYYY.
+    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : null;
+    if (!fbiKey && !_rdShouldUseProxy()) return null;
     const url = `https://api.usa.gov/crime/fbi/cde/summarized/state/${stateAbbr}/violent-crime?from=01-2022&to=12-2022&API_KEY=${fbiKey}`;
     const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
     if (!res.ok) return null;
@@ -1558,8 +1594,8 @@ async function _rdFetchNREL(zip, lat, lng) {
   if (_rdCacheGet(k)) return _rdCacheGet(k);
   try {
     // NREL Utility Rates API v3. `address=` was deprecated 2025-02-25; now requires lat+lon.
-    // DEMO_KEY works for low volume (~10 req/day); users can set window.NREL_API_KEY.
-    const nrelKey = (typeof window !== 'undefined' && window.NREL_API_KEY) ? window.NREL_API_KEY : 'DEMO_KEY';
+    const nrelKey = (typeof window !== 'undefined' && window.NREL_API_KEY) ? window.NREL_API_KEY : null;
+    if (!nrelKey && !_rdShouldUseProxy()) return null;
     const url = `https://developer.nrel.gov/api/utility_rates/v3.json?api_key=${nrelKey}&lat=${lat}&lon=${lng}`;
     const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
     if (!res.ok) return null;
@@ -1706,8 +1742,8 @@ async function _rdFetchACSExpanded(zip) {
       try { return JSON.parse(t); } catch { return null; }
     };
     const [sR, dR] = await Promise.allSettled([
-      fetch(subjUrl, { signal:_rdAbortTimeout(10000) }).then(parseCensus),
-      fetch(detUrl,  { signal:_rdAbortTimeout(10000) }).then(parseCensus),
+      _rdFetchWithProxy(subjUrl, { signal:_rdAbortTimeout(10000) }).then(parseCensus),
+      _rdFetchWithProxy(detUrl,  { signal:_rdAbortTimeout(10000) }).then(parseCensus),
     ]);
     const s = sR.status === 'fulfilled' ? sR.value : null;
     const d = dR.status === 'fulfilled' ? dR.value : null;
@@ -1937,7 +1973,13 @@ async function _rdFetchNDCP(stateFips, countyFips, industryKey) {
   // The previous data.dol.gov/get/... URL was speculative and returns HTML.
   // Skip this fetcher until a server-side cache is added (would require a backend
   // CSV-to-JSON shim hosting nationaldatabaseofchildcareprices.csv).
-  return null;
+  return {
+    skipped: true,
+    reason: 'DOL NDCP is published as downloadable CSV/XLSX; browser pipeline has no live JSON endpoint.',
+    state_fips: stateFips,
+    county_fips: countyFips,
+    source: 'DOL NDCP (not loaded)',
+  };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -2038,7 +2080,8 @@ async function _rdFetchFBICityCrime(city, stateAbbr) {
   try {
     // FBI CDE agency-level — migrated to api.usa.gov (cde.ucr.cjis.gov returns 404).
     // The api.usa.gov endpoint list-by-state path is /agencies/byStateAbbr/{abbr}.
-    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : 'DEMO_KEY';
+    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : null;
+    if (!fbiKey && !_rdShouldUseProxy()) return null;
     const url = `https://api.usa.gov/crime/fbi/cde/agency/byStateAbbr/${stateAbbr}?API_KEY=${fbiKey}`;
     const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
     if (!res.ok) return null;
@@ -2081,9 +2124,9 @@ async function _rdFetchNCESSchools(lat, lng) {
     const feats = d.features || [];
     if (!feats.length) return null;
     const schools = feats.map(f => f.attributes || {});
-    const cityCount  = schools.filter(s => /^1\d$/.test(String(s.LOCALE))).length;
-    const suburbCount= schools.filter(s => /^2\d$/.test(String(s.LOCALE))).length;
-    const ruralCount = schools.filter(s => /^[34]\d$/.test(String(s.LOCALE))).length;
+    const cityCount  = schools.filter(s => /^(11|12|13)$/.test(String(s.LOCALE))).length;
+    const suburbCount= schools.filter(s => /^(21|22|23)$/.test(String(s.LOCALE))).length;
+    const ruralCount = schools.filter(s => /^(31|32|33|41|42|43)$/.test(String(s.LOCALE))).length;
     const result = {
       total_public_schools_5mi: schools.length,
       city_count:          cityCount,
@@ -2406,7 +2449,8 @@ async function _rdFetchUSGSQuakes(lat, lng) {
     const d = await res.json();
     const quakes = d.features || [];
     if (!quakes.length) {
-      return { quakes_50yr_within_100km: 0, max_magnitude: null, seismic_risk: 'Low', source: 'USGS' };
+      const result = { quakes_50yr_within_100km: 0, max_magnitude: null, quakes_m5_plus: 0, seismic_risk: 'Low', confirmed_zero: true, source: 'USGS Earthquake Catalog' };
+      return _rdCacheSet(k, result);
     }
     const mags = quakes.map(q => q.properties?.mag || 0);
     const maxMag = Math.max(...mags);
@@ -2545,7 +2589,13 @@ async function _rdFetchLEHDLODES(stateFips, countyFips) {
     // Use OnTheMap analysis endpoint instead
     const onthemapUrl = `https://onthemap.ces.census.gov/v616/server/services/onthemapServiceArea/datasource?st=${stateFips}&ct=${countyFips}&year=2021`;
     // No working public JSON endpoint discovered; return null gracefully
-    return null;
+    return {
+      skipped: true,
+      reason: 'LEHD LODES WAC is only available as large CSV.gz in this browser build.',
+      state_fips: stateFips,
+      county_fips: countyFips,
+      source: 'Census LEHD LODES (not loaded)',
+    };
   } catch(e) { console.warn('[RealData] LEHD LODES failed:', e.message); return null; }
 }
 

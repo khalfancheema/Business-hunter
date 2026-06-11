@@ -259,6 +259,7 @@ async function runPipeline() {
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
       if(!R.a12) try{R.a12=getFallback12();}catch(e){}
       if(!R.a13) try{R.a13=getFallback13();}catch(e){}
+      if(!R.a16) try{R.a16=getFallback16();}catch(e){}
     } else {
       setProgress(72,'Phase 9 — skipped');
     }
@@ -287,6 +288,7 @@ async function runPipeline() {
         if(typeof runAgent17==='function') await runAgent17(R);
         learn(17);
       } catch(e) { console.error('Agent 17 failed:',e.message); fb(17); }
+      if(!R.a17) try{R.a17=getFallback17();}catch(e){}
     } else {
       setProgress(94,'Phase 12 — skipped');
     }

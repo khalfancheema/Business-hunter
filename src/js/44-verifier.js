@@ -76,7 +76,7 @@
           agent: 'A1', field: 'Median HH Income',
           real: realIncome, ai: aiIncome,
           realFmt: _fmt(realIncome, '$'), aiFmt: _fmt(aiIncome, '$'),
-          acc: _acc(aiIncome, realIncome), source: 'ACS 2022',
+          acc: _acc(aiIncome, realIncome), source: 'ACS 2022', match_type: 'exact',
         });
       }
 
@@ -88,7 +88,7 @@
           agent: 'A1', field: 'Population',
           real: realPop, ai: aiPop,
           realFmt: _fmt(realPop), aiFmt: _fmt(aiPop),
-          acc: _acc(aiPop, realPop), source: 'ACS 2022',
+          acc: _acc(aiPop, realPop), source: 'ACS 2022', match_type: 'exact',
         });
       }
     }
@@ -104,7 +104,7 @@
           real: realUnemp, ai: aiUnemp,
           realFmt: _fmt(realUnemp, '', '%'), aiFmt: _fmt(aiUnemp, '', '%'),
           acc: _accRate(aiUnemp, realUnemp, 3),
-          source: 'FRED',
+          source: 'FRED', match_type: 'tolerance_rate',
         });
       }
     }
@@ -121,7 +121,7 @@
           agent: 'A1', field: 'Median Occupation Wage',
           real: realWeekly, ai: aiWeekly,
           realFmt: _fmt(realWeekly, '$', '/wk'), aiFmt: _fmt(aiWeekly, '$', '/wk'),
-          acc: _acc(aiWeekly, realWeekly), source: 'BLS QCEW',
+          acc: _acc(aiWeekly, realWeekly), source: 'BLS QCEW', match_type: 'proxy',
         });
       }
     }
@@ -140,7 +140,7 @@
           agent: 'A6', field: 'Competitor Count',
           real: realOsm, ai: aiTotal,
           realFmt: _fmt(realOsm, '', ' (OSM)'), aiFmt: _fmt(aiTotal, '', ' (est.)'),
-          acc: osmAcc, source: 'OSM Overpass',
+          acc: osmAcc, source: 'OSM Overpass', match_type: 'proxy',
         });
       }
     }
@@ -157,7 +157,7 @@
           agent: 'A7', field: 'Site Rent (vs HUD×3 proxy)',
           real: estCommercial, ai: siteRent,
           realFmt: _fmt(estCommercial, '$', '/mo'), aiFmt: _fmt(siteRent, '$', '/mo'),
-          acc: _acc(siteRent, estCommercial), source: 'HUD FMR×3',
+          acc: _acc(siteRent, estCommercial), source: 'HUD FMR×3', match_type: 'proxy',
         });
       }
     }
@@ -180,7 +180,7 @@
             agent: 'A7', field: 'Staff Weekly Wage (approx)',
             real: realWeekly, ai: estimatedWeekly,
             realFmt: _fmt(realWeekly, '$', '/wk'), aiFmt: _fmt(estimatedWeekly, '$', '/wk'),
-            acc: _acc(estimatedWeekly, realWeekly), source: 'BLS QCEW',
+            acc: _acc(estimatedWeekly, realWeekly), source: 'BLS QCEW', match_type: 'proxy',
           });
         }
       }
@@ -202,7 +202,7 @@
         agent: 'A2', field: 'Opportunity Score (vs ZBP density)',
         real: expectedGap, ai: gapScore,
         realFmt: _fmt(expectedGap, '', ' (expected)'), aiFmt: _fmt(gapScore, '', '/100'),
-        acc: gapAcc, source: 'Census ZBP',
+        acc: gapAcc, source: 'Census ZBP', match_type: 'proxy',
       });
     }
 
@@ -219,7 +219,7 @@
           agent: 'A4', field: 'Selected Property Rent (vs HUD×3)',
           real: estCommercial, ai: a4Rent,
           realFmt: _fmt(estCommercial, '$', '/mo'), aiFmt: _fmt(a4Rent, '$', '/mo'),
-          acc: _acc(a4Rent, estCommercial), source: 'HUD FMR×3',
+          acc: _acc(a4Rent, estCommercial), source: 'HUD FMR×3', match_type: 'proxy',
         });
       }
     }
@@ -234,7 +234,7 @@
           agent: 'A6', field: `${npi.taxonomy} Count (NPI)`,
           real: npi.count, ai: aiTotal,
           realFmt: _fmt(npi.count, '', ' (licensed)'), aiFmt: _fmt(aiTotal, '', ' (est.)'),
-          acc: npiAcc, source: 'CMS NPI',
+          acc: npiAcc, source: 'CMS NPI', match_type: 'proxy',
         });
       }
     }
@@ -253,7 +253,7 @@
             real: realEduPct, ai: aiBaPct,
             realFmt: _fmt(realEduPct, '', '%'), aiFmt: _fmt(aiBaPct, '', '%'),
             acc: _accRate(aiBaPct, realEduPct, 15), // ±15pp tolerance (metro vs ZIP)
-            source: 'ACS B15003',
+            source: 'ACS B15003', match_type: 'tolerance_rate',
           });
         }
       }
@@ -270,7 +270,7 @@
           real: dem.renter_pct, ai: aiRenter,
           realFmt: _fmt(dem.renter_pct, '', '%'), aiFmt: _fmt(aiRenter, '', '%'),
           acc: _accRate(aiRenter, dem.renter_pct, 10), // ±10pp tolerance
-          source: 'ACS B25003',
+          source: 'ACS B25003', match_type: 'tolerance_rate',
         });
       }
     }
@@ -285,7 +285,7 @@
           agent: 'A1', field: 'Households',
           real: dem.households, ai: aiHH,
           realFmt: _fmt(dem.households), aiFmt: _fmt(aiHH),
-          acc: _acc(aiHH, dem.households), source: 'ACS B25003',
+          acc: _acc(aiHH, dem.households), source: 'ACS B25003', match_type: 'exact',
         });
       }
     }
@@ -304,7 +304,7 @@
           agent: 'A7', field: 'SBA Loan Amount (vs area avg)',
           real: sba.avg_loan_amount, ai: sbaLine.amount,
           realFmt: _fmt(sba.avg_loan_amount, '$', ' avg'), aiFmt: _fmt(sbaLine.amount, '$', ' requested'),
-          acc: sbaAcc, source: 'SBA FOIA',
+          acc: sbaAcc, source: 'SBA FOIA', match_type: 'proxy',
         });
       }
     }
@@ -322,7 +322,7 @@
           agent: 'A9', field: 'Year-1 Revenue (vs A7 base)',
           real: a7annual, ai: a9rev,
           realFmt: _fmt(a7annual, '$', '/yr (A7)'), aiFmt: _fmt(a9rev, '$', '/yr (A9)'),
-          acc: _acc(a9rev, a7annual), source: 'Cross-agent',
+          acc: _acc(a9rev, a7annual), source: 'Cross-agent', match_type: 'cross_agent',
         });
       }
     }
@@ -340,7 +340,7 @@
           real: acsX.female_lfp_pct, ai: aiFemLFP,
           realFmt: _fmt(acsX.female_lfp_pct, '', '%'), aiFmt: _fmt(aiFemLFP, '', '%'),
           acc: _accRate(aiFemLFP, acsX.female_lfp_pct, 12),
-          source: 'ACS S2301',
+          source: 'ACS S2301', match_type: 'tolerance_rate',
         });
       }
     }
@@ -355,7 +355,7 @@
           real: acsX.poverty_pct, ai: aiPov,
           realFmt: _fmt(acsX.poverty_pct, '', '%'), aiFmt: _fmt(aiPov, '', '%'),
           acc: _accRate(aiPov, acsX.poverty_pct, 8),
-          source: 'ACS B17001',
+          source: 'ACS B17001', match_type: 'tolerance_rate',
         });
       }
     }
@@ -378,7 +378,7 @@
           real: benchmark, ai: aiMonthly,
           realFmt: _fmt(benchmark, '$', '/mo'), aiFmt: _fmt(aiMonthly, '$', '/mo'),
           acc: Math.max(0, 1 - Math.abs(aiMonthly - benchmark) / (benchmark * 1.5)),
-          source: hudFmr ? 'HUD FMR' : 'ACS B25064',
+          source: hudFmr ? 'HUD FMR' : 'ACS B25064', match_type: 'proxy',
         });
       }
     }
@@ -395,7 +395,7 @@
           realFmt: _fmt(cbp.establishments, '', ' establishments'),
           aiFmt: _fmt(aiTotal, '', ' estimated'),
           acc: Math.max(0, 1 - Math.abs(aiTotal - cbp.establishments) / (cbp.establishments * 2)),
-          source: 'Census CBP',
+          source: 'Census CBP', match_type: 'proxy',
         });
       }
     }
@@ -416,7 +416,7 @@
           real: oes.median_annual_wage, ai: aiAnnual,
           realFmt: _fmt(oes.median_annual_wage, '$', '/yr median'),
           aiFmt: _fmt(aiAnnual, '$', '/yr total payroll'),
-          acc, source: 'BLS OES',
+          acc, source: 'BLS OES', match_type: 'proxy',
         });
       }
     }
@@ -433,7 +433,7 @@
           realFmt: _fmt(ndcp.median_infant_center, '$', '/mo'),
           aiFmt: _fmt(aiInfant, '$', '/mo'),
           acc: _acc(aiInfant, ndcp.median_infant_center),
-          source: 'DOL NDCP',
+          source: 'DOL NDCP', match_type: 'tolerance_rate',
         });
       }
     }
@@ -451,7 +451,7 @@
           realFmt: _fmt(localUnemp.unemployment_rate, '', '%'),
           aiFmt: _fmt(aiCountyUnemp, '', '%'),
           acc: _accRate(aiCountyUnemp, localUnemp.unemployment_rate, 2),
-          source: 'FRED LAUS',
+          source: 'FRED LAUS', match_type: 'tolerance_rate',
         });
       }
     }
@@ -467,7 +467,7 @@
           realFmt: _fmt(acsHv.median_home_value, '$'),
           aiFmt: _fmt(aiHv, '$'),
           acc: _acc(aiHv, acsHv.median_home_value),
-          source: 'ACS B25077',
+          source: 'ACS B25077', match_type: 'exact',
         });
       }
     }
@@ -488,7 +488,7 @@
           realFmt: _fmt(scaled, '', ' (NCES scaled)'),
           aiFmt: _fmt(aiSchools, '', ' (AI 2mi)'),
           acc: Math.max(0, 1 - Math.abs(aiSchools - scaled) / Math.max(scaled, 1) / 2),
-          source: 'NCES',
+          source: 'NCES', match_type: 'proxy',
         });
       }
     }
@@ -509,7 +509,7 @@
           realFmt: _fmt(hudVac.vacancy_pct_biz, '', '% biz vacant'),
           aiFmt: _fmt(aiVac, '', ' listings'),
           acc: realFlag === aiFlag ? 0.9 : 0.5,
-          source: 'HUD USPS',
+          source: 'HUD USPS', match_type: 'direction_only',
         });
       }
     }
@@ -528,7 +528,7 @@
           realFmt: _fmt(bps.permits_total),
           aiFmt: _fmt(aiPermits),
           acc: _acc(aiPermits, bps.permits_total),
-          source: 'Census BPS',
+          source: 'Census BPS', match_type: 'exact',
         });
       }
     }
@@ -545,7 +545,7 @@
           realFmt: _fmt(hudInc.median_family_income, '$'),
           aiFmt: _fmt(aiMFI, '$'),
           acc: _acc(aiMFI, hudInc.median_family_income),
-          source: 'HUD Income Limits',
+          source: 'HUD Income Limits', match_type: 'proxy',
         });
       }
     }
@@ -561,7 +561,7 @@
           realFmt: _fmt(acsIm.per_capita_income, '$'),
           aiFmt: _fmt(aiPCI, '$'),
           acc: _acc(aiPCI, acsIm.per_capita_income),
-          source: 'ACS B19301',
+          source: 'ACS B19301', match_type: 'exact',
         });
       }
     }
@@ -579,7 +579,7 @@
           realFmt: _fmt(pep.pop_growth_1yr_pct, '', '%'),
           aiFmt: _fmt(aiGrowth, '', '%'),
           acc: _accRate(aiGrowth, pep.pop_growth_1yr_pct, 2),
-          source: 'Census PEP 2023',
+          source: 'Census PEP 2023', match_type: 'tolerance_rate',
         });
       }
     }
@@ -595,7 +595,7 @@
           realFmt: _fmt(mig.newcomers_1yr_pct, '', '%'),
           aiFmt: _fmt(aiMig, '', '%'),
           acc: _accRate(aiMig, mig.newcomers_1yr_pct, 8),
-          source: 'ACS B07001',
+          source: 'ACS B07001', match_type: 'tolerance_rate',
         });
       }
     }
@@ -612,7 +612,7 @@
           realFmt: _fmt(bea.per_capita_personal_income, '$'),
           aiFmt: _fmt(aiPCPI, '$'),
           acc: _acc(aiPCPI, bea.per_capita_personal_income),
-          source: 'BEA CAINC1',
+          source: 'BEA CAINC1', match_type: 'exact',
         });
       }
     }
@@ -632,7 +632,7 @@
           realFmt: _fmt(realUninsured, '', '%'),
           aiFmt: _fmt(aiUninsured, '', '%'),
           acc: _accRate(aiUninsured, realUninsured, 5),
-          source: 'CHR / CDC',
+          source: 'CHR / CDC', match_type: 'tolerance_rate',
         });
       }
     }
@@ -650,7 +650,7 @@
           realFmt: _fmt(noaa.annual_avg_temp_f, '', '°F NOAA'),
           aiFmt: _fmt(Math.round(omFahr * 10) / 10, '', '°F OM'),
           acc: _accRate(omFahr, noaa.annual_avg_temp_f, 3),
-          source: 'NOAA NCEI',
+          source: 'NOAA NCEI', match_type: 'tolerance_rate',
         });
       }
     }
@@ -669,16 +669,13 @@
     // proxy            — derived/inferred comparison (e.g. commercial rent = HUD FMR 2BR × 3, OSM-only competitor count)
     // cross_agent      — internal consistency (A9 year1 revenue vs A7 base × 12)
     // direction_only   — high/low/match flag, not a numeric comparison
-    function _classify(c) {
-      const s   = (c.source || '').toLowerCase();
-      const fld = (c.field  || '').toLowerCase();
-      if (/×|proxy|hud×3|osm overpass|usps$|estimated|proxy/i.test(c.source || '')) return 'proxy';
-      if (/cross[- ]?agent/.test(s)) return 'cross_agent';
-      if (/availability|tight/i.test(fld)) return 'direction_only';
-      if (/rate|%|pct/.test(fld) || /\bpct\b/.test(fld)) return 'tolerance_rate';
-      return 'exact';
-    }
-    realChecks.forEach(c => { c.match_type = _classify(c); });
+    const allowedMatchTypes = new Set(['exact','tolerance_rate','proxy','cross_agent','direction_only']);
+    realChecks.forEach(c => {
+      if (!allowedMatchTypes.has(c.match_type)) {
+        c.match_type = 'proxy';
+        c.classification_warning = 'missing_explicit_match_type';
+      }
+    });
 
     // ── Need at least 2 valid checks to display ──────────────────
     const valid = realChecks.filter(c => c.acc !== null && !isNaN(c.acc));

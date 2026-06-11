@@ -74,14 +74,12 @@ const SOURCE_CONFIG = {
     keyEnv:  'NREL_API_KEY',
     keyMode: 'query',
     keyName: 'api_key',
-    keyFallback: 'DEMO_KEY',
   },
   fbi: {
     base:    'https://api.usa.gov',
     keyEnv:  'FBI_API_KEY',
     keyMode: 'query',
     keyName: 'API_KEY',
-    keyFallback: 'DEMO_KEY',
   },
 };
 

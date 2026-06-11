@@ -5377,23 +5377,25 @@ function ctx(jsonStr, fields, maxLen) {
 // ── FALLBACK DATA ───────────────────────────────────────────
 
 
-function getFallback1(){return {summary:'Demographics data unavailable — using baseline. Run with API key for live data.',cities:[{name:'Area A',county:'Local',distance_miles:10,pop_total:50000,pop_under5:3000,pop_under5_pct:6,median_hh_income:75000,labor_force_pct:65,pop_growth_pct_5yr:5,households:18000,working_parents_est_pct:68,demand_score:70,data_note:'Baseline'}],data_sources:['Baseline estimate']};}
-function getFallback2(){return {summary:'Gap analysis unavailable — baseline used.',overall_opportunity_score:70,cities:[{city:'Target Area',rank:1,demand_score:7,supply_score:4,gap_score:7,unserved_children:300,income_tier:'Mid',recommended_tuition_infant:1800,recommended_tuition_preschool:1400,priority:'Good Opportunity',rationale:'Baseline estimate'}],age_gaps:[{age:'Primary Tier',demand_idx:80,supply_idx:50,gap:30}]};}
-function getFallback3(){return {summary:'Site recommendations unavailable — baseline used.',locations:[{rank:1,city:'Target Area',submarket:'Main corridor',overall_score:70,scores:{demand:70,competition:70,demographics:70,real_estate:70,regulatory:70},capacity_recommended:parseInt(capacity()),target_infant_tuition:1800,target_preschool_tuition:1400,target_primary_rate:1800,target_secondary_rate:1400,risk:'Medium',timeline_months:14,children_under5_nearby:2000,competitors_within_2mi:3,sqft_needed:5000,est_monthly_rent_range:'$7,000-$10,000',ideal_property_type:'Commercial retail',zoning_needed:'C-1',pros:['Baseline estimate'],cons:['Run with API key for live data']}]};}
-function getFallback4(){return {summary:'Real estate data unavailable — baseline used.',listings:[],by_city_summary:[],search_urls:{loopnet:'https://www.loopnet.com'}};}
-function getFallback5(){return {summary:'Regulatory data unavailable — baseline used.',decal_url:'https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits',requirements:[{category:'Licensing',item:'Business License',detail:'Required before opening',timeline_weeks:4,cost_usd:200,source:'Local municipality',priority:'Critical'}],timeline_phases:[{phase:'Business Formation',weeks:2,tasks:'LLC, EIN, bank account'},{phase:'Permits',weeks:8,tasks:'Industry license, zoning'},{phase:'Build-Out',weeks:12,tasks:'Construction, equipment'},{phase:'Open',weeks:4,tasks:'Staff, soft launch'}]};}
-function getFallback7(){return {summary:'Financial model unavailable — baseline used.',startup_breakdown:[],monthly_ops:[],scenarios:[{name:'Base Case',label:'Baseline',enrolled:Math.round(parseInt(capacity())*0.75),revenue_infant:0,revenue_toddler:0,revenue_preschool:0,revenue_prek:0,avg_tuition:1600,monthly_revenue:Math.round(parseInt(capacity())*0.75*1600),monthly_expenses:Math.round(parseInt(capacity())*0.75*1600*0.85),monthly_net:Math.round(parseInt(capacity())*0.75*1600*0.15),annual_net:Math.round(parseInt(capacity())*0.75*1600*0.15*12),breakeven_months:18,roi_3yr:20,color:'var(--amber)'}],projections:[{month:'M1',rev:0,exp:50000,cum:-50000},{month:'M12',rev:80000,exp:70000,cum:10000},{month:'M24',rev:100000,exp:72000,cum:200000}],by_city_financials:[],funding:[]};}
-function getFallback8(){return {verdict:'Cautious Go',verdict_rationale:'Analysis incomplete — run with API key for full evaluation.',assessment:'Based on available data, this area shows moderate opportunity.',success_factors:['Run full analysis for detailed success factors'],risks:[{risk:'Incomplete data',mitigation:'Run with valid API key',severity:'High'}],next_steps:['Run pipeline with API key for complete 15-agent analysis']};}
+function getFallback1(){return {summary:'Demographics data unavailable -- using baseline. Run with API key for live data.',cities:[{name:'Area A',county:'Local',distance_miles:10,pop_total:50000,pop_under5:3000,pop_under5_pct:6,median_hh_income:75000,labor_force_pct:65,pop_growth_pct_5yr:5,households:18000,working_parents_est_pct:68,demand_score:70,data_note:'Baseline'}],data_sources:['Baseline estimate']};}
+function getFallback2(){return {summary:'Gap analysis unavailable -- baseline used.',overall_opportunity_score:70,cities:[{city:'Target Area',rank:1,demand_score:7,supply_score:4,gap_score:7,unserved_children:300,income_tier:'Mid',recommended_tuition_infant:1800,recommended_tuition_preschool:1400,priority:'Good Opportunity',rationale:'Baseline estimate'}],age_gaps:[{age:'Primary Tier',demand_idx:80,supply_idx:50,gap:30}]};}
+function getFallback3(){return {summary:'Site recommendations unavailable -- baseline used.',locations:[{rank:1,city:'Target Area',submarket:'Main corridor',overall_score:70,scores:{demand:70,competition:70,demographics:70,real_estate:70,regulatory:70},capacity_recommended:parseInt(capacity()),target_infant_tuition:1800,target_preschool_tuition:1400,target_primary_rate:1800,target_secondary_rate:1400,risk:'Medium',timeline_months:14,children_under5_nearby:2000,competitors_within_2mi:3,sqft_needed:5000,est_monthly_rent_range:'$7,000-$10,000',ideal_property_type:'Commercial retail',zoning_needed:'C-1',pros:['Baseline estimate'],cons:['Run with API key for live data']}]};}
+function getFallback4(){return {summary:'Real estate data unavailable -- baseline used.',listings:[],by_city_summary:[],search_urls:{loopnet:'https://www.loopnet.com'}};}
+function getFallback5(){return {summary:'Regulatory data unavailable -- baseline used.',decal_url:'https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits',requirements:[{category:'Licensing',item:'Business License',detail:'Required before opening',timeline_weeks:4,cost_usd:200,source:'Local municipality',priority:'Critical'}],timeline_phases:[{phase:'Business Formation',weeks:2,tasks:'LLC, EIN, bank account'},{phase:'Permits',weeks:8,tasks:'Industry license, zoning'},{phase:'Build-Out',weeks:12,tasks:'Construction, equipment'},{phase:'Open',weeks:4,tasks:'Staff, soft launch'}]};}
+function getFallback7(){return {summary:'Financial model unavailable -- baseline used.',startup_breakdown:[],monthly_ops:[],scenarios:[{name:'Base Case',label:'Baseline',enrolled:Math.round(parseInt(capacity())*0.75),revenue_infant:0,revenue_toddler:0,revenue_preschool:0,revenue_prek:0,avg_tuition:1600,monthly_revenue:Math.round(parseInt(capacity())*0.75*1600),monthly_expenses:Math.round(parseInt(capacity())*0.75*1600*0.85),monthly_net:Math.round(parseInt(capacity())*0.75*1600*0.15),annual_net:Math.round(parseInt(capacity())*0.75*1600*0.15*12),breakeven_months:18,roi_3yr:20,color:'var(--amber)'}],projections:[{month:'M1',rev:0,exp:50000,cum:-50000},{month:'M12',rev:80000,exp:70000,cum:10000},{month:'M24',rev:100000,exp:72000,cum:200000}],by_city_financials:[],funding:[]};}
+function getFallback8(){return {verdict:'Cautious Go',verdict_rationale:'Analysis incomplete -- run with API key for full evaluation.',assessment:'Based on available data, this area shows moderate opportunity.',success_factors:['Run full analysis for detailed success factors'],risks:[{risk:'Incomplete data',mitigation:'Run with valid API key',severity:'High'}],next_steps:['Run pipeline with API key for complete analysis']};}
 function getFallback9(){return {business_name:'[Business Name]',entity_type:'LLC',owner_placeholder:'[Owner Name]',executive_summary:{concept:'Business plan unavailable in demo mode.',opportunity:'Run with API key for full business plan.',ask:'Contact SBA for loan information.'},company_overview:{mission:'To be determined.',vision:'To be determined.',values:['Quality','Service','Community'],legal_structure:'LLC',location_rationale:'See site analysis.',services:[]},market_analysis:{target_market:'Local market',market_size:{total_addressable:'TBD',serviceable:'TBD',target_share:'TBD'},competitor_comparison:[],differentiators:['Run with API key for full analysis'],trends:['Market data requires live API call']},operations_plan:{facility:{total_sqft:5000,indoor_sqft_per_child:35,outdoor_sqft_per_child:75,rooms:[]},hours:'Mon-Fri 6:30am-6:30pm',staffing_plan:[],curriculum:'TBD',technology:[]},financial_plan:{startup_capital_needed:parseInt(budget()),use_of_funds:[],funding_sources:[],year1_projections:{revenue:0,gross_profit:0,operating_expenses:0,ebitda:0,net_income:0},year2_projections:{revenue:0,gross_profit:0,operating_expenses:0,ebitda:0,net_income:0},year3_projections:{revenue:0,gross_profit:0,operating_expenses:0,ebitda:0,net_income:0},breakeven_analysis:'TBD',debt_service_coverage:'TBD',collateral:'TBD'},sba_checklist:[],investor_slides:[{slide:1,title:'Demo Mode',content:'Run with a valid API key to generate full investor slides.'}]};}
 function getFallback10(){return {project_name:'Launch Plan',total_duration_months:18,target_open_date:'Month 19',phases:[{phase:'Phase 1: Foundation',months:'1-6',color:'#4a9eff',tasks:[{task:'Run with API key',month_start:1,duration:1,owner:'Owner',priority:'Critical',cost:0,detail:'Full project plan requires live API.',links:[]}]}],milestones:[{month:'Month 1',title:'Get Started',detail:'Run with API key for full milestones',owner:'Owner',priority:'critical'}],budget_tracker:[],risk_register:[],team_vendors:[],checklist_phases:[]};}
 function getFallback11(){return {center:{lat:33.9,lng:-84.0,label:'Target Area'},cities:[{name:'Target Area',county:'Local',lat:33.9,lng:-84.0,gap_score:7,demand_score:7,supply_score:4,unserved_children:300,median_income:70000,competitor_count:3,priority:'Good Opportunity',recommended_action:'Analyze further',real_estate_url:'https://www.loopnet.com'}],real_estate_pins:[],directions:[]};}
-function getFallback6(){return {summary:'Competitive intelligence unavailable — baseline used.',total_licensed_estimated:0,total_accredited_naeyc:0,total_head_start_slots:0,data_sources:['Baseline estimate'],cities:[{city:'Target Area',county:'Local',total_centers_found:0,avg_google_rating:0,avg_yelp_rating:0,licensed_capacity_total:0,market_saturation:'Unknown',market_notes:'Run with API key for live competitive data'}]};}
-function getFallback12(){return {summary:'Grant information unavailable — baseline used.',total_potential_funding:0,federal_grants:[],all_grants_table:[],caps_program:{program_name:'CAPS Subsidy Program',administered_by:'State Agency',what_it_is:'State subsidy program — run with API key for current rates',benefit_to_provider:'Guaranteed payment per enrolled subsidized child'},barrow_county_incentives:[],quality_rated_benefits:{program:'Quality Rated',benefits_by_star:[]}};}
-function getFallback13(){return {summary:'Competitor analysis unavailable — run with API key.',competitor_profiles:[],pain_point_analysis:[],differentiation_strategy:[],messaging_guide:[]};}
+function getFallback6(){return {summary:'Competitive intelligence unavailable -- baseline used.',total_licensed_estimated:0,total_accredited_naeyc:0,total_head_start_slots:0,data_sources:['Baseline estimate'],cities:[{city:'Target Area',county:'Local',total_centers_found:0,avg_google_rating:0,avg_yelp_rating:0,licensed_capacity_total:0,market_saturation:'Unknown',market_notes:'Run with API key for live competitive data'}]};}
+function getFallback12(){return {summary:'Grant information unavailable -- baseline used.',total_potential_funding:0,federal_grants:[],all_grants_table:[],caps_program:{program_name:'CAPS Subsidy Program',administered_by:'State Agency',what_it_is:'State subsidy program -- run with API key for current rates',benefit_to_provider:'Guaranteed payment per enrolled subsidized child'},barrow_county_incentives:[],quality_rated_benefits:{program:'Quality Rated',benefits_by_star:[]}};}
+function getFallback13(){return {summary:'Competitor analysis unavailable -- run with API key.',competitor_profiles:[],pain_point_analysis:[],differentiation_strategy:[],messaging_guide:[]};}
 function getFallback14(){return {summary:'Code review unavailable.',overall_grade:'N/A',issues:[],performance_metrics:[],cost_analysis:{total_cost_per_run:0,optimized_cost_per_run:0,monthly_cost_10runs:0,monthly_cost_50runs:0,agents:[],optimization_tips:[]},recommended_fixes_priority:[]};}
-function getFallback15(){return {summary:'QA audit unavailable — run with API key for full testing.',overall_pass_rate:0,test_suites:[],data_validation:{fields_checked:0,fields_passed:0,fields_warned:0,fields_failed:0,critical_issues:[],warnings:[],by_agent:[]},ux_audit:[],health_score:{overall:0,dimensions:[]}};}
+function getFallback15(){return {summary:'QA audit unavailable -- run with API key for full testing.',overall_pass_rate:0,test_suites:[],data_validation:{fields_checked:0,fields_passed:0,fields_warned:0,fields_failed:0,critical_issues:[],warnings:[],by_agent:[]},ux_audit:[],health_score:{overall:0,dimensions:[]}};}
+function getFallback16(){return {summary:'Build vs buy analysis unavailable -- baseline used.',recommendation:'Needs Review',confidence:0,build_vs_buy_score:null,options:[],key_risks:['Run with API key for live build vs buy analysis'],decision_factors:[],data_sources:['Baseline estimate']};}
+function getFallback17(){return {summary:'Source citation audit unavailable -- baseline used.',overall_source_confidence:0,citations:[],unsupported_claims:[],source_gaps:['Run with API key for full citation audit'],data_sources:['Baseline estimate']};}
 
-// ── FALLBACK TAG WRAPPER ───────────────────────────────────────────────
+// FALLBACK TAG WRAPPER
 // Every getFallback* return is monkey-patched to carry _is_fallback:true so
 // the verifier can exclude these from the consistency score and the UI can
 // flag them as "baseline / not real data".
@@ -5406,16 +5408,16 @@ function getFallback15(){return {summary:'QA audit unavailable — run with API 
     window[fnName] = function() {
       const r = orig.apply(this, arguments);
       if (r && typeof r === 'object') {
-        r._is_fallback   = true;
-        r._fallback_agent= n;
-        r._fallback_at   = Date.now();
+        r._is_fallback    = true;
+        r._fallback_agent = n;
+        r._fallback_at    = Date.now();
       }
       return r;
     };
   }
 })();
 
-// ── RAW DATA VIEWER ─────────────────────────────────────────
+// RAW DATA VIEWER
 function showRaw(n) {
   const el=$('raw-'+n);
   if(!el)return;
@@ -5426,7 +5428,7 @@ function showRaw(n) {
   const keyCount=Object.keys(d).length;
   el.innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span style="font-size:11px;color:var(--muted)">Raw JSON · ${keyCount} top-level key${keyCount===1?'':'s'}</span>
+      <span style="font-size:11px;color:var(--muted)">Raw JSON - ${keyCount} top-level key${keyCount===1?'':'s'}</span>
       <button onclick="navigator.clipboard.writeText(JSON.stringify(R['a${n}'],null,2)).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})" style="font-size:11px;padding:2px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer">Copy</button>
     </div>
     <pre style="max-height:400px;overflow-y:auto;margin:0;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-all">${safe}</pre>
@@ -5434,7 +5436,7 @@ function showRaw(n) {
   el.style.display='block';
 }
 
-// ── HEAT MAP RENDERER ──────────────────────────────────────
+// HEAT MAP RENDERER lives in 06-ui.js.
 
 
 // ══════════════════════════════════════════════════════════
@@ -5683,17 +5685,17 @@ Return ONLY this JSON (use real data from the sources above, note source and "es
 All numbers/strings in the schema are placeholders. Replace every value with verified data for ZIP ${zip()}, or use null/"N/A" when not verified.
 Return ONLY this JSON:
 {
-  "age_pyramid": [{"bracket":"0-4","male":2400,"female":2350},{"bracket":"5-9","male":2600,"female":2500},{"bracket":"10-14","male":2550,"female":2480},{"bracket":"15-19","male":2300,"female":2200},{"bracket":"20-24","male":2800,"female":2750},{"bracket":"25-29","male":4200,"female":4100},{"bracket":"30-34","male":5100,"female":4900},{"bracket":"35-39","male":4800,"female":4700},{"bracket":"40-44","male":4200,"female":4100},{"bracket":"45-49","male":3800,"female":3900},{"bracket":"50-54","male":3200,"female":3400},{"bracket":"55-59","male":2800,"female":3100},{"bracket":"60-64","male":2200,"female":2600},{"bracket":"65-69","male":1600,"female":2100},{"bracket":"70-74","male":1100,"female":1600},{"bracket":"75+","male":700,"female":1200}],
-  "generation_breakdown": [{"gen":"Gen Alpha (0-12)","population_pct":16.2,"households_pct":19.4},{"gen":"Gen Z (13-28)","population_pct":14.8,"households_pct":12.1},{"gen":"Millennial (29-44)","population_pct":24.6,"households_pct":32.8},{"gen":"Gen X (45-60)","population_pct":22.4,"households_pct":25.2},{"gen":"Boomer (61-79)","population_pct":18.2,"households_pct":9.4},{"gen":"Silent (80+)","population_pct":3.8,"households_pct":1.1}],
-  "multi_radius": [{"ring":"1 mi","population":8200,"households":2900,"median_hh_income":142000,"pct_with_children":38,"pop_under5":980,"avg_hh_size":2.82},{"ring":"3 mi","population":48600,"households":16800,"median_hh_income":138900,"pct_with_children":41,"pop_under5":5800,"avg_hh_size":2.91},{"ring":"5 mi","population":124000,"households":42400,"median_hh_income":128400,"pct_with_children":40,"pop_under5":14800,"avg_hh_size":2.88}],
-  "consumer_expenditure": {"radius_miles":5,"total_expenditure_millions":8110,"categories":[{"category":"Housing","amount_millions":2840,"pct_of_total":35.0},{"category":"Transportation","amount_millions":1140,"pct_of_total":14.1},{"category":"Food at Home","amount_millions":810,"pct_of_total":10.0},{"category":"Healthcare","amount_millions":620,"pct_of_total":7.6},{"category":"Education & Childcare","amount_millions":490,"pct_of_total":6.0},{"category":"Food Away from Home","amount_millions":480,"pct_of_total":5.9},{"category":"Entertainment","amount_millions":340,"pct_of_total":4.2},{"category":"Personal Care","amount_millions":180,"pct_of_total":2.2},{"category":"Other","amount_millions":1210,"pct_of_total":14.9}]},
-  "lifestyle_segments": [{"segment":"Savvy Suburbanites","pct":18.4,"description":"Established upper-middle-class families, homeowners, education-focused"},{"segment":"Professional Pride","pct":14.2,"description":"Younger professionals, dual-income, high education, tech-forward"},{"segment":"Bright Young Professionals","pct":11.8,"description":"Recent college grads building careers, renter households"},{"segment":"In Style","pct":9.6,"description":"Upper-middle urban lifestyle, brand conscious, high disposable income"},{"segment":"Family Foundations","pct":7.3,"description":"Young families prioritizing schools, safety, and suburban amenities"}],
-  "population_projections": [{"year":2020,"population":41200},{"year":2021,"population":43800},{"year":2022,"population":46100},{"year":2023,"population":47800},{"year":2024,"population":49200},{"year":2025,"population":51000},{"year":2030,"population":58400}],
-  "occupation_lq": [{"occupation":"Computer & Math","area_pct":12.4,"us_pct":3.1,"lq":4.00},{"occupation":"Business & Financial","area_pct":8.6,"us_pct":5.3,"lq":1.62},{"occupation":"Management","area_pct":7.2,"us_pct":5.8,"lq":1.24},{"occupation":"Healthcare Practitioners","area_pct":6.8,"us_pct":6.3,"lq":1.08},{"occupation":"Education & Training","area_pct":5.4,"us_pct":6.1,"lq":0.89},{"occupation":"Sales & Related","area_pct":9.2,"us_pct":10.1,"lq":0.91},{"occupation":"Service Occupations","area_pct":11.8,"us_pct":17.4,"lq":0.68}],
-  "education_attainment": {"radius_miles":3,"less_than_hs_pct":2.4,"hs_grad_pct":8.6,"some_college_pct":14.2,"associates_pct":5.8,"bachelors_pct":38.4,"graduate_pct":30.6},
-  "housing_detail": {"median_home_value":548000,"avg_home_value":624000,"owner_occupied_pct":72.4,"renter_occupied_pct":27.6,"median_gross_rent":1840,"built_2010_later_pct":28.2,"built_2000_2009_pct":34.6},
-  "language_spoken": [{"language":"English only","pct":58.4},{"language":"Asian/Pacific","pct":22.8},{"language":"Spanish","pct":12.6},{"language":"Indo-European","pct":4.2},{"language":"Other","pct":2.0}],
-  "daytime_population": {"residential_pop":49200,"daytime_pop":54800,"daytime_to_residential_ratio":1.11,"workers_present":28400,"workers_at_home":14600}
+  "age_pyramid": [{"bracket":null,"male":null,"female":null}],
+  "generation_breakdown": [{"gen":null,"population_pct":null,"households_pct":null}],
+  "multi_radius": [{"ring":null,"population":null,"households":null,"median_hh_income":null,"pct_with_children":null,"pop_under5":null,"avg_hh_size":null}],
+  "consumer_expenditure": {"radius_miles":null,"total_expenditure_millions":null,"categories":[{"category":null,"amount_millions":null,"pct_of_total":null}]},
+  "lifestyle_segments": [{"segment":null,"pct":null,"description":null}],
+  "population_projections": [{"year":null,"population":null}],
+  "occupation_lq": [{"occupation":null,"area_pct":null,"us_pct":null,"lq":null}],
+  "education_attainment": {"radius_miles":null,"less_than_hs_pct":null,"hs_grad_pct":null,"some_college_pct":null,"associates_pct":null,"bachelors_pct":null,"graduate_pct":null},
+  "housing_detail": {"median_home_value":null,"avg_home_value":null,"owner_occupied_pct":null,"renter_occupied_pct":null,"median_gross_rent":null,"built_2010_later_pct":null,"built_2000_2009_pct":null},
+  "language_spoken": [{"language":null,"pct":null}],
+  "daytime_population": {"residential_pop":null,"daytime_pop":null,"daytime_to_residential_ratio":null,"workers_present":null,"workers_at_home":null}
 }`;
 
   // Prepend verified Census ACS data so agent anchors to real numbers
@@ -8810,6 +8812,7 @@ async function runPipeline() {
       if(!R.a11) try{R.a11=getFallback11();}catch(e){}
       if(!R.a12) try{R.a12=getFallback12();}catch(e){}
       if(!R.a13) try{R.a13=getFallback13();}catch(e){}
+      if(!R.a16) try{R.a16=getFallback16();}catch(e){}
     } else {
       setProgress(72,'Phase 9 — skipped');
     }
@@ -8838,6 +8841,7 @@ async function runPipeline() {
         if(typeof runAgent17==='function') await runAgent17(R);
         learn(17);
       } catch(e) { console.error('Agent 17 failed:',e.message); fb(17); }
+      if(!R.a17) try{R.a17=getFallback17();}catch(e){}
     } else {
       setProgress(94,'Phase 12 — skipped');
     }
@@ -14438,7 +14442,8 @@ function _rdBuildSourceStatus(real, industryKey) {
       v && typeof v === 'object' && Object.keys(v).some(key => !/^source|url|checked_at|pulled_at|retrieved_at$/i.test(key) && v[key] != null && v[key] !== '') ? 1 : 0;
     const geoLevel = v?.zip ? 'zip' : v?.county || v?.county_fips ? 'county' : v?.state || v?.state_abbr ? 'state' : v?.lat && v?.lng ? 'point' : 'unknown';
     const year = years.length ? Math.max(...years) : null;
-    const ok = !!v && recordCount > 0;
+    const skipped = !!v?.skipped;
+    const ok = !!v && recordCount > 0 && !skipped;
     const stale = year ? (new Date().getFullYear() - year > 3) : false;
     const tooBroad = required.includes(k) && ['rents','competitors_osm','business_density','regulations','building_permits','npi_providers'].includes(k) && /state|unknown/i.test(geoLevel);
     const confidence = !ok ? 0 :
@@ -14448,6 +14453,7 @@ function _rdBuildSourceStatus(real, industryKey) {
       year && new Date().getFullYear() - year <= 3 ? 95 : 80;
     source_details[k] = {
       ok,
+      skipped,
       required: required.includes(k),
       year,
       stale,
@@ -14515,8 +14521,8 @@ async function _rdGovFetch(source, path, opts = {}) {
     bls:    { base:'https://api.bls.gov',           key:'BLS_API_KEY',     mode:'body',   name:'registrationkey' },
     fred:   { base:'https://api.stlouisfed.org',    key:'FRED_API_KEY',    mode:'query',  name:'api_key' },
     sam:    { base:'https://api.sam.gov',           key:'SAM_API_KEY',     mode:'query',  name:'api_key' },
-    nrel:   { base:'https://developer.nrel.gov',    key:'NREL_API_KEY',    mode:'query',  name:'api_key',  fallback:'DEMO_KEY' },
-    fbi:    { base:'https://api.usa.gov',           key:'FBI_API_KEY',     mode:'query',  name:'API_KEY',  fallback:'DEMO_KEY' },
+    nrel:   { base:'https://developer.nrel.gov',    key:'NREL_API_KEY',    mode:'query',  name:'api_key' },
+    fbi:    { base:'https://api.usa.gov',           key:'FBI_API_KEY',     mode:'query',  name:'API_KEY' },
   };
   const cfg = SOURCES[source];
   if (!cfg) throw new Error('_rdGovFetch: unknown source ' + source);
@@ -14760,7 +14766,7 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
   R.real._fingerprint = _rdRealFingerprint(R.real);
 
   const loaded = Object.entries(R.real)
-    .filter(([k, v2]) => v2 && !k.startsWith('_'))
+    .filter(([k, v2]) => v2 && !v2.skipped && !k.startsWith('_'))
     .map(([k]) => k);
   console.log(`[RealData] ✓ ${loaded.length} sources loaded for ZIP ${zipCode}:`, loaded.join(', '));
 
@@ -14778,8 +14784,8 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
     if (!window.BLS_API_KEY)    missing.push('BLS_API_KEY (BLS OES occupation wages)');
     if (!window.FRED_API_KEY)   missing.push('FRED_API_KEY (FRED LAUS county unemployment)');
     if (!window.SAM_API_KEY)    missing.push('SAM_API_KEY (SAM.gov federal opportunities — free at sam.gov/data-services)');
-    if (!window.NREL_API_KEY)   missing.push('NREL_API_KEY (NREL utility rates — optional; DEMO_KEY works for low volume)');
-    if (!window.FBI_API_KEY)    missing.push('FBI_API_KEY (FBI Crime Data Explorer — optional; DEMO_KEY works for low volume)');
+    if (!window.NREL_API_KEY)   missing.push('NREL_API_KEY (NREL utility rates — optional direct-mode key; proxy can inject server key)');
+    if (!window.FBI_API_KEY)    missing.push('FBI_API_KEY (FBI Crime Data Explorer — optional direct-mode key; proxy can inject server key)');
     if (missing.length) {
       console.warn(`[RealData] ⚠ ${missing.length} API keys absent (sources will return null):\n  - ` + missing.join('\n  - ') + '\nSet via window.<KEY_NAME> = "..." before pipeline runs to enable.');
     }
@@ -14794,7 +14800,7 @@ async function prefetchRealData(zipCode, industryKey, capacityVal, budgetVal) {
 function buildRealDataCtx(keys) {
   if (!R || !R.real) return '';
   const d = R.real;
-  const want = k => !keys || keys.includes(k);
+  const want = k => (!keys || keys.includes(k)) && !d[k]?.skipped;
   const lines = ['\n\n══ VERIFIED REAL DATA — MANDATORY: use EXACT numbers below verbatim. DO NOT round, adjust, or re-estimate. If your training data conflicts with these numbers, these numbers win. Cite each figure with its bracketed source tag. ══'];
 
   if (want('demographics') && d.demographics) {
@@ -15416,10 +15422,10 @@ async function _rdFetchFRED() {
     if (prime == null && un == null && cpi == null) return null;
     const fed = prime != null ? Math.round((prime - 3) * 100) / 100 : null;
     return {
-      fed_funds_rate: fed   ?? 4.33,
-      cpi:            cpi   ?? 319.8,
-      unemployment:   un    ?? 4.2,
-      prime_rate:     prime ?? 7.33,
+      fed_funds_rate: fed,
+      cpi:            cpi,
+      unemployment:   un,
+      prime_rate:     prime,
       source:         'FRED (Federal Reserve)',
     };
   }
@@ -15498,12 +15504,37 @@ async function _rdFetchHUDRents(zip, stateAbbr) {
 
 async function _rdFetchClimate(lat, lng) {
   if (typeof v2FetchClimate === 'function') return v2FetchClimate(lat, lng);
-  return null;
+  const k = `rdclimate:${lat.toFixed(3)}:${lng.toFixed(3)}`;
+  if (_rdCacheGet(k)) return _rdCacheGet(k);
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=celsius&timezone=auto&forecast_days=7`;
+    const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const highs = (d.daily?.temperature_2m_max || []).filter(v => v != null).map(Number);
+    const lows = (d.daily?.temperature_2m_min || []).filter(v => v != null).map(Number);
+    const precip = (d.daily?.precipitation_sum || []).filter(v => v != null).map(Number);
+    if (!highs.length || !lows.length) return null;
+    const avg = arr => arr.reduce((s,v)=>s+v,0) / arr.length;
+    const avgTemp = (avg(highs) + avg(lows)) / 2;
+    const result = {
+      avgTemp_c: Math.round(avgTemp * 10) / 10,
+      avg_daily_high_c: Math.round(avg(highs) * 10) / 10,
+      avg_daily_low_c: Math.round(avg(lows) * 10) / 10,
+      precipitation_7d_mm: precip.length ? Math.round(precip.reduce((s,v)=>s+v,0) * 10) / 10 : null,
+      source: 'Open-Meteo forecast',
+    };
+    return _rdCacheSet(k, result);
+  } catch(e) { console.warn('[RealData] Climate failed:', e.message); return null; }
 }
 
 async function _rdFetchCDC(city, stateAbbr) {
   if (typeof v2FetchCDCPlaces === 'function') return v2FetchCDCPlaces(city, stateAbbr);
-  return null;
+  return {
+    skipped: true,
+    reason: 'CDC PLACES city lookup requires v2FetchCDCPlaces or a server-side geocoded PLACES bridge.',
+    source: 'CDC PLACES (not loaded)',
+  };
 }
 
 async function _rdFetchSBA(zip, industry) {
@@ -15522,7 +15553,11 @@ async function _rdFetchSBA(zip, industry) {
       source:          'SBA FOIA Data',
     };
   }
-  return null;
+  return {
+    skipped: true,
+    reason: 'SBA FOIA loan search requires v2FetchSBALoans or a server-side dataset index.',
+    source: 'SBA FOIA (not loaded)',
+  };
 }
 
 async function _rdFetchEIA(stateAbbr) {
@@ -15539,7 +15574,12 @@ async function _rdFetchEIA(stateAbbr) {
       source: 'EIA Electric Power Monthly',
     };
   }
-  return null;
+  return {
+    skipped: true,
+    reason: 'EIA API fetch requires v2FetchEIAEnergy or a configured server-side EIA bridge.',
+    state: stateAbbr,
+    source: 'EIA Electric Power Monthly (not loaded)',
+  };
 }
 
 // ── Phase B: NEW APIs ─────────────────────────────────────────────────────────
@@ -15683,9 +15723,9 @@ async function _rdFetchFBICrime(stateAbbr) {
   const k = 'rdfbi:'+stateAbbr;
   if (_rdCacheGet(k)) return _rdCacheGet(k);
   try {
-    // FBI CDE migrated to api.usa.gov in 2024; cde.ucr.cjis.gov returns 404. Date format
-    // is MM-YYYY. DEMO_KEY works for light use; users can set window.FBI_API_KEY.
-    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : 'DEMO_KEY';
+    // FBI CDE migrated to api.usa.gov in 2024; cde.ucr.cjis.gov returns 404. Date format is MM-YYYY.
+    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : null;
+    if (!fbiKey && !_rdShouldUseProxy()) return null;
     const url = `https://api.usa.gov/crime/fbi/cde/summarized/state/${stateAbbr}/violent-crime?from=01-2022&to=12-2022&API_KEY=${fbiKey}`;
     const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
     if (!res.ok) return null;
@@ -15716,8 +15756,8 @@ async function _rdFetchNREL(zip, lat, lng) {
   if (_rdCacheGet(k)) return _rdCacheGet(k);
   try {
     // NREL Utility Rates API v3. `address=` was deprecated 2025-02-25; now requires lat+lon.
-    // DEMO_KEY works for low volume (~10 req/day); users can set window.NREL_API_KEY.
-    const nrelKey = (typeof window !== 'undefined' && window.NREL_API_KEY) ? window.NREL_API_KEY : 'DEMO_KEY';
+    const nrelKey = (typeof window !== 'undefined' && window.NREL_API_KEY) ? window.NREL_API_KEY : null;
+    if (!nrelKey && !_rdShouldUseProxy()) return null;
     const url = `https://developer.nrel.gov/api/utility_rates/v3.json?api_key=${nrelKey}&lat=${lat}&lon=${lng}`;
     const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
     if (!res.ok) return null;
@@ -15864,8 +15904,8 @@ async function _rdFetchACSExpanded(zip) {
       try { return JSON.parse(t); } catch { return null; }
     };
     const [sR, dR] = await Promise.allSettled([
-      fetch(subjUrl, { signal:_rdAbortTimeout(10000) }).then(parseCensus),
-      fetch(detUrl,  { signal:_rdAbortTimeout(10000) }).then(parseCensus),
+      _rdFetchWithProxy(subjUrl, { signal:_rdAbortTimeout(10000) }).then(parseCensus),
+      _rdFetchWithProxy(detUrl,  { signal:_rdAbortTimeout(10000) }).then(parseCensus),
     ]);
     const s = sR.status === 'fulfilled' ? sR.value : null;
     const d = dR.status === 'fulfilled' ? dR.value : null;
@@ -16095,7 +16135,13 @@ async function _rdFetchNDCP(stateFips, countyFips, industryKey) {
   // The previous data.dol.gov/get/... URL was speculative and returns HTML.
   // Skip this fetcher until a server-side cache is added (would require a backend
   // CSV-to-JSON shim hosting nationaldatabaseofchildcareprices.csv).
-  return null;
+  return {
+    skipped: true,
+    reason: 'DOL NDCP is published as downloadable CSV/XLSX; browser pipeline has no live JSON endpoint.',
+    state_fips: stateFips,
+    county_fips: countyFips,
+    source: 'DOL NDCP (not loaded)',
+  };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -16196,7 +16242,8 @@ async function _rdFetchFBICityCrime(city, stateAbbr) {
   try {
     // FBI CDE agency-level — migrated to api.usa.gov (cde.ucr.cjis.gov returns 404).
     // The api.usa.gov endpoint list-by-state path is /agencies/byStateAbbr/{abbr}.
-    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : 'DEMO_KEY';
+    const fbiKey = (typeof window !== 'undefined' && window.FBI_API_KEY) ? window.FBI_API_KEY : null;
+    if (!fbiKey && !_rdShouldUseProxy()) return null;
     const url = `https://api.usa.gov/crime/fbi/cde/agency/byStateAbbr/${stateAbbr}?API_KEY=${fbiKey}`;
     const res = await _rdFetchWithProxy(url, { signal:_rdAbortTimeout(10000) });
     if (!res.ok) return null;
@@ -16239,9 +16286,9 @@ async function _rdFetchNCESSchools(lat, lng) {
     const feats = d.features || [];
     if (!feats.length) return null;
     const schools = feats.map(f => f.attributes || {});
-    const cityCount  = schools.filter(s => /^1\d$/.test(String(s.LOCALE))).length;
-    const suburbCount= schools.filter(s => /^2\d$/.test(String(s.LOCALE))).length;
-    const ruralCount = schools.filter(s => /^[34]\d$/.test(String(s.LOCALE))).length;
+    const cityCount  = schools.filter(s => /^(11|12|13)$/.test(String(s.LOCALE))).length;
+    const suburbCount= schools.filter(s => /^(21|22|23)$/.test(String(s.LOCALE))).length;
+    const ruralCount = schools.filter(s => /^(31|32|33|41|42|43)$/.test(String(s.LOCALE))).length;
     const result = {
       total_public_schools_5mi: schools.length,
       city_count:          cityCount,
@@ -16564,7 +16611,8 @@ async function _rdFetchUSGSQuakes(lat, lng) {
     const d = await res.json();
     const quakes = d.features || [];
     if (!quakes.length) {
-      return { quakes_50yr_within_100km: 0, max_magnitude: null, seismic_risk: 'Low', source: 'USGS' };
+      const result = { quakes_50yr_within_100km: 0, max_magnitude: null, quakes_m5_plus: 0, seismic_risk: 'Low', confirmed_zero: true, source: 'USGS Earthquake Catalog' };
+      return _rdCacheSet(k, result);
     }
     const mags = quakes.map(q => q.properties?.mag || 0);
     const maxMag = Math.max(...mags);
@@ -16703,7 +16751,13 @@ async function _rdFetchLEHDLODES(stateFips, countyFips) {
     // Use OnTheMap analysis endpoint instead
     const onthemapUrl = `https://onthemap.ces.census.gov/v616/server/services/onthemapServiceArea/datasource?st=${stateFips}&ct=${countyFips}&year=2021`;
     // No working public JSON endpoint discovered; return null gracefully
-    return null;
+    return {
+      skipped: true,
+      reason: 'LEHD LODES WAC is only available as large CSV.gz in this browser build.',
+      state_fips: stateFips,
+      county_fips: countyFips,
+      source: 'Census LEHD LODES (not loaded)',
+    };
   } catch(e) { console.warn('[RealData] LEHD LODES failed:', e.message); return null; }
 }
 
@@ -17072,7 +17126,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A1', field: 'Median HH Income',
           real: realIncome, ai: aiIncome,
           realFmt: _fmt(realIncome, '$'), aiFmt: _fmt(aiIncome, '$'),
-          acc: _acc(aiIncome, realIncome), source: 'ACS 2022',
+          acc: _acc(aiIncome, realIncome), source: 'ACS 2022', match_type: 'exact',
         });
       }
 
@@ -17084,7 +17138,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A1', field: 'Population',
           real: realPop, ai: aiPop,
           realFmt: _fmt(realPop), aiFmt: _fmt(aiPop),
-          acc: _acc(aiPop, realPop), source: 'ACS 2022',
+          acc: _acc(aiPop, realPop), source: 'ACS 2022', match_type: 'exact',
         });
       }
     }
@@ -17100,7 +17154,7 @@ function rdRenderFinancialBadge(elId) {
           real: realUnemp, ai: aiUnemp,
           realFmt: _fmt(realUnemp, '', '%'), aiFmt: _fmt(aiUnemp, '', '%'),
           acc: _accRate(aiUnemp, realUnemp, 3),
-          source: 'FRED',
+          source: 'FRED', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17117,7 +17171,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A1', field: 'Median Occupation Wage',
           real: realWeekly, ai: aiWeekly,
           realFmt: _fmt(realWeekly, '$', '/wk'), aiFmt: _fmt(aiWeekly, '$', '/wk'),
-          acc: _acc(aiWeekly, realWeekly), source: 'BLS QCEW',
+          acc: _acc(aiWeekly, realWeekly), source: 'BLS QCEW', match_type: 'proxy',
         });
       }
     }
@@ -17136,7 +17190,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A6', field: 'Competitor Count',
           real: realOsm, ai: aiTotal,
           realFmt: _fmt(realOsm, '', ' (OSM)'), aiFmt: _fmt(aiTotal, '', ' (est.)'),
-          acc: osmAcc, source: 'OSM Overpass',
+          acc: osmAcc, source: 'OSM Overpass', match_type: 'proxy',
         });
       }
     }
@@ -17153,7 +17207,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A7', field: 'Site Rent (vs HUD×3 proxy)',
           real: estCommercial, ai: siteRent,
           realFmt: _fmt(estCommercial, '$', '/mo'), aiFmt: _fmt(siteRent, '$', '/mo'),
-          acc: _acc(siteRent, estCommercial), source: 'HUD FMR×3',
+          acc: _acc(siteRent, estCommercial), source: 'HUD FMR×3', match_type: 'proxy',
         });
       }
     }
@@ -17176,7 +17230,7 @@ function rdRenderFinancialBadge(elId) {
             agent: 'A7', field: 'Staff Weekly Wage (approx)',
             real: realWeekly, ai: estimatedWeekly,
             realFmt: _fmt(realWeekly, '$', '/wk'), aiFmt: _fmt(estimatedWeekly, '$', '/wk'),
-            acc: _acc(estimatedWeekly, realWeekly), source: 'BLS QCEW',
+            acc: _acc(estimatedWeekly, realWeekly), source: 'BLS QCEW', match_type: 'proxy',
           });
         }
       }
@@ -17198,7 +17252,7 @@ function rdRenderFinancialBadge(elId) {
         agent: 'A2', field: 'Opportunity Score (vs ZBP density)',
         real: expectedGap, ai: gapScore,
         realFmt: _fmt(expectedGap, '', ' (expected)'), aiFmt: _fmt(gapScore, '', '/100'),
-        acc: gapAcc, source: 'Census ZBP',
+        acc: gapAcc, source: 'Census ZBP', match_type: 'proxy',
       });
     }
 
@@ -17215,7 +17269,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A4', field: 'Selected Property Rent (vs HUD×3)',
           real: estCommercial, ai: a4Rent,
           realFmt: _fmt(estCommercial, '$', '/mo'), aiFmt: _fmt(a4Rent, '$', '/mo'),
-          acc: _acc(a4Rent, estCommercial), source: 'HUD FMR×3',
+          acc: _acc(a4Rent, estCommercial), source: 'HUD FMR×3', match_type: 'proxy',
         });
       }
     }
@@ -17230,7 +17284,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A6', field: `${npi.taxonomy} Count (NPI)`,
           real: npi.count, ai: aiTotal,
           realFmt: _fmt(npi.count, '', ' (licensed)'), aiFmt: _fmt(aiTotal, '', ' (est.)'),
-          acc: npiAcc, source: 'CMS NPI',
+          acc: npiAcc, source: 'CMS NPI', match_type: 'proxy',
         });
       }
     }
@@ -17249,7 +17303,7 @@ function rdRenderFinancialBadge(elId) {
             real: realEduPct, ai: aiBaPct,
             realFmt: _fmt(realEduPct, '', '%'), aiFmt: _fmt(aiBaPct, '', '%'),
             acc: _accRate(aiBaPct, realEduPct, 15), // ±15pp tolerance (metro vs ZIP)
-            source: 'ACS B15003',
+            source: 'ACS B15003', match_type: 'tolerance_rate',
           });
         }
       }
@@ -17266,7 +17320,7 @@ function rdRenderFinancialBadge(elId) {
           real: dem.renter_pct, ai: aiRenter,
           realFmt: _fmt(dem.renter_pct, '', '%'), aiFmt: _fmt(aiRenter, '', '%'),
           acc: _accRate(aiRenter, dem.renter_pct, 10), // ±10pp tolerance
-          source: 'ACS B25003',
+          source: 'ACS B25003', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17281,7 +17335,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A1', field: 'Households',
           real: dem.households, ai: aiHH,
           realFmt: _fmt(dem.households), aiFmt: _fmt(aiHH),
-          acc: _acc(aiHH, dem.households), source: 'ACS B25003',
+          acc: _acc(aiHH, dem.households), source: 'ACS B25003', match_type: 'exact',
         });
       }
     }
@@ -17300,7 +17354,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A7', field: 'SBA Loan Amount (vs area avg)',
           real: sba.avg_loan_amount, ai: sbaLine.amount,
           realFmt: _fmt(sba.avg_loan_amount, '$', ' avg'), aiFmt: _fmt(sbaLine.amount, '$', ' requested'),
-          acc: sbaAcc, source: 'SBA FOIA',
+          acc: sbaAcc, source: 'SBA FOIA', match_type: 'proxy',
         });
       }
     }
@@ -17318,7 +17372,7 @@ function rdRenderFinancialBadge(elId) {
           agent: 'A9', field: 'Year-1 Revenue (vs A7 base)',
           real: a7annual, ai: a9rev,
           realFmt: _fmt(a7annual, '$', '/yr (A7)'), aiFmt: _fmt(a9rev, '$', '/yr (A9)'),
-          acc: _acc(a9rev, a7annual), source: 'Cross-agent',
+          acc: _acc(a9rev, a7annual), source: 'Cross-agent', match_type: 'cross_agent',
         });
       }
     }
@@ -17336,7 +17390,7 @@ function rdRenderFinancialBadge(elId) {
           real: acsX.female_lfp_pct, ai: aiFemLFP,
           realFmt: _fmt(acsX.female_lfp_pct, '', '%'), aiFmt: _fmt(aiFemLFP, '', '%'),
           acc: _accRate(aiFemLFP, acsX.female_lfp_pct, 12),
-          source: 'ACS S2301',
+          source: 'ACS S2301', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17351,7 +17405,7 @@ function rdRenderFinancialBadge(elId) {
           real: acsX.poverty_pct, ai: aiPov,
           realFmt: _fmt(acsX.poverty_pct, '', '%'), aiFmt: _fmt(aiPov, '', '%'),
           acc: _accRate(aiPov, acsX.poverty_pct, 8),
-          source: 'ACS B17001',
+          source: 'ACS B17001', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17374,7 +17428,7 @@ function rdRenderFinancialBadge(elId) {
           real: benchmark, ai: aiMonthly,
           realFmt: _fmt(benchmark, '$', '/mo'), aiFmt: _fmt(aiMonthly, '$', '/mo'),
           acc: Math.max(0, 1 - Math.abs(aiMonthly - benchmark) / (benchmark * 1.5)),
-          source: hudFmr ? 'HUD FMR' : 'ACS B25064',
+          source: hudFmr ? 'HUD FMR' : 'ACS B25064', match_type: 'proxy',
         });
       }
     }
@@ -17391,7 +17445,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(cbp.establishments, '', ' establishments'),
           aiFmt: _fmt(aiTotal, '', ' estimated'),
           acc: Math.max(0, 1 - Math.abs(aiTotal - cbp.establishments) / (cbp.establishments * 2)),
-          source: 'Census CBP',
+          source: 'Census CBP', match_type: 'proxy',
         });
       }
     }
@@ -17412,7 +17466,7 @@ function rdRenderFinancialBadge(elId) {
           real: oes.median_annual_wage, ai: aiAnnual,
           realFmt: _fmt(oes.median_annual_wage, '$', '/yr median'),
           aiFmt: _fmt(aiAnnual, '$', '/yr total payroll'),
-          acc, source: 'BLS OES',
+          acc, source: 'BLS OES', match_type: 'proxy',
         });
       }
     }
@@ -17429,7 +17483,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(ndcp.median_infant_center, '$', '/mo'),
           aiFmt: _fmt(aiInfant, '$', '/mo'),
           acc: _acc(aiInfant, ndcp.median_infant_center),
-          source: 'DOL NDCP',
+          source: 'DOL NDCP', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17447,7 +17501,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(localUnemp.unemployment_rate, '', '%'),
           aiFmt: _fmt(aiCountyUnemp, '', '%'),
           acc: _accRate(aiCountyUnemp, localUnemp.unemployment_rate, 2),
-          source: 'FRED LAUS',
+          source: 'FRED LAUS', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17463,7 +17517,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(acsHv.median_home_value, '$'),
           aiFmt: _fmt(aiHv, '$'),
           acc: _acc(aiHv, acsHv.median_home_value),
-          source: 'ACS B25077',
+          source: 'ACS B25077', match_type: 'exact',
         });
       }
     }
@@ -17484,7 +17538,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(scaled, '', ' (NCES scaled)'),
           aiFmt: _fmt(aiSchools, '', ' (AI 2mi)'),
           acc: Math.max(0, 1 - Math.abs(aiSchools - scaled) / Math.max(scaled, 1) / 2),
-          source: 'NCES',
+          source: 'NCES', match_type: 'proxy',
         });
       }
     }
@@ -17505,7 +17559,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(hudVac.vacancy_pct_biz, '', '% biz vacant'),
           aiFmt: _fmt(aiVac, '', ' listings'),
           acc: realFlag === aiFlag ? 0.9 : 0.5,
-          source: 'HUD USPS',
+          source: 'HUD USPS', match_type: 'direction_only',
         });
       }
     }
@@ -17524,7 +17578,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(bps.permits_total),
           aiFmt: _fmt(aiPermits),
           acc: _acc(aiPermits, bps.permits_total),
-          source: 'Census BPS',
+          source: 'Census BPS', match_type: 'exact',
         });
       }
     }
@@ -17541,7 +17595,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(hudInc.median_family_income, '$'),
           aiFmt: _fmt(aiMFI, '$'),
           acc: _acc(aiMFI, hudInc.median_family_income),
-          source: 'HUD Income Limits',
+          source: 'HUD Income Limits', match_type: 'proxy',
         });
       }
     }
@@ -17557,7 +17611,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(acsIm.per_capita_income, '$'),
           aiFmt: _fmt(aiPCI, '$'),
           acc: _acc(aiPCI, acsIm.per_capita_income),
-          source: 'ACS B19301',
+          source: 'ACS B19301', match_type: 'exact',
         });
       }
     }
@@ -17575,7 +17629,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(pep.pop_growth_1yr_pct, '', '%'),
           aiFmt: _fmt(aiGrowth, '', '%'),
           acc: _accRate(aiGrowth, pep.pop_growth_1yr_pct, 2),
-          source: 'Census PEP 2023',
+          source: 'Census PEP 2023', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17591,7 +17645,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(mig.newcomers_1yr_pct, '', '%'),
           aiFmt: _fmt(aiMig, '', '%'),
           acc: _accRate(aiMig, mig.newcomers_1yr_pct, 8),
-          source: 'ACS B07001',
+          source: 'ACS B07001', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17608,7 +17662,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(bea.per_capita_personal_income, '$'),
           aiFmt: _fmt(aiPCPI, '$'),
           acc: _acc(aiPCPI, bea.per_capita_personal_income),
-          source: 'BEA CAINC1',
+          source: 'BEA CAINC1', match_type: 'exact',
         });
       }
     }
@@ -17628,7 +17682,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(realUninsured, '', '%'),
           aiFmt: _fmt(aiUninsured, '', '%'),
           acc: _accRate(aiUninsured, realUninsured, 5),
-          source: 'CHR / CDC',
+          source: 'CHR / CDC', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17646,7 +17700,7 @@ function rdRenderFinancialBadge(elId) {
           realFmt: _fmt(noaa.annual_avg_temp_f, '', '°F NOAA'),
           aiFmt: _fmt(Math.round(omFahr * 10) / 10, '', '°F OM'),
           acc: _accRate(omFahr, noaa.annual_avg_temp_f, 3),
-          source: 'NOAA NCEI',
+          source: 'NOAA NCEI', match_type: 'tolerance_rate',
         });
       }
     }
@@ -17665,16 +17719,13 @@ function rdRenderFinancialBadge(elId) {
     // proxy            — derived/inferred comparison (e.g. commercial rent = HUD FMR 2BR × 3, OSM-only competitor count)
     // cross_agent      — internal consistency (A9 year1 revenue vs A7 base × 12)
     // direction_only   — high/low/match flag, not a numeric comparison
-    function _classify(c) {
-      const s   = (c.source || '').toLowerCase();
-      const fld = (c.field  || '').toLowerCase();
-      if (/×|proxy|hud×3|osm overpass|usps$|estimated|proxy/i.test(c.source || '')) return 'proxy';
-      if (/cross[- ]?agent/.test(s)) return 'cross_agent';
-      if (/availability|tight/i.test(fld)) return 'direction_only';
-      if (/rate|%|pct/.test(fld) || /\bpct\b/.test(fld)) return 'tolerance_rate';
-      return 'exact';
-    }
-    realChecks.forEach(c => { c.match_type = _classify(c); });
+    const allowedMatchTypes = new Set(['exact','tolerance_rate','proxy','cross_agent','direction_only']);
+    realChecks.forEach(c => {
+      if (!allowedMatchTypes.has(c.match_type)) {
+        c.match_type = 'proxy';
+        c.classification_warning = 'missing_explicit_match_type';
+      }
+    });
 
     // ── Need at least 2 valid checks to display ──────────────────
     const valid = realChecks.filter(c => c.acc !== null && !isNaN(c.acc));

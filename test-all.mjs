@@ -246,7 +246,9 @@ test('package.json has test script', () => assert.ok(readFileSync('package.json'
 // Production secret handling
 const REAL_DATA_SRC = readFileSync('src/js/43-real-data.js', 'utf8');
 const API_SRC = readFileSync('src/js/04-api.js', 'utf8');
+const FALLBACK_SRC = readFileSync('src/js/05-fallbacks.js', 'utf8');
 const UI_SRC = readFileSync('src/js/06-ui.js', 'utf8');
+const AGENT1_SRC = readFileSync('src/js/07-render-01.js', 'utf8');
 const PIPELINE_SRC = readFileSync('src/js/22-pipeline.js', 'utf8');
 const STREAMING_SRC = readFileSync('src/js/33-streaming.js', 'utf8');
 const QA_SRC = readFileSync('src/js/21-render-15.js', 'utf8');
@@ -254,6 +256,7 @@ const SOURCES_SRC = readFileSync('src/js/28-agent-sources.js', 'utf8');
 const VERIFIER_SRC = readFileSync('src/js/44-verifier.js', 'utf8');
 const UTILS_API_SRC = readFileSync('src/utils/api.js', 'utf8');
 const LLM_PROXY_SRC = readFileSync('api/llm.mjs', 'utf8');
+const API_PROXY_SRC = readFileSync('api/proxy.mjs', 'utf8');
 const V2_STATE_SRC = readFileSync('v2/src/js/v2-01-state.js', 'utf8');
 const V2_WIZARD_SRC = readFileSync('v2/src/js/v2-03-wizard.js', 'utf8');
 const V2_FEATURES_SRC = readFileSync('v2/src/js/v2-10-features.js', 'utf8');
@@ -449,6 +452,45 @@ test('real-data prefetch records required source status and fingerprint', () => 
   assert.ok(REAL_DATA_SRC.includes('R.real._source_status = _rdBuildSourceStatus'));
   assert.ok(REAL_DATA_SRC.includes('R.real._fingerprint = _rdRealFingerprint'));
   assert.ok(API_SRC.includes('Required real-data source(s) missing for production accuracy'));
+});
+test('Agent 1 community profile prompt does not ship demo facts', () => {
+  assert.ok(AGENT1_SRC.includes('"age_pyramid": [{"bracket":null,"male":null,"female":null}]'));
+  assert.ok(AGENT1_SRC.includes('"multi_radius": [{"ring":null,"population":null'));
+  assert.equal(AGENT1_SRC.includes('"population":8200'), false);
+  assert.equal(AGENT1_SRC.includes('"median_hh_income":142000'), false);
+  assert.equal(AGENT1_SRC.includes('"median_home_value":548000'), false);
+});
+test('verifier match types are explicit and fail closed', () => {
+  assert.equal(VERIFIER_SRC.includes('function _classify('), false);
+  assert.ok(VERIFIER_SRC.includes("const allowedMatchTypes = new Set(['exact','tolerance_rate','proxy','cross_agent','direction_only'])"));
+  assert.ok(VERIFIER_SRC.includes("classification_warning = 'missing_explicit_match_type'"));
+  [
+    "source: 'ACS S2301', match_type: 'tolerance_rate'",
+    "source: 'FRED LAUS', match_type: 'tolerance_rate'",
+    "source: 'Census PEP 2023', match_type: 'tolerance_rate'",
+    "source: 'NOAA NCEI', match_type: 'tolerance_rate'",
+    "source: 'Census ZBP', match_type: 'proxy'",
+    "source: 'CMS NPI', match_type: 'proxy'",
+    "source: 'Census CBP', match_type: 'proxy'",
+    "source: 'BLS OES', match_type: 'proxy'",
+  ].forEach(sig => assert.ok(VERIFIER_SRC.includes(sig), `missing ${sig}`));
+});
+test('real-data fetches avoid stale or fake source fallbacks', () => {
+  assert.ok(REAL_DATA_SRC.includes('_rdFetchWithProxy(subjUrl'));
+  assert.ok(REAL_DATA_SRC.includes('_rdFetchWithProxy(detUrl'));
+  assert.equal(REAL_DATA_SRC.includes('fed   ?? 4.33'), false);
+  assert.equal(REAL_DATA_SRC.includes('cpi   ?? 319.8'), false);
+  assert.equal(REAL_DATA_SRC.includes("fallback:'DEMO_KEY'"), false);
+  assert.equal(REAL_DATA_SRC.includes(": 'DEMO_KEY'"), false);
+  assert.equal(API_PROXY_SRC.includes("keyFallback: 'DEMO_KEY'"), false);
+  assert.ok(REAL_DATA_SRC.includes("skipped: true"));
+  assert.ok(REAL_DATA_SRC.includes("const want = k => (!keys || keys.includes(k)) && !d[k]?.skipped"));
+});
+test('fallback coverage includes agents 16 and 17', () => {
+  assert.ok(FALLBACK_SRC.includes('function getFallback16()'));
+  assert.ok(FALLBACK_SRC.includes('function getFallback17()'));
+  assert.ok(PIPELINE_SRC.includes('R.a16=getFallback16()'));
+  assert.ok(PIPELINE_SRC.includes('R.a17=getFallback17()'));
 });
 test('behavior: parent-only source no longer validates nested critical claim', () => {
   const issues = ctxEval(`_bhCollectCitationIssues({ source:'ACS', nested:{ monthly_rent: 12000 } }, 4)`);

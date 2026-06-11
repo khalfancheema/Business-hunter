@@ -31,7 +31,7 @@ if (typeof window !== 'undefined') {
   window.BLS_API_KEY    = '';
   window.FRED_API_KEY   = '';
   window.SAM_API_KEY    = '';
-  // Optional — DEMO_KEY works for low volume
+  // Optional — provide real keys for production accuracy; public demo keys are not used
   window.NREL_API_KEY   = '';
   window.FBI_API_KEY    = '';
 }
