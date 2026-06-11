@@ -108,6 +108,11 @@ test('parseJSON raw string', () => { const d = ctxEval('parseJSON(\'{"a":1}\')')
 test('parseJSON fenced ```json', () => { const d = ctxEval('parseJSON("```json\\n{\\"b\\":2}\\n```")'); assert.equal(d?.b, 2); });
 test('parseJSON fenced plain ```', () => { const d = ctxEval('parseJSON("```\\n{\\"c\\":3}\\n```")'); assert.equal(d?.c, 3); });
 test('parseJSON extracts from prose', () => { const d = ctxEval('parseJSON(\'Some text {"x":7} more text\')'); assert.equal(d?.x, 7); });
+test('parseJSON ignores stray braces after valid JSON', () => {
+  const d = ctxEval('parseJSON(\'Lead text {"ok":true,"detail":"keeps } inside strings"} trailing narrative }\')');
+  assert.equal(d?.ok, true);
+  assert.equal(d?.detail, 'keeps } inside strings');
+});
 test('parseJSON returns null for garbage', () => assert.equal(ctxEval('parseJSON("not json")'), null));
 test('parseJSON strips claude preamble', () => { const d = ctxEval('parseJSON("Here is the JSON object:\\n{\\"z\\":9}")'); assert.ok(d?.z === 9 || d !== null); });
 
@@ -245,6 +250,7 @@ test('package.json has test script', () => assert.ok(readFileSync('package.json'
 
 // Production secret handling
 const REAL_DATA_SRC = readFileSync('src/js/43-real-data.js', 'utf8');
+const CONFIG_SRC = readFileSync('src/js/01-config.js', 'utf8');
 const API_SRC = readFileSync('src/js/04-api.js', 'utf8');
 const FALLBACK_SRC = readFileSync('src/js/05-fallbacks.js', 'utf8');
 const UI_SRC = readFileSync('src/js/06-ui.js', 'utf8');
@@ -459,6 +465,15 @@ test('Agent 1 community profile prompt does not ship demo facts', () => {
   assert.equal(AGENT1_SRC.includes('"population":8200'), false);
   assert.equal(AGENT1_SRC.includes('"median_hh_income":142000'), false);
   assert.equal(AGENT1_SRC.includes('"median_home_value":548000'), false);
+});
+test('unsupported web-search providers inject no-browse accuracy guard', () => {
+  assert.ok(CONFIG_SRC.includes('function _webSearchUnsupportedNotice(providerKey)'));
+  assert.ok(CONFIG_SRC.includes('system += _webSearchUnsupportedNotice(\'openai\')'));
+  assert.ok(CONFIG_SRC.includes('system += _webSearchUnsupportedNotice(\'gemini\')'));
+  assert.ok(CONFIG_SRC.includes('system += _webSearchUnsupportedNotice(\'openai_compat\')'));
+  assert.ok(LLM_PROXY_SRC.includes('function webSearchUnsupportedNotice(providerKey)'));
+  assert.ok(LLM_PROXY_SRC.includes("opts.webSearch && provider !== 'anthropic'"));
+  assert.ok(LLM_PROXY_SRC.includes('system + webSearchUnsupportedNotice(provider)'));
 });
 test('verifier match types are explicit and fail closed', () => {
   assert.equal(VERIFIER_SRC.includes('function _classify('), false);

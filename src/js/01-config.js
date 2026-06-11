@@ -231,6 +231,7 @@ const PROVIDERS = {
     headers: key => ({'Authorization':'Bearer '+key,'Content-Type':'application/json'}),
     buildBody: (system,user,model,opts={}) => {
       if (opts.webSearch) _warnWebSearchUnsupported('openai');
+      if (opts.webSearch) system += _webSearchUnsupportedNotice('openai');
       return {model,max_tokens:8192,messages:[{role:'system',content:system},{role:'user',content:user}]};
     },
     extractText: d => d.choices?.[0]?.message?.content||'',
@@ -244,6 +245,7 @@ const PROVIDERS = {
     headers: () => ({'Content-Type':'application/json'}),
     buildBody: (system,user,model,opts={}) => {
       if (opts.webSearch) _warnWebSearchUnsupported('gemini');
+      if (opts.webSearch) system += _webSearchUnsupportedNotice('gemini');
       return {contents:[{role:'user',parts:[{text:system+'\n\n'+user}]}],generationConfig:{maxOutputTokens:8192}};
     },
     extractText: d => d.candidates?.[0]?.content?.parts?.[0]?.text||'',
@@ -257,6 +259,7 @@ const PROVIDERS = {
     headers: key => ({'Authorization':'Bearer '+key,'Content-Type':'application/json'}),
     buildBody: (system,user,model,opts={}) => {
       if (opts.webSearch) _warnWebSearchUnsupported('openai_compat');
+      if (opts.webSearch) system += _webSearchUnsupportedNotice('openai_compat');
       return {model,max_tokens:8192,messages:[{role:'system',content:system},{role:'user',content:user}]};
     },
     extractText: d => d.choices?.[0]?.message?.content||'',
@@ -268,6 +271,18 @@ const PROVIDERS = {
 // between web-search-on and web-search-off agents. User should know when a
 // non-Anthropic provider silently drops the request.
 const _webSearchWarned = {};
+function _webSearchUnsupportedNotice(providerKey) {
+  const label = PROVIDERS[providerKey]?.label || providerKey;
+  return `
+
+CRITICAL - WEB SEARCH UNAVAILABLE:
+- This request asked for live web search, but the active provider (${label}) does not expose a web-search tool in this app.
+- Do not claim that you searched the web, checked live sources, browsed, or verified current pages.
+- Use only the verified REAL DATA CONTEXT supplied in the prompt and any upstream agent context.
+- For any current fact, source, citation, business listing, price, rate, count, or URL that is not present in the supplied context, return null/"N/A"/"Information not available" per the schema.
+- Lower your confidence when a requested value depends on live search that is unavailable.`;
+}
+
 function _warnWebSearchUnsupported(providerKey) {
   if (_webSearchWarned[providerKey]) return;
   _webSearchWarned[providerKey] = true;

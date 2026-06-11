@@ -45,16 +45,40 @@ function parseJSON(text) {
   if (anyFenced) { try { return JSON.parse(anyFenced[1].trim()); } catch {} }
   // 3. Try raw text directly
   try { return JSON.parse(text.trim()); } catch {}
-  // 4. Extract largest { } block (handles prose before/after JSON from web search)
-  const braceStart = text.indexOf('{');
-  const braceEnd = text.lastIndexOf('}');
-  if (braceStart !== -1 && braceEnd > braceStart) {
-    try { return JSON.parse(text.slice(braceStart, braceEnd + 1)); } catch {}
-  }
+  // 4. Extract the first balanced JSON object that parses. Avoid lastIndexOf('}')
+  // because narrative text after the JSON may contain stray braces.
+  const balanced = _bhParseFirstBalancedJSONObject(text);
+  if (balanced) return balanced;
   // 5. Strip common Claude preamble phrases then retry
   const stripped = text.replace(/^[\s\S]*?(Here is|Here's|Based on|The following)[^\{]{0,120}/i,'').trim();
-  const s2 = stripped.indexOf('{'), s3 = stripped.lastIndexOf('}');
-  if (s2 !== -1 && s3 > s2) { try { return JSON.parse(stripped.slice(s2, s3+1)); } catch {} }
+  const balancedStripped = _bhParseFirstBalancedJSONObject(stripped);
+  if (balancedStripped) return balancedStripped;
+  return null;
+}
+
+function _bhParseFirstBalancedJSONObject(text) {
+  for (let start = text.indexOf('{'); start !== -1; start = text.indexOf('{', start + 1)) {
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    for (let i = start; i < text.length; i++) {
+      const ch = text[i];
+      if (inString) {
+        if (escaped) { escaped = false; continue; }
+        if (ch === '\\') { escaped = true; continue; }
+        if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') { inString = true; continue; }
+      if (ch === '{') depth++;
+      if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          try { return JSON.parse(text.slice(start, i + 1)); } catch { break; }
+        }
+      }
+    }
+  }
   return null;
 }
 

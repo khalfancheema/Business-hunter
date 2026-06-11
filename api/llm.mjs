@@ -78,6 +78,21 @@ const PROVIDERS = {
   },
 };
 
+function webSearchUnsupportedNotice(providerKey) {
+  const label = providerKey === 'openai' ? 'OpenAI'
+    : providerKey === 'gemini' ? 'Google Gemini'
+    : providerKey === 'openai_compat' ? 'OpenAI-compatible'
+    : providerKey;
+  return `
+
+CRITICAL - WEB SEARCH UNAVAILABLE:
+- This request asked for live web search, but the active provider (${label}) does not expose a web-search tool in this app.
+- Do not claim that you searched the web, checked live sources, browsed, or verified current pages.
+- Use only the verified REAL DATA CONTEXT supplied in the prompt and any upstream agent context.
+- For any current fact, source, citation, business listing, price, rate, count, or URL that is not present in the supplied context, return null/"N/A"/"Information not available" per the schema.
+- Lower your confidence when a requested value depends on live search that is unavailable.`;
+}
+
 function corsHeaders(req) {
   const allowed = (process.env.ALLOWED_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean);
   const origin = req.headers.origin || '';
@@ -137,7 +152,11 @@ export default async function handler(req, res) {
     }
   }
 
-  const body = cfg.body({ model, system, user, opts: safeOpts(payload?.opts) });
+  const opts = safeOpts(payload?.opts);
+  const guardedSystem = opts.webSearch && provider !== 'anthropic'
+    ? system + webSearchUnsupportedNotice(provider)
+    : system;
+  const body = cfg.body({ model, system: guardedSystem, user, opts });
   try {
     const upstream = await fetch(url, {
       method: 'POST',
