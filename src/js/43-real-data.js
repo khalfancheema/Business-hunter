@@ -270,36 +270,51 @@ function _rdBuildSourceStatus(real, industryKey) {
   Object.entries(real || {}).filter(([k]) => !k.startsWith('_')).forEach(([k, v]) => {
     const text = JSON.stringify(v || {});
     const years = [...text.matchAll(/\b(20\d{2})\b/g)].map(m => Number(m[1]));
+    const isListSource = Array.isArray(v) || Array.isArray(v?.businesses) || Array.isArray(v?.opportunities) || Array.isArray(v?.rows);
     const recordCount = Array.isArray(v) ? v.length :
       Array.isArray(v?.businesses) ? v.businesses.length :
       Array.isArray(v?.opportunities) ? v.opportunities.length :
       Array.isArray(v?.rows) ? v.rows.length :
       Number.isFinite(Number(v?.count)) ? Number(v.count) :
-      Number.isFinite(Number(v?.population)) ? 1 : 0;
+      Number.isFinite(Number(v?.population)) ? 1 :
+      v && typeof v === 'object' && Object.keys(v).some(key => !/^source|url|checked_at|pulled_at|retrieved_at$/i.test(key) && v[key] != null && v[key] !== '') ? 1 : 0;
     const geoLevel = v?.zip ? 'zip' : v?.county || v?.county_fips ? 'county' : v?.state || v?.state_abbr ? 'state' : v?.lat && v?.lng ? 'point' : 'unknown';
     const year = years.length ? Math.max(...years) : null;
-    const ok = !!v;
+    const ok = !!v && recordCount > 0;
+    const stale = year ? (new Date().getFullYear() - year > 3) : false;
+    const tooBroad = required.includes(k) && ['rents','competitors_osm','business_density','regulations','building_permits','npi_providers'].includes(k) && /state|unknown/i.test(geoLevel);
+    const confidence = !ok ? 0 :
+      required.includes(k) && isListSource && recordCount === 0 ? 35 :
+      tooBroad ? 60 :
+      stale ? 65 :
+      year && new Date().getFullYear() - year <= 3 ? 95 : 80;
     source_details[k] = {
       ok,
       required: required.includes(k),
       year,
-      stale: year ? (new Date().getFullYear() - year > 3) : false,
+      stale,
       geo_level: geoLevel,
+      too_broad: tooBroad,
       record_count: recordCount,
+      source_shape: isListSource ? 'list' : 'scalar',
       source: v?.source || null,
-      confidence: !ok ? 0 : required.includes(k) && recordCount === 0 ? 45 : year && new Date().getFullYear() - year <= 3 ? 95 : 75,
+      confidence,
     };
   });
   const loaded = Object.entries(source_details).filter(([, d]) => d.ok).map(([k]) => k);
   const missing = Object.entries(source_details).filter(([, d]) => !d.ok).map(([k]) => k);
   const requiredMissing = required.filter(k => !real || !real[k]);
+  const qualityFailures = Object.entries(source_details)
+    .filter(([k, d]) => required.includes(k) && (!d.ok || d.stale || d.too_broad || d.confidence < 70))
+    .map(([k]) => k);
   return {
     loaded,
     missing,
     required,
     required_missing: requiredMissing,
+    quality_failures: qualityFailures,
     source_details,
-    production_ready_sources: requiredMissing.length === 0,
+    production_ready_sources: requiredMissing.length === 0 && qualityFailures.length === 0,
     checked_at: new Date().toISOString(),
   };
 }

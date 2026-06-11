@@ -229,12 +229,21 @@ function _bhClaimCriticality(field) {
 
 function _bhRequiredEvidenceFields() {
   return {
+    A1: [/population/i, /income|household/i, /age|children|family/i, /source|url/i],
+    A2: [/opportunity|demand|score/i, /customer|market|segment/i, /income|population|demographic/i, /source|url/i],
     A3: [/overall_score/i, /est_monthly_rent_range|rent/i, /competitors_within_2mi|competitor/i, /timeline_months/i],
     A4: [/monthly_rent/i, /sqft/i, /source|url/i],
     A5: [/cost_usd|fee/i, /timeline_weeks|timeline/i, /agency_name|source/i],
     A6: [/total_licensed_estimated|competitor|count/i, /source/i],
+    A7: [/revenue|sales/i, /expense|cost|rent|wage/i, /profit|net|margin|roi/i, /source|url/i],
+    A8: [/verdict|recommendation/i, /risk/i, /score|confidence/i, /source|url|data_used/i],
+    A9: [/risk|mitigation/i, /severity|probability/i, /source|url/i],
     A10:[/cost|budget|weeks|months|timeline/i],
+    A11:[/site|address|parcel|zoning/i, /traffic|access|parking/i, /source|url/i],
     A12:[/amount|funding|deadline|eligibility|url/i],
+    A13:[/marketing|customer|channel/i, /budget|cost|cac/i, /source|url/i],
+    A14:[/operations|staff|hours/i, /salary|wage|vendor|equipment/i, /source|url/i],
+    A15:[/milestone|timeline|task/i, /owner|dependency|permit/i, /source|url/i],
     A16:[/asking_price|monthly_rent|revenue|timeline|cost/i],
     A17:[/source|url|data_used/i],
   };
@@ -310,6 +319,55 @@ function _bhSourceQuality(row) {
   };
 }
 
+function _bhNormalizeEvidenceText(v) {
+  return String(v ?? '')
+    .toLowerCase()
+    .replace(/[$,%]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function _bhEvidenceNumbers(v) {
+  return [...String(v ?? '').replace(/,/g, '').matchAll(/-?\d+(?:\.\d+)?/g)]
+    .map(m => Number(m[0]))
+    .filter(n => Number.isFinite(n));
+}
+
+function _bhClaimValueSupported(row, sourceQuality) {
+  const value = row?.value ?? row?.ai_value ?? row?.verified_value;
+  if (value === undefined || value === null || value === '') return true;
+  const method = String(row?.verification_method || '');
+  if (/verified_exact_or_rate|field_map/i.test(method)) return true;
+
+  const supportText = [
+    row?.source_excerpt,
+    row?.source_title,
+    row?.source_field,
+    row?.verification_method,
+    row?.source,
+  ].filter(Boolean).join(' ');
+  const normSupport = _bhNormalizeEvidenceText(supportText);
+  if (!normSupport) return false;
+
+  const criticality = _bhClaimCriticality(row?.field);
+  const valueText = _bhNormalizeEvidenceText(value);
+  const valueNums = _bhEvidenceNumbers(value);
+  const supportNums = _bhEvidenceNumbers(supportText);
+  if (typeof value === 'number' || valueNums.length) {
+    if (supportNums.some(sn => valueNums.some(vn => {
+      const tolerance = Math.max(1, Math.abs(vn) * 0.015);
+      return Math.abs(sn - vn) <= tolerance;
+    }))) return true;
+    return criticality !== 'high' && !!row?.source_field && sourceQuality?.is_authoritative;
+  }
+
+  if (valueText.length <= 80) return normSupport.includes(valueText);
+  const tokens = [...new Set(valueText.split(/[^a-z0-9]+/).filter(t => t.length >= 4))];
+  if (!tokens.length) return true;
+  const matched = tokens.filter(t => normSupport.includes(t)).length;
+  return matched / tokens.length >= (criticality === 'high' ? 0.8 : 0.55);
+}
+
 function _bhValidateEvidenceSource(row) {
   const q = _bhSourceQuality(row);
   const f = _bhSourceFreshness(row);
@@ -323,11 +381,7 @@ function _bhValidateEvidenceSource(row) {
   if (needsUrl && !url) issues.push('missing_url_or_source_field');
   if (q.source_tier === 'unclassified' && /rent|tuition|revenue|cost|wage|count|score|capacity|fee|amount/i.test(field)) issues.push('unclassified_critical_source');
   if (f.stale) issues.push('stale_source');
-  const valueText = row?.value ?? row?.ai_value ?? row?.verified_value ?? '';
-  const supportText = String(row?.source_excerpt || row?.source_title || row?.source_field || row?.verification_method || row?.source || '');
-  const supportsClaim = valueText === '' || valueText == null || String(valueText).length > 20
-    ? !!supportText
-    : supportText.includes(String(valueText)) || !!row?.source_field || /verified_exact_or_rate|field_map/i.test(String(row?.verification_method || ''));
+  const supportsClaim = _bhClaimValueSupported(row, q);
   if (!supportsClaim) issues.push('source_does_not_support_claim_value');
   return {
     ...q,
@@ -342,7 +396,10 @@ function _bhValidateEvidenceSource(row) {
 
 async function _bhValidateEvidenceUrls(limit=40) {
   const ledger = _bhBuildEvidenceLedger();
-  const targets = ledger.filter(r => r.source_url && r.valid_url !== false).slice(0, limit);
+  const allTargets = ledger.filter(r => r.source_url && r.valid_url !== false)
+    .sort((a,b) => (_bhClaimCriticality(b.field) === 'high') - (_bhClaimCriticality(a.field) === 'high'));
+  const effectiveLimit = limit == null ? allTargets.length : Math.max(limit, allTargets.filter(r => _bhClaimCriticality(r.field) === 'high').length);
+  const targets = allTargets.slice(0, effectiveLimit);
   const results = [];
   for (const row of targets) {
     const out = { url: row.source_url, agent: row.agent, field: row.field, ok:false };
@@ -369,6 +426,13 @@ async function _bhValidateEvidenceUrls(limit=40) {
     results.push(out);
   }
   R.evidence_url_checks = results;
+  R.evidence_url_validation = {
+    checked: results.length,
+    total: allTargets.length,
+    skipped: Math.max(0, allTargets.length - results.length),
+    skipped_high_critical: allTargets.slice(results.length).filter(r => _bhClaimCriticality(r.field) === 'high').length,
+    checked_at: new Date().toISOString(),
+  };
   return results;
 }
 
@@ -752,13 +816,18 @@ function _bhProductionBlockers() {
   const hasRealData = R.real && typeof R.real === 'object' && Object.keys(R.real).length > 0;
   const missingRequired = (R.real?._source_status?.required_missing || []);
   if (missingRequired.length) blockers.push(`Required real-data source(s) missing for production accuracy: ${missingRequired.join(', ')}.`);
+  const sourceQualityFailures = (R.real?._source_status?.quality_failures || []);
+  if (sourceQualityFailures.length) blockers.push(`Required real-data source(s) are stale, low-confidence, empty, or too broad: ${sourceQualityFailures.join(', ')}.`);
   if (hasRealData && (score === undefined || score === null)) blockers.push('Accuracy verifier did not produce a score despite available real data.');
+  if (hasRealData && (R.accuracy?.production_score === undefined || R.accuracy?.production_score === null)) blockers.push('Production accuracy score was not exact-verified across enough critical checks.');
   if (!hasRealData && (R.a1 || R.a2) && (score === undefined || score === null)) warnings.push('No verified real-data score was available for this run.');
   const buckets = R.accuracy?.buckets || {};
   if (hasRealData && (buckets.exact || 0) < 5) blockers.push(`Accuracy verifier has only ${buckets.exact || 0} exact-match checks; production requires at least 5.`);
   const checkedAgents = Array.isArray(R.accuracy?.agents_checked) ? R.accuracy.agents_checked : [];
   const missingCritical = ['A1','A2','A4','A6','A7'].filter(a => !checkedAgents.includes(a));
   if (hasRealData && missingCritical.length) blockers.push(`Accuracy verifier did not cover critical agent(s): ${missingCritical.join(', ')}.`);
+  const missingExactCoverage = R.accuracy?.exact_coverage_missing || [];
+  if (hasRealData && missingExactCoverage.length) blockers.push(`Exact verifier coverage missing for critical agent(s): ${missingExactCoverage.join(', ')}.`);
   const missingSourceCoverage = R.accuracy?.source_coverage_missing || [];
   if (hasRealData && missingSourceCoverage.length) blockers.push(`Accuracy verifier source coverage missing for critical agent(s): ${missingSourceCoverage.join(', ')}.`);
 
@@ -768,6 +837,8 @@ function _bhProductionBlockers() {
   if (hasRealData && ledger.length < 10) blockers.push(`Evidence ledger has only ${ledger.length} row(s); production requires at least 10 verifier/source entries.`);
   const badUrls = ledger.filter(r => r.source_url && r.valid_url === false);
   if (badUrls.length) blockers.push(`${badUrls.length} evidence source URL(s) are invalid or placeholder URLs.`);
+  if (hasRealData && !R.evidence_url_validation) blockers.push('Live evidence URL validation did not complete before production gate.');
+  if ((R.evidence_url_validation?.skipped_high_critical || 0) > 0) blockers.push(`${R.evidence_url_validation.skipped_high_critical} high-criticality evidence URL(s) were not live-validated.`);
   const unreachableUrls = (R.evidence_url_checks || []).filter(r => r.ok === false);
   if (unreachableUrls.length) blockers.push(`${unreachableUrls.length} evidence source URL(s) failed live reachability validation.`);
   const invalidSources = ledger.filter(r => r.type !== 'verifier_check' && r.source_validated === false);

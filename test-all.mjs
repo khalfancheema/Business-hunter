@@ -468,6 +468,15 @@ test('behavior: source validator rejects unsupported claim values', () => {
   assert.ok(bad.source_validation_issues.includes('source_does_not_support_claim_value'));
   assert.equal(bad.claim_criticality, 'high');
 });
+test('behavior: source field alone does not support arbitrary high-critical values', () => {
+  const bad = ctxEval(`_bhValidateEvidenceSource({ type:'agent_claim', agent:'A7', field:'monthly_revenue', value:99000, source:'U.S. Census ACS', source_field:'B19013_001E', retrieved_at:'2026' })`);
+  assert.equal(bad.source_supports_claim, false);
+  assert.ok(bad.source_validation_issues.includes('source_does_not_support_claim_value'));
+});
+test('behavior: long claims require semantic source overlap, not just any source text', () => {
+  const bad = ctxEval(`_bhValidateEvidenceSource({ type:'agent_claim', agent:'A8', field:'risk_summary', value:'Lease approval depends on county zoning review and fire marshal inspection before opening', source:'City portal', source_excerpt:'Restaurant inspection scores by neighborhood', retrieved_at:'2026' })`);
+  assert.equal(bad.source_supports_claim, false);
+});
 test('behavior: required evidence coverage is per field, not one row per agent', () => {
   const coverage = ctxEval(`_bhAgentRequiredFieldCoverage([
     {agent:'A4', type:'agent_claim', field:'A4.options[0].monthly_rent', source:'LoopNet', source_validated:true, source_supports_claim:true}
@@ -491,8 +500,16 @@ test('behavior: production blockers require real-data source status and source c
   assert.ok(blockers.some(x => x.includes('source coverage missing')));
 });
 test('pipeline performs live evidence URL validation before final gate', () => {
-  assert.ok(PIPELINE_SRC.includes('await _bhValidateEvidenceUrls(40)'));
+  assert.ok(PIPELINE_SRC.includes('await _bhValidateEvidenceUrls(120)'));
+  assert.ok(API_SRC.includes('skipped_high_critical'));
   assert.ok(API_SRC.includes('evidence source URL(s) failed live reachability validation'));
+});
+test('production gate blocks weak real source quality and missing exact critical coverage', () => {
+  assert.ok(REAL_DATA_SRC.includes('quality_failures'));
+  assert.ok(REAL_DATA_SRC.includes('too_broad'));
+  assert.ok(API_SRC.includes('Required real-data source(s) are stale, low-confidence, empty, or too broad'));
+  assert.ok(VERIFIER_SRC.includes('exact_coverage_missing'));
+  assert.ok(API_SRC.includes('Exact verifier coverage missing for critical agent(s)'));
 });
 test('agent prompts require root sources_by_field maps', () => {
   assert.ok(API_SRC.includes('Add a root-level sources_by_field object'));

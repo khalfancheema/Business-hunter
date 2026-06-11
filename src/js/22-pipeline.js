@@ -298,7 +298,7 @@ async function runPipeline() {
       try { runAccuracyVerifier(); } catch(e) { console.warn('Verifier failed (non-fatal):', e.message); }
     }
     if (typeof _bhValidateEvidenceUrls === 'function') {
-      try { await _bhValidateEvidenceUrls(40); } catch(e) { console.warn('Evidence URL validation failed (non-fatal):', e.message); }
+      try { await _bhValidateEvidenceUrls(120); } catch(e) { console.warn('Evidence URL validation failed (non-fatal):', e.message); }
     }
     if (typeof _bhRecordAllAgentFeedback === 'function') _bhRecordAllAgentFeedback();
     if (typeof _bhRunAccuracyRepairPass === 'function') await _bhRunAccuracyRepairPass();

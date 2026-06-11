@@ -704,6 +704,9 @@
     const exactVerifiedPct = buckets.exact.length >= 5 ? strictPct : null;
     const pct = exactVerifiedPct ?? normalPct ?? broadPct ?? 0;
     const agentsChecked = [...new Set(valid.map(c => c.agent).filter(a => /^A\d+/.test(a || '')))].sort((a,b) => parseInt(a.slice(1),10) - parseInt(b.slice(1),10));
+    const exactAgentsChecked = [...new Set(buckets.exact.map(c => c.agent).filter(a => /^A\d+/.test(a || '')))].sort((a,b) => parseInt(a.slice(1),10) - parseInt(b.slice(1),10));
+    const criticalExactAgents = ['A1','A2','A4','A6','A7'];
+    const exactCoverageMissing = criticalExactAgents.filter(a => !exactAgentsChecked.includes(a));
     const ledger = typeof _bhBuildEvidenceLedger === 'function' ? _bhBuildEvidenceLedger() : [];
     const sourceCoverage = typeof _bhRequiredEvidenceFields === 'function' && typeof _bhAgentRequiredFieldCoverage === 'function'
       ? Object.keys(_bhRequiredEvidenceFields()).flatMap(agent => _bhAgentRequiredFieldCoverage(ledger, agent))
@@ -727,6 +730,8 @@
       dropped_checks:  droppedFallback,
       buckets: Object.fromEntries(Object.entries(buckets).map(([k,v])=>[k,v.length])),
       agents_checked: agentsChecked,
+      exact_agents_checked: exactAgentsChecked,
+      exact_coverage_missing: exactCoverageMissing,
       source_coverage: sourceCoverage,
       source_coverage_missing: [...new Set(sourceCoverage.filter(r => !r.covered).map(r => r.agent))],
     };
