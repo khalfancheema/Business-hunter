@@ -66,8 +66,8 @@ If data is missing, say so briefly and suggest what to run.`;
   try {
     if (provider === 'anthropic') {
       await _v2StreamAnthropic(apiKey, sys, historySlice, bubbleText);
-    } else if (provider === 'openai' || provider === 'openai_compat') {
-      await _v2StreamOpenAI(apiKey, sys, historySlice, bubbleText);
+    } else if (provider === 'openai' || provider === 'openai_compat' || provider === 'deepseek') {
+      await _v2StreamOpenAI(apiKey, sys, historySlice, bubbleText, provider);
     } else {
       // Gemini — non-streaming fallback with history context
       await _v2GeminiFallback(apiKey, sys, historySlice, bubbleText);
@@ -147,9 +147,13 @@ async function _v2StreamAnthropic(apiKey, sys, messages, bubbleEl) {
   }
 }
 
-async function _v2StreamOpenAI(apiKey, sys, messages, bubbleEl) {
-  const customUrl = localStorage.getItem('v2_custom_url') || 'https://api.openai.com/v1/chat/completions';
-  const model     = localStorage.getItem('v2_model') || 'gpt-4o';
+async function _v2StreamOpenAI(apiKey, sys, messages, bubbleEl, provider) {
+  const defaultUrls   = { openai: 'https://api.openai.com/v1/chat/completions', deepseek: 'https://api.deepseek.com/chat/completions' };
+  const defaultModels = { openai: 'gpt-4o', deepseek: 'deepseek-chat' };
+  const customUrl = provider === 'openai_compat'
+    ? (localStorage.getItem('v2_custom_url') || defaultUrls.openai)
+    : (defaultUrls[provider] || defaultUrls.openai);
+  const model     = localStorage.getItem('v2_model') || defaultModels[provider] || 'gpt-4o';
   const allMsgs   = [{ role: 'system', content: sys }, ...messages];
   const res       = await fetch(customUrl, {
     method: 'POST',

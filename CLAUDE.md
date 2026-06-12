@@ -97,7 +97,7 @@ These fields are injected into every agent's prompt via `industry()` and string 
 
 ### PROVIDERS config (`01-config.js`)
 
-Four AI providers: `anthropic`, `openai`, `gemini`, `openai_compat`. Each implements:
+Five AI providers: `anthropic`, `openai`, `deepseek`, `gemini`, `openai_compat`. Each implements:
 - `url` / `url_custom` — endpoint
 - `headers(key)` — request headers
 - `buildBody(system, user, model)` — request body

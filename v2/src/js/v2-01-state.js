@@ -51,6 +51,7 @@ const V2_AGENTS = [
 const V2_PROVIDERS = {
   anthropic:    { name:'Anthropic Claude',   model:'claude-sonnet-4-6',  ico:'🟣' },
   openai:       { name:'OpenAI GPT-4o',      model:'gpt-4o',             ico:'🟢' },
+  deepseek:     { name:'DeepSeek',           model:'deepseek-chat',      ico:'🐋' },
   gemini:       { name:'Google Gemini',      model:'gemini-1.5-pro',     ico:'🔵' },
   openai_compat:{ name:'Local / Custom',     model:'llama3',             ico:'⚪' },
 };

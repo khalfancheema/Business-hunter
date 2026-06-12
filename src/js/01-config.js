@@ -237,6 +237,20 @@ const PROVIDERS = {
     extractText: d => d.choices?.[0]?.message?.content||'',
     extractStop: d => d.choices?.[0]?.finish_reason,
   },
+  deepseek: {
+    label: 'DeepSeek',
+    url: 'https://api.deepseek.com/chat/completions',
+    model_default: 'deepseek-chat',
+    supports: { webSearch: false }, // no built-in web search tool
+    headers: key => ({'Authorization':'Bearer '+key,'Content-Type':'application/json'}),
+    buildBody: (system,user,model,opts={}) => {
+      if (opts.webSearch) _warnWebSearchUnsupported('deepseek');
+      if (opts.webSearch) system += _webSearchUnsupportedNotice('deepseek');
+      return {model,max_tokens:8192,messages:[{role:'system',content:system},{role:'user',content:user}]};
+    },
+    extractText: d => d.choices?.[0]?.message?.content||'',
+    extractStop: d => d.choices?.[0]?.finish_reason,
+  },
   gemini: {
     label: 'Google Gemini',
     url: key => `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${key}`,

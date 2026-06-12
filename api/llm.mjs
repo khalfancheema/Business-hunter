@@ -6,7 +6,7 @@
 //   { provider, model, system, user, opts }
 //
 // Supported env vars:
-//   ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY
+//   ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEEK_API_KEY
 //   OPENAI_COMPAT_API_KEY, OPENAI_COMPAT_URL
 
 const PROVIDERS = {
@@ -51,6 +51,19 @@ const PROVIDERS = {
     extractText: data => data.choices?.[0]?.message?.content || '',
     extractStop: data => data.choices?.[0]?.finish_reason,
   },
+  deepseek: {
+    env: 'DEEPSEEK_API_KEY',
+    url: 'https://api.deepseek.com/chat/completions',
+    defaultModel: 'deepseek-chat',
+    headers: key => ({ Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' }),
+    body: ({ model, system, user }) => ({
+      model,
+      max_tokens: 8192,
+      messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+    }),
+    extractText: data => data.choices?.[0]?.message?.content || '',
+    extractStop: data => data.choices?.[0]?.finish_reason,
+  },
   gemini: {
     env: 'GEMINI_API_KEY',
     defaultModel: 'gemini-1.5-pro',
@@ -81,6 +94,7 @@ const PROVIDERS = {
 function webSearchUnsupportedNotice(providerKey) {
   const label = providerKey === 'openai' ? 'OpenAI'
     : providerKey === 'gemini' ? 'Google Gemini'
+    : providerKey === 'deepseek' ? 'DeepSeek'
     : providerKey === 'openai_compat' ? 'OpenAI-compatible'
     : providerKey;
   return `

@@ -2988,6 +2988,7 @@ div > .v2-ind-category-label:first-of-type { margin-top: 0; border-top: none; }
     <select id="providerSelect" onchange="onProviderChange()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px">
       <option value="anthropic">Anthropic (Claude)</option>
       <option value="openai">OpenAI (GPT-4o)</option>
+      <option value="deepseek">DeepSeek</option>
       <option value="gemini">Google Gemini</option>
       <option value="openai_compat">OpenAI-Compatible / Local</option>
     </select>
@@ -3998,6 +3999,20 @@ const PROVIDERS = {
     buildBody: (system,user,model,opts={}) => {
       if (opts.webSearch) _warnWebSearchUnsupported('openai');
       if (opts.webSearch) system += _webSearchUnsupportedNotice('openai');
+      return {model,max_tokens:8192,messages:[{role:'system',content:system},{role:'user',content:user}]};
+    },
+    extractText: d => d.choices?.[0]?.message?.content||'',
+    extractStop: d => d.choices?.[0]?.finish_reason,
+  },
+  deepseek: {
+    label: 'DeepSeek',
+    url: 'https://api.deepseek.com/chat/completions',
+    model_default: 'deepseek-chat',
+    supports: { webSearch: false }, // no built-in web search tool
+    headers: key => ({'Authorization':'Bearer '+key,'Content-Type':'application/json'}),
+    buildBody: (system,user,model,opts={}) => {
+      if (opts.webSearch) _warnWebSearchUnsupported('deepseek');
+      if (opts.webSearch) system += _webSearchUnsupportedNotice('deepseek');
       return {model,max_tokens:8192,messages:[{role:'system',content:system},{role:'user',content:user}]};
     },
     extractText: d => d.choices?.[0]?.message?.content||'',
@@ -18031,6 +18046,7 @@ const V2_AGENTS = [
 const V2_PROVIDERS = {
   anthropic:    { name:'Anthropic Claude',   model:'claude-sonnet-4-6',  ico:'🟣' },
   openai:       { name:'OpenAI GPT-4o',      model:'gpt-4o',             ico:'🟢' },
+  deepseek:     { name:'DeepSeek',           model:'deepseek-chat',      ico:'🐋' },
   gemini:       { name:'Google Gemini',      model:'gemini-1.5-pro',     ico:'🔵' },
   openai_compat:{ name:'Local / Custom',     model:'llama3',             ico:'⚪' },
 };
@@ -22372,8 +22388,8 @@ If data is missing, say so briefly and suggest what to run.`;
   try {
     if (provider === 'anthropic') {
       await _v2StreamAnthropic(apiKey, sys, historySlice, bubbleText);
-    } else if (provider === 'openai' || provider === 'openai_compat') {
-      await _v2StreamOpenAI(apiKey, sys, historySlice, bubbleText);
+    } else if (provider === 'openai' || provider === 'openai_compat' || provider === 'deepseek') {
+      await _v2StreamOpenAI(apiKey, sys, historySlice, bubbleText, provider);
     } else {
       // Gemini — non-streaming fallback with history context
       await _v2GeminiFallback(apiKey, sys, historySlice, bubbleText);
@@ -22453,9 +22469,13 @@ async function _v2StreamAnthropic(apiKey, sys, messages, bubbleEl) {
   }
 }
 
-async function _v2StreamOpenAI(apiKey, sys, messages, bubbleEl) {
-  const customUrl = localStorage.getItem('v2_custom_url') || 'https://api.openai.com/v1/chat/completions';
-  const model     = localStorage.getItem('v2_model') || 'gpt-4o';
+async function _v2StreamOpenAI(apiKey, sys, messages, bubbleEl, provider) {
+  const defaultUrls   = { openai: 'https://api.openai.com/v1/chat/completions', deepseek: 'https://api.deepseek.com/chat/completions' };
+  const defaultModels = { openai: 'gpt-4o', deepseek: 'deepseek-chat' };
+  const customUrl = provider === 'openai_compat'
+    ? (localStorage.getItem('v2_custom_url') || defaultUrls.openai)
+    : (defaultUrls[provider] || defaultUrls.openai);
+  const model     = localStorage.getItem('v2_model') || defaultModels[provider] || 'gpt-4o';
   const allMsgs   = [{ role: 'system', content: sys }, ...messages];
   const res       = await fetch(customUrl, {
     method: 'POST',
