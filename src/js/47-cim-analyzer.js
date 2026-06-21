@@ -26,7 +26,7 @@ async function runCimAnalysis() {
     return;
   }
   const k = key();
-  if (!k && !demoMode) {
+  if (!k && !demoMode && !(typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy())) {
     $('cim-results').innerHTML = '<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Enter your API key first.</div>';
     return;
   }
@@ -90,7 +90,7 @@ Return ONLY:
 }`;
 
   try {
-    const result = await claudeJSON(sys, usr, { agentNum: 'cim' });
+    const result = await claudeJSON(sys, usr, { skipFeedback: true });
     if (!result) throw new Error('No response from AI');
     _cimRender(result, ind, bm);
   } catch (e) {
@@ -128,10 +128,10 @@ function _cimRender(d, ind, bm) {
 
     <div class="dc-section">
       <div class="dc-section-title">Valuation Multiples</div>
-      <div class="dc-metric"><span class="dc-k">CF Multiple</span><span class="dc-v">${kf.cf_multiple ? kf.cf_multiple.toFixed(1) + 'x' : 'N/A'}${bm.avg_cf_multiple ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_cf_multiple + 'x)</span>' : ''}</span></div>
-      <div class="dc-metric"><span class="dc-k">Revenue Multiple</span><span class="dc-v">${kf.revenue_multiple ? kf.revenue_multiple.toFixed(2) + 'x' : 'N/A'}${bm.avg_revenue_multiple ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_revenue_multiple + 'x)</span>' : ''}</span></div>
-      <div class="dc-metric"><span class="dc-k">Gross Margin</span><span class="dc-v">${kf.gross_margin_pct ? kf.gross_margin_pct.toFixed(1) + '%' : 'N/A'}</span></div>
-      <div class="dc-metric"><span class="dc-k">Net Margin</span><span class="dc-v">${kf.net_margin_pct ? kf.net_margin_pct.toFixed(1) + '%' : 'N/A'}${bm.avg_margin_pct ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_margin_pct + '%)</span>' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">CF Multiple</span><span class="dc-v">${isFinite(Number(kf.cf_multiple)) ? Number(kf.cf_multiple).toFixed(1) + 'x' : 'N/A'}${bm.avg_cf_multiple ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_cf_multiple + 'x)</span>' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">Revenue Multiple</span><span class="dc-v">${isFinite(Number(kf.revenue_multiple)) ? Number(kf.revenue_multiple).toFixed(2) + 'x' : 'N/A'}${bm.avg_revenue_multiple ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_revenue_multiple + 'x)</span>' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">Gross Margin</span><span class="dc-v">${isFinite(Number(kf.gross_margin_pct)) ? Number(kf.gross_margin_pct).toFixed(1) + '%' : 'N/A'}</span></div>
+      <div class="dc-metric"><span class="dc-k">Net Margin</span><span class="dc-v">${isFinite(Number(kf.net_margin_pct)) ? Number(kf.net_margin_pct).toFixed(1) + '%' : 'N/A'}${bm.avg_margin_pct ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_margin_pct + '%)</span>' : ''}</span></div>
       <div class="dc-metric"><span class="dc-k">Revenue Trend</span><span class="dc-v">${_cimTrendBadge(d.revenue_trend)}</span></div>
     </div>
   </div>`;
@@ -144,11 +144,13 @@ function _cimRender(d, ind, bm) {
       <div class="tbl-wrap"><table class="tbl">
         <thead><tr><th>Item</th><th>Amount</th><th>Confidence</th><th>Notes</th></tr></thead>
         <tbody>${addBacks.map(a => {
-          const confColor = a.confidence === 'high' ? 'var(--green)' : (a.confidence === 'medium' ? 'var(--amber)' : 'var(--red)');
+          const conf = (a.confidence || '').toString().trim().toLowerCase();
+          const confColor = conf === 'high' ? 'var(--green)' : (conf === 'medium' ? 'var(--amber)' : 'var(--red)');
+          const addAmt = isFinite(Number(a.amount)) ? Number(a.amount) : 0;
           return `<tr>
             <td>${_esc(a.item)}</td>
-            <td>${a.amount ? _dcFmt(a.amount) : 'N/A'}</td>
-            <td><span style="color:${confColor};font-weight:700;font-size:11px">${_esc((a.confidence || '').toUpperCase())}</span></td>
+            <td>${addAmt ? _dcFmt(addAmt) : 'N/A'}</td>
+            <td><span style="color:${confColor};font-weight:700;font-size:11px">${_esc(conf.toUpperCase())}</span></td>
             <td style="font-size:11px;color:var(--muted)">${_esc(a.note || '')}</td>
           </tr>`;
         }).join('')}</tbody>
@@ -162,11 +164,12 @@ function _cimRender(d, ind, bm) {
     html += `<div class="dc-section" style="margin-top:14px">
       <div class="dc-section-title">Revenue Breakdown</div>
       ${revBreak.map(r => {
-        const pct = r.pct || 0;
+        const amt = isFinite(Number(r.amount)) ? Number(r.amount) : 0;
+        const pct = Math.max(0, Math.min(100, isFinite(Number(r.pct)) ? Number(r.pct) : 0));
         return `<div style="margin-bottom:6px">
           <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
             <span>${_esc(r.stream)}</span>
-            <span style="font-weight:700">${r.amount ? _dcFmt(r.amount) : ''} (${pct}%)</span>
+            <span style="font-weight:700">${amt ? _dcFmt(amt) : ''} (${pct}%)</span>
           </div>
           <div style="height:6px;background:var(--surface3);border-radius:3px;overflow:hidden">
             <div style="height:100%;width:${pct}%;background:var(--blue);border-radius:3px"></div>
@@ -182,8 +185,9 @@ function _cimRender(d, ind, bm) {
     html += `<div class="dc-section" style="margin-top:14px">
       <div class="dc-section-title">Risk Assessment</div>
       ${risks.map(r => {
-        const sevColor = r.severity === 'high' ? 'var(--red)' : (r.severity === 'medium' ? 'var(--amber)' : 'var(--green)');
-        const sevBg = r.severity === 'high' ? 'var(--red-dim)' : (r.severity === 'medium' ? 'var(--amber-dim)' : 'var(--green-dim)');
+        const sev = (r.severity || '').toString().trim().toLowerCase();
+        const sevColor = sev === 'high' ? 'var(--red)' : (sev === 'medium' ? 'var(--amber)' : 'var(--green)');
+        const sevBg = sev === 'high' ? 'var(--red-dim)' : (sev === 'medium' ? 'var(--amber-dim)' : 'var(--green-dim)');
         return `<div style="padding:10px 12px;background:${sevBg};border:1px solid ${sevColor};border-radius:8px;margin-bottom:6px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
             <span style="font-size:12px;font-weight:700;color:var(--text)">${_esc(r.risk)}</span>
@@ -246,6 +250,6 @@ function _cimPopulateCalc() {
   set('dc-asking-price', d.asking_price);
   set('dc-annual-revenue', d.annual_revenue);
   set('dc-sde', d.sde);
-  if (d.includes_real_estate) set('dc-includes-re', 'yes');
+  set('dc-includes-re', d.includes_real_estate ? 'yes' : 'no');
   runDealCalculator();
 }

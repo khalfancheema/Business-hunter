@@ -37,7 +37,9 @@ function _dcInitForm() {
 function _dcResetOnIndustryChange() {
   ['dc-asking-price','dc-annual-revenue','dc-sde','dc-down-pct','dc-loan-rate','dc-loan-term','dc-includes-re']
     .forEach(id => { const el = $(id); if (el) el._userTouched = false; });
-  if (_dcVisible) { _dcInitForm(); $('dc-results').innerHTML = ''; }
+  _dcInitForm();
+  const res = $('dc-results'); if (res) res.innerHTML = '';
+  const aiOut = $('dc-ai-output'); if (aiOut) aiOut.innerHTML = '';
   if (typeof _bmDashVisible !== 'undefined' && _bmDashVisible && typeof _bmRenderDashboard === 'function') _bmRenderDashboard();
 }
 
@@ -78,6 +80,19 @@ function _dcMonthlyPayment(principal, annualRate, termYrs) {
   return principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 }
 
+function _dcMinDownForDscr(askingPrice, sde, loanRate, loanTerm) {
+  if (askingPrice <= 0 || sde <= 0 || loanRate <= 0) return 0;
+  for (let pct = 5; pct <= 100; pct++) {
+    const down = askingPrice * (pct / 100);
+    const loan = askingPrice - down;
+    const fee = _dcSbaGuarantyFee(loan, loanTerm);
+    const pmt = _dcMonthlyPayment(loan + fee, loanRate, loanTerm);
+    const ads = pmt * 12;
+    if (ads > 0 && sde / ads >= 1.25) return pct;
+  }
+  return 100;
+}
+
 function runDealCalculator() {
   const indKey = industryKey();
   const bm = DEAL_BENCHMARKS[indKey] || {};
@@ -100,15 +115,21 @@ function runDealCalculator() {
   const loanAmount = askingPrice - cashDown;
   const sbaFee = _dcSbaGuarantyFee(loanAmount, loanTerm);
   const totalLoanAmt = loanAmount + sbaFee;
+  const closingCosts = askingPrice * 0.025;
+  const totalAcquisitionCost = askingPrice + sbaFee + closingCosts;
+  const totalCashNeeded = cashDown + sbaFee + closingCosts;
   const monthlyPayment = _dcMonthlyPayment(totalLoanAmt, loanRate, loanTerm);
   const annualDebtService = monthlyPayment * 12;
   const dscr = annualDebtService > 0 ? sde / annualDebtService : 0;
   const postDebtCF = sde - annualDebtService;
   const cashOnCash = cashDown > 0 ? (postDebtCF / cashDown) * 100 : 0;
-  const paybackYrs = postDebtCF > 0 ? cashDown / postDebtCF : Infinity;
+  const paybackYrs = postDebtCF > 0 ? totalCashNeeded / postDebtCF : Infinity;
   const cfMultiple = sde > 0 ? askingPrice / sde : 0;
   const revMultiple = annualRevenue > 0 ? askingPrice / annualRevenue : 0;
   const profitMargin = annualRevenue > 0 ? (sde / annualRevenue) * 100 : 0;
+
+  // Minimum down payment % to clear 1.25x DSCR
+  const minDownForDscr = _dcMinDownForDscr(askingPrice, sde, loanRate, loanTerm);
 
   // ── Scoring (0-10 per dimension) ──────────────────────
   const scores = _dcScoreDeal({
@@ -151,21 +172,30 @@ function runDealCalculator() {
   <div class="dc-section-grid">
     <div class="dc-section">
       <div class="dc-section-title">Valuation</div>
-      <div class="dc-metric"><span class="dc-k">Asking Price</span><span class="dc-v">${_dcFmt(askingPrice)}</span></div>
       <div class="dc-metric"><span class="dc-k">Cash Flow Multiple</span><span class="dc-v">${cfMultiple.toFixed(1)}x ${cfMultComp}</span></div>
       <div class="dc-metric"><span class="dc-k">Revenue Multiple</span><span class="dc-v">${revMultiple.toFixed(2)}x ${revMultComp}</span></div>
       <div class="dc-metric"><span class="dc-k">Profit Margin</span><span class="dc-v">${_dcPct(profitMargin)} ${marginComp}</span></div>
+      <div class="dc-metric"><span class="dc-k">Revenue</span><span class="dc-v">${_dcFmt(annualRevenue)}</span></div>
+      <div class="dc-metric"><span class="dc-k">SDE (Cash Flow)</span><span class="dc-v">${_dcFmt(sde)}</span></div>
+    </div>
+
+    <div class="dc-section">
+      <div class="dc-section-title">Acquisition Cost</div>
+      <div class="dc-metric"><span class="dc-k">Asking Price</span><span class="dc-v">${_dcFmt(askingPrice)}</span></div>
+      <div class="dc-metric"><span class="dc-k">SBA Guaranty Fee</span><span class="dc-v">${_dcFmt(sbaFee)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Est. Closing Costs (2.5%)</span><span class="dc-v">${_dcFmt(closingCosts)}</span></div>
+      <div class="dc-metric" style="font-weight:700;border-top:2px solid var(--border2);padding-top:8px"><span class="dc-k" style="font-weight:700">Total Acquisition Cost</span><span class="dc-v">${_dcFmt(totalAcquisitionCost)}</span></div>
     </div>
 
     <div class="dc-section">
       <div class="dc-section-title">SBA Loan Analysis</div>
       <div class="dc-metric"><span class="dc-k">Cash Down (${downPct}%)</span><span class="dc-v">${_dcFmt(cashDown)}</span></div>
       <div class="dc-metric"><span class="dc-k">Loan Amount</span><span class="dc-v">${_dcFmt(loanAmount)}</span></div>
-      <div class="dc-metric"><span class="dc-k">SBA Guaranty Fee</span><span class="dc-v">${_dcFmt(sbaFee)}</span></div>
-      <div class="dc-metric"><span class="dc-k">Total Financed</span><span class="dc-v">${_dcFmt(totalLoanAmt)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Total Financed (+ SBA Fee)</span><span class="dc-v">${_dcFmt(totalLoanAmt)}</span></div>
       <div class="dc-metric"><span class="dc-k">Monthly Payment</span><span class="dc-v">${_dcFmt(monthlyPayment)}</span></div>
       <div class="dc-metric"><span class="dc-k">Annual Debt Service</span><span class="dc-v">${_dcFmt(annualDebtService)}</span></div>
       <div class="dc-metric"><span class="dc-k">Loan Term</span><span class="dc-v">${loanTerm} years${includesRE ? ' (RE)' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">Total Cash Needed</span><span class="dc-v" style="color:var(--amber)">${_dcFmt(totalCashNeeded)}</span></div>
     </div>
 
     <div class="dc-section">
@@ -177,6 +207,7 @@ function runDealCalculator() {
       </div>
       <div class="dc-metric"><span class="dc-k">SDE (Cash Flow)</span><span class="dc-v">${_dcFmt(sde)}</span></div>
       <div class="dc-metric"><span class="dc-k">Annual Debt Service</span><span class="dc-v">${_dcFmt(annualDebtService)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Min Equity for 1.25x</span><span class="dc-v" style="color:${minDownForDscr <= downPct ? 'var(--green)' : 'var(--red)'}">${minDownForDscr}% down${minDownForDscr > downPct ? ' (need more)' : ' ✓'}</span></div>
     </div>
 
     <div class="dc-section">
@@ -243,9 +274,10 @@ function runDealCalculator() {
   // Store for AI analysis
   window._dcLastCalc = {
     askingPrice, annualRevenue, sde, downPct, cashDown, loanAmount, sbaFee,
-    totalLoanAmt, monthlyPayment, annualDebtService, dscr, postDebtCF,
+    totalLoanAmt, totalAcquisitionCost, totalCashNeeded, closingCosts,
+    monthlyPayment, annualDebtService, dscr, postDebtCF,
     cashOnCash, paybackYrs, cfMultiple, revMultiple, profitMargin,
-    overallScore, verdictText, loanTerm, loanRate, includesRE, indKey, bm
+    minDownForDscr, overallScore, verdictText, loanTerm, loanRate, includesRE, indKey, bm
   };
 }
 
@@ -364,7 +396,7 @@ async function _dcRunAiAnalysis() {
   const d = window._dcLastCalc;
   if (!d) return;
   const k = key();
-  if (!k && !demoMode) {
+  if (!k && !demoMode && !(typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy())) {
     $('dc-ai-output').innerHTML = '<div style="color:var(--red);padding:12px;text-align:center;font-size:12px">Enter your API key first to use AI analysis.</div>';
     return;
   }
@@ -377,15 +409,18 @@ async function _dcRunAiAnalysis() {
 
 DEAL METRICS:
 - Asking Price: $${d.askingPrice.toLocaleString()}
+- Total Acquisition Cost: $${d.totalAcquisitionCost.toLocaleString()} (incl SBA fee + closing costs)
 - Annual Revenue: $${d.annualRevenue.toLocaleString()}
 - SDE (Cash Flow): $${d.sde.toLocaleString()}
 - CF Multiple: ${d.cfMultiple.toFixed(1)}x (industry avg: ${d.bm.avg_cf_multiple}x)
 - Revenue Multiple: ${d.revMultiple.toFixed(2)}x (industry avg: ${d.bm.avg_revenue_multiple}x)
 - DSCR: ${d.dscr.toFixed(2)}x
+- Min Down Payment for 1.25x DSCR: ${d.minDownForDscr}%
 - Post-Debt Cash Flow: $${d.postDebtCF.toLocaleString()}/yr
 - Cash-on-Cash Return: ${d.cashOnCash.toFixed(1)}%
 - Payback Period: ${d.paybackYrs.toFixed(1)} years
 - Down Payment: $${d.cashDown.toLocaleString()} (${d.downPct}%)
+- Total Cash Needed: $${d.totalCashNeeded.toLocaleString()} (down + SBA fee + closing)
 - Loan: $${d.loanAmount.toLocaleString()} at ${d.loanRate}% for ${d.loanTerm} years
 - Industry SBA Default Rate: ${d.bm.sba_default_rate_pct}%
 - Profit Margin: ${d.profitMargin.toFixed(1)}% (industry avg: ${d.bm.avg_margin_pct}%)
@@ -404,7 +439,7 @@ Return ONLY:
 }`;
 
   try {
-    const result = await claudeJSON(sys, usr, { agentNum: 'dc' });
+    const result = await claudeJSON(sys, usr, { skipFeedback: true });
     if (!result) throw new Error('No response');
     const v = result.verdict || '';
     const vCls = /no\s*go/i.test(v) ? 'v-nogo' : (/cautious/i.test(v) ? 'v-caution' : 'v-go');
