@@ -731,3 +731,65 @@ select option{background:var(--surface2)}
 /* Down variant — tooltip opens below */
 [data-tip][data-tip-pos="down"]::after{top:calc(100% + 10px);bottom:auto}
 [data-tip][data-tip-pos="down"]::before{top:calc(100% + 4px);bottom:auto;border-top-color:transparent;border-bottom-color:var(--border2)}
+
+/* ══ DEAL CALCULATOR ════════════════════════════════════════ */
+.dc-panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:1.2rem}
+.dc-panel-title{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.dc-panel-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.dc-form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.dc-field{display:flex;flex-direction:column;gap:4px}
+.dc-field label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.dc-field input,.dc-field select{height:36px;padding:0 10px;font-size:13px;font-family:'Instrument Sans',sans-serif;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;transition:border-color 0.2s}
+.dc-field input:focus,.dc-field select:focus{border-color:var(--blue)}
+.dc-score-hero{text-align:center;padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.dc-score-ring{position:relative;width:120px;height:120px;margin:0 auto 12px;display:inline-block}
+.dc-score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dc-score-num span{font-size:32px;font-weight:700;font-family:'Syne',sans-serif}
+.dc-score-num small{font-size:12px;color:var(--muted)}
+.dc-section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.dc-section{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.dc-section-title{font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.dc-metric{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.dc-metric:last-child{border-bottom:none}
+.dc-k{color:var(--muted)}
+.dc-v{font-weight:600;font-family:'Syne',sans-serif;text-align:right}
+.dc-score-bars{display:flex;flex-direction:column;gap:8px}
+.dc-score-bar-row{display:flex;align-items:center;gap:10px}
+.dc-bar-label{width:180px;flex-shrink:0;font-size:12px;color:var(--text);font-family:'Syne',sans-serif;font-weight:500}
+.dc-bar-desc{display:block;font-size:10px;color:var(--faint);font-weight:400;font-family:'Instrument Sans',sans-serif}
+.dc-bar-track{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.dc-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+.dc-bar-val{width:36px;text-align:right;font-size:13px;font-weight:700;font-family:'Syne',sans-serif}
+.dc-bench-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dc-bench-item{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.dc-bench-label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--faint);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.dc-bench-val{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue)}
+.dc-ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dc-ai-col{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px}
+.dc-ai-col-title{font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px}
+.dc-ai-item{font-size:12px;color:var(--text);line-height:1.6;margin-bottom:4px;display:flex;gap:6px}
+.dc-fair-price{text-align:center;margin-top:14px;padding:14px;background:var(--surface3);border:1px solid var(--border2);border-radius:10px}
+.dc-fair-label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:4px}
+.dc-fair-val{font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)}
+.dc-fair-rationale{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+@media(max-width:600px){.dc-section-grid{grid-template-columns:1fr}.dc-bench-grid{grid-template-columns:1fr 1fr}.dc-ai-grid{grid-template-columns:1fr}.dc-bar-label{width:120px}}
+
+/* ══ CIM ANALYZER ═══════════════════════════════════════════ */
+.cim-panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:1.2rem}
+.cim-panel-title{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.cim-panel-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.cim-textarea{width:100%;min-height:180px;padding:12px;font-size:12px;font-family:'Instrument Sans',sans-serif;border:1px solid var(--border2);border-radius:10px;background:var(--surface2);color:var(--text);resize:vertical;outline:none;transition:border-color 0.2s;line-height:1.6}
+.cim-textarea:focus{border-color:var(--purple)}
+.cim-actions{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+
+/* ══ BENCHMARKS DASHBOARD ═══════════════════════════════════ */
+.bench-panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:1.2rem}
+.bm-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bm-mini-chart{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.bm-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.bm-bar-label{width:100px;flex-shrink:0;font-size:10px;font-family:'Syne',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bm-bar-track{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.bm-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+.bm-bar-val{width:60px;text-align:right;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;white-space:nowrap}
+.bm-sort-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+@media(max-width:720px){.bm-chart-row{grid-template-columns:1fr}}
