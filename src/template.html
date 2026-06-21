@@ -145,6 +145,9 @@
     <button class="btn" id="dagPanelBtn" onclick="toggleDagPanel()" data-tip="Open the Agent Dependency Graph — a live SVG showing all 17 agents and their dependencies. Node colors update in real time. Click any node to re-run that agent.">🔗 Pipeline Graph</button>
     <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)" data-tip="Print a formatted executive summary with key sections. Use Full PDF for the complete 17-agent document.">🖨 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)" data-tip="Run the pipeline with built-in sample data — no API key required. Use to preview output shapes and features before a real run.">⚡ Demo Mode</button>
+    <button class="btn" id="dealCalcBtn" onclick="toggleDealCalculator()" style="border-color:var(--teal);color:var(--teal)" data-tip="BizHub-style Deal Calculator. Analyze any business acquisition: SDE, DSCR, SBA loan viability, cash-on-cash return, deal scoring, and AI analysis.">🧮 Deal Calculator</button>
+    <button class="btn" id="cimBtn" onclick="toggleCimAnalyzer()" style="border-color:var(--purple);color:var(--purple)" data-tip="Paste a Confidential Information Memorandum (CIM) and get AI-powered financial extraction, add-back validation, risk analysis, and deal verdict.">📄 CIM Analyzer</button>
+    <button class="btn" id="benchDashBtn" onclick="toggleBenchmarksDash()" style="border-color:var(--blue);color:var(--blue)" data-tip="Compare all 16 industries side-by-side: revenue, SDE, multiples, margins, SBA default rates, and typical asking prices.">📊 Benchmarks</button>
   </div>
 
   <!-- Phase selector panel (collapsed by default) -->
@@ -223,6 +226,82 @@
 
 <!-- Session History Panel -->
 <div id="historyPanel" class="history-panel" style="display:none"></div>
+
+<!-- ══ DEAL CALCULATOR PANEL ══════════════════════════════ -->
+<div id="dealCalcPanel" class="dc-panel" style="display:none">
+  <div class="dc-panel-title">🧮 Deal Calculator</div>
+  <div class="dc-panel-sub">Analyze any business acquisition — SDE, DSCR, SBA loan viability, cash-on-cash return, deal scoring, and AI analysis. Industry benchmarks auto-populated from selected industry.</div>
+  <div class="dc-form-grid">
+    <div class="dc-field">
+      <label>Asking Price ($)</label>
+      <input type="number" id="dc-asking-price" placeholder="475000" min="0" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Annual Revenue ($)</label>
+      <input type="number" id="dc-annual-revenue" placeholder="850000" min="0" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>SDE / Cash Flow ($)</label>
+      <input type="number" id="dc-sde" placeholder="170000" min="0" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Down Payment (%)</label>
+      <input type="number" id="dc-down-pct" value="15" min="5" max="100" step="1" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Loan Rate (%)</label>
+      <input type="number" id="dc-loan-rate" value="10.5" min="0" max="30" step="0.25" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Loan Term (years)</label>
+      <input type="number" id="dc-loan-term" value="10" min="1" max="25" step="1" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Includes Real Estate?</label>
+      <select id="dc-includes-re" oninput="_dcMarkTouched(this)">
+        <option value="no">No</option>
+        <option value="yes">Yes (25-year term)</option>
+      </select>
+    </div>
+    <div class="dc-field">
+      <label>Owner-Operated?</label>
+      <select id="dc-owner-op" oninput="_dcMarkTouched(this);_dcToggleOperatorSalary()">
+        <option value="yes">Yes (owner runs it)</option>
+        <option value="no">No (hire operator)</option>
+      </select>
+    </div>
+    <div class="dc-field" id="dc-opsalary-wrap" style="display:none">
+      <label>Operator Salary ($)</label>
+      <input type="number" id="dc-operator-salary" placeholder="52000" min="0" step="1000" oninput="_dcMarkTouched(this)">
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button class="btn primary" onclick="runDealCalculator()">Analyze Deal</button>
+    <button class="btn" onclick="_dcResetOnIndustryChange();runDealCalculator()" style="border-color:var(--muted);color:var(--muted)">Reset to Defaults</button>
+    <span style="font-size:11px;color:var(--faint);margin-left:auto">Defaults reflect industry benchmarks for the selected industry</span>
+  </div>
+  <div id="dc-results" style="margin-top:16px"></div>
+</div>
+
+<!-- ══ CIM ANALYZER PANEL ════════════════════════════════ -->
+<div id="cimPanel" class="cim-panel" style="display:none">
+  <div class="cim-panel-title">📄 CIM Analyzer</div>
+  <div class="cim-panel-sub">Paste a Confidential Information Memorandum (CIM) below. AI extracts financials, validates add-backs, identifies risks, and delivers a structured deal verdict. Requires API key.</div>
+  <textarea id="cim-text" class="cim-textarea" placeholder="Paste the full CIM text here... The AI will extract: asking price, revenue, SDE, EBITDA, add-backs, risks, revenue breakdown, and more.
+
+Tip: Include at least the financial summary, P&L, and asking price sections for best results."></textarea>
+  <div class="cim-actions">
+    <button class="btn primary" id="cim-run-btn" onclick="runCimAnalysis()">Analyze CIM</button>
+    <button class="btn" onclick="$('cim-text').value='';$('cim-results').innerHTML=''" style="border-color:var(--muted);color:var(--muted)">Clear</button>
+    <span style="font-size:11px;color:var(--faint);margin-left:auto">Uses ~4K tokens per analysis</span>
+  </div>
+  <div id="cim-results" style="margin-top:16px"></div>
+</div>
+
+<!-- ══ BENCHMARKS DASHBOARD PANEL ════════════════════════ -->
+<div id="benchDashPanel" class="bench-panel" style="display:none">
+  <div id="benchDashContent"></div>
+</div>
 
 <div class="arrow">↓</div>
 

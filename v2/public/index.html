@@ -743,6 +743,68 @@ select option{background:var(--surface2)}
 [data-tip][data-tip-pos="down"]::after{top:calc(100% + 10px);bottom:auto}
 [data-tip][data-tip-pos="down"]::before{top:calc(100% + 4px);bottom:auto;border-top-color:transparent;border-bottom-color:var(--border2)}
 
+/* ══ DEAL CALCULATOR ════════════════════════════════════════ */
+.dc-panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:1.2rem}
+.dc-panel-title{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.dc-panel-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.dc-form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.dc-field{display:flex;flex-direction:column;gap:4px}
+.dc-field label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.dc-field input,.dc-field select{height:36px;padding:0 10px;font-size:13px;font-family:'Instrument Sans',sans-serif;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;transition:border-color 0.2s}
+.dc-field input:focus,.dc-field select:focus{border-color:var(--blue)}
+.dc-score-hero{text-align:center;padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.dc-score-ring{position:relative;width:120px;height:120px;margin:0 auto 12px;display:inline-block}
+.dc-score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dc-score-num span{font-size:32px;font-weight:700;font-family:'Syne',sans-serif}
+.dc-score-num small{font-size:12px;color:var(--muted)}
+.dc-section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.dc-section{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.dc-section-title{font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.dc-metric{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.dc-metric:last-child{border-bottom:none}
+.dc-k{color:var(--muted)}
+.dc-v{font-weight:600;font-family:'Syne',sans-serif;text-align:right}
+.dc-score-bars{display:flex;flex-direction:column;gap:8px}
+.dc-score-bar-row{display:flex;align-items:center;gap:10px}
+.dc-bar-label{width:180px;flex-shrink:0;font-size:12px;color:var(--text);font-family:'Syne',sans-serif;font-weight:500}
+.dc-bar-desc{display:block;font-size:10px;color:var(--faint);font-weight:400;font-family:'Instrument Sans',sans-serif}
+.dc-bar-track{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.dc-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+.dc-bar-val{width:36px;text-align:right;font-size:13px;font-weight:700;font-family:'Syne',sans-serif}
+.dc-bench-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dc-bench-item{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.dc-bench-label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:var(--faint);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.dc-bench-val{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue)}
+.dc-ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dc-ai-col{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px}
+.dc-ai-col-title{font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px}
+.dc-ai-item{font-size:12px;color:var(--text);line-height:1.6;margin-bottom:4px;display:flex;gap:6px}
+.dc-fair-price{text-align:center;margin-top:14px;padding:14px;background:var(--surface3);border:1px solid var(--border2);border-radius:10px}
+.dc-fair-label{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:4px}
+.dc-fair-val{font-size:28px;font-weight:700;font-family:'Syne',sans-serif;color:var(--green)}
+.dc-fair-rationale{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+@media(max-width:600px){.dc-section-grid{grid-template-columns:1fr}.dc-bench-grid{grid-template-columns:1fr 1fr}.dc-ai-grid{grid-template-columns:1fr}.dc-bar-label{width:120px}}
+
+/* ══ CIM ANALYZER ═══════════════════════════════════════════ */
+.cim-panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:1.2rem}
+.cim-panel-title{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.cim-panel-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.cim-textarea{width:100%;min-height:180px;padding:12px;font-size:12px;font-family:'Instrument Sans',sans-serif;border:1px solid var(--border2);border-radius:10px;background:var(--surface2);color:var(--text);resize:vertical;outline:none;transition:border-color 0.2s;line-height:1.6}
+.cim-textarea:focus{border-color:var(--purple)}
+.cim-actions{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+
+/* ══ BENCHMARKS DASHBOARD ═══════════════════════════════════ */
+.bench-panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:1.2rem}
+.bm-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bm-mini-chart{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.bm-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.bm-bar-label{width:100px;flex-shrink:0;font-size:10px;font-family:'Syne',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bm-bar-track{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.bm-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+.bm-bar-val{width:60px;text-align:right;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;white-space:nowrap}
+.bm-sort-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+@media(max-width:720px){.bm-chart-row{grid-template-columns:1fr}}
+
 /* ── V2 DESIGN SYSTEM ──────────────────────────────────────────────── */
 :root {
   --v2-bg:      #07070f;
@@ -3103,6 +3165,9 @@ div > .v2-ind-category-label:first-of-type { margin-top: 0; border-top: none; }
     <button class="btn" id="dagPanelBtn" onclick="toggleDagPanel()" data-tip="Open the Agent Dependency Graph — a live SVG showing all 17 agents and their dependencies. Node colors update in real time. Click any node to re-run that agent.">🔗 Pipeline Graph</button>
     <button class="btn" id="printBtn" onclick="printReport()" style="border-color:var(--purple);color:var(--purple)" data-tip="Print a formatted executive summary with key sections. Use Full PDF for the complete 17-agent document.">🖨 Print Report</button>
     <button class="btn" id="demoBtn" onclick="toggleDemo()" style="border-color:var(--amber);color:var(--amber)" data-tip="Run the pipeline with built-in sample data — no API key required. Use to preview output shapes and features before a real run.">⚡ Demo Mode</button>
+    <button class="btn" id="dealCalcBtn" onclick="toggleDealCalculator()" style="border-color:var(--teal);color:var(--teal)" data-tip="BizHub-style Deal Calculator. Analyze any business acquisition: SDE, DSCR, SBA loan viability, cash-on-cash return, deal scoring, and AI analysis.">🧮 Deal Calculator</button>
+    <button class="btn" id="cimBtn" onclick="toggleCimAnalyzer()" style="border-color:var(--purple);color:var(--purple)" data-tip="Paste a Confidential Information Memorandum (CIM) and get AI-powered financial extraction, add-back validation, risk analysis, and deal verdict.">📄 CIM Analyzer</button>
+    <button class="btn" id="benchDashBtn" onclick="toggleBenchmarksDash()" style="border-color:var(--blue);color:var(--blue)" data-tip="Compare all 16 industries side-by-side: revenue, SDE, multiples, margins, SBA default rates, and typical asking prices.">📊 Benchmarks</button>
   </div>
 
   <!-- Phase selector panel (collapsed by default) -->
@@ -3181,6 +3246,82 @@ div > .v2-ind-category-label:first-of-type { margin-top: 0; border-top: none; }
 
 <!-- Session History Panel -->
 <div id="historyPanel" class="history-panel" style="display:none"></div>
+
+<!-- ══ DEAL CALCULATOR PANEL ══════════════════════════════ -->
+<div id="dealCalcPanel" class="dc-panel" style="display:none">
+  <div class="dc-panel-title">🧮 Deal Calculator</div>
+  <div class="dc-panel-sub">Analyze any business acquisition — SDE, DSCR, SBA loan viability, cash-on-cash return, deal scoring, and AI analysis. Industry benchmarks auto-populated from selected industry.</div>
+  <div class="dc-form-grid">
+    <div class="dc-field">
+      <label>Asking Price ($)</label>
+      <input type="number" id="dc-asking-price" placeholder="475000" min="0" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Annual Revenue ($)</label>
+      <input type="number" id="dc-annual-revenue" placeholder="850000" min="0" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>SDE / Cash Flow ($)</label>
+      <input type="number" id="dc-sde" placeholder="170000" min="0" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Down Payment (%)</label>
+      <input type="number" id="dc-down-pct" value="15" min="5" max="100" step="1" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Loan Rate (%)</label>
+      <input type="number" id="dc-loan-rate" value="10.5" min="0" max="30" step="0.25" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Loan Term (years)</label>
+      <input type="number" id="dc-loan-term" value="10" min="1" max="25" step="1" oninput="_dcMarkTouched(this)">
+    </div>
+    <div class="dc-field">
+      <label>Includes Real Estate?</label>
+      <select id="dc-includes-re" oninput="_dcMarkTouched(this)">
+        <option value="no">No</option>
+        <option value="yes">Yes (25-year term)</option>
+      </select>
+    </div>
+    <div class="dc-field">
+      <label>Owner-Operated?</label>
+      <select id="dc-owner-op" oninput="_dcMarkTouched(this);_dcToggleOperatorSalary()">
+        <option value="yes">Yes (owner runs it)</option>
+        <option value="no">No (hire operator)</option>
+      </select>
+    </div>
+    <div class="dc-field" id="dc-opsalary-wrap" style="display:none">
+      <label>Operator Salary ($)</label>
+      <input type="number" id="dc-operator-salary" placeholder="52000" min="0" step="1000" oninput="_dcMarkTouched(this)">
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button class="btn primary" onclick="runDealCalculator()">Analyze Deal</button>
+    <button class="btn" onclick="_dcResetOnIndustryChange();runDealCalculator()" style="border-color:var(--muted);color:var(--muted)">Reset to Defaults</button>
+    <span style="font-size:11px;color:var(--faint);margin-left:auto">Defaults reflect industry benchmarks for the selected industry</span>
+  </div>
+  <div id="dc-results" style="margin-top:16px"></div>
+</div>
+
+<!-- ══ CIM ANALYZER PANEL ════════════════════════════════ -->
+<div id="cimPanel" class="cim-panel" style="display:none">
+  <div class="cim-panel-title">📄 CIM Analyzer</div>
+  <div class="cim-panel-sub">Paste a Confidential Information Memorandum (CIM) below. AI extracts financials, validates add-backs, identifies risks, and delivers a structured deal verdict. Requires API key.</div>
+  <textarea id="cim-text" class="cim-textarea" placeholder="Paste the full CIM text here... The AI will extract: asking price, revenue, SDE, EBITDA, add-backs, risks, revenue breakdown, and more.
+
+Tip: Include at least the financial summary, P&L, and asking price sections for best results."></textarea>
+  <div class="cim-actions">
+    <button class="btn primary" id="cim-run-btn" onclick="runCimAnalysis()">Analyze CIM</button>
+    <button class="btn" onclick="$('cim-text').value='';$('cim-results').innerHTML=''" style="border-color:var(--muted);color:var(--muted)">Clear</button>
+    <span style="font-size:11px;color:var(--faint);margin-left:auto">Uses ~4K tokens per analysis</span>
+  </div>
+  <div id="cim-results" style="margin-top:16px"></div>
+</div>
+
+<!-- ══ BENCHMARKS DASHBOARD PANEL ════════════════════════ -->
+<div id="benchDashPanel" class="bench-panel" style="display:none">
+  <div id="benchDashContent"></div>
+</div>
 
 <div class="arrow">↓</div>
 
@@ -3726,45 +3867,6 @@ div > .v2-ind-category-label:first-of-type { margin-top: 0; border-top: none; }
 
 </div>
 <script>
-// ══════════════════════════════════════════════════════════════════════════════
-// LOCAL API KEYS — personal copy, kept out of git
-// ══════════════════════════════════════════════════════════════════════════════
-//
-// USAGE:
-//   1. Copy this file to `src/js/local-keys.js` (already in .gitignore)
-//   2. Replace each '' with your actual key
-//   3. Run `node build.mjs && (cd v2 && node build-v2.mjs)` to bundle
-//
-// The keys load BEFORE prefetchRealData runs, so every pipeline run picks them
-// up automatically. They never reach git, never leave your local clone.
-//
-// Get free keys (~5 min total):
-//   Census  -> https://api.census.gov/data/key_signup.html         (REQUIRED for ACS, ZBP, PEP, BPS)
-//   HUD     -> https://www.huduser.gov/portal/dataset/fmr-api.html (FMR, Income Limits, Vacancy)
-//   BEA     -> https://apps.bea.gov/API/signup/                    (Per-capita personal income)
-//   NOAA    -> https://www.ncdc.noaa.gov/cdo-web/token             (Climate normals)
-//   AirNow  -> https://docs.airnowapi.org/account/request/         (Air quality)
-//   BLS     -> https://data.bls.gov/registrationEngine/            (BLS OES wages — higher rate)
-//   FRED    -> https://fred.stlouisfed.org/docs/api/api_key.html   (County LAUS)
-//   SAM.gov -> https://sam.gov/data-services                       (Federal contracting)
-//
-// ══════════════════════════════════════════════════════════════════════════════
-
-if (typeof window !== 'undefined') {
-  window.CENSUS_API_KEY = '6174bf11a8e4ecfd1b593ccdc54e359f9af6bad9';   // 🚨 Required — unlocks 9 sources
-  window.HUD_TOKEN      = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2IiwianRpIjoiNmI4ODUwM2YxYmMyNWNhYTIwNzAzZDc4YzFhYzFlZWI2ZDc4MDQxNDMwZmVmMDFhNGI0MTkzYTg3YWFmM2JlOTdlNTAxZjNkMDhkOWQ1YjgiLCJpYXQiOjE3Nzg5NzI1ODUuNzg2MTUsIm5iZiI6MTc3ODk3MjU4NS43ODYxNTMsImV4cCI6MjA5NDU5MTc4NS43ODE4NDQsInN1YiI6IjEyODc1NCIsInNjb3BlcyI6W119.j3h_J76MRg5iyZbp6MY2fZV5sLdi6H4ACfvPtKkILH2Cw_bhW7GBRyJEY5FYK40gnsLHioej3PG_lns0eBRd3w';
-  window.BEA_API_KEY    = 'FD0A43B6-7620-4C2A-A556-0D89F1BCE48F';
-  window.NOAA_TOKEN     = 'OoOuSldKdIyQBGgjniqUbrWnocQOPBBC';
-  window.AIRNOW_API_KEY = '6C450DED-F39C-4B65-B8D8-D834FFD066DD';
-  window.BLS_API_KEY    = 'ab371b09ca1241e2a801446af7cb5814';
-  window.FRED_API_KEY   = '59de256ecd2f5c77c0111f90da978ab9';
-  window.SAM_API_KEY    = '';
-  // Optional — DEMO_KEY works for low volume
-  window.NREL_API_KEY   = 'andQ5cinYztYHaGkEzI1JJlddTcwJ37WIZiJa0Ui';
-  window.FBI_API_KEY    = '95HiPCzv6XBbAdIu5J6Lf4QTfeGOZJtjTkgnDKbc';
-}
-
-
 
 const API='https://api.anthropic.com/v1/messages', MODEL='claude-sonnet-4-6';
 let running=false, R={}, charts={}, demoMode=false, stopRequested=false;
@@ -17991,6 +18093,1470 @@ function rdRenderFinancialBadge(elId) {
   window.runAccuracyVerifier = runAccuracyVerifier;
 
 })();
+
+
+// ══════════════════════════════════════════════════════════
+// 45-deal-benchmarks.js — Industry Benchmark Data
+// Median revenue, SDE, multiples, margins, SBA default rates,
+// operator salaries, NAICS codes, and SBA loan statistics
+// for all 16 industries. Used by Deal Calculator & scoring.
+// ══════════════════════════════════════════════════════════
+
+const DEAL_BENCHMARKS = {
+  daycare: {
+    median_revenue: 850000, median_sde: 170000,
+    avg_cf_multiple: 2.8, avg_revenue_multiple: 0.56,
+    avg_margin_pct: 20, sba_default_rate_pct: 3.8,
+    typical_asking: 475000, typical_down_pct: 15,
+    owner_operated: true, operator_salary: 52000,
+    naics: '624410', naics_label: 'Child Day Care Services',
+    sba_avg_loan: 350000, sba_avg_term: 10, sba_approval_pct: 68,
+    sba_total_loans_yr: 1850, top_states: ['TX','CA','FL']
+  },
+  gas_station: {
+    median_revenue: 2400000, median_sde: 240000,
+    avg_cf_multiple: 3.5, avg_revenue_multiple: 0.35,
+    avg_margin_pct: 10, sba_default_rate_pct: 5.2,
+    typical_asking: 840000, typical_down_pct: 20,
+    owner_operated: true, operator_salary: 45000,
+    naics: '447110', naics_label: 'Gasoline Stations with Convenience Stores',
+    sba_avg_loan: 620000, sba_avg_term: 12, sba_approval_pct: 58,
+    sba_total_loans_yr: 3200, top_states: ['TX','CA','FL']
+  },
+  laundromat: {
+    median_revenue: 300000, median_sde: 105000,
+    avg_cf_multiple: 2.5, avg_revenue_multiple: 0.88,
+    avg_margin_pct: 35, sba_default_rate_pct: 3.1,
+    typical_asking: 262000, typical_down_pct: 15,
+    owner_operated: false, operator_salary: 38000,
+    naics: '812310', naics_label: 'Coin-Operated Laundries and Drycleaners',
+    sba_avg_loan: 210000, sba_avg_term: 10, sba_approval_pct: 72,
+    sba_total_loans_yr: 980, top_states: ['CA','NY','TX']
+  },
+  car_wash: {
+    median_revenue: 450000, median_sde: 135000,
+    avg_cf_multiple: 3.0, avg_revenue_multiple: 0.90,
+    avg_margin_pct: 30, sba_default_rate_pct: 4.0,
+    typical_asking: 405000, typical_down_pct: 15,
+    owner_operated: false, operator_salary: 42000,
+    naics: '811192', naics_label: 'Car Washes',
+    sba_avg_loan: 380000, sba_avg_term: 10, sba_approval_pct: 65,
+    sba_total_loans_yr: 1100, top_states: ['TX','FL','CA']
+  },
+  restaurant: {
+    median_revenue: 900000, median_sde: 126000,
+    avg_cf_multiple: 2.2, avg_revenue_multiple: 0.31,
+    avg_margin_pct: 14, sba_default_rate_pct: 7.8,
+    typical_asking: 277000, typical_down_pct: 20,
+    owner_operated: true, operator_salary: 55000,
+    naics: '722511', naics_label: 'Full-Service Restaurants',
+    sba_avg_loan: 450000, sba_avg_term: 10, sba_approval_pct: 52,
+    sba_total_loans_yr: 8500, top_states: ['CA','TX','NY']
+  },
+  gym: {
+    median_revenue: 600000, median_sde: 120000,
+    avg_cf_multiple: 2.5, avg_revenue_multiple: 0.50,
+    avg_margin_pct: 20, sba_default_rate_pct: 5.5,
+    typical_asking: 300000, typical_down_pct: 15,
+    owner_operated: true, operator_salary: 48000,
+    naics: '713940', naics_label: 'Fitness and Recreational Sports Centers',
+    sba_avg_loan: 320000, sba_avg_term: 10, sba_approval_pct: 60,
+    sba_total_loans_yr: 2100, top_states: ['CA','TX','FL']
+  },
+  indoor_play: {
+    median_revenue: 400000, median_sde: 100000,
+    avg_cf_multiple: 2.3, avg_revenue_multiple: 0.58,
+    avg_margin_pct: 25, sba_default_rate_pct: 4.5,
+    typical_asking: 230000, typical_down_pct: 15,
+    owner_operated: true, operator_salary: 40000,
+    naics: '713120', naics_label: 'Amusement Arcades',
+    sba_avg_loan: 250000, sba_avg_term: 10, sba_approval_pct: 62,
+    sba_total_loans_yr: 420, top_states: ['TX','CA','FL']
+  },
+  dry_cleaning: {
+    median_revenue: 350000, median_sde: 87500,
+    avg_cf_multiple: 2.0, avg_revenue_multiple: 0.50,
+    avg_margin_pct: 25, sba_default_rate_pct: 4.2,
+    typical_asking: 175000, typical_down_pct: 15,
+    owner_operated: true, operator_salary: 38000,
+    naics: '812320', naics_label: 'Drycleaning and Laundry Services',
+    sba_avg_loan: 180000, sba_avg_term: 10, sba_approval_pct: 66,
+    sba_total_loans_yr: 750, top_states: ['CA','NY','TX']
+  },
+  senior_care: {
+    median_revenue: 1200000, median_sde: 240000,
+    avg_cf_multiple: 3.5, avg_revenue_multiple: 0.70,
+    avg_margin_pct: 20, sba_default_rate_pct: 3.5,
+    typical_asking: 840000, typical_down_pct: 20,
+    owner_operated: false, operator_salary: 62000,
+    naics: '623110', naics_label: 'Nursing Care Facilities',
+    sba_avg_loan: 750000, sba_avg_term: 15, sba_approval_pct: 70,
+    sba_total_loans_yr: 1400, top_states: ['CA','TX','FL']
+  },
+  tutoring: {
+    median_revenue: 250000, median_sde: 75000,
+    avg_cf_multiple: 2.0, avg_revenue_multiple: 0.60,
+    avg_margin_pct: 30, sba_default_rate_pct: 3.0,
+    typical_asking: 150000, typical_down_pct: 10,
+    owner_operated: true, operator_salary: 42000,
+    naics: '611691', naics_label: 'Exam Preparation and Tutoring',
+    sba_avg_loan: 120000, sba_avg_term: 7, sba_approval_pct: 74,
+    sba_total_loans_yr: 380, top_states: ['CA','TX','NY']
+  },
+  urgent_care: {
+    median_revenue: 1800000, median_sde: 360000,
+    avg_cf_multiple: 4.0, avg_revenue_multiple: 0.80,
+    avg_margin_pct: 20, sba_default_rate_pct: 2.8,
+    typical_asking: 1440000, typical_down_pct: 20,
+    owner_operated: false, operator_salary: 85000,
+    naics: '621493', naics_label: 'Freestanding Ambulatory Surgical and Emergency Centers',
+    sba_avg_loan: 950000, sba_avg_term: 15, sba_approval_pct: 75,
+    sba_total_loans_yr: 620, top_states: ['TX','FL','CA']
+  },
+  medical_practice: {
+    median_revenue: 1500000, median_sde: 300000,
+    avg_cf_multiple: 3.8, avg_revenue_multiple: 0.76,
+    avg_margin_pct: 20, sba_default_rate_pct: 2.5,
+    typical_asking: 1140000, typical_down_pct: 20,
+    owner_operated: false, operator_salary: 78000,
+    naics: '621111', naics_label: 'Offices of Physicians',
+    sba_avg_loan: 880000, sba_avg_term: 15, sba_approval_pct: 78,
+    sba_total_loans_yr: 1800, top_states: ['CA','TX','NY']
+  },
+  optometry: {
+    median_revenue: 900000, median_sde: 225000,
+    avg_cf_multiple: 3.2, avg_revenue_multiple: 0.80,
+    avg_margin_pct: 25, sba_default_rate_pct: 2.2,
+    typical_asking: 720000, typical_down_pct: 15,
+    owner_operated: true, operator_salary: 65000,
+    naics: '621320', naics_label: 'Offices of Optometrists',
+    sba_avg_loan: 520000, sba_avg_term: 10, sba_approval_pct: 80,
+    sba_total_loans_yr: 950, top_states: ['CA','TX','FL']
+  },
+  coffee_shop: {
+    median_revenue: 500000, median_sde: 85000,
+    avg_cf_multiple: 2.0, avg_revenue_multiple: 0.34,
+    avg_margin_pct: 17, sba_default_rate_pct: 6.5,
+    typical_asking: 170000, typical_down_pct: 15,
+    owner_operated: true, operator_salary: 42000,
+    naics: '722515', naics_label: 'Snack and Nonalcoholic Beverage Bars',
+    sba_avg_loan: 280000, sba_avg_term: 10, sba_approval_pct: 55,
+    sba_total_loans_yr: 4200, top_states: ['CA','NY','WA']
+  },
+  barbershop: {
+    median_revenue: 250000, median_sde: 75000,
+    avg_cf_multiple: 1.8, avg_revenue_multiple: 0.54,
+    avg_margin_pct: 30, sba_default_rate_pct: 3.5,
+    typical_asking: 135000, typical_down_pct: 10,
+    owner_operated: true, operator_salary: 38000,
+    naics: '812111', naics_label: 'Barber Shops',
+    sba_avg_loan: 110000, sba_avg_term: 7, sba_approval_pct: 70,
+    sba_total_loans_yr: 650, top_states: ['TX','CA','GA']
+  },
+  coworking: {
+    median_revenue: 700000, median_sde: 140000,
+    avg_cf_multiple: 3.0, avg_revenue_multiple: 0.60,
+    avg_margin_pct: 20, sba_default_rate_pct: 5.0,
+    typical_asking: 420000, typical_down_pct: 20,
+    owner_operated: false, operator_salary: 55000,
+    naics: '531120', naics_label: 'Lessors of Nonresidential Buildings',
+    sba_avg_loan: 480000, sba_avg_term: 10, sba_approval_pct: 58,
+    sba_total_loans_yr: 520, top_states: ['CA','NY','TX']
+  }
+};
+
+
+// ══════════════════════════════════════════════════════════
+// 46-deal-calculator.js — BizHub-style Deal Calculator
+// Pure client-side SDE, DSCR, SBA loan, cash-on-cash,
+// payback, valuation multiples, deal scoring, AI analysis.
+// ══════════════════════════════════════════════════════════
+
+let _dcVisible = false;
+
+function toggleDealCalculator() {
+  _dcVisible = !_dcVisible;
+  const panel = $('dealCalcPanel');
+  if (!panel) return;
+  panel.style.display = _dcVisible ? 'block' : 'none';
+  const btn = $('dealCalcBtn');
+  if (btn) {
+    btn.style.background = _dcVisible ? 'var(--teal-dim, rgba(45,212,191,0.12))' : '';
+    btn.style.borderColor = 'var(--teal)';
+    btn.style.color = 'var(--teal)';
+  }
+  if (_dcVisible) _dcInitForm();
+}
+
+function _dcInitForm() {
+  const indKey = industryKey();
+  const bm = DEAL_BENCHMARKS[indKey];
+  if (!bm) return;
+  const f = (id, v) => { const el = $(id); if (el && !el._userTouched) el.value = v; };
+  f('dc-asking-price', bm.typical_asking);
+  f('dc-annual-revenue', bm.median_revenue);
+  f('dc-sde', bm.median_sde);
+  f('dc-down-pct', bm.typical_down_pct);
+  f('dc-loan-rate', '10.5');
+  f('dc-loan-term', '10');
+  f('dc-includes-re', 'no');
+  f('dc-owner-op', bm.owner_operated ? 'yes' : 'no');
+  f('dc-operator-salary', bm.operator_salary || 50000);
+  _dcToggleOperatorSalary();
+}
+
+function _dcToggleOperatorSalary() {
+  const wrap = $('dc-opsalary-wrap');
+  if (!wrap) return;
+  wrap.style.display = $('dc-owner-op')?.value === 'no' ? '' : 'none';
+}
+
+function _dcResetOnIndustryChange() {
+  ['dc-asking-price','dc-annual-revenue','dc-sde','dc-down-pct','dc-loan-rate','dc-loan-term','dc-includes-re','dc-owner-op','dc-operator-salary']
+    .forEach(id => { const el = $(id); if (el) el._userTouched = false; });
+  _dcInitForm();
+  const res = $('dc-results'); if (res) res.innerHTML = '';
+  const aiOut = $('dc-ai-output'); if (aiOut) aiOut.innerHTML = '';
+  if (typeof _bmDashVisible !== 'undefined' && _bmDashVisible && typeof _bmRenderDashboard === 'function') _bmRenderDashboard();
+}
+
+// Wrap onIndustryChange to also reset deal calculator defaults
+(function() {
+  const _orig = onIndustryChange;
+  onIndustryChange = function() { _orig(); _dcResetOnIndustryChange(); };
+})();
+
+function _dcMarkTouched(el) { if (el) el._userTouched = true; }
+
+function _dcNum(id) { return parseFloat($(id)?.value) || 0; }
+
+function _dcFmt(n) {
+  if (Math.abs(n) >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
+  return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+function _dcPct(n) { return n.toFixed(1) + '%'; }
+
+function _dcSbaGuarantyFee(loanAmt, termYrs) {
+  if (loanAmt <= 0) return 0;
+  let feePct;
+  if (loanAmt <= 150000) feePct = 2.0;
+  else if (loanAmt <= 700000) feePct = 3.0;
+  else if (loanAmt <= 1000000) feePct = 3.5;
+  else feePct = 3.75;
+  if (termYrs > 15) feePct += 0.25;
+  const guarantyPct = loanAmt <= 150000 ? 0.85 : (loanAmt <= 500000 ? 0.75 : 0.75);
+  return loanAmt * guarantyPct * (feePct / 100);
+}
+
+function _dcMonthlyPayment(principal, annualRate, termYrs) {
+  if (principal <= 0 || annualRate <= 0 || termYrs <= 0) return 0;
+  const r = annualRate / 100 / 12;
+  const n = termYrs * 12;
+  return principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+}
+
+function _dcMinDownForDscr(askingPrice, sde, loanRate, loanTerm) {
+  if (askingPrice <= 0 || sde <= 0 || loanRate <= 0) return 0;
+  for (let pct = 5; pct <= 100; pct++) {
+    const down = askingPrice * (pct / 100);
+    const loan = askingPrice - down;
+    const fee = _dcSbaGuarantyFee(loan, loanTerm);
+    const pmt = _dcMonthlyPayment(loan + fee, loanRate, loanTerm);
+    const ads = pmt * 12;
+    if (ads > 0 && sde / ads >= 1.25) return pct;
+  }
+  return 100;
+}
+
+function runDealCalculator() {
+  const indKey = industryKey();
+  const bm = DEAL_BENCHMARKS[indKey] || {};
+  const ind = industry();
+
+  const askingPrice = _dcNum('dc-asking-price');
+  const annualRevenue = _dcNum('dc-annual-revenue');
+  const sde = _dcNum('dc-sde');
+  const downPct = _dcNum('dc-down-pct');
+  const loanRate = _dcNum('dc-loan-rate');
+  const includesRE = $('dc-includes-re')?.value === 'yes';
+  const loanTerm = includesRE ? 25 : _dcNum('dc-loan-term');
+  const ownerOperated = $('dc-owner-op')?.value !== 'no';
+  const operatorSalary = ownerOperated ? 0 : (_dcNum('dc-operator-salary') || bm.operator_salary || 50000);
+  const adjustedSde = sde - operatorSalary;
+
+  if (askingPrice <= 0 || sde <= 0) {
+    $('dc-results').innerHTML = '<div style="color:var(--red);padding:20px;text-align:center">Enter a valid Asking Price and SDE to analyze.</div>';
+    return;
+  }
+
+  const cashDown = askingPrice * (downPct / 100);
+  const loanAmount = askingPrice - cashDown;
+  const sbaFee = _dcSbaGuarantyFee(loanAmount, loanTerm);
+  const totalLoanAmt = loanAmount + sbaFee;
+  const closingCosts = askingPrice * 0.025;
+  const totalAcquisitionCost = askingPrice + sbaFee + closingCosts;
+  const totalCashNeeded = cashDown + sbaFee + closingCosts;
+  const monthlyPayment = _dcMonthlyPayment(totalLoanAmt, loanRate, loanTerm);
+  const annualDebtService = monthlyPayment * 12;
+  const dscr = annualDebtService > 0 ? adjustedSde / annualDebtService : 0;
+  const postDebtCF = adjustedSde - annualDebtService;
+  const cashOnCash = cashDown > 0 ? (postDebtCF / cashDown) * 100 : 0;
+  const paybackYrs = postDebtCF > 0 ? totalCashNeeded / postDebtCF : Infinity;
+  const cfMultiple = sde > 0 ? askingPrice / sde : 0;
+  const revMultiple = annualRevenue > 0 ? askingPrice / annualRevenue : 0;
+  const profitMargin = annualRevenue > 0 ? (sde / annualRevenue) * 100 : 0;
+
+  // Minimum down payment % to clear 1.25x DSCR (uses adjusted SDE)
+  const minDownForDscr = _dcMinDownForDscr(askingPrice, adjustedSde, loanRate, loanTerm);
+
+  // ── Scoring (0-10 per dimension) ──────────────────────
+  const scores = _dcScoreDeal({
+    cfMultiple, dscr, cashOnCash, profitMargin, paybackYrs, revMultiple
+  }, bm);
+  const overallScore = scores.overall;
+
+  // ── Amortization schedule (first 5 years) ─────────────
+  const amort = _dcAmortSchedule(totalLoanAmt, loanRate, loanTerm, 5);
+
+  // ── Build HTML ────────────────────────────────────────
+  const dscrColor = dscr >= 1.25 ? 'var(--green)' : (dscr >= 1.0 ? 'var(--amber)' : 'var(--red)');
+  const dscrBadge = dscr >= 1.25 ? 'b-green' : (dscr >= 1.0 ? 'b-amber' : 'b-red');
+  const dscrLabel = dscr >= 1.25 ? 'PASS' : (dscr >= 1.0 ? 'TIGHT' : 'FAIL');
+  const scoreColor = overallScore >= 7 ? 'var(--green)' : (overallScore >= 5 ? 'var(--amber)' : 'var(--red)');
+  const verdictText = overallScore >= 7 ? 'Strong Deal' : (overallScore >= 5 ? 'Proceed with Caution' : 'High Risk');
+  const verdictClass = overallScore >= 7 ? 'v-go' : (overallScore >= 5 ? 'v-caution' : 'v-nogo');
+
+  const cfMultComp = bm.avg_cf_multiple ? _dcCompare(cfMultiple, bm.avg_cf_multiple, true) : '';
+  const revMultComp = bm.avg_revenue_multiple ? _dcCompare(revMultiple, bm.avg_revenue_multiple, true) : '';
+  const marginComp = bm.avg_margin_pct ? _dcCompare(profitMargin, bm.avg_margin_pct, false) : '';
+
+  let html = `
+  <div class="dc-score-hero">
+    <div class="dc-score-ring">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="var(--surface3)" stroke-width="8"/>
+        <circle cx="60" cy="60" r="52" fill="none" stroke="${scoreColor}" stroke-width="8" stroke-linecap="round"
+          stroke-dasharray="${(overallScore / 10) * 327} 327" transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="dc-score-num">
+        <span style="color:${scoreColor}">${overallScore.toFixed(1)}</span>
+        <small>/ 10</small>
+      </div>
+    </div>
+    <div class="verdict ${verdictClass}" style="font-size:14px;padding:8px 16px">${verdictText}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">${ind.emoji} ${ind.label} Acquisition Analysis</div>
+  </div>
+
+  <div class="dc-section-grid">
+    <div class="dc-section">
+      <div class="dc-section-title">Valuation</div>
+      <div class="dc-metric"><span class="dc-k">Cash Flow Multiple</span><span class="dc-v">${cfMultiple.toFixed(1)}x ${cfMultComp}</span></div>
+      <div class="dc-metric"><span class="dc-k">Revenue Multiple</span><span class="dc-v">${revMultiple.toFixed(2)}x ${revMultComp}</span></div>
+      <div class="dc-metric"><span class="dc-k">Profit Margin</span><span class="dc-v">${_dcPct(profitMargin)} ${marginComp}</span></div>
+      <div class="dc-metric"><span class="dc-k">Revenue</span><span class="dc-v">${_dcFmt(annualRevenue)}</span></div>
+      <div class="dc-metric"><span class="dc-k">SDE (Cash Flow)</span><span class="dc-v">${_dcFmt(sde)}</span></div>
+    </div>
+
+    <div class="dc-section">
+      <div class="dc-section-title">Acquisition Cost</div>
+      <div class="dc-metric"><span class="dc-k">Asking Price</span><span class="dc-v">${_dcFmt(askingPrice)}</span></div>
+      <div class="dc-metric"><span class="dc-k">SBA Guaranty Fee</span><span class="dc-v">${_dcFmt(sbaFee)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Est. Closing Costs (2.5%)</span><span class="dc-v">${_dcFmt(closingCosts)}</span></div>
+      <div class="dc-metric" style="font-weight:700;border-top:2px solid var(--border2);padding-top:8px"><span class="dc-k" style="font-weight:700">Total Acquisition Cost</span><span class="dc-v">${_dcFmt(totalAcquisitionCost)}</span></div>
+    </div>
+
+    <div class="dc-section">
+      <div class="dc-section-title">SBA Loan Analysis</div>
+      <div class="dc-metric"><span class="dc-k">Cash Down (${downPct}%)</span><span class="dc-v">${_dcFmt(cashDown)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Loan Amount</span><span class="dc-v">${_dcFmt(loanAmount)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Total Financed (+ SBA Fee)</span><span class="dc-v">${_dcFmt(totalLoanAmt)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Monthly Payment</span><span class="dc-v">${_dcFmt(monthlyPayment)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Annual Debt Service</span><span class="dc-v">${_dcFmt(annualDebtService)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Loan Term</span><span class="dc-v">${loanTerm} years${includesRE ? ' (RE)' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">Total Cash Needed</span><span class="dc-v" style="color:var(--amber)">${_dcFmt(totalCashNeeded)}</span></div>
+    </div>
+
+    <div class="dc-section">
+      <div class="dc-section-title">Debt Service Coverage</div>
+      <div class="dc-dscr-display" style="text-align:center;padding:12px 0">
+        <div style="font-size:36px;font-weight:700;font-family:'Syne',sans-serif;color:${dscrColor}">${dscr.toFixed(2)}x</div>
+        <div class="badge ${dscrBadge}" style="margin-top:6px;font-size:12px;padding:4px 12px">${dscrLabel}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">SBA minimum: 1.25x</div>
+      </div>
+      <div class="dc-metric"><span class="dc-k">SDE (Cash Flow)</span><span class="dc-v">${_dcFmt(sde)}</span></div>
+      ${operatorSalary > 0 ? `<div class="dc-metric"><span class="dc-k">− Operator Salary</span><span class="dc-v" style="color:var(--red)">−${_dcFmt(operatorSalary)}</span></div>
+      <div class="dc-metric" style="border-top:2px solid var(--border2);padding-top:6px"><span class="dc-k" style="font-weight:700">Adjusted Cash Flow</span><span class="dc-v" style="font-weight:700;color:${adjustedSde >= 0 ? 'var(--text)' : 'var(--red)'}">${_dcFmt(adjustedSde)}</span></div>` : ''}
+      <div class="dc-metric"><span class="dc-k">Annual Debt Service</span><span class="dc-v">${_dcFmt(annualDebtService)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Min Equity for 1.25x</span><span class="dc-v" style="color:${minDownForDscr <= downPct ? 'var(--green)' : 'var(--red)'}">${minDownForDscr}% down${minDownForDscr > downPct ? ' (need more)' : ' ✓'}</span></div>
+    </div>
+
+    <div class="dc-section">
+      <div class="dc-section-title">Returns</div>
+      <div class="dc-metric"><span class="dc-k">Post-Debt Cash Flow</span><span class="dc-v" style="color:${postDebtCF >= 0 ? 'var(--green)' : 'var(--red)'}">${_dcFmt(postDebtCF)}/yr</span></div>
+      <div class="dc-metric"><span class="dc-k">Cash-on-Cash Return</span><span class="dc-v" style="color:${cashOnCash >= 15 ? 'var(--green)' : (cashOnCash >= 0 ? 'var(--amber)' : 'var(--red)')}">${_dcPct(cashOnCash)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Payback Period</span><span class="dc-v">${paybackYrs < 100 ? paybackYrs.toFixed(1) + ' years' : 'Never'}</span></div>
+      <div class="dc-metric"><span class="dc-k">Monthly Take-Home</span><span class="dc-v">${_dcFmt(postDebtCF / 12)}/mo</span></div>
+    </div>
+  </div>
+
+  <div class="dc-section" style="margin-top:14px">
+    <div class="dc-section-title">Deal Score Breakdown</div>
+    <div class="dc-score-bars">
+      ${_dcScoreBar('Valuation Fairness', scores.valuation, 'How the CF multiple compares to industry avg')}
+      ${_dcScoreBar('DSCR Strength', scores.dscr_score, 'Distance from 1.25x SBA threshold')}
+      ${_dcScoreBar('Cash-on-Cash Return', scores.coc_score, 'Return on your equity invested')}
+      ${_dcScoreBar('Margin Health', scores.margin_score, 'Profit margin vs industry avg')}
+      ${_dcScoreBar('Payback Period', scores.payback_score, 'Years to recoup your down payment')}
+      ${_dcScoreBar('Default Risk', scores.risk_score, 'Industry SBA default rate')}
+    </div>
+  </div>
+
+  <div class="dc-section" style="margin-top:14px">
+    <div class="dc-section-title">Industry Benchmarks: ${ind.label}</div>
+    <div class="dc-bench-grid">
+      <div class="dc-bench-item"><div class="dc-bench-label">Median Revenue</div><div class="dc-bench-val">${_dcFmt(bm.median_revenue)}</div></div>
+      <div class="dc-bench-item"><div class="dc-bench-label">Median SDE</div><div class="dc-bench-val">${_dcFmt(bm.median_sde)}</div></div>
+      <div class="dc-bench-item"><div class="dc-bench-label">Avg CF Multiple</div><div class="dc-bench-val">${bm.avg_cf_multiple}x</div></div>
+      <div class="dc-bench-item"><div class="dc-bench-label">Avg Rev Multiple</div><div class="dc-bench-val">${bm.avg_revenue_multiple}x</div></div>
+      <div class="dc-bench-item"><div class="dc-bench-label">Avg Margin</div><div class="dc-bench-val">${bm.avg_margin_pct}%</div></div>
+      <div class="dc-bench-item"><div class="dc-bench-label">SBA Default Rate</div><div class="dc-bench-val">${bm.sba_default_rate_pct}%</div></div>
+    </div>
+  </div>
+
+  <div class="dc-section" style="margin-top:14px">
+    <div class="dc-section-title">Amortization Schedule (First 5 Years)</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Year</th><th>Payment</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>
+        <tbody>
+          ${amort.map(r => `<tr>
+            <td>${r.year}</td>
+            <td>${_dcFmt(r.totalPaid)}</td>
+            <td>${_dcFmt(r.principalPaid)}</td>
+            <td>${_dcFmt(r.interestPaid)}</td>
+            <td>${_dcFmt(r.endBalance)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  ${_dcSensitivityTable(askingPrice, adjustedSde, loanRate, loanTerm, downPct)}
+
+  <div style="text-align:center;margin-top:16px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+    <button class="btn" onclick="_dcRunAiAnalysis()" id="dc-ai-btn" style="border-color:var(--purple);color:var(--purple)">
+      AI Deep Analysis (uses API key)
+    </button>
+    <button class="btn" onclick="_dcSaveScenario()" style="border-color:var(--teal);color:var(--teal)">
+      Save as Scenario
+    </button>
+    <button class="btn" onclick="_dcExport()" style="border-color:var(--amber);color:var(--amber)">
+      Export / Print
+    </button>
+  </div>
+  <div id="dc-ai-output"></div>
+  <div id="dc-scenario-compare"></div>
+  `;
+
+  $('dc-results').innerHTML = html;
+
+  // Store for AI analysis
+  window._dcLastCalc = {
+    askingPrice, annualRevenue, sde, adjustedSde, operatorSalary, ownerOperated,
+    downPct, cashDown, loanAmount, sbaFee,
+    totalLoanAmt, totalAcquisitionCost, totalCashNeeded, closingCosts,
+    monthlyPayment, annualDebtService, dscr, postDebtCF,
+    cashOnCash, paybackYrs, cfMultiple, revMultiple, profitMargin,
+    minDownForDscr, overallScore, verdictText, loanTerm, loanRate, includesRE, indKey, bm
+  };
+}
+
+function _dcCompare(actual, benchmark, lowerIsBetter) {
+  const diff = ((actual - benchmark) / benchmark) * 100;
+  const absDiff = Math.abs(diff).toFixed(0);
+  if (Math.abs(diff) < 3) return '<span style="color:var(--muted);font-size:10px">= avg</span>';
+  if (lowerIsBetter) {
+    return diff > 0
+      ? `<span style="color:var(--red);font-size:10px">${absDiff}% above avg</span>`
+      : `<span style="color:var(--green);font-size:10px">${absDiff}% below avg</span>`;
+  }
+  return diff > 0
+    ? `<span style="color:var(--green);font-size:10px">${absDiff}% above avg</span>`
+    : `<span style="color:var(--red);font-size:10px">${absDiff}% below avg</span>`;
+}
+
+function _dcScoreDeal(metrics, bm) {
+  // Valuation: lower CF multiple vs avg = better
+  let valuation = 10;
+  if (bm.avg_cf_multiple) {
+    const ratio = metrics.cfMultiple / bm.avg_cf_multiple;
+    if (ratio <= 0.7) valuation = 10;
+    else if (ratio <= 0.9) valuation = 8;
+    else if (ratio <= 1.1) valuation = 6;
+    else if (ratio <= 1.5) valuation = 4;
+    else if (ratio <= 2.0) valuation = 2;
+    else valuation = 1;
+  }
+
+  // DSCR: above 1.25 = pass
+  let dscr_score = 1;
+  if (metrics.dscr >= 2.0) dscr_score = 10;
+  else if (metrics.dscr >= 1.5) dscr_score = 8;
+  else if (metrics.dscr >= 1.25) dscr_score = 6;
+  else if (metrics.dscr >= 1.0) dscr_score = 3;
+  else dscr_score = 1;
+
+  // Cash-on-cash: 20%+ is great
+  let coc_score = 1;
+  if (metrics.cashOnCash >= 30) coc_score = 10;
+  else if (metrics.cashOnCash >= 20) coc_score = 8;
+  else if (metrics.cashOnCash >= 15) coc_score = 6;
+  else if (metrics.cashOnCash >= 10) coc_score = 4;
+  else if (metrics.cashOnCash >= 0) coc_score = 2;
+  else coc_score = 1;
+
+  // Margin vs industry avg
+  let margin_score = 5;
+  if (bm.avg_margin_pct) {
+    const ratio = metrics.profitMargin / bm.avg_margin_pct;
+    if (ratio >= 1.3) margin_score = 10;
+    else if (ratio >= 1.1) margin_score = 8;
+    else if (ratio >= 0.9) margin_score = 6;
+    else if (ratio >= 0.7) margin_score = 4;
+    else margin_score = 2;
+  }
+
+  // Payback: under 3 years is great
+  let payback_score = 1;
+  if (metrics.paybackYrs <= 2) payback_score = 10;
+  else if (metrics.paybackYrs <= 3) payback_score = 8;
+  else if (metrics.paybackYrs <= 5) payback_score = 6;
+  else if (metrics.paybackYrs <= 7) payback_score = 4;
+  else if (metrics.paybackYrs <= 10) payback_score = 2;
+  else payback_score = 1;
+
+  // Default risk (industry baseline)
+  let risk_score = 5;
+  if (bm.sba_default_rate_pct) {
+    if (bm.sba_default_rate_pct <= 2.5) risk_score = 10;
+    else if (bm.sba_default_rate_pct <= 3.5) risk_score = 8;
+    else if (bm.sba_default_rate_pct <= 5.0) risk_score = 6;
+    else if (bm.sba_default_rate_pct <= 7.0) risk_score = 4;
+    else risk_score = 2;
+  }
+
+  const weights = { valuation: 0.25, dscr_score: 0.20, coc_score: 0.20, margin_score: 0.15, payback_score: 0.10, risk_score: 0.10 };
+  const overall = valuation * weights.valuation + dscr_score * weights.dscr_score +
+    coc_score * weights.coc_score + margin_score * weights.margin_score +
+    payback_score * weights.payback_score + risk_score * weights.risk_score;
+
+  return { valuation, dscr_score, coc_score, margin_score, payback_score, risk_score, overall };
+}
+
+function _dcScoreBar(label, score, desc) {
+  const pct = (score / 10) * 100;
+  const color = score >= 7 ? 'var(--green)' : (score >= 5 ? 'var(--amber)' : 'var(--red)');
+  return `<div class="dc-score-bar-row">
+    <div class="dc-bar-label">${_esc(label)}<span class="dc-bar-desc">${_esc(desc)}</span></div>
+    <div class="dc-bar-track"><div class="dc-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    <div class="dc-bar-val" style="color:${color}">${score.toFixed(1)}</div>
+  </div>`;
+}
+
+function _dcAmortSchedule(principal, annualRate, termYrs, showYears) {
+  const rows = [];
+  let bal = principal;
+  const r = annualRate / 100 / 12;
+  const pmt = _dcMonthlyPayment(principal, annualRate, termYrs);
+  for (let y = 1; y <= Math.min(showYears, termYrs); y++) {
+    let yearPrinc = 0, yearInt = 0;
+    for (let m = 0; m < 12 && bal > 0; m++) {
+      const interest = bal * r;
+      const princPay = Math.min(pmt - interest, bal);
+      bal -= princPay;
+      yearPrinc += princPay;
+      yearInt += interest;
+    }
+    rows.push({ year: y, totalPaid: yearPrinc + yearInt, principalPaid: yearPrinc, interestPaid: yearInt, endBalance: Math.max(0, bal) });
+  }
+  return rows;
+}
+
+async function _dcRunAiAnalysis() {
+  const d = window._dcLastCalc;
+  if (!d) return;
+  const k = key();
+  if (!k && !demoMode && !(typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy())) {
+    $('dc-ai-output').innerHTML = '<div style="color:var(--red);padding:12px;text-align:center;font-size:12px">Enter your API key first to use AI analysis.</div>';
+    return;
+  }
+  const btn = $('dc-ai-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
+
+  const ind = industry();
+  const sys = `You are a senior M&A advisor specializing in small business acquisitions. Analyze this deal and provide actionable insights. Return JSON only.`;
+  const opInfo = d.operatorSalary > 0
+    ? `\n- Owner-Operated: No (hiring manager)\n- Operator Salary Deducted: $${d.operatorSalary.toLocaleString()}/yr\n- Adjusted SDE (after operator): $${d.adjustedSde.toLocaleString()}`
+    : '\n- Owner-Operated: Yes (buyer operates)';
+  const usr = `Analyze this ${ind.label} acquisition deal:
+
+DEAL METRICS:
+- Asking Price: $${d.askingPrice.toLocaleString()}
+- Total Acquisition Cost: $${d.totalAcquisitionCost.toLocaleString()} (incl SBA fee + closing costs)
+- Annual Revenue: $${d.annualRevenue.toLocaleString()}
+- SDE (Cash Flow): $${d.sde.toLocaleString()}${opInfo}
+- CF Multiple: ${d.cfMultiple.toFixed(1)}x (industry avg: ${d.bm.avg_cf_multiple}x)
+- Revenue Multiple: ${d.revMultiple.toFixed(2)}x (industry avg: ${d.bm.avg_revenue_multiple}x)
+- DSCR: ${d.dscr.toFixed(2)}x${d.operatorSalary > 0 ? ' (based on adjusted SDE)' : ''}
+- Min Down Payment for 1.25x DSCR: ${d.minDownForDscr}%
+- Post-Debt Cash Flow: $${d.postDebtCF.toLocaleString()}/yr${d.operatorSalary > 0 ? ' (after operator salary)' : ''}
+- Cash-on-Cash Return: ${d.cashOnCash.toFixed(1)}%
+- Payback Period: ${d.paybackYrs.toFixed(1)} years
+- Down Payment: $${d.cashDown.toLocaleString()} (${d.downPct}%)
+- Total Cash Needed: $${d.totalCashNeeded.toLocaleString()} (down + SBA fee + closing)
+- Loan: $${d.loanAmount.toLocaleString()} at ${d.loanRate}% for ${d.loanTerm} years
+- Industry SBA Default Rate: ${d.bm.sba_default_rate_pct}%
+- Profit Margin: ${d.profitMargin.toFixed(1)}% (industry avg: ${d.bm.avg_margin_pct}%)
+- Deal Score: ${d.overallScore.toFixed(1)}/10 — ${d.verdictText}
+
+Return ONLY:
+{
+  "verdict": "Go / Cautious Go / No Go",
+  "headline": "One-sentence deal summary",
+  "strengths": ["strength 1", "strength 2", "strength 3"],
+  "weaknesses": ["weakness 1", "weakness 2", "weakness 3"],
+  "negotiation_tips": ["tip 1 with specific numbers", "tip 2"],
+  "what_to_verify": ["due diligence item 1", "item 2", "item 3"],
+  "fair_price_estimate": 0,
+  "fair_price_rationale": "2-sentence explanation of fair price"
+}`;
+
+  try {
+    const result = await claudeJSON(sys, usr, { skipFeedback: true });
+    if (!result) throw new Error('No response');
+    const v = result.verdict || '';
+    const vCls = /no\s*go/i.test(v) ? 'v-nogo' : (/cautious/i.test(v) ? 'v-caution' : 'v-go');
+    const fairPrice = result.fair_price_estimate || 0;
+
+    let aiHtml = `
+    <div class="dc-section" style="margin-top:16px">
+      <div class="dc-section-title">AI Deal Analysis</div>
+      <div style="text-align:center;margin-bottom:12px">
+        <div class="verdict ${vCls}" style="font-size:14px;padding:8px 16px">${_esc(v)}</div>
+        <div style="font-size:13px;color:var(--text);margin-top:8px;font-style:italic">${_esc(result.headline || '')}</div>
+      </div>
+      <div class="dc-ai-grid">
+        <div class="dc-ai-col">
+          <div class="dc-ai-col-title" style="color:var(--green)">Strengths</div>
+          ${(result.strengths || []).map(s => `<div class="dc-ai-item"><span style="color:var(--green)">+</span> ${_esc(s)}</div>`).join('')}
+        </div>
+        <div class="dc-ai-col">
+          <div class="dc-ai-col-title" style="color:var(--red)">Weaknesses</div>
+          ${(result.weaknesses || []).map(w => `<div class="dc-ai-item"><span style="color:var(--red)">-</span> ${_esc(w)}</div>`).join('')}
+        </div>
+      </div>
+      ${fairPrice > 0 ? `<div class="dc-fair-price">
+        <div class="dc-fair-label">AI Fair Price Estimate</div>
+        <div class="dc-fair-val">${_dcFmt(fairPrice)}</div>
+        <div class="dc-fair-rationale">${_esc(result.fair_price_rationale || '')}</div>
+      </div>` : ''}
+      <div style="margin-top:12px">
+        <div class="dc-ai-col-title">Negotiation Tips</div>
+        ${(result.negotiation_tips || []).map(t => `<div class="dc-ai-item" style="margin-bottom:4px"><span style="color:var(--blue)">></span> ${_esc(t)}</div>`).join('')}
+      </div>
+      <div style="margin-top:12px">
+        <div class="dc-ai-col-title">Due Diligence Checklist</div>
+        ${(result.what_to_verify || []).map(d => `<div class="dc-ai-item" style="margin-bottom:4px"><span style="color:var(--amber)">!</span> ${_esc(d)}</div>`).join('')}
+      </div>
+    </div>`;
+    $('dc-ai-output').innerHTML = aiHtml;
+  } catch (e) {
+    $('dc-ai-output').innerHTML = `<div style="color:var(--red);padding:12px;text-align:center;font-size:12px">AI analysis failed: ${_esc(e.message)}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'AI Deep Analysis (uses API key)'; }
+  }
+}
+
+// ── Sensitivity Table ──────────────────────────────────
+function _dcSensitivityTable(askingPrice, sde, baseRate, baseTerm, baseDown) {
+  if (askingPrice <= 0 || sde <= 0) return '';
+  const downSteps = [10, 15, 20, 25, 30];
+  const rateSteps = [];
+  const rBase = Math.max(6, Math.floor(baseRate - 2));
+  for (let r = rBase; r <= rBase + 4; r += 1) rateSteps.push(r);
+
+  let rows = rateSteps.map(rate => {
+    const cells = downSteps.map(dp => {
+      const down = askingPrice * (dp / 100);
+      const loan = askingPrice - down;
+      const fee = _dcSbaGuarantyFee(loan, baseTerm);
+      const pmt = _dcMonthlyPayment(loan + fee, rate, baseTerm);
+      const ads = pmt * 12;
+      const dscr = ads > 0 ? sde / ads : 0;
+      const postDebt = sde - ads;
+      const coc = down > 0 ? (postDebt / down) * 100 : 0;
+      const dscrColor = dscr >= 1.25 ? 'var(--green)' : (dscr >= 1.0 ? 'var(--amber)' : 'var(--red)');
+      const isBase = Math.abs(rate - baseRate) < 0.01 && dp === baseDown;
+      const bg = isBase ? 'var(--blue-dim)' : '';
+      return `<td style="text-align:center;font-size:11px;${bg ? 'background:' + bg + ';' : ''}padding:6px 4px">
+        <div style="color:${dscrColor};font-weight:700">${dscr.toFixed(2)}x</div>
+        <div style="color:var(--muted);font-size:9px">${coc.toFixed(0)}% CoC</div>
+      </td>`;
+    }).join('');
+    const isBaseRate = Math.abs(rate - baseRate) < 0.01;
+    return `<tr><td style="font-weight:${isBaseRate ? '700' : '400'};font-size:11px;white-space:nowrap;padding:6px 8px">${rate.toFixed(1)}%</td>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="dc-section" style="margin-top:14px">
+    <div class="dc-section-title">Sensitivity Analysis — DSCR & Cash-on-Cash</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">How DSCR and cash-on-cash return change across different down payments and interest rates. Your current inputs are highlighted.</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th style="font-size:11px">Rate \\ Down</th>
+          ${downSteps.map(d => `<th style="text-align:center;font-size:11px">${d}%</th>`).join('')}
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ── Scenario Comparison ────────────────────────────────
+const _dcScenarios = [];
+
+function _dcSaveScenario() {
+  const d = window._dcLastCalc;
+  if (!d) return;
+  if (_dcScenarios.length >= 3) _dcScenarios.shift();
+  const ind = INDUSTRIES[d.indKey] || {};
+  _dcScenarios.push({
+    name: 'Scenario ' + (_dcScenarios.length + 1),
+    label: ind.label || d.indKey,
+    emoji: ind.emoji || '',
+    askingPrice: d.askingPrice,
+    annualRevenue: d.annualRevenue,
+    sde: d.sde,
+    adjustedSde: d.adjustedSde,
+    operatorSalary: d.operatorSalary,
+    ownerOperated: d.ownerOperated,
+    downPct: d.downPct,
+    cashDown: d.cashDown,
+    loanAmount: d.loanAmount,
+    loanRate: d.loanRate,
+    loanTerm: d.loanTerm,
+    sbaFee: d.sbaFee,
+    totalAcquisitionCost: d.totalAcquisitionCost,
+    totalCashNeeded: d.totalCashNeeded,
+    monthlyPayment: d.monthlyPayment,
+    annualDebtService: d.annualDebtService,
+    dscr: d.dscr,
+    postDebtCF: d.postDebtCF,
+    cashOnCash: d.cashOnCash,
+    paybackYrs: d.paybackYrs,
+    cfMultiple: d.cfMultiple,
+    revMultiple: d.revMultiple,
+    profitMargin: d.profitMargin,
+    overallScore: d.overallScore,
+    verdictText: d.verdictText,
+    includesRE: d.includesRE,
+    minDownForDscr: d.minDownForDscr,
+  });
+  _dcRenderComparison();
+}
+
+function _dcRemoveScenario(idx) {
+  _dcScenarios.splice(idx, 1);
+  _dcRenderComparison();
+}
+
+function _dcRenderComparison() {
+  const el = $('dc-scenario-compare');
+  if (!el || _dcScenarios.length < 1) { if (el) el.innerHTML = ''; return; }
+
+  const metric = (label, fn, opts) => {
+    const vals = _dcScenarios.map(fn);
+    let bestIdx = -1;
+    if (opts && opts.best) {
+      const best = opts.best === 'max' ? Math.max(...vals) : Math.min(...vals);
+      bestIdx = vals.indexOf(best);
+    }
+    return `<tr>
+      <td style="font-size:11px;font-weight:600;white-space:nowrap;padding:6px 10px">${label}</td>
+      ${vals.map((v, i) => `<td style="text-align:center;font-size:12px;font-weight:${i === bestIdx ? '700' : '400'};color:${i === bestIdx ? 'var(--green)' : 'var(--text)'};padding:6px 10px">${v}</td>`).join('')}
+    </tr>`;
+  };
+
+  const dscrFmt = (s) => {
+    const color = s.dscr >= 1.25 ? 'var(--green)' : (s.dscr >= 1.0 ? 'var(--amber)' : 'var(--red)');
+    return `<span style="color:${color}">${s.dscr.toFixed(2)}x</span>`;
+  };
+
+  let html = `<div class="dc-section" style="margin-top:16px">
+    <div class="dc-section-title">Scenario Comparison (${_dcScenarios.length}/3)</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Save up to 3 scenarios with different parameters to compare side by side. Adjust inputs and click "Save as Scenario" again to add another.</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th style="font-size:11px">Metric</th>
+          ${_dcScenarios.map((s, i) => `<th style="text-align:center;font-size:11px">
+            ${_esc(s.emoji)} ${_esc(s.name)}
+            <button onclick="_dcRemoveScenario(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;margin-left:4px" title="Remove">✕</button>
+          </th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${metric('Asking Price', s => _dcFmt(s.askingPrice))}
+          ${metric('Total Acquisition', s => _dcFmt(s.totalAcquisitionCost))}
+          ${metric('Revenue', s => _dcFmt(s.annualRevenue))}
+          ${metric('SDE', s => _dcFmt(s.sde))}
+          ${_dcScenarios.some(s => s.operatorSalary > 0) ? metric('Adjusted SDE', s => s.operatorSalary > 0 ? _dcFmt(s.adjustedSde) : _dcFmt(s.sde)) : ''}
+          ${metric('Down Payment', s => _dcFmt(s.cashDown) + ' (' + s.downPct + '%)')}
+          ${metric('Total Cash Needed', s => _dcFmt(s.totalCashNeeded))}
+          ${metric('CF Multiple', s => s.cfMultiple.toFixed(1) + 'x', { best: 'min' })}
+          ${metric('DSCR', s => dscrFmt(s), { best: 'max' })}
+          ${metric('Post-Debt CF', s => _dcFmt(s.postDebtCF) + '/yr', { best: 'max' })}
+          ${metric('Cash-on-Cash', s => s.cashOnCash.toFixed(1) + '%', { best: 'max' })}
+          ${metric('Payback', s => s.paybackYrs < 100 ? s.paybackYrs.toFixed(1) + 'yr' : 'Never', { best: 'min' })}
+          ${metric('Deal Score', s => s.overallScore.toFixed(1) + '/10', { best: 'max' })}
+          ${metric('Verdict', s => s.verdictText)}
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn" onclick="_dcScenarios.length=0;_dcRenderComparison()" style="border-color:var(--muted);color:var(--muted);font-size:11px">Clear All Scenarios</button>
+    </div>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ── Export / Print ─────────────────────────────────────
+function _dcExport() {
+  const d = window._dcLastCalc;
+  if (!d) return;
+  const ind = INDUSTRIES[d.indKey] || {};
+
+  const lines = [
+    '═══════════════════════════════════════════════════',
+    '  DEAL CALCULATOR REPORT',
+    '  ' + (ind.emoji || '') + ' ' + (ind.label || d.indKey),
+    '  Generated: ' + new Date().toLocaleDateString(),
+    '═══════════════════════════════════════════════════',
+    '',
+    '── DEAL OVERVIEW ──────────────────────────────────',
+    'Deal Score:            ' + d.overallScore.toFixed(1) + '/10 — ' + d.verdictText,
+    'Asking Price:          ' + _dcFmt(d.askingPrice),
+    'Total Acquisition:     ' + _dcFmt(d.totalAcquisitionCost),
+    'Annual Revenue:        ' + _dcFmt(d.annualRevenue),
+    'SDE (Cash Flow):       ' + _dcFmt(d.sde),
+  ];
+  if (d.operatorSalary > 0) {
+    lines.push('Operator Salary:       −' + _dcFmt(d.operatorSalary));
+    lines.push('Adjusted SDE:          ' + _dcFmt(d.adjustedSde));
+  }
+  lines.push('Owner-Operated:        ' + (d.ownerOperated ? 'Yes' : 'No'));
+  lines.push('');
+  lines.push('── VALUATION ──────────────────────────────────────');
+  lines.push('CF Multiple:           ' + d.cfMultiple.toFixed(1) + 'x (avg: ' + d.bm.avg_cf_multiple + 'x)');
+  lines.push('Revenue Multiple:      ' + d.revMultiple.toFixed(2) + 'x (avg: ' + d.bm.avg_revenue_multiple + 'x)');
+  lines.push('Profit Margin:         ' + d.profitMargin.toFixed(1) + '% (avg: ' + d.bm.avg_margin_pct + '%)');
+  lines.push('');
+  lines.push('── SBA LOAN ───────────────────────────────────────');
+  lines.push('Down Payment:          ' + _dcFmt(d.cashDown) + ' (' + d.downPct + '%)');
+  lines.push('Loan Amount:           ' + _dcFmt(d.loanAmount));
+  lines.push('SBA Guaranty Fee:      ' + _dcFmt(d.sbaFee));
+  lines.push('Total Financed:        ' + _dcFmt(d.totalLoanAmt));
+  lines.push('Rate / Term:           ' + d.loanRate + '% / ' + d.loanTerm + ' years' + (d.includesRE ? ' (RE)' : ''));
+  lines.push('Monthly Payment:       ' + _dcFmt(d.monthlyPayment));
+  lines.push('Annual Debt Service:   ' + _dcFmt(d.annualDebtService));
+  lines.push('Total Cash Needed:     ' + _dcFmt(d.totalCashNeeded));
+  lines.push('');
+  lines.push('── RETURNS ────────────────────────────────────────');
+  lines.push('DSCR:                  ' + d.dscr.toFixed(2) + 'x ' + (d.dscr >= 1.25 ? '(PASS)' : d.dscr >= 1.0 ? '(TIGHT)' : '(FAIL)'));
+  lines.push('Min Down for 1.25x:    ' + d.minDownForDscr + '%');
+  lines.push('Post-Debt Cash Flow:   ' + _dcFmt(d.postDebtCF) + '/yr');
+  lines.push('Cash-on-Cash Return:   ' + d.cashOnCash.toFixed(1) + '%');
+  lines.push('Payback Period:        ' + (d.paybackYrs < 100 ? d.paybackYrs.toFixed(1) + ' years' : 'Never'));
+  lines.push('Monthly Take-Home:     ' + _dcFmt(d.postDebtCF / 12) + '/mo');
+  lines.push('');
+  lines.push('── INDUSTRY BENCHMARKS (' + (ind.label || '') + ') ──────────');
+  lines.push('Median Revenue:        ' + _dcFmt(d.bm.median_revenue));
+  lines.push('Median SDE:            ' + _dcFmt(d.bm.median_sde));
+  lines.push('SBA Default Rate:      ' + d.bm.sba_default_rate_pct + '%');
+  if (d.bm.naics) lines.push('NAICS Code:            ' + d.bm.naics + ' — ' + d.bm.naics_label);
+  lines.push('');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push('  Generated by Business Hunter Deal Calculator');
+  lines.push('═══════════════════════════════════════════════════');
+
+  const text = lines.join('\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'deal-analysis-' + d.indKey + '-' + new Date().toISOString().slice(0, 10) + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+// ══════════════════════════════════════════════════════════
+// 47-cim-analyzer.js — CIM Analyzer (AI-powered)
+// Paste or upload a Confidential Information Memorandum
+// and get structured financial extraction + risk analysis.
+// ══════════════════════════════════════════════════════════
+
+let _cimVisible = false;
+
+function toggleCimAnalyzer() {
+  _cimVisible = !_cimVisible;
+  const panel = $('cimPanel');
+  if (!panel) return;
+  panel.style.display = _cimVisible ? 'block' : 'none';
+  const btn = $('cimBtn');
+  if (btn) {
+    btn.style.background = _cimVisible ? 'var(--purple-dim, rgba(167,139,250,0.12))' : '';
+    btn.style.borderColor = 'var(--purple)';
+    btn.style.color = 'var(--purple)';
+  }
+}
+
+async function runCimAnalysis() {
+  const text = $('cim-text')?.value?.trim();
+  if (!text || text.length < 100) {
+    $('cim-results').innerHTML = '<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Paste at least 100 characters of CIM content to analyze.</div>';
+    return;
+  }
+  const k = key();
+  if (!k && !demoMode && !(typeof _bhShouldUseLLMProxy === 'function' && _bhShouldUseLLMProxy())) {
+    $('cim-results').innerHTML = '<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Enter your API key first.</div>';
+    return;
+  }
+
+  const btn = $('cim-run-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Analyzing CIM...'; }
+  $('cim-results').innerHTML = '<div class="comp-loading"><div class="live-dot"></div> Extracting financials and risks from CIM...</div>';
+
+  const indKey = industryKey();
+  const ind = industry();
+  const bm = DEAL_BENCHMARKS[indKey] || {};
+
+  const cimTrunc = text.length > 12000 ? text.slice(0, 12000) + '\n[...truncated]' : text;
+
+  const sys = `You are a senior M&A advisor. Extract structured financial data and risk analysis from this Confidential Information Memorandum (CIM). Return JSON only.`;
+  const usr = `Analyze this CIM for a ${ind.label} business acquisition.
+
+INDUSTRY BENCHMARKS:
+- Avg CF Multiple: ${bm.avg_cf_multiple || 'N/A'}x
+- Avg Revenue Multiple: ${bm.avg_revenue_multiple || 'N/A'}x
+- Avg Margin: ${bm.avg_margin_pct || 'N/A'}%
+- SBA Default Rate: ${bm.sba_default_rate_pct || 'N/A'}%
+
+CIM CONTENT:
+${cimTrunc}
+
+Return ONLY:
+{
+  "business_name": "extracted or 'Not specified'",
+  "location": "extracted or 'Not specified'",
+  "asking_price": 0,
+  "annual_revenue": 0,
+  "annual_expenses": 0,
+  "sde": 0,
+  "ebitda": 0,
+  "years_in_business": 0,
+  "employees": 0,
+  "includes_real_estate": false,
+  "real_estate_value": 0,
+  "add_backs": [
+    {"item": "Add-back description", "amount": 0, "confidence": "high/medium/low", "note": "Why this is valid or suspect"}
+  ],
+  "revenue_trend": "growing / stable / declining",
+  "revenue_breakdown": [
+    {"stream": "Revenue source", "amount": 0, "pct": 0}
+  ],
+  "key_financials": {
+    "gross_margin_pct": 0,
+    "net_margin_pct": 0,
+    "cf_multiple": 0,
+    "revenue_multiple": 0
+  },
+  "risks": [
+    {"risk": "Risk description", "severity": "high/medium/low", "mitigation": "How to address"}
+  ],
+  "strengths": ["strength 1", "strength 2"],
+  "deal_verdict": "Go / Cautious Go / No Go",
+  "verdict_rationale": "2-3 sentence explanation",
+  "questions_for_seller": ["Question 1 to ask the seller", "Question 2", "Question 3"],
+  "negotiation_leverage": ["Point 1 you can negotiate on", "Point 2"]
+}`;
+
+  try {
+    const result = await claudeJSON(sys, usr, { skipFeedback: true });
+    if (!result) throw new Error('No response from AI');
+    _cimRender(result, ind, bm);
+  } catch (e) {
+    $('cim-results').innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">CIM analysis failed: ${_esc(e.message)}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Analyze CIM'; }
+  }
+}
+
+function _cimRender(d, ind, bm) {
+  const v = d.deal_verdict || 'N/A';
+  const vCls = /no\s*go/i.test(v) ? 'v-nogo' : (/cautious/i.test(v) ? 'v-caution' : 'v-go');
+  const kf = d.key_financials || {};
+
+  let html = `
+  <div class="dc-score-hero">
+    <div class="verdict ${vCls}" style="font-size:16px;padding:10px 20px">${_esc(v)}</div>
+    <div style="font-size:15px;font-weight:700;font-family:'Syne',sans-serif;margin-top:10px">${_esc(d.business_name || 'Unknown Business')}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px">${_esc(d.location || '')} ${ind.emoji} ${ind.label}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;max-width:600px;line-height:1.6">${_esc(d.verdict_rationale || '')}</div>
+  </div>
+
+  <div class="dc-section-grid">
+    <div class="dc-section">
+      <div class="dc-section-title">Extracted Financials</div>
+      <div class="dc-metric"><span class="dc-k">Asking Price</span><span class="dc-v">${d.asking_price ? _dcFmt(d.asking_price) : 'Not specified'}</span></div>
+      <div class="dc-metric"><span class="dc-k">Annual Revenue</span><span class="dc-v">${d.annual_revenue ? _dcFmt(d.annual_revenue) : 'Not specified'}</span></div>
+      <div class="dc-metric"><span class="dc-k">Annual Expenses</span><span class="dc-v">${d.annual_expenses ? _dcFmt(d.annual_expenses) : 'N/A'}</span></div>
+      <div class="dc-metric"><span class="dc-k">SDE</span><span class="dc-v">${d.sde ? _dcFmt(d.sde) : 'N/A'}</span></div>
+      <div class="dc-metric"><span class="dc-k">EBITDA</span><span class="dc-v">${d.ebitda ? _dcFmt(d.ebitda) : 'N/A'}</span></div>
+      <div class="dc-metric"><span class="dc-k">Years in Business</span><span class="dc-v">${d.years_in_business || 'N/A'}</span></div>
+      <div class="dc-metric"><span class="dc-k">Employees</span><span class="dc-v">${d.employees || 'N/A'}</span></div>
+      ${d.includes_real_estate ? `<div class="dc-metric"><span class="dc-k">Real Estate Value</span><span class="dc-v">${d.real_estate_value ? _dcFmt(d.real_estate_value) : 'Included'}</span></div>` : ''}
+    </div>
+
+    <div class="dc-section">
+      <div class="dc-section-title">Valuation Multiples</div>
+      <div class="dc-metric"><span class="dc-k">CF Multiple</span><span class="dc-v">${isFinite(Number(kf.cf_multiple)) ? Number(kf.cf_multiple).toFixed(1) + 'x' : 'N/A'}${bm.avg_cf_multiple ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_cf_multiple + 'x)</span>' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">Revenue Multiple</span><span class="dc-v">${isFinite(Number(kf.revenue_multiple)) ? Number(kf.revenue_multiple).toFixed(2) + 'x' : 'N/A'}${bm.avg_revenue_multiple ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_revenue_multiple + 'x)</span>' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">Gross Margin</span><span class="dc-v">${isFinite(Number(kf.gross_margin_pct)) ? Number(kf.gross_margin_pct).toFixed(1) + '%' : 'N/A'}</span></div>
+      <div class="dc-metric"><span class="dc-k">Net Margin</span><span class="dc-v">${isFinite(Number(kf.net_margin_pct)) ? Number(kf.net_margin_pct).toFixed(1) + '%' : 'N/A'}${bm.avg_margin_pct ? ' <span style="font-size:10px;color:var(--muted)">(avg: ' + bm.avg_margin_pct + '%)</span>' : ''}</span></div>
+      <div class="dc-metric"><span class="dc-k">Revenue Trend</span><span class="dc-v">${_cimTrendBadge(d.revenue_trend)}</span></div>
+    </div>
+  </div>`;
+
+  // Add-backs
+  const addBacks = _toArr(d.add_backs);
+  if (addBacks.length) {
+    html += `<div class="dc-section" style="margin-top:14px">
+      <div class="dc-section-title">Add-Back Validation</div>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Item</th><th>Amount</th><th>Confidence</th><th>Notes</th></tr></thead>
+        <tbody>${addBacks.map(a => {
+          const conf = (a.confidence || '').toString().trim().toLowerCase();
+          const confColor = conf === 'high' ? 'var(--green)' : (conf === 'medium' ? 'var(--amber)' : 'var(--red)');
+          const addAmt = isFinite(Number(a.amount)) ? Number(a.amount) : 0;
+          return `<tr>
+            <td>${_esc(a.item)}</td>
+            <td>${addAmt ? _dcFmt(addAmt) : 'N/A'}</td>
+            <td><span style="color:${confColor};font-weight:700;font-size:11px">${_esc(conf.toUpperCase())}</span></td>
+            <td style="font-size:11px;color:var(--muted)">${_esc(a.note || '')}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }
+
+  // Revenue breakdown
+  const revBreak = _toArr(d.revenue_breakdown);
+  if (revBreak.length) {
+    html += `<div class="dc-section" style="margin-top:14px">
+      <div class="dc-section-title">Revenue Breakdown</div>
+      ${revBreak.map(r => {
+        const amt = isFinite(Number(r.amount)) ? Number(r.amount) : 0;
+        const pct = Math.max(0, Math.min(100, isFinite(Number(r.pct)) ? Number(r.pct) : 0));
+        return `<div style="margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+            <span>${_esc(r.stream)}</span>
+            <span style="font-weight:700">${amt ? _dcFmt(amt) : ''} (${pct}%)</span>
+          </div>
+          <div style="height:6px;background:var(--surface3);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--blue);border-radius:3px"></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  // Risks
+  const risks = _toArr(d.risks);
+  if (risks.length) {
+    html += `<div class="dc-section" style="margin-top:14px">
+      <div class="dc-section-title">Risk Assessment</div>
+      ${risks.map(r => {
+        const sev = (r.severity || '').toString().trim().toLowerCase();
+        const sevColor = sev === 'high' ? 'var(--red)' : (sev === 'medium' ? 'var(--amber)' : 'var(--green)');
+        const sevBg = sev === 'high' ? 'var(--red-dim)' : (sev === 'medium' ? 'var(--amber-dim)' : 'var(--green-dim)');
+        return `<div style="padding:10px 12px;background:${sevBg};border:1px solid ${sevColor};border-radius:8px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:12px;font-weight:700;color:var(--text)">${_esc(r.risk)}</span>
+            <span class="badge" style="background:${sevBg};color:${sevColor};border:1px solid ${sevColor}">${_esc((r.severity || '').toUpperCase())}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5">${_esc(r.mitigation || '')}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  // Strengths + Questions
+  html += `<div class="dc-ai-grid" style="margin-top:14px">
+    <div class="dc-ai-col">
+      <div class="dc-ai-col-title" style="color:var(--green)">Strengths</div>
+      ${_toArr(d.strengths).map(s => `<div class="dc-ai-item"><span style="color:var(--green)">+</span> ${_esc(s)}</div>`).join('')}
+    </div>
+    <div class="dc-ai-col">
+      <div class="dc-ai-col-title" style="color:var(--amber)">Questions for Seller</div>
+      ${_toArr(d.questions_for_seller).map(q => `<div class="dc-ai-item"><span style="color:var(--amber)">?</span> ${_esc(q)}</div>`).join('')}
+    </div>
+  </div>`;
+
+  // Negotiation leverage
+  const leverage = _toArr(d.negotiation_leverage);
+  if (leverage.length) {
+    html += `<div class="dc-section" style="margin-top:14px">
+      <div class="dc-section-title">Negotiation Leverage</div>
+      ${leverage.map(l => `<div class="dc-ai-item" style="margin-bottom:6px"><span style="color:var(--blue)">></span> ${_esc(l)}</div>`).join('')}
+    </div>`;
+  }
+
+  // Auto-fill deal calculator button
+  if (d.asking_price && d.sde) {
+    html += `<div style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <button class="btn" onclick="_cimPopulateCalc()" style="border-color:var(--teal);color:var(--teal)">
+        Send to Deal Calculator
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Auto-fill the Deal Calculator with extracted financials</div>
+    </div>`;
+    window._cimLastExtract = d;
+  }
+
+  $('cim-results').innerHTML = html;
+}
+
+function _cimTrendBadge(trend) {
+  if (!trend) return 'N/A';
+  const t = trend.toLowerCase();
+  if (t.includes('grow')) return '<span class="badge b-green">GROWING</span>';
+  if (t.includes('declin')) return '<span class="badge b-red">DECLINING</span>';
+  return '<span class="badge b-amber">STABLE</span>';
+}
+
+function _cimPopulateCalc() {
+  const d = window._cimLastExtract;
+  if (!d) return;
+  if (!_dcVisible) toggleDealCalculator();
+  const set = (id, v) => { const el = $(id); if (el && v) { el.value = v; el._userTouched = true; } };
+  set('dc-asking-price', d.asking_price);
+  set('dc-annual-revenue', d.annual_revenue);
+  set('dc-sde', d.sde);
+  set('dc-includes-re', d.includes_real_estate ? 'yes' : 'no');
+  runDealCalculator();
+}
+
+
+// ══════════════════════════════════════════════════════════
+// 48-benchmarks-dashboard.js — Industry Benchmarks Dashboard
+// Compare all 16 industries side-by-side on key metrics,
+// plus SBA Market Data by NAICS code.
+// ══════════════════════════════════════════════════════════
+
+let _bmDashVisible = false;
+let _bmSortKey = 'revenue';
+let _bmTab = 'benchmarks';
+
+function toggleBenchmarksDash() {
+  _bmDashVisible = !_bmDashVisible;
+  const panel = $('benchDashPanel');
+  if (!panel) return;
+  panel.style.display = _bmDashVisible ? 'block' : 'none';
+  const btn = $('benchDashBtn');
+  if (btn) {
+    btn.style.background = _bmDashVisible ? 'var(--blue-dim)' : '';
+    btn.style.borderColor = 'var(--blue)';
+    btn.style.color = 'var(--blue)';
+  }
+  if (_bmDashVisible) _bmRenderDashboard();
+}
+
+function _bmSortEntries(entries, key) {
+  const sortMap = {
+    revenue: (a, b) => b.median_revenue - a.median_revenue,
+    sde: (a, b) => b.median_sde - a.median_sde,
+    margin: (a, b) => b.avg_margin_pct - a.avg_margin_pct,
+    multiple: (a, b) => b.avg_cf_multiple - a.avg_cf_multiple,
+    risk: (a, b) => a.sba_default_rate_pct - b.sba_default_rate_pct,
+    sba_loan: (a, b) => b.sba_avg_loan - a.sba_avg_loan,
+    sba_approval: (a, b) => b.sba_approval_pct - a.sba_approval_pct,
+    sba_volume: (a, b) => b.sba_total_loans_yr - a.sba_total_loans_yr,
+  };
+  return [...entries].sort(sortMap[key] || sortMap.revenue);
+}
+
+function _bmGetEntries() {
+  return Object.entries(DEAL_BENCHMARKS).map(([key, bm]) => {
+    const ind = INDUSTRIES[key];
+    if (!ind) return null;
+    return { key, label: ind.label, emoji: ind.emoji, ...bm };
+  }).filter(Boolean);
+}
+
+function _bmRenderDashboard() {
+  const container = $('benchDashContent');
+  if (!container) return;
+
+  const tabBench = _bmTab === 'benchmarks' ? ' active' : '';
+  const tabSba = _bmTab === 'sba' ? ' active' : '';
+
+  let html = `<div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px">
+    <button class="phase-quick-btn bm-sort-btn${tabBench}" onclick="_bmSwitchTab('benchmarks')" style="font-size:12px;padding:6px 14px">Industry Benchmarks</button>
+    <button class="phase-quick-btn bm-sort-btn${tabSba}" onclick="_bmSwitchTab('sba')" style="font-size:12px;padding:6px 14px">SBA Market Data</button>
+  </div>`;
+
+  if (_bmTab === 'benchmarks') {
+    html += _bmRenderBenchmarksTab();
+  } else {
+    html += _bmRenderSbaTab();
+  }
+
+  container.innerHTML = html;
+}
+
+function _bmSwitchTab(tab) {
+  _bmTab = tab;
+  _bmRenderDashboard();
+}
+
+function _bmRenderBenchmarksTab() {
+  const currentInd = industryKey();
+  const entries = _bmGetEntries();
+  const sorted = _bmSortEntries(entries, _bmSortKey);
+
+  const sortBtns = ['revenue','sde','margin','multiple','risk'].map(k => {
+    const labels = { revenue:'By Revenue', sde:'By SDE', margin:'By Margin', multiple:'By Multiple', risk:'By Risk (Low→High)' };
+    const active = _bmSortKey === k ? ' active' : '';
+    return `<button class="phase-quick-btn bm-sort-btn${active}" onclick="_bmSort('${k}')">${labels[k]}</button>`;
+  }).join('');
+
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif">Industry Benchmark Comparison</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${sortBtns}</div>
+  </div>
+
+  <div class="bm-chart-row">
+    ${_bmBarChart(sorted, 'median_revenue', 'Median Revenue', v => _dcFmt(v), 'var(--blue)')}
+    ${_bmBarChart(sorted, 'median_sde', 'Median SDE', v => _dcFmt(v), 'var(--green)')}
+  </div>
+
+  <div class="bm-chart-row" style="margin-top:14px">
+    ${_bmBarChart(sorted, 'avg_margin_pct', 'Avg Profit Margin', v => v + '%', 'var(--teal)')}
+    ${_bmBarChart(sorted, 'avg_cf_multiple', 'Avg CF Multiple', v => v + 'x', 'var(--purple)')}
+  </div>
+
+  <div style="margin-top:14px">
+    <div class="dc-section-title">Full Comparison Table</div>
+    <div class="tbl-wrap" style="max-height:500px">
+      <table class="tbl" id="bmFullTable">
+        <thead><tr>
+          <th>Industry</th>
+          <th>Revenue</th>
+          <th>SDE</th>
+          <th>CF Mult</th>
+          <th>Rev Mult</th>
+          <th>Margin</th>
+          <th>Default %</th>
+          <th>Typical Ask</th>
+        </tr></thead>
+        <tbody>
+        ${sorted.map(e => {
+          const isActive = e.key === currentInd;
+          const rowStyle = isActive ? 'background:var(--blue-dim);border:1px solid var(--blue)' : '';
+          return `<tr style="${rowStyle}">
+            <td style="white-space:nowrap;font-weight:${isActive ? '700' : '400'}">${e.emoji} ${_esc(e.label)}</td>
+            <td>${_dcFmt(e.median_revenue)}</td>
+            <td>${_dcFmt(e.median_sde)}</td>
+            <td>${e.avg_cf_multiple}x</td>
+            <td>${e.avg_revenue_multiple}x</td>
+            <td>${e.avg_margin_pct}%</td>
+            <td><span style="color:${e.sba_default_rate_pct <= 3.5 ? 'var(--green)' : (e.sba_default_rate_pct <= 5.5 ? 'var(--amber)' : 'var(--red)')}">${e.sba_default_rate_pct}%</span></td>
+            <td>${_dcFmt(e.typical_asking)}</td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bm-chart-row" style="margin-top:14px">
+    ${_bmBarChart(sorted, 'sba_default_rate_pct', 'SBA Default Rate', v => v + '%', 'var(--red)')}
+    ${_bmBarChart(sorted, 'typical_asking', 'Typical Asking Price', v => _dcFmt(v), 'var(--amber)')}
+  </div>`;
+}
+
+function _bmRenderSbaTab() {
+  const currentInd = industryKey();
+  const entries = _bmGetEntries();
+
+  const sbaSortKey = ['sba_loan','sba_approval','sba_volume','risk'].includes(_bmSortKey) ? _bmSortKey : 'sba_volume';
+  const sorted = _bmSortEntries(entries, sbaSortKey);
+
+  const sortBtns = ['sba_volume','sba_loan','sba_approval','risk'].map(k => {
+    const labels = { sba_volume:'By Loan Volume', sba_loan:'By Avg Loan', sba_approval:'By Approval Rate', risk:'By Default Rate' };
+    const active = sbaSortKey === k ? ' active' : '';
+    return `<button class="phase-quick-btn bm-sort-btn${active}" onclick="_bmSort('${k}')">${labels[k]}</button>`;
+  }).join('');
+
+  const totalLoans = sorted.reduce((s, e) => s + (e.sba_total_loans_yr || 0), 0);
+  const avgApproval = sorted.length > 0 ? (sorted.reduce((s, e) => s + (e.sba_approval_pct || 0), 0) / sorted.length).toFixed(1) : 0;
+  const avgDefault = sorted.length > 0 ? (sorted.reduce((s, e) => s + (e.sba_default_rate_pct || 0), 0) / sorted.length).toFixed(1) : 0;
+  const avgLoan = sorted.length > 0 ? Math.round(sorted.reduce((s, e) => s + (e.sba_avg_loan || 0), 0) / sorted.length) : 0;
+
+  const currentBm = DEAL_BENCHMARKS[currentInd] || {};
+  const currentLabel = INDUSTRIES[currentInd]?.label || '';
+  const currentEmoji = INDUSTRIES[currentInd]?.emoji || '';
+
+  let html = `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif">SBA 7(a) Loan Data by Industry</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${sortBtns}</div>
+  </div>
+
+  <div class="dc-section-grid" style="margin-bottom:14px">
+    <div class="dc-section">
+      <div class="dc-section-title">Cross-Industry SBA Summary</div>
+      <div class="dc-metric"><span class="dc-k">Total Annual SBA Loans (tracked)</span><span class="dc-v" style="font-weight:700">${totalLoans.toLocaleString()}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Loan Size</span><span class="dc-v">${_dcFmt(avgLoan)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Approval Rate</span><span class="dc-v">${avgApproval}%</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Default Rate</span><span class="dc-v">${avgDefault}%</span></div>
+    </div>`;
+
+  if (currentBm.naics) {
+    html += `
+    <div class="dc-section">
+      <div class="dc-section-title">${currentEmoji} ${_esc(currentLabel)} — Your Industry</div>
+      <div class="dc-metric"><span class="dc-k">NAICS Code</span><span class="dc-v" style="font-family:monospace;font-weight:700;color:var(--blue)">${_esc(currentBm.naics)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Classification</span><span class="dc-v" style="font-size:11px">${_esc(currentBm.naics_label)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg SBA Loan</span><span class="dc-v">${_dcFmt(currentBm.sba_avg_loan)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Term</span><span class="dc-v">${currentBm.sba_avg_term} years</span></div>
+      <div class="dc-metric"><span class="dc-k">Approval Rate</span><span class="dc-v" style="color:${currentBm.sba_approval_pct >= 70 ? 'var(--green)' : (currentBm.sba_approval_pct >= 60 ? 'var(--amber)' : 'var(--red)')}">${currentBm.sba_approval_pct}%</span></div>
+      <div class="dc-metric"><span class="dc-k">Default Rate</span><span class="dc-v" style="color:${currentBm.sba_default_rate_pct <= 3.5 ? 'var(--green)' : (currentBm.sba_default_rate_pct <= 5.5 ? 'var(--amber)' : 'var(--red)')}">${currentBm.sba_default_rate_pct}%</span></div>
+      <div class="dc-metric"><span class="dc-k">Annual Loan Volume</span><span class="dc-v">${(currentBm.sba_total_loans_yr || 0).toLocaleString()} loans/yr</span></div>
+      <div class="dc-metric"><span class="dc-k">Top States</span><span class="dc-v">${(currentBm.top_states || []).join(', ')}</span></div>
+    </div>`;
+  }
+
+  html += `</div>
+
+  <div class="bm-chart-row">
+    ${_bmBarChart(sorted, 'sba_avg_loan', 'Avg SBA Loan Size', v => _dcFmt(v), 'var(--blue)')}
+    ${_bmBarChart(sorted, 'sba_approval_pct', 'SBA Approval Rate', v => v + '%', 'var(--green)')}
+  </div>
+
+  <div class="bm-chart-row" style="margin-top:14px">
+    ${_bmBarChart(sorted, 'sba_total_loans_yr', 'Annual Loan Volume', v => v.toLocaleString(), 'var(--teal)')}
+    ${_bmBarChart(sorted, 'sba_default_rate_pct', 'Default Rate by Industry', v => v + '%', 'var(--red)')}
+  </div>
+
+  <div style="margin-top:14px">
+    <div class="dc-section-title">SBA Data by NAICS Code</div>
+    <div class="tbl-wrap" style="max-height:500px">
+      <table class="tbl">
+        <thead><tr>
+          <th>Industry</th>
+          <th>NAICS</th>
+          <th>Avg Loan</th>
+          <th>Term</th>
+          <th>Approval</th>
+          <th>Default</th>
+          <th>Volume/yr</th>
+          <th>Top States</th>
+        </tr></thead>
+        <tbody>
+        ${sorted.map(e => {
+          const isActive = e.key === currentInd;
+          const rowStyle = isActive ? 'background:var(--blue-dim);border:1px solid var(--blue)' : '';
+          const approvalColor = e.sba_approval_pct >= 70 ? 'var(--green)' : (e.sba_approval_pct >= 60 ? 'var(--amber)' : 'var(--red)');
+          const defaultColor = e.sba_default_rate_pct <= 3.5 ? 'var(--green)' : (e.sba_default_rate_pct <= 5.5 ? 'var(--amber)' : 'var(--red)');
+          return `<tr style="${rowStyle}">
+            <td style="white-space:nowrap;font-weight:${isActive ? '700' : '400'}">${e.emoji} ${_esc(e.label)}</td>
+            <td style="font-family:monospace;font-size:11px" title="${_esc(e.naics_label)}">${_esc(e.naics)}</td>
+            <td>${_dcFmt(e.sba_avg_loan)}</td>
+            <td>${e.sba_avg_term}yr</td>
+            <td><span style="color:${approvalColor};font-weight:700">${e.sba_approval_pct}%</span></td>
+            <td><span style="color:${defaultColor};font-weight:700">${e.sba_default_rate_pct}%</span></td>
+            <td>${(e.sba_total_loans_yr || 0).toLocaleString()}</td>
+            <td style="font-size:11px">${(e.top_states || []).join(', ')}</td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dc-section" style="margin-top:14px">
+    <div class="dc-section-title">SBA Risk-Reward Matrix</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:8px">
+    ${sorted.map(e => {
+      const isActive = e.key === currentInd;
+      const borderColor = isActive ? 'var(--blue)' : 'var(--border)';
+      const bg = isActive ? 'var(--blue-dim)' : 'var(--surface2)';
+      const riskColor = e.sba_default_rate_pct <= 3.5 ? 'var(--green)' : (e.sba_default_rate_pct <= 5.5 ? 'var(--amber)' : 'var(--red)');
+      const riskLabel = e.sba_default_rate_pct <= 3.5 ? 'LOW RISK' : (e.sba_default_rate_pct <= 5.5 ? 'MEDIUM' : 'HIGH RISK');
+      return `<div style="background:${bg};border:1px solid ${borderColor};border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:16px;margin-bottom:4px">${e.emoji}</div>
+        <div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:6px">${_esc(e.label)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">NAICS ${_esc(e.naics)}</div>
+        <div style="font-size:18px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);margin:4px 0">${_dcFmt(e.sba_avg_loan)}</div>
+        <div style="font-size:10px;color:var(--muted)">avg loan</div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px">
+          <span style="color:var(--green)">${e.sba_approval_pct}% apr</span>
+          <span style="color:${riskColor}">${e.sba_default_rate_pct}% def</span>
+        </div>
+        <div class="badge" style="margin-top:6px;font-size:9px;background:transparent;color:${riskColor};border:1px solid ${riskColor}">${riskLabel}</div>
+      </div>`;
+    }).join('')}
+    </div>
+  </div>
+
+  <div style="margin-top:14px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+    <div style="font-size:11px;color:var(--muted);line-height:1.6">
+      <strong style="color:var(--text)">About this data:</strong> SBA 7(a) loan statistics compiled from SBA FOIA data, industry reports, and NAICS-classified lending records. Default rates represent historical averages for each industry classification. Approval rates and loan volumes are annual estimates based on recent fiscal year data. NAICS codes shown are primary classifications — some businesses may qualify under multiple codes.
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function _bmBarChart(entries, field, title, fmt, color) {
+  const max = Math.max(...entries.map(e => e[field] || 0));
+  const currentInd = industryKey();
+  return `<div class="bm-mini-chart">
+    <div class="dc-section-title">${title}</div>
+    ${entries.map(e => {
+      const val = e[field] || 0;
+      const pct = max > 0 ? (val / max) * 100 : 0;
+      const isActive = e.key === currentInd;
+      const textColor = isActive ? 'var(--text)' : 'var(--muted)';
+      return `<div class="bm-bar-row">
+        <div class="bm-bar-label" style="color:${textColor}">${e.emoji} ${_esc(e.label.split('/')[0].split('(')[0].trim())}</div>
+        <div class="bm-bar-track"><div class="bm-bar-fill" style="width:${pct}%;background:${isActive ? color : 'var(--border2)'}"></div></div>
+        <div class="bm-bar-val" style="color:${textColor}">${fmt(val)}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function _bmSort(key) {
+  _bmSortKey = key;
+  _bmRenderDashboard();
+}
 
 
 // ── V2 STATE MACHINE ──────────────────────────────────────────────────────

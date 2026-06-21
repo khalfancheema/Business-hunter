@@ -61,6 +61,10 @@ const JS_FILES = [
   'src/js/41-agent-stress-guard.js', // Stress-test guard: safeClaudeJSON + A13/A14 overrides
   'src/js/43-real-data.js',      // Real data pipeline: prefetchRealData + buildRealDataCtx
   'src/js/44-verifier.js',       // Post-pipeline accuracy verifier vs live government sources
+  'src/js/45-deal-benchmarks.js', // Industry benchmark data for deal calculator
+  'src/js/46-deal-calculator.js', // BizHub-style deal calculator + SBA scoring
+  'src/js/47-cim-analyzer.js',    // CIM analyzer (AI-powered)
+  'src/js/48-benchmarks-dashboard.js', // Industry benchmarks dashboard
 ];
 
 const CSS_FILES = ['src/styles.css'];
