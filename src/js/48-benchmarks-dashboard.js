@@ -4,6 +4,7 @@
 // ══════════════════════════════════════════════════════════
 
 let _bmDashVisible = false;
+let _bmSortKey = 'revenue';
 
 function toggleBenchmarksDash() {
   _bmDashVisible = !_bmDashVisible;
@@ -19,6 +20,17 @@ function toggleBenchmarksDash() {
   if (_bmDashVisible) _bmRenderDashboard();
 }
 
+function _bmSortEntries(entries, key) {
+  const sortMap = {
+    revenue: (a, b) => b.median_revenue - a.median_revenue,
+    sde: (a, b) => b.median_sde - a.median_sde,
+    margin: (a, b) => b.avg_margin_pct - a.avg_margin_pct,
+    multiple: (a, b) => b.avg_cf_multiple - a.avg_cf_multiple,
+    risk: (a, b) => a.sba_default_rate_pct - b.sba_default_rate_pct,
+  };
+  return [...entries].sort(sortMap[key] || sortMap.revenue);
+}
+
 function _bmRenderDashboard() {
   const container = $('benchDashContent');
   if (!container) return;
@@ -30,19 +42,18 @@ function _bmRenderDashboard() {
     return { key, label: ind.label, emoji: ind.emoji, ...bm };
   }).filter(Boolean);
 
-  // Sort by median revenue descending for initial view
-  const sorted = [...entries].sort((a, b) => b.median_revenue - a.median_revenue);
+  const sorted = _bmSortEntries(entries, _bmSortKey);
+
+  const sortBtns = ['revenue','sde','margin','multiple','risk'].map(k => {
+    const labels = { revenue:'By Revenue', sde:'By SDE', margin:'By Margin', multiple:'By Multiple', risk:'By Risk (Low→High)' };
+    const active = _bmSortKey === k ? ' active' : '';
+    return `<button class="phase-quick-btn bm-sort-btn${active}" onclick="_bmSort('${k}',this)">${labels[k]}</button>`;
+  }).join('');
 
   let html = `
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif">Industry Benchmark Comparison</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="phase-quick-btn bm-sort-btn active" onclick="_bmSort('revenue')">By Revenue</button>
-      <button class="phase-quick-btn bm-sort-btn" onclick="_bmSort('sde')">By SDE</button>
-      <button class="phase-quick-btn bm-sort-btn" onclick="_bmSort('margin')">By Margin</button>
-      <button class="phase-quick-btn bm-sort-btn" onclick="_bmSort('multiple')">By Multiple</button>
-      <button class="phase-quick-btn bm-sort-btn" onclick="_bmSort('risk')">By Risk</button>
-    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${sortBtns}</div>
   </div>
 
   <div class="bm-chart-row">
@@ -107,7 +118,6 @@ function _bmBarChart(entries, field, title, fmt, color) {
       const val = e[field] || 0;
       const pct = max > 0 ? (val / max) * 100 : 0;
       const isActive = e.key === currentInd;
-      const barColor = isActive ? color : 'var(--surface3)';
       const textColor = isActive ? 'var(--text)' : 'var(--muted)';
       return `<div class="bm-bar-row">
         <div class="bm-bar-label" style="color:${textColor}">${e.emoji} ${_esc(e.label.split('/')[0].split('(')[0].trim())}</div>
@@ -118,8 +128,7 @@ function _bmBarChart(entries, field, title, fmt, color) {
   </div>`;
 }
 
-function _bmSort(by) {
-  document.querySelectorAll('.bm-sort-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+function _bmSort(key, btnEl) {
+  _bmSortKey = key;
   _bmRenderDashboard();
 }

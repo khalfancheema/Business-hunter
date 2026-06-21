@@ -34,6 +34,19 @@ function _dcInitForm() {
   f('dc-includes-re', 'no');
 }
 
+function _dcResetOnIndustryChange() {
+  ['dc-asking-price','dc-annual-revenue','dc-sde','dc-down-pct','dc-loan-rate','dc-loan-term','dc-includes-re']
+    .forEach(id => { const el = $(id); if (el) el._userTouched = false; });
+  if (_dcVisible) { _dcInitForm(); $('dc-results').innerHTML = ''; }
+  if (typeof _bmDashVisible !== 'undefined' && _bmDashVisible && typeof _bmRenderDashboard === 'function') _bmRenderDashboard();
+}
+
+// Wrap onIndustryChange to also reset deal calculator defaults
+(function() {
+  const _orig = onIndustryChange;
+  onIndustryChange = function() { _orig(); _dcResetOnIndustryChange(); };
+})();
+
 function _dcMarkTouched(el) { if (el) el._userTouched = true; }
 
 function _dcNum(id) { return parseFloat($(id)?.value) || 0; }
