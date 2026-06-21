@@ -18543,12 +18543,21 @@ function runDealCalculator() {
     </div>
   </div>
 
-  <div style="text-align:center;margin-top:16px">
+  ${_dcSensitivityTable(askingPrice, adjustedSde, loanRate, loanTerm, downPct)}
+
+  <div style="text-align:center;margin-top:16px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
     <button class="btn" onclick="_dcRunAiAnalysis()" id="dc-ai-btn" style="border-color:var(--purple);color:var(--purple)">
       AI Deep Analysis (uses API key)
     </button>
+    <button class="btn" onclick="_dcSaveScenario()" style="border-color:var(--teal);color:var(--teal)">
+      Save as Scenario
+    </button>
+    <button class="btn" onclick="_dcExport()" style="border-color:var(--amber);color:var(--amber)">
+      Export / Print
+    </button>
   </div>
   <div id="dc-ai-output"></div>
+  <div id="dc-scenario-compare"></div>
   `;
 
   $('dc-results').innerHTML = html;
@@ -18768,6 +18777,230 @@ Return ONLY:
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'AI Deep Analysis (uses API key)'; }
   }
+}
+
+// ── Sensitivity Table ──────────────────────────────────
+function _dcSensitivityTable(askingPrice, sde, baseRate, baseTerm, baseDown) {
+  if (askingPrice <= 0 || sde <= 0) return '';
+  const downSteps = [10, 15, 20, 25, 30];
+  const rateSteps = [];
+  const rBase = Math.max(6, Math.floor(baseRate - 2));
+  for (let r = rBase; r <= rBase + 4; r += 1) rateSteps.push(r);
+
+  let rows = rateSteps.map(rate => {
+    const cells = downSteps.map(dp => {
+      const down = askingPrice * (dp / 100);
+      const loan = askingPrice - down;
+      const fee = _dcSbaGuarantyFee(loan, baseTerm);
+      const pmt = _dcMonthlyPayment(loan + fee, rate, baseTerm);
+      const ads = pmt * 12;
+      const dscr = ads > 0 ? sde / ads : 0;
+      const postDebt = sde - ads;
+      const coc = down > 0 ? (postDebt / down) * 100 : 0;
+      const dscrColor = dscr >= 1.25 ? 'var(--green)' : (dscr >= 1.0 ? 'var(--amber)' : 'var(--red)');
+      const isBase = Math.abs(rate - baseRate) < 0.01 && dp === baseDown;
+      const bg = isBase ? 'var(--blue-dim)' : '';
+      return `<td style="text-align:center;font-size:11px;${bg ? 'background:' + bg + ';' : ''}padding:6px 4px">
+        <div style="color:${dscrColor};font-weight:700">${dscr.toFixed(2)}x</div>
+        <div style="color:var(--muted);font-size:9px">${coc.toFixed(0)}% CoC</div>
+      </td>`;
+    }).join('');
+    const isBaseRate = Math.abs(rate - baseRate) < 0.01;
+    return `<tr><td style="font-weight:${isBaseRate ? '700' : '400'};font-size:11px;white-space:nowrap;padding:6px 8px">${rate.toFixed(1)}%</td>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="dc-section" style="margin-top:14px">
+    <div class="dc-section-title">Sensitivity Analysis — DSCR & Cash-on-Cash</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">How DSCR and cash-on-cash return change across different down payments and interest rates. Your current inputs are highlighted.</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th style="font-size:11px">Rate \\ Down</th>
+          ${downSteps.map(d => `<th style="text-align:center;font-size:11px">${d}%</th>`).join('')}
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ── Scenario Comparison ────────────────────────────────
+const _dcScenarios = [];
+
+function _dcSaveScenario() {
+  const d = window._dcLastCalc;
+  if (!d) return;
+  if (_dcScenarios.length >= 3) _dcScenarios.shift();
+  const ind = INDUSTRIES[d.indKey] || {};
+  _dcScenarios.push({
+    name: 'Scenario ' + (_dcScenarios.length + 1),
+    label: ind.label || d.indKey,
+    emoji: ind.emoji || '',
+    askingPrice: d.askingPrice,
+    annualRevenue: d.annualRevenue,
+    sde: d.sde,
+    adjustedSde: d.adjustedSde,
+    operatorSalary: d.operatorSalary,
+    ownerOperated: d.ownerOperated,
+    downPct: d.downPct,
+    cashDown: d.cashDown,
+    loanAmount: d.loanAmount,
+    loanRate: d.loanRate,
+    loanTerm: d.loanTerm,
+    sbaFee: d.sbaFee,
+    totalAcquisitionCost: d.totalAcquisitionCost,
+    totalCashNeeded: d.totalCashNeeded,
+    monthlyPayment: d.monthlyPayment,
+    annualDebtService: d.annualDebtService,
+    dscr: d.dscr,
+    postDebtCF: d.postDebtCF,
+    cashOnCash: d.cashOnCash,
+    paybackYrs: d.paybackYrs,
+    cfMultiple: d.cfMultiple,
+    revMultiple: d.revMultiple,
+    profitMargin: d.profitMargin,
+    overallScore: d.overallScore,
+    verdictText: d.verdictText,
+    includesRE: d.includesRE,
+    minDownForDscr: d.minDownForDscr,
+  });
+  _dcRenderComparison();
+}
+
+function _dcRemoveScenario(idx) {
+  _dcScenarios.splice(idx, 1);
+  _dcRenderComparison();
+}
+
+function _dcRenderComparison() {
+  const el = $('dc-scenario-compare');
+  if (!el || _dcScenarios.length < 1) { if (el) el.innerHTML = ''; return; }
+
+  const metric = (label, fn, opts) => {
+    const vals = _dcScenarios.map(fn);
+    let bestIdx = -1;
+    if (opts && opts.best) {
+      const best = opts.best === 'max' ? Math.max(...vals) : Math.min(...vals);
+      bestIdx = vals.indexOf(best);
+    }
+    return `<tr>
+      <td style="font-size:11px;font-weight:600;white-space:nowrap;padding:6px 10px">${label}</td>
+      ${vals.map((v, i) => `<td style="text-align:center;font-size:12px;font-weight:${i === bestIdx ? '700' : '400'};color:${i === bestIdx ? 'var(--green)' : 'var(--text)'};padding:6px 10px">${v}</td>`).join('')}
+    </tr>`;
+  };
+
+  const dscrFmt = (s) => {
+    const color = s.dscr >= 1.25 ? 'var(--green)' : (s.dscr >= 1.0 ? 'var(--amber)' : 'var(--red)');
+    return `<span style="color:${color}">${s.dscr.toFixed(2)}x</span>`;
+  };
+
+  let html = `<div class="dc-section" style="margin-top:16px">
+    <div class="dc-section-title">Scenario Comparison (${_dcScenarios.length}/3)</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Save up to 3 scenarios with different parameters to compare side by side. Adjust inputs and click "Save as Scenario" again to add another.</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th style="font-size:11px">Metric</th>
+          ${_dcScenarios.map((s, i) => `<th style="text-align:center;font-size:11px">
+            ${_esc(s.emoji)} ${_esc(s.name)}
+            <button onclick="_dcRemoveScenario(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;margin-left:4px" title="Remove">✕</button>
+          </th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${metric('Asking Price', s => _dcFmt(s.askingPrice))}
+          ${metric('Total Acquisition', s => _dcFmt(s.totalAcquisitionCost))}
+          ${metric('Revenue', s => _dcFmt(s.annualRevenue))}
+          ${metric('SDE', s => _dcFmt(s.sde))}
+          ${_dcScenarios.some(s => s.operatorSalary > 0) ? metric('Adjusted SDE', s => s.operatorSalary > 0 ? _dcFmt(s.adjustedSde) : _dcFmt(s.sde)) : ''}
+          ${metric('Down Payment', s => _dcFmt(s.cashDown) + ' (' + s.downPct + '%)')}
+          ${metric('Total Cash Needed', s => _dcFmt(s.totalCashNeeded))}
+          ${metric('CF Multiple', s => s.cfMultiple.toFixed(1) + 'x', { best: 'min' })}
+          ${metric('DSCR', s => dscrFmt(s), { best: 'max' })}
+          ${metric('Post-Debt CF', s => _dcFmt(s.postDebtCF) + '/yr', { best: 'max' })}
+          ${metric('Cash-on-Cash', s => s.cashOnCash.toFixed(1) + '%', { best: 'max' })}
+          ${metric('Payback', s => s.paybackYrs < 100 ? s.paybackYrs.toFixed(1) + 'yr' : 'Never', { best: 'min' })}
+          ${metric('Deal Score', s => s.overallScore.toFixed(1) + '/10', { best: 'max' })}
+          ${metric('Verdict', s => s.verdictText)}
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn" onclick="_dcScenarios.length=0;_dcRenderComparison()" style="border-color:var(--muted);color:var(--muted);font-size:11px">Clear All Scenarios</button>
+    </div>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ── Export / Print ─────────────────────────────────────
+function _dcExport() {
+  const d = window._dcLastCalc;
+  if (!d) return;
+  const ind = INDUSTRIES[d.indKey] || {};
+
+  const lines = [
+    '═══════════════════════════════════════════════════',
+    '  DEAL CALCULATOR REPORT',
+    '  ' + (ind.emoji || '') + ' ' + (ind.label || d.indKey),
+    '  Generated: ' + new Date().toLocaleDateString(),
+    '═══════════════════════════════════════════════════',
+    '',
+    '── DEAL OVERVIEW ──────────────────────────────────',
+    'Deal Score:            ' + d.overallScore.toFixed(1) + '/10 — ' + d.verdictText,
+    'Asking Price:          ' + _dcFmt(d.askingPrice),
+    'Total Acquisition:     ' + _dcFmt(d.totalAcquisitionCost),
+    'Annual Revenue:        ' + _dcFmt(d.annualRevenue),
+    'SDE (Cash Flow):       ' + _dcFmt(d.sde),
+  ];
+  if (d.operatorSalary > 0) {
+    lines.push('Operator Salary:       −' + _dcFmt(d.operatorSalary));
+    lines.push('Adjusted SDE:          ' + _dcFmt(d.adjustedSde));
+  }
+  lines.push('Owner-Operated:        ' + (d.ownerOperated ? 'Yes' : 'No'));
+  lines.push('');
+  lines.push('── VALUATION ──────────────────────────────────────');
+  lines.push('CF Multiple:           ' + d.cfMultiple.toFixed(1) + 'x (avg: ' + d.bm.avg_cf_multiple + 'x)');
+  lines.push('Revenue Multiple:      ' + d.revMultiple.toFixed(2) + 'x (avg: ' + d.bm.avg_revenue_multiple + 'x)');
+  lines.push('Profit Margin:         ' + d.profitMargin.toFixed(1) + '% (avg: ' + d.bm.avg_margin_pct + '%)');
+  lines.push('');
+  lines.push('── SBA LOAN ───────────────────────────────────────');
+  lines.push('Down Payment:          ' + _dcFmt(d.cashDown) + ' (' + d.downPct + '%)');
+  lines.push('Loan Amount:           ' + _dcFmt(d.loanAmount));
+  lines.push('SBA Guaranty Fee:      ' + _dcFmt(d.sbaFee));
+  lines.push('Total Financed:        ' + _dcFmt(d.totalLoanAmt));
+  lines.push('Rate / Term:           ' + d.loanRate + '% / ' + d.loanTerm + ' years' + (d.includesRE ? ' (RE)' : ''));
+  lines.push('Monthly Payment:       ' + _dcFmt(d.monthlyPayment));
+  lines.push('Annual Debt Service:   ' + _dcFmt(d.annualDebtService));
+  lines.push('Total Cash Needed:     ' + _dcFmt(d.totalCashNeeded));
+  lines.push('');
+  lines.push('── RETURNS ────────────────────────────────────────');
+  lines.push('DSCR:                  ' + d.dscr.toFixed(2) + 'x ' + (d.dscr >= 1.25 ? '(PASS)' : d.dscr >= 1.0 ? '(TIGHT)' : '(FAIL)'));
+  lines.push('Min Down for 1.25x:    ' + d.minDownForDscr + '%');
+  lines.push('Post-Debt Cash Flow:   ' + _dcFmt(d.postDebtCF) + '/yr');
+  lines.push('Cash-on-Cash Return:   ' + d.cashOnCash.toFixed(1) + '%');
+  lines.push('Payback Period:        ' + (d.paybackYrs < 100 ? d.paybackYrs.toFixed(1) + ' years' : 'Never'));
+  lines.push('Monthly Take-Home:     ' + _dcFmt(d.postDebtCF / 12) + '/mo');
+  lines.push('');
+  lines.push('── INDUSTRY BENCHMARKS (' + (ind.label || '') + ') ──────────');
+  lines.push('Median Revenue:        ' + _dcFmt(d.bm.median_revenue));
+  lines.push('Median SDE:            ' + _dcFmt(d.bm.median_sde));
+  lines.push('SBA Default Rate:      ' + d.bm.sba_default_rate_pct + '%');
+  if (d.bm.naics) lines.push('NAICS Code:            ' + d.bm.naics + ' — ' + d.bm.naics_label);
+  lines.push('');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push('  Generated by Business Hunter Deal Calculator');
+  lines.push('═══════════════════════════════════════════════════');
+
+  const text = lines.join('\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'deal-analysis-' + d.indKey + '-' + new Date().toISOString().slice(0, 10) + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 
