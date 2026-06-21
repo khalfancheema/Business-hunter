@@ -263,6 +263,17 @@
         <option value="yes">Yes (25-year term)</option>
       </select>
     </div>
+    <div class="dc-field">
+      <label>Owner-Operated?</label>
+      <select id="dc-owner-op" oninput="_dcMarkTouched(this);_dcToggleOperatorSalary()">
+        <option value="yes">Yes (owner runs it)</option>
+        <option value="no">No (hire operator)</option>
+      </select>
+    </div>
+    <div class="dc-field" id="dc-opsalary-wrap" style="display:none">
+      <label>Operator Salary ($)</label>
+      <input type="number" id="dc-operator-salary" placeholder="52000" min="0" step="1000" oninput="_dcMarkTouched(this)">
+    </div>
   </div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <button class="btn primary" onclick="runDealCalculator()">Analyze Deal</button>

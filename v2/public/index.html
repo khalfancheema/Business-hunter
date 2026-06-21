@@ -3283,6 +3283,17 @@ div > .v2-ind-category-label:first-of-type { margin-top: 0; border-top: none; }
         <option value="yes">Yes (25-year term)</option>
       </select>
     </div>
+    <div class="dc-field">
+      <label>Owner-Operated?</label>
+      <select id="dc-owner-op" oninput="_dcMarkTouched(this);_dcToggleOperatorSalary()">
+        <option value="yes">Yes (owner runs it)</option>
+        <option value="no">No (hire operator)</option>
+      </select>
+    </div>
+    <div class="dc-field" id="dc-opsalary-wrap" style="display:none">
+      <label>Operator Salary ($)</label>
+      <input type="number" id="dc-operator-salary" placeholder="52000" min="0" step="1000" oninput="_dcMarkTouched(this)">
+    </div>
   </div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <button class="btn primary" onclick="runDealCalculator()">Analyze Deal</button>
@@ -18086,7 +18097,8 @@ function rdRenderFinancialBadge(elId) {
 
 // ══════════════════════════════════════════════════════════
 // 45-deal-benchmarks.js — Industry Benchmark Data
-// Median revenue, SDE, multiples, margins, SBA default rates
+// Median revenue, SDE, multiples, margins, SBA default rates,
+// operator salaries, NAICS codes, and SBA loan statistics
 // for all 16 industries. Used by Deal Calculator & scoring.
 // ══════════════════════════════════════════════════════════
 
@@ -18096,112 +18108,160 @@ const DEAL_BENCHMARKS = {
     avg_cf_multiple: 2.8, avg_revenue_multiple: 0.56,
     avg_margin_pct: 20, sba_default_rate_pct: 3.8,
     typical_asking: 475000, typical_down_pct: 15,
-    owner_operated: true
+    owner_operated: true, operator_salary: 52000,
+    naics: '624410', naics_label: 'Child Day Care Services',
+    sba_avg_loan: 350000, sba_avg_term: 10, sba_approval_pct: 68,
+    sba_total_loans_yr: 1850, top_states: ['TX','CA','FL']
   },
   gas_station: {
     median_revenue: 2400000, median_sde: 240000,
     avg_cf_multiple: 3.5, avg_revenue_multiple: 0.35,
     avg_margin_pct: 10, sba_default_rate_pct: 5.2,
     typical_asking: 840000, typical_down_pct: 20,
-    owner_operated: true
+    owner_operated: true, operator_salary: 45000,
+    naics: '447110', naics_label: 'Gasoline Stations with Convenience Stores',
+    sba_avg_loan: 620000, sba_avg_term: 12, sba_approval_pct: 58,
+    sba_total_loans_yr: 3200, top_states: ['TX','CA','FL']
   },
   laundromat: {
     median_revenue: 300000, median_sde: 105000,
     avg_cf_multiple: 2.5, avg_revenue_multiple: 0.88,
     avg_margin_pct: 35, sba_default_rate_pct: 3.1,
     typical_asking: 262000, typical_down_pct: 15,
-    owner_operated: false
+    owner_operated: false, operator_salary: 38000,
+    naics: '812310', naics_label: 'Coin-Operated Laundries and Drycleaners',
+    sba_avg_loan: 210000, sba_avg_term: 10, sba_approval_pct: 72,
+    sba_total_loans_yr: 980, top_states: ['CA','NY','TX']
   },
   car_wash: {
     median_revenue: 450000, median_sde: 135000,
     avg_cf_multiple: 3.0, avg_revenue_multiple: 0.90,
     avg_margin_pct: 30, sba_default_rate_pct: 4.0,
     typical_asking: 405000, typical_down_pct: 15,
-    owner_operated: false
+    owner_operated: false, operator_salary: 42000,
+    naics: '811192', naics_label: 'Car Washes',
+    sba_avg_loan: 380000, sba_avg_term: 10, sba_approval_pct: 65,
+    sba_total_loans_yr: 1100, top_states: ['TX','FL','CA']
   },
   restaurant: {
     median_revenue: 900000, median_sde: 126000,
     avg_cf_multiple: 2.2, avg_revenue_multiple: 0.31,
     avg_margin_pct: 14, sba_default_rate_pct: 7.8,
     typical_asking: 277000, typical_down_pct: 20,
-    owner_operated: true
+    owner_operated: true, operator_salary: 55000,
+    naics: '722511', naics_label: 'Full-Service Restaurants',
+    sba_avg_loan: 450000, sba_avg_term: 10, sba_approval_pct: 52,
+    sba_total_loans_yr: 8500, top_states: ['CA','TX','NY']
   },
   gym: {
     median_revenue: 600000, median_sde: 120000,
     avg_cf_multiple: 2.5, avg_revenue_multiple: 0.50,
     avg_margin_pct: 20, sba_default_rate_pct: 5.5,
     typical_asking: 300000, typical_down_pct: 15,
-    owner_operated: true
+    owner_operated: true, operator_salary: 48000,
+    naics: '713940', naics_label: 'Fitness and Recreational Sports Centers',
+    sba_avg_loan: 320000, sba_avg_term: 10, sba_approval_pct: 60,
+    sba_total_loans_yr: 2100, top_states: ['CA','TX','FL']
   },
   indoor_play: {
     median_revenue: 400000, median_sde: 100000,
     avg_cf_multiple: 2.3, avg_revenue_multiple: 0.58,
     avg_margin_pct: 25, sba_default_rate_pct: 4.5,
     typical_asking: 230000, typical_down_pct: 15,
-    owner_operated: true
+    owner_operated: true, operator_salary: 40000,
+    naics: '713120', naics_label: 'Amusement Arcades',
+    sba_avg_loan: 250000, sba_avg_term: 10, sba_approval_pct: 62,
+    sba_total_loans_yr: 420, top_states: ['TX','CA','FL']
   },
   dry_cleaning: {
     median_revenue: 350000, median_sde: 87500,
     avg_cf_multiple: 2.0, avg_revenue_multiple: 0.50,
     avg_margin_pct: 25, sba_default_rate_pct: 4.2,
     typical_asking: 175000, typical_down_pct: 15,
-    owner_operated: true
+    owner_operated: true, operator_salary: 38000,
+    naics: '812320', naics_label: 'Drycleaning and Laundry Services',
+    sba_avg_loan: 180000, sba_avg_term: 10, sba_approval_pct: 66,
+    sba_total_loans_yr: 750, top_states: ['CA','NY','TX']
   },
   senior_care: {
     median_revenue: 1200000, median_sde: 240000,
     avg_cf_multiple: 3.5, avg_revenue_multiple: 0.70,
     avg_margin_pct: 20, sba_default_rate_pct: 3.5,
     typical_asking: 840000, typical_down_pct: 20,
-    owner_operated: false
+    owner_operated: false, operator_salary: 62000,
+    naics: '623110', naics_label: 'Nursing Care Facilities',
+    sba_avg_loan: 750000, sba_avg_term: 15, sba_approval_pct: 70,
+    sba_total_loans_yr: 1400, top_states: ['CA','TX','FL']
   },
   tutoring: {
     median_revenue: 250000, median_sde: 75000,
     avg_cf_multiple: 2.0, avg_revenue_multiple: 0.60,
     avg_margin_pct: 30, sba_default_rate_pct: 3.0,
     typical_asking: 150000, typical_down_pct: 10,
-    owner_operated: true
+    owner_operated: true, operator_salary: 42000,
+    naics: '611691', naics_label: 'Exam Preparation and Tutoring',
+    sba_avg_loan: 120000, sba_avg_term: 7, sba_approval_pct: 74,
+    sba_total_loans_yr: 380, top_states: ['CA','TX','NY']
   },
   urgent_care: {
     median_revenue: 1800000, median_sde: 360000,
     avg_cf_multiple: 4.0, avg_revenue_multiple: 0.80,
     avg_margin_pct: 20, sba_default_rate_pct: 2.8,
     typical_asking: 1440000, typical_down_pct: 20,
-    owner_operated: false
+    owner_operated: false, operator_salary: 85000,
+    naics: '621493', naics_label: 'Freestanding Ambulatory Surgical and Emergency Centers',
+    sba_avg_loan: 950000, sba_avg_term: 15, sba_approval_pct: 75,
+    sba_total_loans_yr: 620, top_states: ['TX','FL','CA']
   },
   medical_practice: {
     median_revenue: 1500000, median_sde: 300000,
     avg_cf_multiple: 3.8, avg_revenue_multiple: 0.76,
     avg_margin_pct: 20, sba_default_rate_pct: 2.5,
     typical_asking: 1140000, typical_down_pct: 20,
-    owner_operated: false
+    owner_operated: false, operator_salary: 78000,
+    naics: '621111', naics_label: 'Offices of Physicians',
+    sba_avg_loan: 880000, sba_avg_term: 15, sba_approval_pct: 78,
+    sba_total_loans_yr: 1800, top_states: ['CA','TX','NY']
   },
   optometry: {
     median_revenue: 900000, median_sde: 225000,
     avg_cf_multiple: 3.2, avg_revenue_multiple: 0.80,
     avg_margin_pct: 25, sba_default_rate_pct: 2.2,
     typical_asking: 720000, typical_down_pct: 15,
-    owner_operated: true
+    owner_operated: true, operator_salary: 65000,
+    naics: '621320', naics_label: 'Offices of Optometrists',
+    sba_avg_loan: 520000, sba_avg_term: 10, sba_approval_pct: 80,
+    sba_total_loans_yr: 950, top_states: ['CA','TX','FL']
   },
   coffee_shop: {
     median_revenue: 500000, median_sde: 85000,
     avg_cf_multiple: 2.0, avg_revenue_multiple: 0.34,
     avg_margin_pct: 17, sba_default_rate_pct: 6.5,
     typical_asking: 170000, typical_down_pct: 15,
-    owner_operated: true
+    owner_operated: true, operator_salary: 42000,
+    naics: '722515', naics_label: 'Snack and Nonalcoholic Beverage Bars',
+    sba_avg_loan: 280000, sba_avg_term: 10, sba_approval_pct: 55,
+    sba_total_loans_yr: 4200, top_states: ['CA','NY','WA']
   },
   barbershop: {
     median_revenue: 250000, median_sde: 75000,
     avg_cf_multiple: 1.8, avg_revenue_multiple: 0.54,
     avg_margin_pct: 30, sba_default_rate_pct: 3.5,
     typical_asking: 135000, typical_down_pct: 10,
-    owner_operated: true
+    owner_operated: true, operator_salary: 38000,
+    naics: '812111', naics_label: 'Barber Shops',
+    sba_avg_loan: 110000, sba_avg_term: 7, sba_approval_pct: 70,
+    sba_total_loans_yr: 650, top_states: ['TX','CA','GA']
   },
   coworking: {
     median_revenue: 700000, median_sde: 140000,
     avg_cf_multiple: 3.0, avg_revenue_multiple: 0.60,
     avg_margin_pct: 20, sba_default_rate_pct: 5.0,
     typical_asking: 420000, typical_down_pct: 20,
-    owner_operated: false
+    owner_operated: false, operator_salary: 55000,
+    naics: '531120', naics_label: 'Lessors of Nonresidential Buildings',
+    sba_avg_loan: 480000, sba_avg_term: 10, sba_approval_pct: 58,
+    sba_total_loans_yr: 520, top_states: ['CA','NY','TX']
   }
 };
 
@@ -18240,10 +18300,19 @@ function _dcInitForm() {
   f('dc-loan-rate', '10.5');
   f('dc-loan-term', '10');
   f('dc-includes-re', 'no');
+  f('dc-owner-op', bm.owner_operated ? 'yes' : 'no');
+  f('dc-operator-salary', bm.operator_salary || 50000);
+  _dcToggleOperatorSalary();
+}
+
+function _dcToggleOperatorSalary() {
+  const wrap = $('dc-opsalary-wrap');
+  if (!wrap) return;
+  wrap.style.display = $('dc-owner-op')?.value === 'no' ? '' : 'none';
 }
 
 function _dcResetOnIndustryChange() {
-  ['dc-asking-price','dc-annual-revenue','dc-sde','dc-down-pct','dc-loan-rate','dc-loan-term','dc-includes-re']
+  ['dc-asking-price','dc-annual-revenue','dc-sde','dc-down-pct','dc-loan-rate','dc-loan-term','dc-includes-re','dc-owner-op','dc-operator-salary']
     .forEach(id => { const el = $(id); if (el) el._userTouched = false; });
   _dcInitForm();
   const res = $('dc-results'); if (res) res.innerHTML = '';
@@ -18313,6 +18382,9 @@ function runDealCalculator() {
   const loanRate = _dcNum('dc-loan-rate');
   const includesRE = $('dc-includes-re')?.value === 'yes';
   const loanTerm = includesRE ? 25 : _dcNum('dc-loan-term');
+  const ownerOperated = $('dc-owner-op')?.value !== 'no';
+  const operatorSalary = ownerOperated ? 0 : (_dcNum('dc-operator-salary') || bm.operator_salary || 50000);
+  const adjustedSde = sde - operatorSalary;
 
   if (askingPrice <= 0 || sde <= 0) {
     $('dc-results').innerHTML = '<div style="color:var(--red);padding:20px;text-align:center">Enter a valid Asking Price and SDE to analyze.</div>';
@@ -18328,16 +18400,16 @@ function runDealCalculator() {
   const totalCashNeeded = cashDown + sbaFee + closingCosts;
   const monthlyPayment = _dcMonthlyPayment(totalLoanAmt, loanRate, loanTerm);
   const annualDebtService = monthlyPayment * 12;
-  const dscr = annualDebtService > 0 ? sde / annualDebtService : 0;
-  const postDebtCF = sde - annualDebtService;
+  const dscr = annualDebtService > 0 ? adjustedSde / annualDebtService : 0;
+  const postDebtCF = adjustedSde - annualDebtService;
   const cashOnCash = cashDown > 0 ? (postDebtCF / cashDown) * 100 : 0;
   const paybackYrs = postDebtCF > 0 ? totalCashNeeded / postDebtCF : Infinity;
   const cfMultiple = sde > 0 ? askingPrice / sde : 0;
   const revMultiple = annualRevenue > 0 ? askingPrice / annualRevenue : 0;
   const profitMargin = annualRevenue > 0 ? (sde / annualRevenue) * 100 : 0;
 
-  // Minimum down payment % to clear 1.25x DSCR
-  const minDownForDscr = _dcMinDownForDscr(askingPrice, sde, loanRate, loanTerm);
+  // Minimum down payment % to clear 1.25x DSCR (uses adjusted SDE)
+  const minDownForDscr = _dcMinDownForDscr(askingPrice, adjustedSde, loanRate, loanTerm);
 
   // ── Scoring (0-10 per dimension) ──────────────────────
   const scores = _dcScoreDeal({
@@ -18414,6 +18486,8 @@ function runDealCalculator() {
         <div style="font-size:11px;color:var(--muted);margin-top:8px">SBA minimum: 1.25x</div>
       </div>
       <div class="dc-metric"><span class="dc-k">SDE (Cash Flow)</span><span class="dc-v">${_dcFmt(sde)}</span></div>
+      ${operatorSalary > 0 ? `<div class="dc-metric"><span class="dc-k">− Operator Salary</span><span class="dc-v" style="color:var(--red)">−${_dcFmt(operatorSalary)}</span></div>
+      <div class="dc-metric" style="border-top:2px solid var(--border2);padding-top:6px"><span class="dc-k" style="font-weight:700">Adjusted Cash Flow</span><span class="dc-v" style="font-weight:700;color:${adjustedSde >= 0 ? 'var(--text)' : 'var(--red)'}">${_dcFmt(adjustedSde)}</span></div>` : ''}
       <div class="dc-metric"><span class="dc-k">Annual Debt Service</span><span class="dc-v">${_dcFmt(annualDebtService)}</span></div>
       <div class="dc-metric"><span class="dc-k">Min Equity for 1.25x</span><span class="dc-v" style="color:${minDownForDscr <= downPct ? 'var(--green)' : 'var(--red)'}">${minDownForDscr}% down${minDownForDscr > downPct ? ' (need more)' : ' ✓'}</span></div>
     </div>
@@ -18481,7 +18555,8 @@ function runDealCalculator() {
 
   // Store for AI analysis
   window._dcLastCalc = {
-    askingPrice, annualRevenue, sde, downPct, cashDown, loanAmount, sbaFee,
+    askingPrice, annualRevenue, sde, adjustedSde, operatorSalary, ownerOperated,
+    downPct, cashDown, loanAmount, sbaFee,
     totalLoanAmt, totalAcquisitionCost, totalCashNeeded, closingCosts,
     monthlyPayment, annualDebtService, dscr, postDebtCF,
     cashOnCash, paybackYrs, cfMultiple, revMultiple, profitMargin,
@@ -18613,18 +18688,21 @@ async function _dcRunAiAnalysis() {
 
   const ind = industry();
   const sys = `You are a senior M&A advisor specializing in small business acquisitions. Analyze this deal and provide actionable insights. Return JSON only.`;
+  const opInfo = d.operatorSalary > 0
+    ? `\n- Owner-Operated: No (hiring manager)\n- Operator Salary Deducted: $${d.operatorSalary.toLocaleString()}/yr\n- Adjusted SDE (after operator): $${d.adjustedSde.toLocaleString()}`
+    : '\n- Owner-Operated: Yes (buyer operates)';
   const usr = `Analyze this ${ind.label} acquisition deal:
 
 DEAL METRICS:
 - Asking Price: $${d.askingPrice.toLocaleString()}
 - Total Acquisition Cost: $${d.totalAcquisitionCost.toLocaleString()} (incl SBA fee + closing costs)
 - Annual Revenue: $${d.annualRevenue.toLocaleString()}
-- SDE (Cash Flow): $${d.sde.toLocaleString()}
+- SDE (Cash Flow): $${d.sde.toLocaleString()}${opInfo}
 - CF Multiple: ${d.cfMultiple.toFixed(1)}x (industry avg: ${d.bm.avg_cf_multiple}x)
 - Revenue Multiple: ${d.revMultiple.toFixed(2)}x (industry avg: ${d.bm.avg_revenue_multiple}x)
-- DSCR: ${d.dscr.toFixed(2)}x
+- DSCR: ${d.dscr.toFixed(2)}x${d.operatorSalary > 0 ? ' (based on adjusted SDE)' : ''}
 - Min Down Payment for 1.25x DSCR: ${d.minDownForDscr}%
-- Post-Debt Cash Flow: $${d.postDebtCF.toLocaleString()}/yr
+- Post-Debt Cash Flow: $${d.postDebtCF.toLocaleString()}/yr${d.operatorSalary > 0 ? ' (after operator salary)' : ''}
 - Cash-on-Cash Return: ${d.cashOnCash.toFixed(1)}%
 - Payback Period: ${d.paybackYrs.toFixed(1)} years
 - Down Payment: $${d.cashDown.toLocaleString()} (${d.downPct}%)
@@ -18952,11 +19030,13 @@ function _cimPopulateCalc() {
 
 // ══════════════════════════════════════════════════════════
 // 48-benchmarks-dashboard.js — Industry Benchmarks Dashboard
-// Compare all 16 industries side-by-side on key metrics.
+// Compare all 16 industries side-by-side on key metrics,
+// plus SBA Market Data by NAICS code.
 // ══════════════════════════════════════════════════════════
 
 let _bmDashVisible = false;
 let _bmSortKey = 'revenue';
+let _bmTab = 'benchmarks';
 
 function toggleBenchmarksDash() {
   _bmDashVisible = !_bmDashVisible;
@@ -18979,30 +19059,59 @@ function _bmSortEntries(entries, key) {
     margin: (a, b) => b.avg_margin_pct - a.avg_margin_pct,
     multiple: (a, b) => b.avg_cf_multiple - a.avg_cf_multiple,
     risk: (a, b) => a.sba_default_rate_pct - b.sba_default_rate_pct,
+    sba_loan: (a, b) => b.sba_avg_loan - a.sba_avg_loan,
+    sba_approval: (a, b) => b.sba_approval_pct - a.sba_approval_pct,
+    sba_volume: (a, b) => b.sba_total_loans_yr - a.sba_total_loans_yr,
   };
   return [...entries].sort(sortMap[key] || sortMap.revenue);
+}
+
+function _bmGetEntries() {
+  return Object.entries(DEAL_BENCHMARKS).map(([key, bm]) => {
+    const ind = INDUSTRIES[key];
+    if (!ind) return null;
+    return { key, label: ind.label, emoji: ind.emoji, ...bm };
+  }).filter(Boolean);
 }
 
 function _bmRenderDashboard() {
   const container = $('benchDashContent');
   if (!container) return;
+
+  const tabBench = _bmTab === 'benchmarks' ? ' active' : '';
+  const tabSba = _bmTab === 'sba' ? ' active' : '';
+
+  let html = `<div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px">
+    <button class="phase-quick-btn bm-sort-btn${tabBench}" onclick="_bmSwitchTab('benchmarks')" style="font-size:12px;padding:6px 14px">Industry Benchmarks</button>
+    <button class="phase-quick-btn bm-sort-btn${tabSba}" onclick="_bmSwitchTab('sba')" style="font-size:12px;padding:6px 14px">SBA Market Data</button>
+  </div>`;
+
+  if (_bmTab === 'benchmarks') {
+    html += _bmRenderBenchmarksTab();
+  } else {
+    html += _bmRenderSbaTab();
+  }
+
+  container.innerHTML = html;
+}
+
+function _bmSwitchTab(tab) {
+  _bmTab = tab;
+  _bmRenderDashboard();
+}
+
+function _bmRenderBenchmarksTab() {
   const currentInd = industryKey();
-
-  const entries = Object.entries(DEAL_BENCHMARKS).map(([key, bm]) => {
-    const ind = INDUSTRIES[key];
-    if (!ind) return null;
-    return { key, label: ind.label, emoji: ind.emoji, ...bm };
-  }).filter(Boolean);
-
+  const entries = _bmGetEntries();
   const sorted = _bmSortEntries(entries, _bmSortKey);
 
   const sortBtns = ['revenue','sde','margin','multiple','risk'].map(k => {
     const labels = { revenue:'By Revenue', sde:'By SDE', margin:'By Margin', multiple:'By Multiple', risk:'By Risk (Low→High)' };
     const active = _bmSortKey === k ? ' active' : '';
-    return `<button class="phase-quick-btn bm-sort-btn${active}" onclick="_bmSort('${k}',this)">${labels[k]}</button>`;
+    return `<button class="phase-quick-btn bm-sort-btn${active}" onclick="_bmSort('${k}')">${labels[k]}</button>`;
   }).join('');
 
-  let html = `
+  return `
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif">Industry Benchmark Comparison</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">${sortBtns}</div>
@@ -19055,10 +19164,141 @@ function _bmRenderDashboard() {
   <div class="bm-chart-row" style="margin-top:14px">
     ${_bmBarChart(sorted, 'sba_default_rate_pct', 'SBA Default Rate', v => v + '%', 'var(--red)')}
     ${_bmBarChart(sorted, 'typical_asking', 'Typical Asking Price', v => _dcFmt(v), 'var(--amber)')}
-  </div>
-  `;
+  </div>`;
+}
 
-  container.innerHTML = html;
+function _bmRenderSbaTab() {
+  const currentInd = industryKey();
+  const entries = _bmGetEntries();
+
+  const sbaSortKey = ['sba_loan','sba_approval','sba_volume','risk'].includes(_bmSortKey) ? _bmSortKey : 'sba_volume';
+  const sorted = _bmSortEntries(entries, sbaSortKey);
+
+  const sortBtns = ['sba_volume','sba_loan','sba_approval','risk'].map(k => {
+    const labels = { sba_volume:'By Loan Volume', sba_loan:'By Avg Loan', sba_approval:'By Approval Rate', risk:'By Default Rate' };
+    const active = sbaSortKey === k ? ' active' : '';
+    return `<button class="phase-quick-btn bm-sort-btn${active}" onclick="_bmSort('${k}')">${labels[k]}</button>`;
+  }).join('');
+
+  const totalLoans = sorted.reduce((s, e) => s + (e.sba_total_loans_yr || 0), 0);
+  const avgApproval = sorted.length > 0 ? (sorted.reduce((s, e) => s + (e.sba_approval_pct || 0), 0) / sorted.length).toFixed(1) : 0;
+  const avgDefault = sorted.length > 0 ? (sorted.reduce((s, e) => s + (e.sba_default_rate_pct || 0), 0) / sorted.length).toFixed(1) : 0;
+  const avgLoan = sorted.length > 0 ? Math.round(sorted.reduce((s, e) => s + (e.sba_avg_loan || 0), 0) / sorted.length) : 0;
+
+  const currentBm = DEAL_BENCHMARKS[currentInd] || {};
+  const currentLabel = INDUSTRIES[currentInd]?.label || '';
+  const currentEmoji = INDUSTRIES[currentInd]?.emoji || '';
+
+  let html = `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif">SBA 7(a) Loan Data by Industry</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${sortBtns}</div>
+  </div>
+
+  <div class="dc-section-grid" style="margin-bottom:14px">
+    <div class="dc-section">
+      <div class="dc-section-title">Cross-Industry SBA Summary</div>
+      <div class="dc-metric"><span class="dc-k">Total Annual SBA Loans (tracked)</span><span class="dc-v" style="font-weight:700">${totalLoans.toLocaleString()}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Loan Size</span><span class="dc-v">${_dcFmt(avgLoan)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Approval Rate</span><span class="dc-v">${avgApproval}%</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Default Rate</span><span class="dc-v">${avgDefault}%</span></div>
+    </div>`;
+
+  if (currentBm.naics) {
+    html += `
+    <div class="dc-section">
+      <div class="dc-section-title">${currentEmoji} ${_esc(currentLabel)} — Your Industry</div>
+      <div class="dc-metric"><span class="dc-k">NAICS Code</span><span class="dc-v" style="font-family:monospace;font-weight:700;color:var(--blue)">${_esc(currentBm.naics)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Classification</span><span class="dc-v" style="font-size:11px">${_esc(currentBm.naics_label)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg SBA Loan</span><span class="dc-v">${_dcFmt(currentBm.sba_avg_loan)}</span></div>
+      <div class="dc-metric"><span class="dc-k">Avg Term</span><span class="dc-v">${currentBm.sba_avg_term} years</span></div>
+      <div class="dc-metric"><span class="dc-k">Approval Rate</span><span class="dc-v" style="color:${currentBm.sba_approval_pct >= 70 ? 'var(--green)' : (currentBm.sba_approval_pct >= 60 ? 'var(--amber)' : 'var(--red)')}">${currentBm.sba_approval_pct}%</span></div>
+      <div class="dc-metric"><span class="dc-k">Default Rate</span><span class="dc-v" style="color:${currentBm.sba_default_rate_pct <= 3.5 ? 'var(--green)' : (currentBm.sba_default_rate_pct <= 5.5 ? 'var(--amber)' : 'var(--red)')}">${currentBm.sba_default_rate_pct}%</span></div>
+      <div class="dc-metric"><span class="dc-k">Annual Loan Volume</span><span class="dc-v">${(currentBm.sba_total_loans_yr || 0).toLocaleString()} loans/yr</span></div>
+      <div class="dc-metric"><span class="dc-k">Top States</span><span class="dc-v">${(currentBm.top_states || []).join(', ')}</span></div>
+    </div>`;
+  }
+
+  html += `</div>
+
+  <div class="bm-chart-row">
+    ${_bmBarChart(sorted, 'sba_avg_loan', 'Avg SBA Loan Size', v => _dcFmt(v), 'var(--blue)')}
+    ${_bmBarChart(sorted, 'sba_approval_pct', 'SBA Approval Rate', v => v + '%', 'var(--green)')}
+  </div>
+
+  <div class="bm-chart-row" style="margin-top:14px">
+    ${_bmBarChart(sorted, 'sba_total_loans_yr', 'Annual Loan Volume', v => v.toLocaleString(), 'var(--teal)')}
+    ${_bmBarChart(sorted, 'sba_default_rate_pct', 'Default Rate by Industry', v => v + '%', 'var(--red)')}
+  </div>
+
+  <div style="margin-top:14px">
+    <div class="dc-section-title">SBA Data by NAICS Code</div>
+    <div class="tbl-wrap" style="max-height:500px">
+      <table class="tbl">
+        <thead><tr>
+          <th>Industry</th>
+          <th>NAICS</th>
+          <th>Avg Loan</th>
+          <th>Term</th>
+          <th>Approval</th>
+          <th>Default</th>
+          <th>Volume/yr</th>
+          <th>Top States</th>
+        </tr></thead>
+        <tbody>
+        ${sorted.map(e => {
+          const isActive = e.key === currentInd;
+          const rowStyle = isActive ? 'background:var(--blue-dim);border:1px solid var(--blue)' : '';
+          const approvalColor = e.sba_approval_pct >= 70 ? 'var(--green)' : (e.sba_approval_pct >= 60 ? 'var(--amber)' : 'var(--red)');
+          const defaultColor = e.sba_default_rate_pct <= 3.5 ? 'var(--green)' : (e.sba_default_rate_pct <= 5.5 ? 'var(--amber)' : 'var(--red)');
+          return `<tr style="${rowStyle}">
+            <td style="white-space:nowrap;font-weight:${isActive ? '700' : '400'}">${e.emoji} ${_esc(e.label)}</td>
+            <td style="font-family:monospace;font-size:11px" title="${_esc(e.naics_label)}">${_esc(e.naics)}</td>
+            <td>${_dcFmt(e.sba_avg_loan)}</td>
+            <td>${e.sba_avg_term}yr</td>
+            <td><span style="color:${approvalColor};font-weight:700">${e.sba_approval_pct}%</span></td>
+            <td><span style="color:${defaultColor};font-weight:700">${e.sba_default_rate_pct}%</span></td>
+            <td>${(e.sba_total_loans_yr || 0).toLocaleString()}</td>
+            <td style="font-size:11px">${(e.top_states || []).join(', ')}</td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dc-section" style="margin-top:14px">
+    <div class="dc-section-title">SBA Risk-Reward Matrix</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:8px">
+    ${sorted.map(e => {
+      const isActive = e.key === currentInd;
+      const borderColor = isActive ? 'var(--blue)' : 'var(--border)';
+      const bg = isActive ? 'var(--blue-dim)' : 'var(--surface2)';
+      const riskColor = e.sba_default_rate_pct <= 3.5 ? 'var(--green)' : (e.sba_default_rate_pct <= 5.5 ? 'var(--amber)' : 'var(--red)');
+      const riskLabel = e.sba_default_rate_pct <= 3.5 ? 'LOW RISK' : (e.sba_default_rate_pct <= 5.5 ? 'MEDIUM' : 'HIGH RISK');
+      return `<div style="background:${bg};border:1px solid ${borderColor};border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:16px;margin-bottom:4px">${e.emoji}</div>
+        <div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:6px">${_esc(e.label)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">NAICS ${_esc(e.naics)}</div>
+        <div style="font-size:18px;font-weight:700;font-family:'Syne',sans-serif;color:var(--blue);margin:4px 0">${_dcFmt(e.sba_avg_loan)}</div>
+        <div style="font-size:10px;color:var(--muted)">avg loan</div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px">
+          <span style="color:var(--green)">${e.sba_approval_pct}% apr</span>
+          <span style="color:${riskColor}">${e.sba_default_rate_pct}% def</span>
+        </div>
+        <div class="badge" style="margin-top:6px;font-size:9px;background:transparent;color:${riskColor};border:1px solid ${riskColor}">${riskLabel}</div>
+      </div>`;
+    }).join('')}
+    </div>
+  </div>
+
+  <div style="margin-top:14px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+    <div style="font-size:11px;color:var(--muted);line-height:1.6">
+      <strong style="color:var(--text)">About this data:</strong> SBA 7(a) loan statistics compiled from SBA FOIA data, industry reports, and NAICS-classified lending records. Default rates represent historical averages for each industry classification. Approval rates and loan volumes are annual estimates based on recent fiscal year data. NAICS codes shown are primary classifications — some businesses may qualify under multiple codes.
+    </div>
+  </div>`;
+
+  return html;
 }
 
 function _bmBarChart(entries, field, title, fmt, color) {
@@ -19080,7 +19320,7 @@ function _bmBarChart(entries, field, title, fmt, color) {
   </div>`;
 }
 
-function _bmSort(key, btnEl) {
+function _bmSort(key) {
   _bmSortKey = key;
   _bmRenderDashboard();
 }

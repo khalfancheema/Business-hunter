@@ -32,10 +32,19 @@ function _dcInitForm() {
   f('dc-loan-rate', '10.5');
   f('dc-loan-term', '10');
   f('dc-includes-re', 'no');
+  f('dc-owner-op', bm.owner_operated ? 'yes' : 'no');
+  f('dc-operator-salary', bm.operator_salary || 50000);
+  _dcToggleOperatorSalary();
+}
+
+function _dcToggleOperatorSalary() {
+  const wrap = $('dc-opsalary-wrap');
+  if (!wrap) return;
+  wrap.style.display = $('dc-owner-op')?.value === 'no' ? '' : 'none';
 }
 
 function _dcResetOnIndustryChange() {
-  ['dc-asking-price','dc-annual-revenue','dc-sde','dc-down-pct','dc-loan-rate','dc-loan-term','dc-includes-re']
+  ['dc-asking-price','dc-annual-revenue','dc-sde','dc-down-pct','dc-loan-rate','dc-loan-term','dc-includes-re','dc-owner-op','dc-operator-salary']
     .forEach(id => { const el = $(id); if (el) el._userTouched = false; });
   _dcInitForm();
   const res = $('dc-results'); if (res) res.innerHTML = '';
@@ -105,6 +114,9 @@ function runDealCalculator() {
   const loanRate = _dcNum('dc-loan-rate');
   const includesRE = $('dc-includes-re')?.value === 'yes';
   const loanTerm = includesRE ? 25 : _dcNum('dc-loan-term');
+  const ownerOperated = $('dc-owner-op')?.value !== 'no';
+  const operatorSalary = ownerOperated ? 0 : (_dcNum('dc-operator-salary') || bm.operator_salary || 50000);
+  const adjustedSde = sde - operatorSalary;
 
   if (askingPrice <= 0 || sde <= 0) {
     $('dc-results').innerHTML = '<div style="color:var(--red);padding:20px;text-align:center">Enter a valid Asking Price and SDE to analyze.</div>';
@@ -120,16 +132,16 @@ function runDealCalculator() {
   const totalCashNeeded = cashDown + sbaFee + closingCosts;
   const monthlyPayment = _dcMonthlyPayment(totalLoanAmt, loanRate, loanTerm);
   const annualDebtService = monthlyPayment * 12;
-  const dscr = annualDebtService > 0 ? sde / annualDebtService : 0;
-  const postDebtCF = sde - annualDebtService;
+  const dscr = annualDebtService > 0 ? adjustedSde / annualDebtService : 0;
+  const postDebtCF = adjustedSde - annualDebtService;
   const cashOnCash = cashDown > 0 ? (postDebtCF / cashDown) * 100 : 0;
   const paybackYrs = postDebtCF > 0 ? totalCashNeeded / postDebtCF : Infinity;
   const cfMultiple = sde > 0 ? askingPrice / sde : 0;
   const revMultiple = annualRevenue > 0 ? askingPrice / annualRevenue : 0;
   const profitMargin = annualRevenue > 0 ? (sde / annualRevenue) * 100 : 0;
 
-  // Minimum down payment % to clear 1.25x DSCR
-  const minDownForDscr = _dcMinDownForDscr(askingPrice, sde, loanRate, loanTerm);
+  // Minimum down payment % to clear 1.25x DSCR (uses adjusted SDE)
+  const minDownForDscr = _dcMinDownForDscr(askingPrice, adjustedSde, loanRate, loanTerm);
 
   // ── Scoring (0-10 per dimension) ──────────────────────
   const scores = _dcScoreDeal({
@@ -206,6 +218,8 @@ function runDealCalculator() {
         <div style="font-size:11px;color:var(--muted);margin-top:8px">SBA minimum: 1.25x</div>
       </div>
       <div class="dc-metric"><span class="dc-k">SDE (Cash Flow)</span><span class="dc-v">${_dcFmt(sde)}</span></div>
+      ${operatorSalary > 0 ? `<div class="dc-metric"><span class="dc-k">− Operator Salary</span><span class="dc-v" style="color:var(--red)">−${_dcFmt(operatorSalary)}</span></div>
+      <div class="dc-metric" style="border-top:2px solid var(--border2);padding-top:6px"><span class="dc-k" style="font-weight:700">Adjusted Cash Flow</span><span class="dc-v" style="font-weight:700;color:${adjustedSde >= 0 ? 'var(--text)' : 'var(--red)'}">${_dcFmt(adjustedSde)}</span></div>` : ''}
       <div class="dc-metric"><span class="dc-k">Annual Debt Service</span><span class="dc-v">${_dcFmt(annualDebtService)}</span></div>
       <div class="dc-metric"><span class="dc-k">Min Equity for 1.25x</span><span class="dc-v" style="color:${minDownForDscr <= downPct ? 'var(--green)' : 'var(--red)'}">${minDownForDscr}% down${minDownForDscr > downPct ? ' (need more)' : ' ✓'}</span></div>
     </div>
@@ -273,7 +287,8 @@ function runDealCalculator() {
 
   // Store for AI analysis
   window._dcLastCalc = {
-    askingPrice, annualRevenue, sde, downPct, cashDown, loanAmount, sbaFee,
+    askingPrice, annualRevenue, sde, adjustedSde, operatorSalary, ownerOperated,
+    downPct, cashDown, loanAmount, sbaFee,
     totalLoanAmt, totalAcquisitionCost, totalCashNeeded, closingCosts,
     monthlyPayment, annualDebtService, dscr, postDebtCF,
     cashOnCash, paybackYrs, cfMultiple, revMultiple, profitMargin,
@@ -405,18 +420,21 @@ async function _dcRunAiAnalysis() {
 
   const ind = industry();
   const sys = `You are a senior M&A advisor specializing in small business acquisitions. Analyze this deal and provide actionable insights. Return JSON only.`;
+  const opInfo = d.operatorSalary > 0
+    ? `\n- Owner-Operated: No (hiring manager)\n- Operator Salary Deducted: $${d.operatorSalary.toLocaleString()}/yr\n- Adjusted SDE (after operator): $${d.adjustedSde.toLocaleString()}`
+    : '\n- Owner-Operated: Yes (buyer operates)';
   const usr = `Analyze this ${ind.label} acquisition deal:
 
 DEAL METRICS:
 - Asking Price: $${d.askingPrice.toLocaleString()}
 - Total Acquisition Cost: $${d.totalAcquisitionCost.toLocaleString()} (incl SBA fee + closing costs)
 - Annual Revenue: $${d.annualRevenue.toLocaleString()}
-- SDE (Cash Flow): $${d.sde.toLocaleString()}
+- SDE (Cash Flow): $${d.sde.toLocaleString()}${opInfo}
 - CF Multiple: ${d.cfMultiple.toFixed(1)}x (industry avg: ${d.bm.avg_cf_multiple}x)
 - Revenue Multiple: ${d.revMultiple.toFixed(2)}x (industry avg: ${d.bm.avg_revenue_multiple}x)
-- DSCR: ${d.dscr.toFixed(2)}x
+- DSCR: ${d.dscr.toFixed(2)}x${d.operatorSalary > 0 ? ' (based on adjusted SDE)' : ''}
 - Min Down Payment for 1.25x DSCR: ${d.minDownForDscr}%
-- Post-Debt Cash Flow: $${d.postDebtCF.toLocaleString()}/yr
+- Post-Debt Cash Flow: $${d.postDebtCF.toLocaleString()}/yr${d.operatorSalary > 0 ? ' (after operator salary)' : ''}
 - Cash-on-Cash Return: ${d.cashOnCash.toFixed(1)}%
 - Payback Period: ${d.paybackYrs.toFixed(1)} years
 - Down Payment: $${d.cashDown.toLocaleString()} (${d.downPct}%)
